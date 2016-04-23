@@ -290,6 +290,8 @@ class Completer( with_metaclass( abc.ABCMeta, object ) ):
         sort_property = 'word'
       elif 'insertion_text' in candidates[ 0 ]:
         sort_property = 'insertion_text'
+      elif 'menu_text' in candidates[ 0 ]:
+        sort_property = 'menu_text'
 
     return self.FilterAndSortCandidatesInner( candidates, sort_property, query )
 
