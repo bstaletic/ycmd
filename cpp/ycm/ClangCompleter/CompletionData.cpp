@@ -82,25 +82,25 @@ CompletionKind CursorKindToCompletionKind( CXCursorKind kind ) {
 
 bool IsMainCompletionTextInfo( CXCompletionChunkKind kind ) {
   return
-    kind == CXCompletionChunk_Optional     ||
-    kind == CXCompletionChunk_TypedText    ||
-    kind == CXCompletionChunk_Placeholder  ||
-    kind == CXCompletionChunk_LeftParen    ||
-    kind == CXCompletionChunk_RightParen   ||
-    kind == CXCompletionChunk_RightBracket ||
-    kind == CXCompletionChunk_LeftBracket  ||
-    kind == CXCompletionChunk_LeftBrace    ||
-    kind == CXCompletionChunk_RightBrace   ||
-    kind == CXCompletionChunk_RightAngle   ||
-    kind == CXCompletionChunk_LeftAngle    ||
-    kind == CXCompletionChunk_Comma        ||
-    kind == CXCompletionChunk_Colon        ||
-    kind == CXCompletionChunk_SemiColon    ||
-    kind == CXCompletionChunk_Equal        ||
-    kind == CXCompletionChunk_Informative  ||
-    kind == CXCompletionChunk_HorizontalSpace ||
-    kind == CXCompletionChunk_Text;
-
+    kind == CXCompletionChunk_Optional         ||
+    kind == CXCompletionChunk_TypedText        ||
+    kind == CXCompletionChunk_Placeholder      ||
+    kind == CXCompletionChunk_CurrentParameter ||
+    kind == CXCompletionChunk_Text             ||
+    kind == CXCompletionChunk_LeftParen        ||
+    kind == CXCompletionChunk_RightParen       ||
+    kind == CXCompletionChunk_RightBracket     ||
+    kind == CXCompletionChunk_LeftBracket      ||
+    kind == CXCompletionChunk_LeftBrace        ||
+    kind == CXCompletionChunk_RightBrace       ||
+    kind == CXCompletionChunk_RightAngle       ||
+    kind == CXCompletionChunk_LeftAngle        ||
+    kind == CXCompletionChunk_Comma            ||
+    kind == CXCompletionChunk_Colon            ||
+    kind == CXCompletionChunk_SemiColon        ||
+    kind == CXCompletionChunk_Equal            ||
+    kind == CXCompletionChunk_Informative      ||
+    kind == CXCompletionChunk_HorizontalSpace;
 }
 
 
@@ -111,40 +111,6 @@ std::string ChunkToString( CXCompletionString completion_string,
 
   return YouCompleteMe::CXStringToString(
            clang_getCompletionChunkText( completion_string, chunk_num ) );
-}
-
-
-std::string OptionalChunkToString( CXCompletionString completion_string,
-                                   uint chunk_num ) {
-  std::string final_string;
-
-  if ( !completion_string )
-    return final_string;
-
-  CXCompletionString optional_completion_string =
-    clang_getCompletionChunkCompletionString( completion_string, chunk_num );
-
-  if ( !optional_completion_string )
-    return final_string;
-
-  uint optional_num_chunks = clang_getNumCompletionChunks(
-                               optional_completion_string );
-
-  for ( uint j = 0; j < optional_num_chunks; ++j ) {
-    CXCompletionChunkKind kind = clang_getCompletionChunkKind(
-                                   optional_completion_string, j );
-
-    if ( kind == CXCompletionChunk_Optional ) {
-      final_string.append( OptionalChunkToString( optional_completion_string,
-                                                  j ) );
-    }
-
-    else {
-      final_string.append( ChunkToString( optional_completion_string, j ) );
-    }
-  }
-
-  return final_string;
 }
 
 
@@ -163,7 +129,8 @@ std::string RemoveTrailingParens( std::string text ) {
 } // unnamed namespace
 
 
-CompletionData::CompletionData( const CXCompletionResult &completion_result ) {
+CompletionData::CompletionData( const CXCompletionResult &completion_result,
+                                bool is_argument_hint ) {
   CXCompletionString completion_string = completion_result.CompletionString;
 
   if ( !completion_string )
@@ -192,6 +159,60 @@ CompletionData::CompletionData( const CXCompletionResult &completion_result ) {
 
   doc_string_ = YouCompleteMe::CXStringToString(
                   clang_getCompletionBriefComment( completion_string ) );
+
+  if ( is_argument_hint ) {
+    kind_ = NONE;
+    return_type_ = "";
+    original_string_ = "";
+    everything_except_return_type_ = current_arg_;
+    if ( everything_except_return_type_.empty() )
+      everything_except_return_type_ = "void";
+  }
+}
+
+
+std::string
+CompletionData::OptionalChunkToString( CXCompletionString completion_string,
+                                       uint chunk_num ) {
+  std::string final_string;
+
+  if ( !completion_string )
+    return final_string;
+
+  CXCompletionString optional_completion_string =
+    clang_getCompletionChunkCompletionString( completion_string, chunk_num );
+
+  if ( !optional_completion_string )
+    return final_string;
+
+  uint optional_num_chunks = clang_getNumCompletionChunks(
+                               optional_completion_string );
+
+  for ( uint j = 0; j < optional_num_chunks; ++j ) {
+    CXCompletionChunkKind kind = clang_getCompletionChunkKind(
+                                   optional_completion_string, j );
+
+    if ( kind == CXCompletionChunk_Optional ) {
+      final_string.append( OptionalChunkToString( optional_completion_string,
+                                                  j ) );
+    }
+
+    else if ( kind == CXCompletionChunk_Placeholder ) {
+      final_string.append(
+          "[" + ChunkToString( optional_completion_string, j ) + "]" );
+    }
+
+    else if ( kind == CXCompletionChunk_CurrentParameter ) {
+      current_arg_ = "[" + ChunkToString( optional_completion_string, j ) + "]";
+      final_string.append( "☞  " + current_arg_ );
+    }
+
+    else {
+      final_string.append( ChunkToString( optional_completion_string, j ) );
+    }
+  }
+
+  return final_string;
 }
 
 
@@ -206,6 +227,10 @@ void CompletionData::ExtractDataFromChunk( CXCompletionString completion_string,
   if ( IsMainCompletionTextInfo( kind ) ) {
     if ( kind == CXCompletionChunk_LeftParen ) {
       saw_left_paren = true;
+      if ( original_string_.empty() )
+        original_string_ = "(*) ";
+      if ( everything_except_return_type_.empty() )
+        everything_except_return_type_ = "(*) ";
     }
 
     else if ( saw_left_paren &&
@@ -225,6 +250,11 @@ void CompletionData::ExtractDataFromChunk( CXCompletionString completion_string,
         OptionalChunkToString( completion_string, chunk_num ) );
     }
 
+    else if ( kind == CXCompletionChunk_CurrentParameter ) {
+      current_arg_ = ChunkToString( completion_string, chunk_num );
+      everything_except_return_type_.append( "☞  " + current_arg_ );
+    }
+
     else {
       everything_except_return_type_.append(
         ChunkToString( completion_string, chunk_num ) );
@@ -237,6 +267,7 @@ void CompletionData::ExtractDataFromChunk( CXCompletionString completion_string,
       break;
 
     case CXCompletionChunk_Placeholder:
+    case CXCompletionChunk_CurrentParameter:
       saw_placeholder = true;
       break;
 

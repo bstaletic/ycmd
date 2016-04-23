@@ -65,6 +65,29 @@ class ClangCompleter( Completer ):
     return CLANG_FILETYPES
 
 
+  def CurrentTriggerKind( self, request_data ):
+    if not self.prepared_triggers:
+      return "COMPLETION"
+
+    current_line = request_data[ 'line_value' ]
+    start_column = request_data[ 'start_column' ] - 1
+    current_column = request_data[ 'column_num' ] - 1
+    filetype = self._CurrentFiletype( request_data[ 'filetypes' ] )
+
+    trigger = self.prepared_triggers.MatchingTriggerForFiletype(
+        current_line,
+        start_column,
+        current_column,
+        filetype )
+
+    if ( trigger is not None and
+         trigger.pattern in map(re.escape, ['[', '(', ',', ':']) and
+         current_column == start_column ):
+      return "HINT"
+
+    return "COMPLETION"
+
+
   def GetUnsavedFilesVector( self, request_data ):
     files = ycm_core.UnsavedFileVector()
     for filename, file_data in iteritems( request_data[ 'file_data' ] ):
@@ -101,17 +124,24 @@ class ClangCompleter( Completer ):
     line = request_data[ 'line_num' ]
     column = request_data[ 'start_column' ]
     with self._files_being_compiled.GetExclusive( filename ):
-      results = self._completer.CandidatesForLocationInFile(
+      if self.CurrentTriggerKind( request_data ) == "COMPLETION":
+        results = self._completer.CandidatesForLocationInFile(
+            ToCppStringCompatible( filename ),
+            line,
+            column,
+            files,
+            flags )
+        if not results:
+          raise RuntimeError( NO_COMPLETIONS_MESSAGE )
+        return [ ConvertCompletionData( x ) for x in results ]
+
+      results = self._completer.HintsForLocationInFile(
           ToCppStringCompatible( filename ),
           line,
           column,
           files,
           flags )
-
-    if not results:
-      raise RuntimeError( NO_COMPLETIONS_MESSAGE )
-
-    return [ ConvertCompletionData( x ) for x in results ]
+      return [ ConvertCompletionData( x ) for x in results ]
 
 
   def GetSubcommandsMap( self ):
@@ -389,7 +419,7 @@ def ConvertCompletionData( completion_data ):
     insertion_text = completion_data.TextToInsertInBuffer(),
     menu_text = completion_data.MainCompletionText(),
     extra_menu_info = completion_data.ExtraMenuInfo(),
-    kind = completion_data.kind_.name,
+    kind = completion_data.Kind(),
     detailed_info = completion_data.DetailedInfoForPreviewWindow(),
     extra_data = ( { 'doc_string': completion_data.DocString() }
                    if completion_data.DocString() else None ) )

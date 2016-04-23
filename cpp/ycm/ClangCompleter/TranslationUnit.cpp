@@ -22,14 +22,9 @@
 #include "ClangUtils.h"
 #include "ClangHelpers.h"
 
-#include <boost/shared_ptr.hpp>
-#include <boost/type_traits/remove_pointer.hpp>
-
 using boost::unique_lock;
 using boost::mutex;
 using boost::try_to_lock_t;
-using boost::shared_ptr;
-using boost::remove_pointer;
 
 namespace YouCompleteMe {
 
@@ -43,6 +38,7 @@ unsigned EditingOptions() {
          clang_defaultEditingTranslationUnitOptions();
 }
 
+
 unsigned ReparseOptions( CXTranslationUnit translationUnit ) {
   return clang_defaultReparseOptions( translationUnit );
 }
@@ -53,6 +49,7 @@ unsigned CompletionOptions() {
          CXCodeComplete_IncludeBriefComments;
 }
 
+
 void EnsureCompilerNamePresent( std::vector< const char * > &flags ) {
   bool no_compiler_name_set = !flags.empty() && flags.front()[ 0 ] == '-';
 
@@ -62,13 +59,12 @@ void EnsureCompilerNamePresent( std::vector< const char * > &flags ) {
 
 }  // unnamed namespace
 
-typedef shared_ptr <
-remove_pointer< CXCodeCompleteResults >::type > CodeCompleteResultsWrap;
 
 TranslationUnit::TranslationUnit()
   : filename_( "" ),
     clang_translation_unit_( NULL ) {
 }
+
 
 TranslationUnit::TranslationUnit(
   const std::string &filename,
@@ -144,14 +140,14 @@ std::vector< Diagnostic > TranslationUnit::Reparse(
 }
 
 
-std::vector< CompletionData > TranslationUnit::CandidatesForLocation(
+CodeCompleteResultsWrap TranslationUnit::CodeCompletionResultsForLocation(
   int line,
   int column,
   const std::vector< UnsavedFile > &unsaved_files ) {
   unique_lock< mutex > lock( clang_access_mutex_ );
 
   if ( !clang_translation_unit_ )
-    return std::vector< CompletionData >();
+    return CodeCompleteResultsWrap();
 
   std::vector< CXUnsavedFile > cxunsaved_files =
     ToCXUnsavedFiles( unsaved_files );
@@ -168,7 +164,7 @@ std::vector< CompletionData > TranslationUnit::CandidatesForLocation(
   // in the open-source world don't realize this (I checked). Some don't even
   // call reparse*, but parse* which is even less efficient.
 
-  CodeCompleteResultsWrap results(
+  return CodeCompleteResultsWrap(
     clang_codeCompleteAt( clang_translation_unit_,
                           filename_.c_str(),
                           line,
@@ -177,11 +173,27 @@ std::vector< CompletionData > TranslationUnit::CandidatesForLocation(
                           cxunsaved_files.size(),
                           CompletionOptions() ),
     clang_disposeCodeCompleteResults );
-
-  std::vector< CompletionData > candidates = ToCompletionDataVector(
-                                               results.get() );
-  return candidates;
 }
+
+
+std::vector< CompletionData > TranslationUnit::CandidatesForLocation(
+  int line,
+  int column,
+  const std::vector< UnsavedFile > &unsaved_files ) {
+
+  return ToCompletionDataVector(
+    CodeCompletionResultsForLocation( line, column, unsaved_files ).get() );
+}
+
+
+std::vector< CompletionData > TranslationUnit::HintsForLocation(
+  int line,
+  int column,
+  const std::vector< UnsavedFile > &unsaved_files ) {
+  return ToArgumentHintDataVector(
+    CodeCompletionResultsForLocation( line, column, unsaved_files ).get() );
+}
+
 
 Location TranslationUnit::GetDeclarationLocation(
   int line,
@@ -214,6 +226,7 @@ Location TranslationUnit::GetDeclarationLocation(
   return Location( clang_getCursorLocation( canonical_cursor ) );
 }
 
+
 Location TranslationUnit::GetDefinitionLocation(
   int line,
   int column,
@@ -239,6 +252,7 @@ Location TranslationUnit::GetDefinitionLocation(
 
   return Location( clang_getCursorLocation( definition_cursor ) );
 }
+
 
 std::string TranslationUnit::GetTypeAtLocation(
   int line,
@@ -297,6 +311,7 @@ std::string TranslationUnit::GetTypeAtLocation(
   return type_description;
 }
 
+
 std::string TranslationUnit::GetEnclosingFunctionAtLocation(
   int line,
   int column,
@@ -326,6 +341,7 @@ std::string TranslationUnit::GetEnclosingFunctionAtLocation(
 
   return parent_str;
 }
+
 
 // Argument taken as non-const ref because we need to be able to pass a
 // non-const pointer to clang. This function (and clang too) will not modify the
@@ -369,6 +385,7 @@ void TranslationUnit::Reparse( std::vector< CXUnsavedFile > &unsaved_files,
   UpdateLatestDiagnostics();
 }
 
+
 void TranslationUnit::UpdateLatestDiagnostics() {
   unique_lock< mutex > lock1( clang_access_mutex_ );
   unique_lock< mutex > lock2( diagnostics_mutex_ );
@@ -389,6 +406,7 @@ void TranslationUnit::UpdateLatestDiagnostics() {
   }
 }
 
+
 namespace {
 /// Sort a FixIt container by its location's distance from a given column
 /// (such as the cursor location).
@@ -408,6 +426,7 @@ private:
   int column_;
 };
 }
+
 
 std::vector< FixIt > TranslationUnit::GetFixItsForLocationInFile(
   int line,
@@ -448,6 +467,7 @@ std::vector< FixIt > TranslationUnit::GetFixItsForLocationInFile(
   return fixits;
 }
 
+
 DocumentationData TranslationUnit::GetDocsForLocationInFile(
   int line,
   int column,
@@ -482,6 +502,7 @@ DocumentationData TranslationUnit::GetDocsForLocationInFile(
 
   return DocumentationData( canonical_cursor );
 }
+
 
 CXCursor TranslationUnit::GetCursor( int line, int column ) {
   // ASSUMES A LOCK IS ALREADY HELD ON clang_access_mutex_!

@@ -242,7 +242,7 @@ def _ConvertCandidates( candidates, sort_property, converter ):
 TRIGGER_REGEX_PREFIX = 're!'
 
 DEFAULT_FILETYPE_TRIGGERS = {
-  'c' : [ '->', '.' ],
+  'c' : [ '->', '.', '(', ',' ],
   'objc' : [
     '->',
     '.',
@@ -251,7 +251,7 @@ DEFAULT_FILETYPE_TRIGGERS = {
     r're!\[.*\]\s',             # method composition
   ],
   'ocaml' : [ '.', '#' ],
-  'cpp,objcpp' : [ '->', '.', '::' ],
+  'cpp,objcpp' : [ '->', '.', '::', '(', ',' ],
   'perl' : [ '->' ],
   'php' : [ '->', '::' ],
   'cs,java,javascript,typescript,d,python,perl6,scala,vb,elixir,go,groovy' : [

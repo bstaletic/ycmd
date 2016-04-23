@@ -26,7 +26,9 @@
 
 #include <clang-c/Index.h>
 #include <boost/utility.hpp>
+#include <boost/shared_ptr.hpp>
 #include <boost/thread/mutex.hpp>
+#include <boost/type_traits/remove_pointer.hpp>
 
 #include <string>
 #include <vector>
@@ -35,6 +37,8 @@ namespace YouCompleteMe {
 
 struct CompletionData;
 typedef boost::shared_ptr< std::vector< CompletionData > > AsyncCompletions;
+typedef boost::shared_ptr<
+boost::remove_pointer< CXCodeCompleteResults >::type > CodeCompleteResultsWrap;
 
 class TranslationUnit : boost::noncopyable {
 public:
@@ -60,6 +64,11 @@ public:
     const std::vector< UnsavedFile > &unsaved_files );
 
   std::vector< CompletionData > CandidatesForLocation(
+    int line,
+    int column,
+    const std::vector< UnsavedFile > &unsaved_files );
+
+  std::vector< CompletionData > HintsForLocation(
     int line,
     int column,
     const std::vector< UnsavedFile > &unsaved_files );
@@ -109,6 +118,11 @@ private:
   void UpdateLatestDiagnostics();
 
   CXCursor GetCursor( int line, int column );
+
+  CodeCompleteResultsWrap CodeCompletionResultsForLocation(
+    int line,
+    int column,
+    const std::vector< UnsavedFile > &unsaved_files );
 
   /////////////////////////////
   // PRIVATE MEMBER VARIABLES
