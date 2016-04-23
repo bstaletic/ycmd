@@ -98,7 +98,11 @@ class RequestWrap( object ):
     current_file = self._request[ 'filepath' ]
     contents = self._request[ 'file_data' ][ current_file ][ 'contents' ]
 
-    return SplitLines( contents )[ self._request[ 'line_num' ] - 1 ]
+    lines = SplitLines( contents )
+    line_num = self._request[ 'line_num' ] - 1
+    if line_num >= len(lines):
+      line_num = len(lines) - 1
+    return lines[ line_num ]
 
 
   def CompletionStartColumn( self ):
