@@ -160,6 +160,10 @@ CompletionData::CompletionData( const CXCompletionResult &completion_result,
   doc_string_ = YouCompleteMe::CXStringToString(
                   clang_getCompletionBriefComment( completion_string ) );
 
+  // This address issue #1287
+  if ( kind_ == YouCompleteMe::FUNCTION || kind_ == YouCompleteMe::UNKNOWN )
+    everything_except_return_type_ = original_string_;
+
   if ( is_argument_hint ) {
     kind_ = NONE;
     return_type_ = "";
