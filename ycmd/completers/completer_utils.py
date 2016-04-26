@@ -260,6 +260,7 @@ DEFAULT_FILETYPE_TRIGGERS = {
   'ruby,rust' : [ '.', '::' ],
   'lua' : [ '.', ':' ],
   'erlang' : [ ':' ],
+  'swift' : ['.', '(', ',', ':'],
 }
 
 PREPARED_DEFAULT_FILETYPE_TRIGGERS = _FiletypeTriggerDictFromSpec(
