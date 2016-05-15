@@ -222,6 +222,16 @@ class Completer( with_metaclass( abc.ABCMeta, object ) ):
     return candidates
 
 
+  def _ComputeCandidatesUpdatingCache( self, request_data ):
+    raw_completions = self.ComputeCandidatesInner( request_data )
+    self._completions_cache.Update(
+        request_data[ 'line_num' ],
+        request_data[ 'start_column' ],
+        self.CompletionType( request_data ),
+        raw_completions )
+    return raw_completions
+
+
   def _GetCandidatesFromSubclass( self, request_data ):
     cache_completions = self._completions_cache.GetCompletionsIfCacheValid(
           request_data[ 'line_num' ],
@@ -229,15 +239,16 @@ class Completer( with_metaclass( abc.ABCMeta, object ) ):
           self.CompletionType( request_data ) )
 
     if cache_completions:
+      if ForceSemanticCompletion( request_data ):
+        background_cache_update = threading.Thread(
+                                    target=self._ComputeCandidatesUpdatingCache,
+                                    args=[ request_data ] )
+        background_cache_update.start()
+        background_cache_update.join( 0.4 )
+        if not background_cache_update.isAlive():
+          return self._completions_cache._completions
       return cache_completions
-    else:
-      raw_completions = self.ComputeCandidatesInner( request_data )
-      self._completions_cache.Update(
-          request_data[ 'line_num' ],
-          request_data[ 'start_column' ],
-          self.CompletionType( request_data ),
-          raw_completions )
-      return raw_completions
+    return self._ComputeCandidatesUpdatingCache( request_data )
 
 
   def ComputeCandidatesInner( self, request_data ):
