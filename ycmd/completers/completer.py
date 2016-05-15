@@ -240,10 +240,14 @@ class Completer( with_metaclass( abc.ABCMeta, object ) ):
 
     if cache_completions:
       if ForceSemanticCompletion( request_data ):
-        threading.Thread( target=self._ComputeCandidatesUpdatingCache,
-                          args=[ request_data ] ).start()
+        background_cache_update = threading.Thread(
+                                    target=self._ComputeCandidatesUpdatingCache,
+                                    args=[ request_data ] )
+        background_cache_update.start()
+        background_cache_update.join( 0.4 )
+        if not background_cache_update.isAlive():
+          return self._completions_cache._completions
       return cache_completions
-
     return self._ComputeCandidatesUpdatingCache( request_data )
 
 
