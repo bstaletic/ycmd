@@ -7,6 +7,7 @@ from __future__ import print_function
 from __future__ import division
 from __future__ import absolute_import
 
+from distutils import sysconfig
 from shutil import rmtree
 from tempfile import mkdtemp
 import errno
@@ -144,15 +145,16 @@ def GetPythonNameOnUnix():
   return python_name
 
 
-def GetStandardPythonLocationsOnUnix( prefix, name ):
-  return ( '{0}/lib/lib{1}'.format( prefix, name ),
-           '{0}/include/{1}'.format( prefix, name ) )
+def GetStandardPythonLocationsOnUnix( name ):
+  library_dir = sysconfig.get_config_var( 'LIBDIR' )
+  include_dir = sysconfig.get_config_var( 'INCLUDEDIR' )
+  return p.join( library_dir, 'lib' + name ), p.join( include_dir, name )
 
 
 def FindPythonLibrariesOnLinux():
   python_name = GetPythonNameOnUnix()
   python_library_root, python_include = GetStandardPythonLocationsOnUnix(
-    sys.exec_prefix, python_name )
+    python_name )
 
   python_library = python_library_root + '.so'
   if p.isfile( python_library ):
@@ -177,15 +179,9 @@ def FindPythonLibrariesOnLinux():
 
 
 def FindPythonLibrariesOnMac():
-  python_prefix = sys.exec_prefix
-
-  python_library = p.join( python_prefix, 'Python' )
-  if p.isfile( python_library ):
-    return python_library, p.join( python_prefix, 'Headers' )
-
   python_name = GetPythonNameOnUnix()
   python_library_root, python_include = GetStandardPythonLocationsOnUnix(
-    python_prefix, python_name )
+    python_name )
 
   # On MacOS, ycmd does not work with statically linked python library.
   # It typically manifests with the following error when there is a
@@ -220,12 +216,13 @@ def FindPythonLibrariesOnMac():
 
 
 def FindPythonLibrariesOnWindows():
-  python_prefix = sys.exec_prefix
   python_name = 'python' + str( PY_MAJOR ) + str( PY_MINOR )
 
-  python_library = p.join( python_prefix, 'libs', python_name + '.lib' )
+  python_include = sysconfig.get_config_var( 'INCLUDEPY' )
+  python_library = p.join(
+    p.dirname( python_include ), 'libs', python_name + '.lib' )
   if p.isfile( python_library ):
-    return python_library, p.join( python_prefix, 'include' )
+    return python_library, python_include
 
   sys.exit( NO_PYTHON_LIBRARY_ERROR )
 
@@ -305,6 +302,10 @@ def ParseArguments():
                        action = 'store_true',
                        help   = 'Enable all supported completers',
                        dest   = 'all_completers' )
+  parser.add_argument( '--enable-debug',
+                       action = 'store_true',
+                       help   = 'For developers: build ycm_core library with '
+                                'debug symbols' )
 
   args = parser.parse_args()
 
@@ -326,6 +327,9 @@ def GetCmakeArgs( parsed_args ):
 
   if parsed_args.system_boost:
     cmake_args.append( '-DUSE_SYSTEM_BOOST=ON' )
+
+  if parsed_args.enable_debug:
+    cmake_args.append( '-DCMAKE_BUILD_TYPE=Debug' )
 
   use_python2 = 'ON' if PY_MAJOR == 2 else 'OFF'
   cmake_args.append( '-DUSE_PYTHON2=' + use_python2 )
@@ -389,7 +393,8 @@ def BuildYcmdLib( args ):
 
     build_command = [ 'cmake', '--build', '.', '--target', build_target ]
     if OnWindows():
-      build_command.extend( [ '--config', 'Release' ] )
+      config = 'Debug' if args.enable_debug else 'Release'
+      build_command.extend( [ '--config', config ] )
     else:
       build_command.extend( [ '--', '-j', str( NumCores() ) ] )
 
