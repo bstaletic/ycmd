@@ -27,7 +27,7 @@ from hamcrest import assert_that, empty
 from mock import patch
 from nose.tools import eq_
 from pprint import pformat
-import http.client
+import requests
 import os
 
 from ycmd.tests.test_utils import BuildRequest, ErrorMatcher
@@ -47,7 +47,7 @@ def EventNotification_OnFileReadyToParse_ProjectFile_cwd_test( app ):
                               filetype = 'javascript' ),
                             expect_errors = True)
 
-  eq_( response.status_code, http.client.OK )
+  eq_( response.status_code, requests.codes.ok )
   assert_that( response.json, empty() )
 
 
@@ -63,7 +63,7 @@ def EventNotification_OnFileReadyToParse_ProjectFile_parentdir_test( app ):
                               filetype = 'javascript' ),
                             expect_errors = True)
 
-  eq_( response.status_code, http.client.OK )
+  eq_( response.status_code, requests.codes.ok )
   assert_that( response.json, empty() )
 
 
@@ -86,7 +86,7 @@ def EventNotification_OnFileReadyToParse_NoProjectFile_test( app, *args ):
 
   print( 'event response: {0}'.format( pformat( response.json ) ) )
 
-  eq_( response.status_code, http.client.INTERNAL_SERVER_ERROR )
+  eq_( response.status_code, requests.codes.internal_server_error )
 
   assert_that(
     response.json,
@@ -110,18 +110,13 @@ def EventNotification_OnFileReadyToParse_NoProjectFile_test( app, *args ):
 
   print( 'event response: {0}'.format( pformat( response.json ) ) )
 
-  eq_( response.status_code, http.client.OK )
+  eq_( response.status_code, requests.codes.ok )
   assert_that( response.json, empty() )
 
   # Restart the server and check that it raises it again
 
   app.post_json( '/run_completer_command',
-                 BuildRequest( command_arguments = [ 'StopServer' ],
-                               filetype = 'javascript',
-                               contents = contents,
-                               completer_target = 'filetype_default' ) )
-  app.post_json( '/run_completer_command',
-                 BuildRequest( command_arguments = [ 'StartServer' ],
+                 BuildRequest( command_arguments = [ 'RestartServer' ],
                                filetype = 'javascript',
                                contents = contents,
                                completer_target = 'filetype_default' ) )
@@ -136,7 +131,7 @@ def EventNotification_OnFileReadyToParse_NoProjectFile_test( app, *args ):
 
   print( 'event response: {0}'.format( pformat( response.json ) ) )
 
-  eq_( response.status_code, http.client.INTERNAL_SERVER_ERROR )
+  eq_( response.status_code, requests.codes.internal_server_error )
 
   assert_that(
     response.json,
@@ -165,4 +160,4 @@ def EventNotification_OnFileReadyToParse_UseGlobalConfig_test( app, *args ):
 
   print( 'event response: {0}'.format( pformat( response.json ) ) )
 
-  eq_( response.status_code, http.client.OK )
+  eq_( response.status_code, requests.codes.ok )

@@ -34,6 +34,9 @@ import bottle
 import contextlib
 import nose
 import functools
+import os
+import tempfile
+import stat
 
 from ycmd import handlers, user_options_store
 from ycmd.completers.completer import Completer
@@ -52,6 +55,7 @@ WindowsOnly = skipIf( not OnWindows(), 'Windows only' )
 ClangOnly = skipIf( not ycm_core.HasClangSupport(),
                     'Only when Clang support available' )
 MacOnly = skipIf( not OnMac(), 'Mac only' )
+UnixOnly = skipIf( OnWindows(), 'Unix only' )
 
 
 def BuildRequest( **kwargs ):
@@ -154,6 +158,25 @@ def UserOption( key, value ):
     yield
   finally:
     handlers.UpdateUserOptions( current_options )
+
+
+@contextlib.contextmanager
+def CurrentWorkingDirectory( path ):
+  old_cwd = os.getcwd()
+  os.chdir( path )
+  try:
+    yield
+  finally:
+    os.chdir( old_cwd )
+
+
+# The "exe" suffix is needed on Windows and not harmful on other platforms.
+@contextlib.contextmanager
+def TemporaryExecutable( extension = '.exe' ):
+  with tempfile.NamedTemporaryFile( prefix = 'Temp',
+                                    suffix = extension ) as executable:
+    os.chmod( executable.name, stat.S_IXUSR )
+    yield executable.name
 
 
 def SetUpApp():
