@@ -42,9 +42,8 @@ from os import path as p
 
 _logger = logging.getLogger( __name__ )
 
-DIR_OF_THIS_SCRIPT = p.dirname( p.abspath( __file__ ) )
-DIR_OF_THIRD_PARTY = p.join( DIR_OF_THIS_SCRIPT, '..', '..', '..',
-                             'third_party' )
+DIR_OF_THIRD_PARTY = p.abspath(
+  p.join( p.dirname( __file__ ), '..', '..', '..', 'third_party' ) )
 
 RACERD_BINARY_NAME = 'racerd' + ( '.exe' if utils.OnWindows() else '' )
 RACERD_BINARY_RELEASE = p.join( DIR_OF_THIRD_PARTY, 'racerd', 'target',
@@ -55,14 +54,16 @@ RACERD_BINARY_DEBUG = p.join( DIR_OF_THIRD_PARTY, 'racerd', 'target',
 RACERD_HMAC_HEADER = 'x-racerd-hmac'
 HMAC_SECRET_LENGTH = 16
 
-BINARY_NOT_FOUND_MESSAGE = ( 'racerd binary not found. Did you build it? ' +
-                             'You can do so by running ' +
-                             '"./build.py --racer-completer".' )
+BINARY_NOT_FOUND_MESSAGE = (
+  'racerd binary not found. Did you build it? '
+  'You can do so by running "./build.py --racer-completer".' )
+NON_EXISTING_RUST_SOURCES_PATH_MESSAGE = (
+  'Rust sources path does not exist. Check the value of the rust_src_path '
+  'option or the RUST_SRC_PATH environment variable.' )
 ERROR_FROM_RACERD_MESSAGE = (
   'Received error from racerd while retrieving completions. You did not '
-  'set the rust_src_path option (or you did, but the path doesn\'t exist), '
-  'which is probably causing this issue. See YCM docs for details.'
-)
+  'set the rust_src_path option, which is probably causing this issue. '
+  'See YCM docs for details.' )
 
 
 def FindRacerdBinary( user_options ):
@@ -100,7 +101,7 @@ class RustCompleter( Completer ):
 
   def __init__( self, user_options ):
     super( RustCompleter, self ).__init__( user_options )
-    self._racerd = FindRacerdBinary( user_options )
+    self._racerd_binary = FindRacerdBinary( user_options )
     self._racerd_host = None
     self._server_state_lock = threading.RLock()
     self._keep_logfiles = user_options[ 'server_keep_logfiles' ]
@@ -110,8 +111,11 @@ class RustCompleter( Completer ):
     if not self._rust_source_path:
       _logger.warning( 'No path provided for the rustc source. Please set the '
                        'rust_src_path option' )
+    elif not p.isdir( self._rust_source_path ):
+      _logger.error( NON_EXISTING_RUST_SOURCES_PATH_MESSAGE )
+      raise RuntimeError( NON_EXISTING_RUST_SOURCES_PATH_MESSAGE )
 
-    if not self._racerd:
+    if not self._racerd_binary:
       _logger.error( BINARY_NOT_FOUND_MESSAGE )
       raise RuntimeError( BINARY_NOT_FOUND_MESSAGE )
 
@@ -237,8 +241,7 @@ class RustCompleter( Completer ):
     try:
       completions = self._FetchCompletions( request_data )
     except requests.HTTPError:
-      if not self._rust_source_path or not os.path.exists(
-          self._rust_source_path ):
+      if not self._rust_source_path:
         raise RuntimeError( ERROR_FROM_RACERD_MESSAGE )
       raise
 
@@ -265,7 +268,7 @@ class RustCompleter( Completer ):
       # racerd will delete the secret_file after it's done reading it
       with tempfile.NamedTemporaryFile( delete = False ) as secret_file:
         secret_file.write( self._hmac_secret )
-        args = [ self._racerd, 'serve',
+        args = [ self._racerd_binary, 'serve',
                 '--port', str( port ),
                 '-l',
                 '--secret-file', secret_file.name ]
@@ -395,21 +398,34 @@ class RustCompleter( Completer ):
   def DebugInfo( self, request_data ):
     with self._server_state_lock:
       if self._ServerIsRunning():
-        return ( 'racerd\n'
-                 '  listening at: {0}\n'
-                 '  racerd path: {1}\n'
-                 '  stdout log: {2}\n'
-                 '  stderr log: {3}').format( self._racerd_host,
-                                              self._racerd,
-                                              self._server_stdout,
-                                              self._server_stderr )
+        return ( 'Rust completer debug information:\n'
+                 '  Racerd running at: {0}\n'
+                 '  Racerd process ID: {1}\n'
+                 '  Racerd executable: {2}\n'
+                 '  Racerd logfiles:\n'
+                 '    {3}\n'
+                 '    {4}\n'
+                 '  Rust sources: {5}'.format( self._racerd_host,
+                                               self._racerd_phandle.pid,
+                                               self._racerd_binary,
+                                               self._server_stdout,
+                                               self._server_stderr,
+                                               self._rust_source_path ) )
 
       if self._server_stdout and self._server_stderr:
-        return ( 'racerd is no longer running\n',
-                 '  racerd path: {0}\n'
-                 '  stdout log: {1}\n'
-                 '  stderr log: {2}').format( self._racerd,
-                                              self._server_stdout,
-                                              self._server_stderr )
+        return ( 'Rust completer debug information:\n'
+                 '  Racerd no longer running\n'
+                 '  Racerd executable: {0}\n'
+                 '  Racerd logfiles:\n'
+                 '    {1}\n'
+                 '    {2}\n'
+                 '  Rust sources: {3}'.format( self._racerd_binary,
+                                               self._server_stdout,
+                                               self._server_stderr,
+                                               self._rust_source_path ) )
 
-      return 'racerd is not running'
+      return ( 'Rust completer debug information:\n'
+               '  Racerd is not running\n'
+               '  Racerd executable: {0}\n'
+               '  Rust sources: {1}'.format( self._racerd_binary,
+                                             self._rust_source_path ) )
