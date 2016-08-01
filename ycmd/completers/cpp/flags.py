@@ -39,11 +39,19 @@ INCLUDE_FLAGS = [ '-isystem', '-I', '-iquote', '-isysroot', '--sysroot',
 
 # We need to remove --fcolor-diagnostics because it will cause shell escape
 # sequences to show up in editors, which is bad. See Valloric/YouCompleteMe#1421
-STATE_FLAGS_TO_SKIP = set(['-c', '-MP', '--fcolor-diagnostics'])
+STATE_FLAGS_TO_SKIP = set( [ '-c',
+                             '-MP',
+                             '-MD',
+                             '-MMD',
+                             '--fcolor-diagnostics' ] )
 
 # The -M* flags spec:
 #   https://gcc.gnu.org/onlinedocs/gcc-4.9.0/gcc/Preprocessor-Options.html
-FILE_FLAGS_TO_SKIP = set(['-MD', '-MMD', '-MF', '-MT', '-MQ', '-o'])
+FILE_FLAGS_TO_SKIP = set( [ '-MF',
+                            '-MT',
+                            '-MQ',
+                            '-o',
+                            '--serialize-diagnostics' ] )
 
 # Use a regex to correctly detect c++/c language for both versioned and
 # non-versioned compiler executable names suffixes
@@ -91,7 +99,10 @@ class Flags( object ):
 
       if add_extra_clang_flags:
         flags += self.extra_clang_flags
-      sanitized_flags = PrepareFlagsForClang( flags, filename )
+
+      sanitized_flags = PrepareFlagsForClang( flags,
+                                              filename,
+                                              add_extra_clang_flags )
 
       if results[ 'do_cache' ]:
         self.flags_for_file[ filename ] = sanitized_flags
@@ -164,10 +175,12 @@ def _CallExtraConfFlagsForFile( module, filename, client_data ):
     return module.FlagsForFile( filename )
 
 
-def PrepareFlagsForClang( flags, filename ):
+def PrepareFlagsForClang( flags, filename, add_extra_clang_flags = True ):
   flags = _CompilerToLanguageFlag( flags )
   flags = _RemoveXclangFlags( flags )
   flags = _RemoveUnusedFlags( flags, filename )
+  if add_extra_clang_flags:
+    flags = _EnableTypoCorrection( flags )
   flags = _SanitizeFlags( flags )
   return flags
 
@@ -266,9 +279,11 @@ def _RemoveUnusedFlags( flags, filename ):
   previous_flag_is_include = False
   previous_flag_starts_with_dash = False
   current_flag_starts_with_dash = False
+
   for flag in flags:
     previous_flag_starts_with_dash = current_flag_starts_with_dash
     current_flag_starts_with_dash = flag.startswith( '-' )
+
     if skip_next:
       skip_next = False
       continue
@@ -377,9 +392,9 @@ def _ExtraClangFlags():
   if OnMac():
     for path in MAC_INCLUDE_PATHS:
       flags.extend( [ '-isystem', path ] )
-  # On Windows, parsing of templates is delayed until instantation time.
-  # This makes GetType and GetParent commands not returning the expected
-  # result when the cursor is in templates.
+  # On Windows, parsing of templates is delayed until instantiation time.
+  # This makes GetType and GetParent commands fail to return the expected
+  # result when the cursor is in a template.
   # Using the -fno-delayed-template-parsing flag disables this behavior.
   # See
   # http://clang.llvm.org/extra/PassByValueTransform.html#note-about-delayed-template-parsing # noqa
@@ -388,6 +403,24 @@ def _ExtraClangFlags():
   # for a similar issue.
   if OnWindows():
     flags.append( '-fno-delayed-template-parsing' )
+  return flags
+
+
+def _EnableTypoCorrection( flags ):
+  """Adds the -fspell-checking flag if the -fno-spell-checking flag is not
+  present"""
+
+  # "Typo correction" (aka spell checking) in clang allows it to produce
+  # hints (in the form of fix-its) in the case of certain diagnostics. A common
+  # example is "no type named 'strng' in namespace 'std'; Did you mean
+  # 'string'? (FixIt)". This is enabled by default in the clang driver (i.e. the
+  # 'clang' binary), but is not when using libclang (as we do). It's a useful
+  # enough feature that we just always turn it on unless the user explicitly
+  # turned it off in their flags (with -fno-spell-checking).
+  if '-fno-spell-checking' in flags:
+    return flags
+
+  flags.append( '-fspell-checking' )
   return flags
 
 

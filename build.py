@@ -19,6 +19,7 @@ import re
 import shlex
 import subprocess
 import sys
+import traceback
 
 PY_MAJOR, PY_MINOR = sys.version_info[ 0 : 2 ]
 if not ( ( PY_MAJOR == 2 and PY_MINOR >= 6 ) or
@@ -354,19 +355,30 @@ def BuildYcmdLib( args ):
     full_cmake_args.append( p.join( DIR_OF_THIS_SCRIPT, 'cpp' ) )
 
     os.chdir( build_dir )
-    subprocess.check_call( [ 'cmake' ] + full_cmake_args )
+    try:
+      subprocess.check_call( [ 'cmake' ] + full_cmake_args )
 
-    build_target = ( 'ycm_core' if 'YCM_TESTRUN' not in os.environ else
-                     'ycm_core_tests' )
+      build_target = ( 'ycm_core' if 'YCM_TESTRUN' not in os.environ else
+                       'ycm_core_tests' )
 
-    build_command = [ 'cmake', '--build', '.', '--target', build_target ]
-    if OnWindows():
-      config = 'Debug' if args.enable_debug else 'Release'
-      build_command.extend( [ '--config', config ] )
-    else:
-      build_command.extend( [ '--', '-j', str( NumCores() ) ] )
+      build_command = [ 'cmake', '--build', '.', '--target', build_target ]
+      if OnWindows():
+        config = 'Debug' if args.enable_debug else 'Release'
+        build_command.extend( [ '--config', config ] )
+      else:
+        build_command.extend( [ '--', '-j', str( NumCores() ) ] )
 
-    subprocess.check_call( build_command )
+      subprocess.check_call( build_command )
+    except subprocess.CalledProcessError:
+      traceback.print_exc()
+      sys.exit(
+        '\n\nERROR: The build failed.\n\n'
+        'NOTE: It is *highly* unlikely that this is a bug but rather\n'
+        'that this is a problem with the configuration of your system\n'
+        'or a missing dependency. Please carefully read CONTRIBUTING.md\n'
+        "and if you're sure that it is a bug, please raise an issue on the\n"
+        'issue tracker, including the entire output of this script\n'
+        'and the invocation line used to run it.\n' )
 
     if 'YCM_TESTRUN' in os.environ:
       RunYcmdTests( build_dir )
@@ -427,7 +439,7 @@ def SetUpTern():
   # node_modules of the Tern runtime.  We also want to be able to install our
   # own plugins to improve the user experience for all users.
   #
-  # This is not possible if we use a git submodle for Tern and simply run 'npm
+  # This is not possible if we use a git submodule for Tern and simply run 'npm
   # install' within the submodule source directory, as subsequent 'npm install
   # tern-my-plugin' will (heinously) install another (arbitrary) version of Tern
   # within the Tern source tree (e.g. third_party/tern/node_modules/tern. The
@@ -438,19 +450,7 @@ def SetUpTern():
   # So instead, we have a package.json within our "Tern runtime" directory
   # (third_party/tern_runtime) that defines the packages that we require,
   # including Tern and any plugins which we require as standard.
-  TERN_RUNTIME_DIR = os.path.join( DIR_OF_THIS_SCRIPT,
-                                   'third_party',
-                                   'tern_runtime' )
-  try:
-    os.makedirs( TERN_RUNTIME_DIR )
-  except Exception:
-    # os.makedirs throws if the dir already exists, it also throws if the
-    # permissions prevent creating the directory. There's no way to know the
-    # difference, so we just let the call to os.chdir below throw if this fails
-    # to create the target directory.
-    pass
-
-  os.chdir( TERN_RUNTIME_DIR )
+  os.chdir( p.join( DIR_OF_THIS_SCRIPT, 'third_party', 'tern_runtime' ) )
   subprocess.check_call( [ paths[ 'npm' ], 'install', '--production' ] )
 
 
