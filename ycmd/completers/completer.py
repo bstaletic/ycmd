@@ -244,7 +244,7 @@ class Completer( with_metaclass( abc.ABCMeta, object ) ):
                                     target=self._ComputeCandidatesUpdatingCache,
                                     args=[ request_data ] )
         background_cache_update.start()
-        background_cache_update.join( 0.4 )
+        background_cache_update.join( 2.5 )
         if not background_cache_update.isAlive():
           return self._completions_cache._completions
       return cache_completions
