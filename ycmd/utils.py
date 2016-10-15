@@ -97,6 +97,22 @@ def ToUnicode( value ):
   return str( value )
 
 
+# When lines is an iterable of all strings or all bytes, equivalent to
+#   '\n'.join( ToUnicode( lines ) )
+# but faster on large inputs.
+def JoinLinesAsUnicode( lines ):
+  try:
+    first = next( iter( lines ) )
+  except StopIteration:
+    return str()
+
+  if isinstance( first, str ):
+    return ToUnicode( '\n'.join( lines ) )
+  if isinstance( first, bytes ):
+    return ToUnicode( b'\n'.join( lines ) )
+  raise ValueError( 'lines must contain either strings or bytes.' )
+
+
 # Consistently returns the new bytes() type from python-future. Assumes incoming
 # strings are either UTF-8 or unicode (which is converted to UTF-8).
 def ToBytes( value ):
@@ -429,3 +445,17 @@ def SplitLines( contents ):
     lines.append( '' )
 
   return lines
+
+
+def GetCurrentDirectory():
+  """Returns the current directory as an unicode object. If the current
+  directory does not exist anymore, returns the temporary folder instead."""
+  try:
+    if PY2:
+      return os.getcwdu()
+    return os.getcwd()
+  # os.getcwdu throws an OSError exception when the current directory has been
+  # deleted while os.getcwd throws a FileNotFoundError, which is a subclass of
+  # OSError.
+  except OSError:
+    return tempfile.gettempdir()
