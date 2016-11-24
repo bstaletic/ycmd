@@ -28,7 +28,6 @@ from future.utils import PY2, native
 
 import os
 import socket
-import stat
 import subprocess
 import sys
 import tempfile
@@ -38,14 +37,6 @@ import time
 # Creation flag to disable creating a console window on Windows. See
 # https://msdn.microsoft.com/en-us/library/windows/desktop/ms684863.aspx
 CREATE_NO_WINDOW = 0x08000000
-
-# Don't use this! Call PathToCreatedTempDir() instead. This exists for the sake
-# of tests.
-RAW_PATH_TO_TEMP_DIR = os.path.join( tempfile.gettempdir(), 'ycm_temp' )
-
-# Readable, writable and executable by everyone.
-ACCESSIBLE_TO_ALL_MASK = ( stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH |
-                           stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP )
 
 EXECUTABLE_FILE_MASK = os.F_OK | os.X_OK
 
@@ -71,6 +62,13 @@ def OpenForStdHandle( filepath ):
   if PY2:
     return open( filepath, mode = 'wb', buffering = 0 )
   return open( filepath, mode = 'w', buffering = 1 )
+
+
+def CreateLogfile( prefix = '' ):
+  with tempfile.NamedTemporaryFile( prefix = prefix,
+                                    suffix = '.log',
+                                    delete = False ) as logfile:
+    return logfile.name
 
 
 # Given an object, returns a str object that's utf-8 encoded. This is meant to
@@ -182,24 +180,6 @@ def CodepointOffsetToByteOffset( unicode_line_value, codepoint_offset ):
   return len( ToBytes( unicode_line_value[ : codepoint_offset - 1 ] ) ) + 1
 
 
-def PathToCreatedTempDir( tempdir = RAW_PATH_TO_TEMP_DIR ):
-  try:
-    os.makedirs( tempdir )
-    # Needed to support multiple users working on the same machine;
-    # see issue 606.
-    MakeFolderAccessibleToAll( tempdir )
-  except OSError:
-    # Folder already exists, skip folder creation.
-    pass
-  return tempdir
-
-
-def MakeFolderAccessibleToAll( path_to_folder ):
-  current_stat = os.stat( path_to_folder )
-  flags = current_stat.st_mode | ACCESSIBLE_TO_ALL_MASK
-  os.chmod( path_to_folder, flags )
-
-
 def GetUnusedLocalhostPort():
   sock = socket.socket()
   # This tells the OS to give us any free port in the range [1024 - 65535]
@@ -306,6 +286,14 @@ def WaitUntilProcessIsTerminated( handle, timeout = 5 ):
     if not ProcessIsRunning( handle ):
       return
     time.sleep( 0.1 )
+
+
+def CloseStandardStreams( handle ):
+  if not handle:
+    return
+  for stream in [ handle.stdin, handle.stdout, handle.stderr ]:
+    if stream:
+      stream.close()
 
 
 def PathsToAllParentFolders( path ):
