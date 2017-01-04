@@ -234,9 +234,7 @@ def _ConvertCandidates( candidates, sort_property, converter ):
   if sort_property:
     for candidate in candidates:
       candidate[ sort_property ] = converter( candidate[ sort_property ] )
-    return candidates
-
-  return [ converter( c ) for c in candidates ]
+  return candidates
 
 
 TRIGGER_REGEX_PREFIX = 're!'
