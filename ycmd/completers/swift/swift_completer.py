@@ -65,8 +65,10 @@ class SwiftCompleter( Completer ):
     self._flag_store = FlagStore()
     self._diagnostic_store = None
 
+
   def SupportedFiletypes( self ):
     return SWIFT_FILETYPES
+
 
   def CurrentTriggerKind( self, request_data ):
     if not self.prepared_triggers:
@@ -83,11 +85,21 @@ class SwiftCompleter( Completer ):
         current_column,
         filetype )
 
-    if ( trigger is not None and trigger.pattern != re.escape('.') and
-         current_column == start_column ):
-      return "HINT"
+    if trigger is not None and trigger.pattern != re.escape( '.' ):
+      if current_column == start_column:
+        return "HINT"
+      return "AFTER_HINT"
 
     return "COMPLETION"
+
+
+  def ShouldUseNowInner( self, request_data ):
+    current_trigger_kind = self.CurrentTriggerKind( request_data )
+    if current_trigger_kind == "AFTER_HINT":
+      return False
+
+    return super( SwiftCompleter, self ).ShouldUseNowInner( request_data )
+
 
   def ComputeCandidatesInner( self, request_data ):
     filename = request_data[ 'filepath' ]
@@ -99,20 +111,21 @@ class SwiftCompleter( Completer ):
 
     self._flag_store.PassFlags( self._compiler, filename )
 
-    if self.CurrentTriggerKind( request_data ) == "COMPLETION":
-      completions = self._compiler.completions(
+    if self.CurrentTriggerKind( request_data ) == "HINT":
+      completions = self._compiler.hints(
           ToCppStringCompatible( contents ),
           request_data[ 'line_num' ],
           request_data[ 'start_column' ] )
-      if not completions:
-        raise RuntimeError( NO_COMPLETIONS_MESSAGE )
       return [ ConvertCompletionData( x ) for x in completions ]
 
-    completions = self._compiler.hints(
+    completions = self._compiler.completions(
         ToCppStringCompatible( contents ),
         request_data[ 'line_num' ],
         request_data[ 'start_column' ] )
+    if not completions:
+      raise RuntimeError( NO_COMPLETIONS_MESSAGE )
     return [ ConvertCompletionData( x ) for x in completions ]
+
 
   def OnFileReadyToParse( self, request_data ):
     filename = request_data[ 'filepath' ]
@@ -130,6 +143,7 @@ class SwiftCompleter( Completer ):
     self._diagnostic_store = DiagnosticsToDiagStructure( diagnostics )
     return [ responses.BuildDiagnosticData( x ) for x in
              diagnostics[ : self._max_diagnostics_to_display ] ]
+
 
   def GetDetailedDiagnostic( self, request_data ):
     current_line = request_data[ 'line_num' ]
@@ -157,6 +171,7 @@ class SwiftCompleter( Completer ):
 
     return responses.BuildDisplayMessageResponse(
       closest_diagnostic.long_formatted_text_ )
+
 
   def _FixIt( self, request_data ):
     line = request_data[ 'line_num' ]

@@ -82,9 +82,10 @@ class ClangCompleter( Completer ):
         filetype )
 
     if ( trigger is not None and
-         trigger.pattern in map(re.escape, ['[', '(', ',', ':']) and
-         current_column == start_column ):
-      return "HINT"
+         trigger.pattern in map( re.escape, [ '[', '(', ',', ':' ] ) ):
+      if current_column == start_column:
+        return "HINT"
+      return "AFTER_HINT"
 
     return "COMPLETION"
 
@@ -108,6 +109,14 @@ class ClangCompleter( Completer ):
     return files
 
 
+  def ShouldUseNowInner( self, request_data ):
+    current_trigger_kind = self.CurrentTriggerKind( request_data )
+    if current_trigger_kind == "AFTER_HINT":
+      return False
+
+    return super( ClangCompleter, self ).ShouldUseNowInner( request_data )
+
+
   def ComputeCandidatesInner( self, request_data ):
     filename = request_data[ 'filepath' ]
     if not filename:
@@ -125,23 +134,23 @@ class ClangCompleter( Completer ):
     line = request_data[ 'line_num' ]
     column = request_data[ 'start_column' ]
     with self._files_being_compiled.GetExclusive( filename ):
-      if self.CurrentTriggerKind( request_data ) == "COMPLETION":
-        results = self._completer.CandidatesForLocationInFile(
+      if self.CurrentTriggerKind( request_data ) == "HINT":
+        results = self._completer.HintsForLocationInFile(
             ToCppStringCompatible( filename ),
             line,
             column,
             files,
             flags )
-        if not results:
-          raise RuntimeError( NO_COMPLETIONS_MESSAGE )
         return [ ConvertCompletionData( x ) for x in results ]
 
-      results = self._completer.HintsForLocationInFile(
+      results = self._completer.CandidatesForLocationInFile(
           ToCppStringCompatible( filename ),
           line,
           column,
           files,
           flags )
+      if not results:
+        raise RuntimeError( NO_COMPLETIONS_MESSAGE )
       return [ ConvertCompletionData( x ) for x in results ]
 
 
