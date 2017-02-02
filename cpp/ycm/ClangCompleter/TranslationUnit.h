@@ -26,19 +26,17 @@
 
 #include <clang-c/Index.h>
 #include <boost/utility.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/thread/mutex.hpp>
-#include <boost/type_traits/remove_pointer.hpp>
 
+#include <mutex>
 #include <string>
 #include <vector>
+#include <memory>
 
 namespace YouCompleteMe {
 
 struct CompletionData;
-typedef boost::shared_ptr< std::vector< CompletionData > > AsyncCompletions;
-typedef boost::shared_ptr<
-boost::remove_pointer< CXCodeCompleteResults >::type > CodeCompleteResultsWrap;
+typedef std::shared_ptr<
+std::remove_pointer< CXCodeCompleteResults >::type > CodeCompleteResultsWrap;
 
 class TranslationUnit : boost::noncopyable {
 public:
@@ -130,10 +128,10 @@ private:
 
   std::string filename_;
 
-  boost::mutex diagnostics_mutex_;
+  std::mutex diagnostics_mutex_;
   std::vector< Diagnostic > latest_diagnostics_;
 
-  mutable boost::mutex clang_access_mutex_;
+  mutable std::mutex clang_access_mutex_;
   CXTranslationUnit clang_translation_unit_;
 };
 

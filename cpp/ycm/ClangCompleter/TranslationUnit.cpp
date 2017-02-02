@@ -22,9 +22,11 @@
 #include "ClangUtils.h"
 #include "ClangHelpers.h"
 
-using boost::unique_lock;
-using boost::mutex;
-using boost::try_to_lock_t;
+#include <memory>
+
+using std::unique_lock;
+using std::mutex;
+using std::try_to_lock_t;
 
 namespace YouCompleteMe {
 
@@ -78,7 +80,7 @@ TranslationUnit::TranslationUnit(
   std::vector< const char * > pointer_flags;
   pointer_flags.reserve( flags.size() );
 
-  foreach ( const std::string & flag, flags ) {
+  for ( const std::string & flag : flags ) {
     pointer_flags.push_back( flag.c_str() );
   }
 
@@ -444,7 +446,7 @@ std::vector< FixIt > TranslationUnit::GetFixItsForLocationInFile(
   {
     unique_lock< mutex > lock( diagnostics_mutex_ );
 
-    foreach( const Diagnostic& diagnostic, latest_diagnostics_ ) {
+    for ( const Diagnostic& diagnostic : latest_diagnostics_ ) {
       // Find all diagnostics for the supplied line which have FixIts attached
       if ( diagnostic.location_.line_number_ == static_cast< uint >( line ) ) {
         fixits.insert( fixits.end(),
