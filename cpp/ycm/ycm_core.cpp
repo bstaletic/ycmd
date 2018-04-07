@@ -53,24 +53,6 @@ bool HasClangSupport() {
 #endif // USE_CLANG_COMPLETER
 }
 
-#if PY_MAJOR_VERSION < 3
-namespace pybind11 { namespace detail {
-template<> struct type_caster< std::string > : string_caster< std::string > {
-  static handle cast( const std::string &src,
-                      return_value_policy /* policy */,
-                      handle /* parent */ ) {
-    const char *buffer = reinterpret_cast< const char * >( src.data() );
-    ssize_t nbytes = ssize_t( src.size() * sizeof( char ) );
-    handle s = PyString_FromStringAndSize( buffer, nbytes );
-    if ( !s ) {
-      throw error_already_set();
-    }
-    return s;
-  }
-};
-} }
-#endif
-
 PYBIND11_MAKE_OPAQUE( std::vector< std::string > );
 #ifdef USE_CLANG_COMPLETER
 PYBIND11_MAKE_OPAQUE( std::vector< UnsavedFile > );
