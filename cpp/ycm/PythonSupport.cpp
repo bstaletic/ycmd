@@ -27,7 +27,9 @@
 
 using pybind11::len;
 using pybind11::str;
+using pybind11::bytes;
 using pybind11::object;
+using pybind11::isinstance;
 using pylist = pybind11::list;
 
 namespace YouCompleteMe {
@@ -40,14 +42,16 @@ std::vector< const Candidate * > CandidatesFromObjectList(
   size_t num_candidates = len( candidates );
   std::vector< std::string > candidate_strings;
   candidate_strings.reserve( num_candidates );
+  // Store the property in a native Python string so that the below doesn't need
+  // to reconvert over and over:
+  str py_prop( candidate_property );
 
   for ( size_t i = 0; i < num_candidates; ++i ) {
     if ( candidate_property.empty() ) {
       candidate_strings.push_back( GetUtf8String( candidates[ i ] ) );
     } else {
-      object holder = candidates[ i ].cast< object >();
       candidate_strings.push_back( GetUtf8String(
-                                     holder[ candidate_property.c_str() ] ) );
+                                     candidates[ i ][ py_prop ] ) );
     }
   }
 
@@ -101,42 +105,14 @@ pylist FilterAndSortCandidates(
 
 
 std::string GetUtf8String( const object &value ) {
-  std::string type = value.attr( "__class__" )
-                          .attr( "__name__" )
-                          .cast< std::string >();
-
-#if PY_MAJOR_VERSION >= 3
-  // While strings are internally represented in UCS-2 or UCS-4 on Python 3,
-  // they are UTF-8 encoded when converted to std::string.
-  if ( type == "str" || type == "bytes" ) {
-    return value.cast< std::string >();
-  }
-#else
-  if ( type == "str" ) {
+  // If already a unicode or string (or something derived from it) pybind will already convert
+  // to utf8 when converting to std::string.  For `bytes` the contents are left untouched:
+  if ( isinstance<str>( value ) || isinstance<bytes>( value ) ) {
     return value.cast< std::string >();
   }
 
-  if ( type == "unicode" ) {
-    // unicode -> str
-    return value.attr( "encode" )( "utf8" ).cast< std::string >();
-  }
-
-  // newstr and newbytes have a __native__ method that convert them
-  // respectively to unicode and str.
-  if ( type == "newstr" ) {
-    // newstr -> unicode -> str
-    return value.attr( "__native__" )()
-                .attr( "encode" )( "utf8" )
-                .cast< std::string >();
-  }
-
-  if ( type == "newbytes" ) {
-    // newbytes -> str
-    return value.attr( "__native__" )().cast< std::string >();
-  }
-#endif
-
-  return str( value ).attr( "encode" )( "utf8" ) .cast< std::string >();
+  // Otherwise go through `pybind11::str()`, which goes through Python's built-in `str`.
+  return str(value);
 }
 
 } // namespace YouCompleteMe
