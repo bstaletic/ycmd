@@ -29,7 +29,7 @@ import os
 from nose.tools import eq_
 from future.types.newbytes import newbytes
 from future.types.newstr import newstr
-from future.utils import native, PY2
+from future.utils import native
 
 import ycm_core
 from ycmd.tests.test_utils import ClangOnly, Py2Only, Py3Only
@@ -71,7 +71,8 @@ def GetUtf8String_NewBytes_test():
 # bytes is identical to str on Python 2.
 @Py3Only
 def GetUtf8String_Bytes_test():
-  eq_( 'foø'.encode( 'utf-8' ), ycm_core.GetUtf8String( bytes( 'foø', 'utf8' ) ) )
+  eq_( 'foø'.encode( 'utf-8' ),
+       ycm_core.GetUtf8String( bytes( 'foø', 'utf8' ) ) )
 
 
 def GetUtf8String_Int_test():

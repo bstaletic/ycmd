@@ -551,8 +551,9 @@ def _BuildGetDocResponse( doc_data ):
   # future, we can use this XML for more interesting things.
 
   comment_xml = doc_data.comment_xml
-  # Under Python 2, passing in a unicode fails if the unicode contains non-ASCII:
-  if PY2 and isinstance(comment_xml, unicode):
+  # Under Python 2, passing a unicode containing non-ASCII fails, but passing
+  # a string containing decoded utf-8 is okay:
+  if PY2 and isinstance(comment_xml, unicode):  # noqa
     comment_xml = comment_xml.encode('utf-8')
 
   try:
