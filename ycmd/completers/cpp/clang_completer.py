@@ -24,7 +24,7 @@ from __future__ import absolute_import
 from builtins import *  # noqa
 
 from collections import defaultdict
-from future.utils import iteritems
+from future.utils import iteritems, PY2
 import logging
 import os.path
 import re
@@ -549,8 +549,14 @@ def _BuildGetDocResponse( doc_data ):
   # parsing, but having the raw declaration text is likely one of the most
   # useful pieces of documentation available to the developer. Perhaps in
   # future, we can use this XML for more interesting things.
+
+  comment_xml = doc_data.comment_xml
+  # Under Python 2, passing in a unicode fails if the unicode contains non-ASCII:
+  if PY2 and isinstance(comment_xml, unicode):
+    comment_xml = comment_xml.encode('utf-8')
+
   try:
-    root = xml.etree.ElementTree.fromstring( doc_data.comment_xml )
+    root = xml.etree.ElementTree.XML( comment_xml )
   except XmlParseError:
     raise ValueError( NO_DOCUMENTATION_MESSAGE )
 
