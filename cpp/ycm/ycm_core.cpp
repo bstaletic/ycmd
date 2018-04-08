@@ -80,7 +80,7 @@ PYBIND11_MODULE(ycm_core, m)
   m.def( "YcmCoreVersion", &YcmCoreVersion );
 
   // This is exposed so that we can test it.
-  m.def( "GetUtf8String", &GetUtf8String );
+  m.def( "GetUtf8String", []( py::object o ) -> py::bytes { return GetUtf8String( o ); } );
 
   py::class_< IdentifierCompleter >( m, "IdentifierCompleter" )
     .def( py::init<>() )
