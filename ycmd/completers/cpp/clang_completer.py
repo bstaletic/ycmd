@@ -553,8 +553,8 @@ def _BuildGetDocResponse( doc_data ):
   comment_xml = doc_data.comment_xml
   # Under Python 2, passing a unicode containing non-ASCII fails, but passing
   # a string containing decoded utf-8 is okay:
-  if PY2 and isinstance(comment_xml, unicode):  # noqa
-    comment_xml = comment_xml.encode('utf-8')
+  if PY2 and not isinstance( comment_xml, bytes ):
+    comment_xml = comment_xml.encode( 'utf-8' )
 
   try:
     root = xml.etree.ElementTree.XML( comment_xml )
