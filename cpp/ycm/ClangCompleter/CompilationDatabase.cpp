@@ -17,7 +17,6 @@
 
 #include "CompilationDatabase.h"
 #include "ClangUtils.h"
-#include "ReleaseGil.h"
 #include "PythonSupport.h"
 
 #include <memory>
@@ -72,7 +71,7 @@ CompilationInfoForFile CompilationDatabase::GetCompilationInfoForFile(
   }
 
   std::string path_to_file_string = GetUtf8String( path_to_file );
-  ReleaseGil unlock;
+  pybind11::gil_scoped_release unlock;
 
   lock_guard< mutex > lock( compilation_database_mutex_ );
 

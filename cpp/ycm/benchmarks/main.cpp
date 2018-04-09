@@ -19,13 +19,11 @@
 // iostream is included because of a bug with Python earlier than 2.7.12
 // and 3.5.3 on OSX and FreeBSD.
 #include <iostream>
-#include <Python.h>
+#include <pybind11/embed.h>
 
 
 int main( int argc, char** argv ) {
-  Py_Initialize();
-  // Necessary because of usage of the ReleaseGil class.
-  PyEval_InitThreads();
+  pybind11::scoped_interpreter guard{};
 
   benchmark::Initialize(&argc, argv);
   benchmark::RunSpecifiedBenchmarks();

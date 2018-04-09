@@ -1,11 +1,9 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
-#include <Python.h>
+#include <pybind11/embed.h>
 
 int main( int argc, char **argv ) {
-  Py_Initialize();
-  // Necessary because of usage of the ReleaseGil class
-  PyEval_InitThreads();
+  pybind11::scoped_interpreter guard{};
 
   testing::InitGoogleMock( &argc, argv );
   return RUN_ALL_TESTS();

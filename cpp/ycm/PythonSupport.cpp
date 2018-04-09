@@ -19,7 +19,6 @@
 #include "Result.h"
 #include "Candidate.h"
 #include "CandidateRepository.h"
-#include "ReleaseGil.h"
 #include "Utils.h"
 
 #include <vector>
@@ -75,7 +74,7 @@ pylist FilterAndSortCandidates(
 
   std::vector< ResultAnd< size_t > > result_and_objects;
   {
-    ReleaseGil unlock;
+    pybind11::gil_scoped_release unlock;
     Word query_object( query );
 
     for ( size_t i = 0; i < num_candidates; ++i ) {
