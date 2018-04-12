@@ -24,11 +24,12 @@
  * before anything python related.
  */
 #include <iostream>
+#include <pybind11/stl_bind.h>
+
 #include "CodePoint.h"
 #include "IdentifierCompleter.h"
 #include "PythonSupport.h"
 #include "versioning.h"
-#include <pybind11/stl_bind.h>
 
 #ifdef USE_CLANG_COMPLETER
 #  include "ClangCompleter.h"
@@ -63,26 +64,24 @@ PYBIND11_MAKE_OPAQUE( std::vector< YouCompleteMe::FixIt > );
 PYBIND11_MAKE_OPAQUE( std::vector< YouCompleteMe::FixItChunk > );
 #endif // USE_CLANG_COMPLETER
 
-PYBIND11_MODULE(ycm_core, m)
+PYBIND11_MODULE( ycm_core, module )
 {
-  // Necessary because of usage of the ReleaseGil class
-  PyEval_InitThreads();
+  module.def( "HasClangSupport", &HasClangSupport );
 
-  m.def( "HasClangSupport", &HasClangSupport );
-
-  m.def( "FilterAndSortCandidates",
+  module.def( "FilterAndSortCandidates",
          &FilterAndSortCandidates,
          py::arg("candidates"),
          py::arg("candidate_property"),
          py::arg("query"),
          py::arg("max_candidates") = 0 );
 
-  m.def( "YcmCoreVersion", &YcmCoreVersion );
+  module.def( "YcmCoreVersion", &YcmCoreVersion );
 
   // This is exposed so that we can test it.
-  m.def( "GetUtf8String", []( py::object o ) -> py::bytes { return GetUtf8String( o ); } );
+  module.def( "GetUtf8String", []( py::object o ) -> py::bytes {
+                                  return GetUtf8String( o ); } );
 
-  py::class_< IdentifierCompleter >( m, "IdentifierCompleter" )
+  py::class_< IdentifierCompleter >( module, "IdentifierCompleter" )
     .def( py::init<>() )
     .def( "AddIdentifiersToDatabase",
           &IdentifierCompleter::AddIdentifiersToDatabase )
@@ -96,26 +95,26 @@ PYBIND11_MODULE(ycm_core, m)
           py::arg( "filetype" ),
           py::arg( "max_candidates" ) = 0 );
 
-  py::bind_vector< std::vector< std::string > >( m, "StringVector" );
+  py::bind_vector< std::vector< std::string > >( module, "StringVector" );
 
 #ifdef USE_CLANG_COMPLETER
-  py::register_exception< ClangParseError >(m, "ClangParseError" );
+  py::register_exception< ClangParseError >( module, "ClangParseError" );
 
-  m.def( "ClangVersion", ClangVersion );
+  module.def( "ClangVersion", ClangVersion );
 
   // CAREFUL HERE! For filename and contents we are referring directly to
   // Python-allocated and -managed memory since we are accepting pointers to
   // data members of python objects. We need to ensure that those objects
   // outlive our UnsavedFile objects.
-  py::class_< UnsavedFile >( m, "UnsavedFile" )
+  py::class_< UnsavedFile >( module, "UnsavedFile" )
     .def( py::init<>() )
     .def_readwrite( "filename_", &UnsavedFile::filename_ )
     .def_readwrite( "contents_", &UnsavedFile::contents_ )
     .def_readwrite( "length_", &UnsavedFile::length_ );
 
-  py::bind_vector< std::vector< UnsavedFile > >( m, "UnsavedFileVector" );
+  py::bind_vector< std::vector< UnsavedFile > >( module, "UnsavedFileVector" );
 
-  py::class_< ClangCompleter >( m, "ClangCompleter" )
+  py::class_< ClangCompleter >( module, "ClangCompleter" )
     .def( py::init<>() )
     .def( "GetDeclarationLocation", &ClangCompleter::GetDeclarationLocation )
     .def( "GetDefinitionLocation", &ClangCompleter::GetDefinitionLocation )
@@ -134,7 +133,7 @@ PYBIND11_MODULE(ycm_core, m)
     .def( "GetDocsForLocationInFile",
           &ClangCompleter::GetDocsForLocationInFile );
 
-  py::enum_< CompletionKind >( m, "CompletionKind" )
+  py::enum_< CompletionKind >( module, "CompletionKind" )
     .value( "STRUCT", CompletionKind::STRUCT )
     .value( "CLASS", CompletionKind::CLASS )
     .value( "ENUM", CompletionKind::ENUM )
@@ -147,7 +146,7 @@ PYBIND11_MODULE(ycm_core, m)
     .value( "NAMESPACE", CompletionKind::NAMESPACE )
     .value( "UNKNOWN", CompletionKind::UNKNOWN );
 
-  py::class_< CompletionData >( m, "CompletionData" )
+  py::class_< CompletionData >( module, "CompletionData" )
     .def( py::init<>() )
     .def( "TextToInsertInBuffer", &CompletionData::TextToInsertInBuffer )
     .def( "MainCompletionText", &CompletionData::MainCompletionText )
@@ -157,43 +156,44 @@ PYBIND11_MODULE(ycm_core, m)
     .def( "DocString", &CompletionData::DocString )
     .def_readonly( "kind_", &CompletionData::kind_ );
 
-  py::bind_vector< std::vector< CompletionData > >( m, "CompletionVector" );
+  py::bind_vector< std::vector< CompletionData > >( module,
+                                                    "CompletionVector" );
 
-  py::class_< Location >( m, "Location" )
+  py::class_< Location >( module, "Location" )
     .def( py::init<>() )
     .def_readonly( "line_number_", &Location::line_number_ )
     .def_readonly( "column_number_", &Location::column_number_ )
     .def_readonly( "filename_", &Location::filename_ )
     .def( "IsValid", &Location::IsValid );
 
-  py::class_< Range >( m, "Range" )
+  py::class_< Range >( module, "Range" )
     .def( py::init<>() )
     .def_readonly( "start_", &Range::start_ )
     .def_readonly( "end_", &Range::end_ );
 
-  py::bind_vector< std::vector< Range > >( m, "RangeVector" );
+  py::bind_vector< std::vector< Range > >( module, "RangeVector" );
 
-  py::class_< FixItChunk >( m, "FixItChunk" )
+  py::class_< FixItChunk >( module, "FixItChunk" )
     .def( py::init<>() )
     .def_readonly( "replacement_text", &FixItChunk::replacement_text )
     .def_readonly( "range", &FixItChunk::range );
 
-  py::bind_vector< std::vector< FixItChunk > >( m, "FixItChunkVector" );
+  py::bind_vector< std::vector< FixItChunk > >( module, "FixItChunkVector" );
 
-  py::class_< FixIt >( m, "FixIt" )
+  py::class_< FixIt >( module, "FixIt" )
     .def( py::init<>() )
     .def_readonly( "chunks", &FixIt::chunks )
     .def_readonly( "location", &FixIt::location )
     .def_readonly( "text", &FixIt::text );
 
-  py::bind_vector< std::vector< FixIt > >( m, "FixItVector" );
+  py::bind_vector< std::vector< FixIt > >( module, "FixItVector" );
 
-  py::enum_< DiagnosticKind >( m, "DiagnosticKind" )
+  py::enum_< DiagnosticKind >( module, "DiagnosticKind" )
     .value( "ERROR", DiagnosticKind::ERROR )
     .value( "WARNING", DiagnosticKind::WARNING )
     .value( "INFORMATION", DiagnosticKind::INFORMATION );
 
-  py::class_< Diagnostic >( m, "Diagnostic" )
+  py::class_< Diagnostic >( module, "Diagnostic" )
     .def( py::init<>() )
     .def_readonly( "ranges_", &Diagnostic::ranges_ )
     .def_readonly( "location_", &Diagnostic::location_ )
@@ -203,9 +203,9 @@ PYBIND11_MODULE(ycm_core, m)
     .def_readonly( "long_formatted_text_", &Diagnostic::long_formatted_text_ )
     .def_readonly( "fixits_", &Diagnostic::fixits_ );
 
-  py::bind_vector< std::vector< Diagnostic > >( m, "DiagnosticVector" );
+  py::bind_vector< std::vector< Diagnostic > >( module, "DiagnosticVector" );
 
-  py::class_< DocumentationData >( m, "DocumentationData" )
+  py::class_< DocumentationData >( module, "DocumentationData" )
     .def( py::init<>() )
     .def_readonly( "comment_xml", &DocumentationData::comment_xml )
     .def_readonly( "raw_comment", &DocumentationData::raw_comment )
@@ -213,8 +213,7 @@ PYBIND11_MODULE(ycm_core, m)
     .def_readonly( "canonical_type", &DocumentationData::canonical_type )
     .def_readonly( "display_name", &DocumentationData::display_name );
 
-  py::class_< CompilationDatabase >(
-      m, "CompilationDatabase" )
+  py::class_< CompilationDatabase >( module, "CompilationDatabase" )
     .def( py::init< const py::object & >() )
     .def( "DatabaseSuccessfullyLoaded",
           &CompilationDatabase::DatabaseSuccessfullyLoaded )
@@ -227,7 +226,7 @@ PYBIND11_MODULE(ycm_core, m)
 
   py::class_< CompilationInfoForFile,
       std::shared_ptr< CompilationInfoForFile > >(
-          m, "CompilationInfoForFile" )
+          module, "CompilationInfoForFile" )
     .def_readonly( "compiler_working_dir_",
                    &CompilationInfoForFile::compiler_working_dir_ )
     .def_readonly( "compiler_flags_",

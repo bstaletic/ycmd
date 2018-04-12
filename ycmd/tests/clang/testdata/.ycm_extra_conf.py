@@ -17,4 +17,4 @@ def FlagsForFile( filename ):
       'include_paths_relative_to_dir': os.path.dirname( filename ),
     }
 
-  return { 'flags': ['-x', 'c++', '-I', '.'] }
+  return { 'flags': ['-xc++', '-I', '.'] }

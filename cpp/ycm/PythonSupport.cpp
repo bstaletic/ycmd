@@ -104,14 +104,16 @@ pylist FilterAndSortCandidates(
 
 
 std::string GetUtf8String( const object &value ) {
-  // If already a unicode or string (or something derived from it) pybind will already convert
-  // to utf8 when converting to std::string.  For `bytes` the contents are left untouched:
-  if ( isinstance<str>( value ) || isinstance<bytes>( value ) ) {
+  // If already a unicode or string (or something derived from it)
+  // pybind will already convert to utf8 when converting to std::string.
+  // For `bytes` the contents are left untouched:
+  if ( isinstance< str >( value ) || isinstance< bytes >( value ) ) {
     return value.cast< std::string >();
   }
 
-  // Otherwise go through `pybind11::str()`, which goes through Python's built-in `str`.
-  return str(value);
+  // Otherwise go through `pybind11::str()`,
+  // which goes through Python's built-in `str`.
+  return str( value );
 }
 
 } // namespace YouCompleteMe

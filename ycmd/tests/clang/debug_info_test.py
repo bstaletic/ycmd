@@ -49,7 +49,7 @@ def DebugInfo_FlagsWhenExtraConfLoadedAndNoCompilationDatabase_test( app ):
         } ),
         has_entries( {
           'key': 'flags',
-          'value': matches_regexp( "\[u?'-x', u?'c\+\+', .*\]" )
+          'value': matches_regexp( "\[u?'-xc\+\+', .*\]" )
         } ),
         has_entries( {
           'key': 'translation unit',

@@ -200,6 +200,8 @@ else()
   set( Boost_LIBRARIES BoostParts )
 endif()
 
+set( PYBIND11_INCLUDES_DIR "${CMAKE_SOURCE_DIR}/pybind11" )
+
 file( GLOB_RECURSE SERVER_SOURCES *.h *.cpp )
 
 # The test and benchmark sources are a part of a different target, so we remove
@@ -232,7 +234,6 @@ endif()
 # Since there is no -isystem flag equivalent on Windows, headers from external
 # projects may conflict with our headers and override them. We prevent that by
 # including these directories after ours.
-set( PYBIND11_INCLUDES_DIR "${CMAKE_SOURCE_DIR}/pybind11" )
 include_directories(
   SYSTEM
   ${Boost_INCLUDE_DIR}

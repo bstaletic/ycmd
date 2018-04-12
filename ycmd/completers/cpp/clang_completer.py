@@ -24,7 +24,7 @@ from __future__ import absolute_import
 from builtins import *  # noqa
 
 from collections import defaultdict
-from future.utils import iteritems, PY2
+from future.utils import iteritems
 import logging
 import os.path
 import re
@@ -34,7 +34,7 @@ from xml.etree.ElementTree import ParseError as XmlParseError
 
 import ycm_core
 from ycmd import responses
-from ycmd.utils import ToCppStringCompatible, ToUnicode
+from ycmd.utils import ToCppStringCompatible, ToUnicode, ToBytes
 from ycmd.completers.completer import Completer
 from ycmd.completers.cpp.flags import ( Flags, PrepareFlagsForClang,
                                         NoCompilationDatabase,
@@ -550,14 +550,8 @@ def _BuildGetDocResponse( doc_data ):
   # useful pieces of documentation available to the developer. Perhaps in
   # future, we can use this XML for more interesting things.
 
-  comment_xml = doc_data.comment_xml
-  # Under Python 2, passing a unicode containing non-ASCII fails, but passing
-  # a string containing decoded utf-8 is okay:
-  if PY2 and not isinstance( comment_xml, bytes ):
-    comment_xml = comment_xml.encode( 'utf-8' )
-
   try:
-    root = xml.etree.ElementTree.XML( comment_xml )
+    root = xml.etree.ElementTree.fromstring( ToBytes( doc_data.comment_xml ) )
   except XmlParseError:
     raise ValueError( NO_DOCUMENTATION_MESSAGE )
 

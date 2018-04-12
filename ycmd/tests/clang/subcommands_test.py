@@ -1363,7 +1363,7 @@ def Subcommands_GetDoc_Unicode_test( app ):
   pprint( response )
 
   eq_( response, {
-    'detailed_info': u"""\
+    'detailed_info': """\
 int member_with_å_unicøde
 This method has unicøde in it
 Type: int
