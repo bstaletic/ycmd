@@ -397,7 +397,7 @@ def _AddLanguageFlagWhenAppropriate( flags, enable_windows_style_flags ):
   #   is a stray file path and shall be gotten rid of in _RemoveUnusedFlags().
   if ( not first_flag.startswith( '-' ) and
        CPP_COMPILER_REGEX.search( first_flag ) ):
-    return [ first_flag, '-xc++' ] + flags[ 1: ]
+    return [ first_flag, '-x', 'c++' ] + flags[ 1: ]
   return flags
 
 

@@ -549,7 +549,6 @@ def _BuildGetDocResponse( doc_data ):
   # parsing, but having the raw declaration text is likely one of the most
   # useful pieces of documentation available to the developer. Perhaps in
   # future, we can use this XML for more interesting things.
-
   try:
     root = xml.etree.ElementTree.fromstring( ToBytes( doc_data.comment_xml ) )
   except XmlParseError:
