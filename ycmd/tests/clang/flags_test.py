@@ -755,7 +755,7 @@ def AddLanguageFlagWhenAppropriate_CppCompiler_test():
                 '/some/other/path++-4.9.31', 'some_command++-5.10' ]
 
   for compiler in compilers:
-    yield _AddLanguageFlagWhenAppropriateTester, compiler, [ '-x', 'c++' ]
+    yield _AddLanguageFlagWhenAppropriateTester, compiler, [ '-xc++' ]
 
 
 def ExtraClangFlags_test():
@@ -852,8 +852,7 @@ def CompilationDatabase_UseFlagsFromDatabase_test():
           os.path.join( tmp_dir, 'test.cc' ),
           add_extra_clang_flags = False )[ 0 ],
         contains( 'clang++',
-                  '-x',
-                  'c++',
+                  '-xc++',
                   '-x',
                   'c++',
                   '-I' + os.path.normpath( tmp_dir ),
@@ -888,8 +887,7 @@ def CompilationDatabase_UseFlagsFromSameDir_test():
           os.path.join( tmp_dir, 'test.cc' ),
           add_extra_clang_flags = False )[ 0 ],
         contains( 'clang++',
-                  '-x',
-                  'c++',
+                  '-xc++',
                   '-x',
                   'c++',
                   '-Wall' ) )
@@ -901,8 +899,7 @@ def CompilationDatabase_UseFlagsFromSameDir_test():
           os.path.join( tmp_dir, 'test2.cc' ),
           add_extra_clang_flags = False )[ 0 ],
         contains( 'clang++',
-                  '-x',
-                  'c++',
+                  '-xc++',
                   '-x',
                   'c++',
                   '-Wall' ) )
@@ -925,8 +922,7 @@ def CompilationDatabase_HeaderFileHeuristic_test():
           os.path.join( tmp_dir, 'test.h' ),
           add_extra_clang_flags = False )[ 0 ],
         contains( 'clang++',
-                  '-x',
-                  'c++',
+                  '-xc++',
                   '-x',
                   'c++',
                   '-Wall' ) )
@@ -974,8 +970,7 @@ def CompilationDatabase_ExplicitHeaderFileEntry_test():
           os.path.join( tmp_dir, 'test.h' ),
           add_extra_clang_flags = False )[ 0 ],
         contains( 'clang++',
-                  '-x',
-                  'c++',
+                  '-xc++',
                   '-I' + os.path.normpath( '/absolute/path' ),
                   '-Wall' ) )
 
