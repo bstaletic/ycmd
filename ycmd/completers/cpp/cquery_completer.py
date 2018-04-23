@@ -40,8 +40,6 @@ PATH_TO_CQUERY = os.path.abspath( os.path.join(
   'third_party',
   'cquery',
   'build',
-  'release',
-  'bin',
   'cquery' ) )
 
 
