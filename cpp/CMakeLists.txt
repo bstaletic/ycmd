@@ -184,11 +184,6 @@ if ( MSVC )
   set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /bigobj /utf-8" )
 endif()
 
-if( MSVC OR CYGWIN OR MSYS)
-  # BOOST_ALL_NO_LIB turns off MSVC library autolinking
-  add_definitions( -DBOOST_ALL_NO_LIB )
-endif()
-
 # Enables Python compilation for 64-bit Windows. Already defined by Python
 # headers when compiling with MSVC.
 if( WIN32 OR CYGWIN OR MSYS AND NOT MSVC AND 64_BIT_PLATFORM )
@@ -258,11 +253,5 @@ else()
 endif()
 
 #############################################################################
-
-option( USE_SYSTEM_BOOST "Set to ON to use the system boost libraries" OFF )
-
-if (NOT USE_SYSTEM_BOOST)
-  add_subdirectory( BoostParts )
-endif()
 
 add_subdirectory( ycm )
