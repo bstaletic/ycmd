@@ -63,7 +63,7 @@ debugger, e.g. [pyclewn][] in Vim), there are a few things you need to do:
 ```sh
     export OPT='-g' # Ensure Python binary has debugging info
     export PYTHON_CONFIGURE_OPTS='--enable-shared --with-pydebug'
-    pyenv install 2.7.11 # or whatever version
+    pyenv install 3.4 # or whatever version
 ```
 
    On OS X, you need a working debugger. You can either use `lldb`
@@ -75,7 +75,7 @@ debugger, e.g. [pyclewn][] in Vim), there are a few things you need to do:
    Python):
 
 ```sh
-    pyenv shell 2.7.11
+    pyenv shell 3.4
     ./build.py --all --enable-debug
 ```
 

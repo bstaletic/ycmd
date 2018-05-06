@@ -18,12 +18,6 @@
 # You should have received a copy of the GNU General Public License
 # along with ycmd.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import unicode_literals
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-# Not installing aliases from python-future; it's unreliable and slow.
-from builtins import *  # noqa
 
 from ycmd.utils import ToBytes, ToUnicode, ProcessIsRunning, urljoin
 from ycmd.completers.completer import Completer
@@ -31,7 +25,6 @@ from ycmd import responses, utils, hmac_utils
 from tempfile import NamedTemporaryFile
 
 from base64 import b64encode
-from future.utils import native
 import json
 import logging
 import requests
@@ -210,8 +203,8 @@ class JediCompleter( Completer ):
     self._logger.debug( 'Making JediHTTP request: %s %s %s %s', 'POST', url,
                         extra_headers, body )
 
-    response = requests.request( native( bytes( b'POST' ) ),
-                                 native( url ),
+    response = requests.request( bytes( b'POST' ),
+                                 url,
                                  data = body,
                                  headers = extra_headers )
 

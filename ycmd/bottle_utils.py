@@ -15,15 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with ycmd.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import unicode_literals
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-# Not installing aliases from python-future; it's unreliable and slow.
-from builtins import *  # noqa
-
-from future.utils import PY2
-from ycmd.utils import ToCppStringCompatible, ToUnicode
+from ycmd.utils import ToUnicode
 import bottle
 
 
@@ -38,6 +30,6 @@ import bottle
 # making life easier for codebases that work across versions, thus preventing
 # tracebacks in the depths of WSGI server frameworks.
 def SetResponseHeader( name, value ):
-  name = ToCppStringCompatible( name ) if PY2 else ToUnicode( name )
-  value = ToCppStringCompatible( value ) if PY2 else ToUnicode( value )
+  name = ToUnicode( name )
+  value = ToUnicode( value )
   bottle.response.set_header( name, value )

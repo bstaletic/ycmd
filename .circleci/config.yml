@@ -36,18 +36,6 @@ aliases:
     restore_cache:
       key: v4-ycmd-{{ .Environment.CIRCLE_JOB }}
 jobs:
-  python2:
-    <<: *common
-    steps:
-      - checkout
-      - *update-submodules
-      - *restore-cache
-      - *install-dependencies
-      - *run-tests
-      - *save-cache
-      - *upload-coverage
-    environment:
-      YCMD_PYTHON_VERSION: 2.7
   python3:
     <<: *common
     steps:

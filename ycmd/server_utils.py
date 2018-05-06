@@ -15,13 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with ycmd.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import unicode_literals
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-# No other imports from `future` because this module is loaded before we have
-# put our submodules in sys.path
-
 import io
 import logging
 import os
@@ -30,21 +23,10 @@ import sys
 
 PYTHON_STDLIB_ZIP_REGEX = re.compile( "python[23][0-9].zip" )
 CORE_MISSING_ERROR_REGEX = re.compile( "No module named '?ycm_core'?" )
-CORE_PYTHON2_ERROR_REGEX = re.compile(
-  'dynamic module does not define (?:init|module export) '
-  'function \(PyInit_ycm_core\)|'
-  'Module use of python2[0-9].dll conflicts with this version of Python\.$' )
-CORE_PYTHON3_ERROR_REGEX = re.compile(
-  'dynamic module does not define init function \(initycm_core\)|'
-  'Module use of python3[0-9].dll conflicts with this version of Python\.$' )
 
 CORE_MISSING_MESSAGE = (
   'ycm_core library not detected; you need to compile it by running the '
   'build.py script. See the documentation for more details.' )
-CORE_PYTHON2_MESSAGE = (
-  'ycm_core library compiled for Python 2 but loaded in Python 3.' )
-CORE_PYTHON3_MESSAGE = (
-  'ycm_core library compiled for Python 3 but loaded in Python 2.' )
 CORE_OUTDATED_MESSAGE = (
   'ycm_core library too old; PLEASE RECOMPILE by running the build.py script. '
   'See the documentation for more details.' )
@@ -53,10 +35,6 @@ CORE_OUTDATED_MESSAGE = (
 #  - CORE_COMPATIBLE_STATUS: ycm_core is compatible;
 #  - CORE_UNEXPECTED_STATUS: unexpected error while loading ycm_core;
 #  - CORE_MISSING_STATUS   : ycm_core is missing;
-#  - CORE_PYTHON2_STATUS   : ycm_core is compiled with Python 2 but loaded with
-#    Python 3;
-#  - CORE_PYTHON3_STATUS   : ycm_core is compiled with Python 3 but loaded with
-#    Python 2;
 #  - CORE_OUTDATED_STATUS  : ycm_core version is outdated.
 # Values 1 and 2 are not used because 1 is for general errors and 2 has often a
 # special meaning for Unix programs. See
@@ -64,8 +42,6 @@ CORE_OUTDATED_MESSAGE = (
 CORE_COMPATIBLE_STATUS  = 0
 CORE_UNEXPECTED_STATUS  = 3
 CORE_MISSING_STATUS     = 4
-CORE_PYTHON2_STATUS     = 5
-CORE_PYTHON3_STATUS     = 6
 CORE_OUTDATED_STATUS    = 7
 
 VERSION_FILENAME = 'CORE_VERSION'
@@ -99,12 +75,6 @@ def CompatibleWithCurrentCore():
     if CORE_MISSING_ERROR_REGEX.match( message ):
       _logger.exception( CORE_MISSING_MESSAGE )
       return CORE_MISSING_STATUS
-    if CORE_PYTHON2_ERROR_REGEX.match( message ):
-      _logger.exception( CORE_PYTHON2_MESSAGE )
-      return CORE_PYTHON2_STATUS
-    if CORE_PYTHON3_ERROR_REGEX.match( message ):
-      _logger.exception( CORE_PYTHON3_MESSAGE )
-      return CORE_PYTHON3_STATUS
     _logger.exception( message )
     return CORE_UNEXPECTED_STATUS
 

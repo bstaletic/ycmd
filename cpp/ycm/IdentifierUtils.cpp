@@ -177,7 +177,7 @@ FiletypeIdentifierMap ExtractIdentifiersFromTagsFile(
   std::string::const_iterator end   = tags_file_contents.end();
 
   std::smatch matches;
-  const std::regex expression( TAG_REGEX, /*, std::regex::multiline*/ );
+  const std::regex expression( TAG_REGEX /*, std::regex::multiline*/ );
 
   while ( std::regex_search( start, end, matches, expression ) ) {
     start = matches[ 0 ].second;

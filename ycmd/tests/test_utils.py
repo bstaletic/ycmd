@@ -17,14 +17,7 @@
 # along with ycmd.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from __future__ import unicode_literals
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-# Not installing aliases from python-future; it's unreliable and slow.
-from builtins import *  # noqa
 
-from future.utils import iteritems, PY2
 from hamcrest import contains_string, has_entry, has_entries, assert_that
 from mock import patch
 from webtest import TestApp
@@ -49,8 +42,6 @@ try:
 except ImportError:
   from unittest2 import skipIf
 
-Py2Only = skipIf( not PY2, 'Python 2 only' )
-Py3Only = skipIf( PY2, 'Python 3 only' )
 WindowsOnly = skipIf( not OnWindows(), 'Windows only' )
 ClangOnly = skipIf( not ycm_core.HasClangSupport(),
                     'Only when Clang support available' )
@@ -75,7 +66,7 @@ def BuildRequest( **kwargs ):
     }
   }
 
-  for key, value in iteritems( kwargs ):
+  for key, value in kwargs.items():
     if key in [ 'contents', 'filetype', 'filepath' ]:
       continue
 

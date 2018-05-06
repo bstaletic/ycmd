@@ -1,14 +1,5 @@
 #!/usr/bin/env python
 
-# Passing an environment variable containing unicode literals to a subprocess
-# on Windows and Python2 raises a TypeError. Since there is no unicode
-# string in this script, we don't import unicode_literals to avoid the issue.
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-# Not installing aliases from python-future; it's unreliable and slow.
-from builtins import *  # noqa
-
 import platform
 import os
 import subprocess

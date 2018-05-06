@@ -1,12 +1,5 @@
 #!/usr/bin/env python
 
-# Passing an environment variable containing unicode literals to a subprocess
-# on Windows and Python2 raises a TypeError. Since there is no unicode
-# string in this script, we don't import unicode_literals to avoid the issue.
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-
 from shutil import rmtree
 from tempfile import mkdtemp
 import errno
@@ -25,10 +18,8 @@ import tarfile
 import tempfile
 
 PY_MAJOR, PY_MINOR, PY_PATCH = sys.version_info[ 0 : 3 ]
-if not ( ( PY_MAJOR == 2 and PY_MINOR == 7 and PY_PATCH >= 1 ) or
-         ( PY_MAJOR == 3 and PY_MINOR >= 4 ) or
-         PY_MAJOR > 3 ):
-  sys.exit( 'ycmd requires Python >= 2.7.1 or >= 3.4; '
+if not ( ( PY_MAJOR == 3 and PY_MINOR >= 4 ) or PY_MAJOR > 3 ):
+  sys.exit( 'ycmd requires Python >= 3.4; '
             'your version of Python is ' + sys.version )
 
 DIR_OF_THIS_SCRIPT = p.dirname( p.abspath( __file__ ) )
@@ -418,9 +409,6 @@ def GetCmakeArgs( parsed_args ):
   # coverage is not supported for c++ on MSVC
   if not OnWindows() and parsed_args.enable_coverage:
     cmake_args.append( '-DCMAKE_CXX_FLAGS=-coverage' )
-
-  use_python2 = 'ON' if PY_MAJOR == 2 else 'OFF'
-  cmake_args.append( '-DUSE_PYTHON2=' + use_python2 )
 
   extra_cmake_args = os.environ.get( 'EXTRA_CMAKE_ARGS', '' )
   # We use shlex split to properly parse quoted CMake arguments.

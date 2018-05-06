@@ -15,20 +15,13 @@
 # You should have received a copy of the GNU General Public License
 # along with ycmd.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import unicode_literals
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-# Not installing aliases from python-future; it's unreliable and slow.
-from builtins import *  # noqa
 
 import ycm_core
 import os
 import inspect
-from future.utils import PY2, native
 from ycmd import extra_conf_store
 from ycmd.utils import ( re, ToCppStringCompatible, OnMac, OnWindows, ToUnicode,
-                         ToBytes, PathsToAllParentFolders )
+                         PathsToAllParentFolders )
 from ycmd.responses import NoExtraConfDetected
 
 # -include-pch and --sysroot= must be listed before -include and --sysroot
@@ -285,10 +278,7 @@ def _CallExtraConfFlagsForFile( module, filename, client_data ):
   # ycm_extra_conf files already out there that expect a py2 `str` object on
   # py2, and WE DO NOT BREAK BACKWARDS COMPATIBILITY.
   # Hindsight is 20/20.
-  if PY2:
-    filename = native( ToBytes( filename ) )
-  else:
-    filename = native( ToUnicode( filename ) )
+  filename = ToUnicode( filename )
 
   # For the sake of backwards compatibility, we need to first check whether the
   # FlagsForFile function in the extra conf module even allows keyword args.

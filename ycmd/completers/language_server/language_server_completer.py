@@ -15,14 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with ycmd.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import unicode_literals
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-# Not installing aliases from python-future; it's unreliable and slow.
-from builtins import *  # noqa
 
-from future.utils import iteritems, iterkeys
 import abc
 import collections
 import logging
@@ -263,7 +256,7 @@ class LanguageServerConnection( threading.Thread ):
     except LanguageServerConnectionStopped:
       # Abort any outstanding requests
       with self._response_mutex:
-        for _, response in iteritems( self._responses ):
+        for _, response in self._responses.items():
           response.Abort()
         self._responses.clear()
 
@@ -275,7 +268,7 @@ class LanguageServerConnection( threading.Thread ):
 
       # Abort any outstanding requests
       with self._response_mutex:
-        for _, response in iteritems( self._responses ):
+        for _, response in self._responses.items():
           response.Abort()
         self._responses.clear()
 
@@ -1084,7 +1077,7 @@ class LanguageServerCompleter( Completer ):
 
 
   def _UpdateDirtyFilesUnderLock( self, request_data ):
-    for file_name, file_data in iteritems( request_data[ 'file_data' ] ):
+    for file_name, file_data in request_data[ 'file_data' ].items():
       if not self._AnySupportedFileType( file_data[ 'filetypes' ] ):
         continue
 
@@ -1113,7 +1106,7 @@ class LanguageServerCompleter( Completer ):
 
   def _UpdateSavedFilesUnderLock( self, request_data ):
     files_to_purge = []
-    for file_name, file_state in iteritems( self._server_file_state ):
+    for file_name, file_state in self._server_file_state.items():
       if file_name in request_data[ 'file_data' ]:
         continue
 
@@ -1838,7 +1831,7 @@ def WorkspaceEditToFixIt( request_data, workspace_edit, text='' ):
   # We sort the filenames to make the response stable. Edits are applied in
   # strict sequence within a file, but apply to files in arbitrary order.
   # However, it's important for the response to be stable for the tests.
-  for uri in sorted( iterkeys( workspace_edit[ 'changes' ] ) ):
+  for uri in sorted( workspace_edit[ 'changes' ].keys() ):
     chunks.extend( TextEditToChunks( request_data,
                                      uri,
                                      workspace_edit[ 'changes' ][ uri ] ) )

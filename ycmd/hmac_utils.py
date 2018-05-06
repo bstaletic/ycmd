@@ -15,21 +15,11 @@
 # You should have received a copy of the GNU General Public License
 # along with ycmd.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import unicode_literals
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-# Not installing aliases from python-future; it's unreliable and slow.
-from builtins import *  # noqa
-
-from builtins import bytes
-
 import hmac
 import hashlib
 
 
 def CreateHmac( content, hmac_secret ):
-  # Note that py2's str type passes this check (and that's ok)
   if not isinstance( content, bytes ):
     raise TypeError( 'content was not of bytes type; you have a bug!' )
   if not isinstance( hmac_secret, bytes ):
@@ -41,7 +31,6 @@ def CreateHmac( content, hmac_secret ):
 
 
 def CreateRequestHmac( method, path, body, hmac_secret ):
-  # Note that py2's str type passes this check (and that's ok)
   if not isinstance( body, bytes ):
     raise TypeError( 'body was not of bytes type; you have a bug!' )
   if not isinstance( hmac_secret, bytes ):

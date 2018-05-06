@@ -15,19 +15,12 @@
 # You should have received a copy of the GNU General Public License
 # along with ycmd.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import unicode_literals
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-# Not installing aliases from python-future; it's unreliable and slow.
-from builtins import *  # noqa
 
 from ycmd.utils import ( ExpandVariablesInPath, FindExecutable, ToUnicode,
                          ToBytes, SetEnviron, ProcessIsRunning, urljoin )
 from ycmd.completers.completer import Completer
 from ycmd import responses, utils, hmac_utils
 
-from future.utils import iteritems, native
 import logging
 import requests
 import json
@@ -190,8 +183,8 @@ class RustCompleter( Completer ):
     # Failing to wrap the method & url bytes objects in `native()` causes HMAC
     # failures (403 Forbidden from racerd) for unknown reasons. Similar for
     # request_hmac above.
-    response = requests.request( native( method ),
-                                 native( url ),
+    response = requests.request( method,
+                                 url,
                                  data = body,
                                  headers = extra_headers )
 
@@ -211,7 +204,7 @@ class RustCompleter( Completer ):
                                          handler,
                                          body,
                                          self._hmac_secret )
-    final_hmac_value = native( ToBytes( binascii.hexlify( hmac ) ) )
+    final_hmac_value = ToBytes( binascii.hexlify( hmac ) )
 
     extra_headers = { 'content-type': 'application/json' }
     extra_headers[ RACERD_HMAC_HEADER ] = final_hmac_value
@@ -227,7 +220,7 @@ class RustCompleter( Completer ):
 
     file_path = request_data[ 'filepath' ]
     buffers = []
-    for path, obj in iteritems( request_data[ 'file_data' ] ):
+    for path, obj in request_data[ 'file_data' ].items():
       buffers.append( {
         'contents': obj[ 'contents' ],
         'file_path': path

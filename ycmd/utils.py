@@ -17,14 +17,6 @@
 # You should have received a copy of the GNU General Public License
 # along with ycmd.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import unicode_literals
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-# Not installing aliases from python-future; it's unreliable and slow.
-from builtins import *  # noqa
-
-from future.utils import PY2, native
 import os
 import socket
 import subprocess
@@ -40,12 +32,8 @@ import threading
 #
 #   from ycmd.utils import pathname2url, url2pathname, urljoin, urlparse
 #
-if PY2:
-  from urlparse import urljoin, urlparse
-  from urllib import pathname2url, url2pathname
-else:
-  from urllib.parse import urljoin, urlparse  # noqa
-  from urllib.request import pathname2url, url2pathname  # noqa
+from urllib.parse import urljoin, urlparse  # noqa
+from urllib.request import pathname2url, url2pathname  # noqa
 
 
 # We replace the re module with regex as it has better support for characters on
@@ -84,8 +72,6 @@ def OpenForStdHandle( filepath ):
   # Since this function is used for logging purposes, we don't want the output
   # to be delayed. This means no buffering for binary mode and line buffering
   # for text mode. See https://docs.python.org/2/library/io.html#io.open
-  if PY2:
-    return open( filepath, mode = 'wb', buffering = 0 )
   return open( filepath, mode = 'w', buffering = 1 )
 
 
@@ -101,10 +87,10 @@ def CreateLogfile( prefix = '' ):
 # plugins. For other code, you likely want to use ToBytes below.
 def ToCppStringCompatible( value ):
   if isinstance( value, str ):
-    return native( value.encode( 'utf8' ) )
+    return value.encode( 'utf8' )
   if isinstance( value, bytes ):
-    return native( value )
-  return native( str( value ).encode( 'utf8' ) )
+    return value
+  return str( value ).encode( 'utf8' )
 
 
 # Returns a unicode type; either the new python-future str type or the real
@@ -142,7 +128,6 @@ def ToBytes( value ):
   if not value:
     return bytes()
 
-  # This is tricky. On py2, the bytes type from builtins (from python-future) is
   # a subclass of str. So all of the following are true:
   #   isinstance(str(), bytes)
   #   isinstance(bytes(), str)
@@ -157,7 +142,6 @@ def ToBytes( value ):
     return bytes( value, encoding = 'utf8' )
 
   if isinstance( value, str ):
-    # On py2, with `from builtins import *` imported, the following is true:
     #
     #   bytes(str(u'abc'), 'utf8') == b"b'abc'"
     #
@@ -166,10 +150,7 @@ def ToBytes( value ):
     # We can't just return value.encode( 'utf8' ) on both py2 & py3 because on
     # py2 that *sometimes* returns the built-in str type instead of the newbytes
     # type from python-future.
-    if PY2:
-      return bytes( value.encode( 'utf8' ), encoding = 'utf8' )
-    else:
-      return bytes( value, encoding = 'utf8' )
+    return bytes( value, encoding = 'utf8' )
 
   # This is meant to catch `int` and similar non-string/bytes types.
   return ToBytes( str( value ) )
@@ -361,8 +342,6 @@ def SafePopen( args, **kwargs ):
     # http://bugs.python.org/issue1759845.
     # Since paths are likely to contains such characters, we convert them to
     # short ones to obtain paths with only ascii characters.
-    if PY2:
-      args = ConvertArgsToShortPath( args )
 
   kwargs.pop( 'stdin_windows', None )
   return subprocess.Popen( args, **kwargs )
@@ -371,10 +350,7 @@ def SafePopen( args, **kwargs ):
 # We need to convert environment variables to native strings on Windows and
 # Python 2 to prevent a TypeError when passing them to a subprocess.
 def SetEnviron( environ, variable, value ):
-  if OnWindows() and PY2:
-    environ[ native( ToBytes( variable ) ) ] = native( ToBytes( value ) )
-  else:
-    environ[ variable ] = value
+  environ[ variable ] = value
 
 
 # Convert paths in arguments command to short path ones
@@ -415,21 +391,7 @@ def GetShortPathName( path ):
       output_buf_size = needed
 
 
-# Shim for imp.load_source so that it works on both Py2 & Py3. See upstream
-# Python docs for info on what this does.
 def LoadPythonSource( name, pathname ):
-  if PY2:
-    import imp
-    try:
-      return imp.load_source( name, pathname )
-    except UnicodeEncodeError:
-      # imp.load_source doesn't handle non-ASCII characters in pathname. See
-      # http://bugs.python.org/issue9425
-      source = ReadFile( pathname )
-      module = imp.new_module( name )
-      module.__file__ = pathname
-      exec( source, module.__dict__ )
-      return module
   import importlib
   return importlib.machinery.SourceFileLoader( name, pathname ).load_module()
 
@@ -481,8 +443,6 @@ def GetCurrentDirectory():
   """Returns the current directory as an unicode object. If the current
   directory does not exist anymore, returns the temporary folder instead."""
   try:
-    if PY2:
-      return os.getcwdu()
     return os.getcwd()
   # os.getcwdu throws an OSError exception when the current directory has been
   # deleted while os.getcwd throws a FileNotFoundError, which is a subclass of
@@ -496,3 +456,33 @@ def StartThread( func, *args ):
   thread.daemon = True
   thread.start()
   return thread
+
+
+def with_metaclass(meta, *bases):
+  """
+  Function from jinja2/_compat.py. License: BSD.
+  Use it like this::
+    class BaseForm(object):
+      pass
+    class FormType(type):
+      pass
+    class Form(with_metaclass(FormType, BaseForm)):
+      pass
+  This requires a bit of explanation: the basic idea is to make a
+  dummy metaclass for one level of class instantiation that replaces
+  itself with the actual metaclass.  Because of internal type checks
+  we also need to make sure that we downgrade the custom metaclass
+  for one level to something closer to type (that's why __call__ and
+  __init__ comes back from type etc.).
+  This has the advantage over six.with_metaclass of not introducing
+  dummy classes into the final MRO.
+  """
+  class metaclass(meta):
+    __call__ = type.__call__
+    __init__ = type.__init__
+
+    def __new__(cls, name, this_bases, d):
+      if this_bases is None:
+        return type.__new__(cls, name, (), d)
+      return meta(name, bases, d)
+  return metaclass('temporary_class', None, {})

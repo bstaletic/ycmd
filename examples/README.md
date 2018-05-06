@@ -1,8 +1,5 @@
 # ycmd example client
 
-The example client **requires** Python 3.4+ (unlike ycmd which also runs on
-Python 2).
-
 First make sure you have built ycmd; see the top-level README for details.
 
 Then install all the Python requirements with [pip][] (run as admin/super user):
