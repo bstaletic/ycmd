@@ -22,7 +22,7 @@
 #include "CodePoint.h"
 #include "Word.h"
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include <gmock/gmock.h>
 #include <string>
 #include <vector>
@@ -210,7 +210,7 @@ MATCHER_P( ContainsPointees, expected, PrintToString( expected ) ) {
 }
 
 
-boost::filesystem::path PathToTestFile( const std::string &filepath );
+std::filesystem::path PathToTestFile( const std::string &filepath );
 
 } // namespace YouCompleteMe
 

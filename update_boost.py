@@ -36,7 +36,6 @@ BOOST_NAME = 'boost_{version_}'
 BOOST_ARCHIVE = BOOST_NAME + '.tar.bz2'
 BOOST_PARTS = [
   'boost/algorithm/string/regex.hpp',
-  'boost/filesystem.hpp',
   'boost/regex.hpp'
 ]
 BOOST_LIBS_FOLDERS_TO_REMOVE = [
@@ -49,6 +48,7 @@ BOOST_LIBS_FOLDERS_TO_REMOVE = [
   'doc',
   'examples',
   'exception',
+  'filesystem',
   'lockfree',
   'mpi',
   'python',

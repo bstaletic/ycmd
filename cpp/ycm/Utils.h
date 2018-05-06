@@ -18,13 +18,14 @@
 #ifndef UTILS_H_KEPMRPBH
 #define UTILS_H_KEPMRPBH
 
+#include <algorithm>
 #include <cmath>
 #include <limits>
 #include <string>
 #include <vector>
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 namespace YouCompleteMe {
 

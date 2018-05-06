@@ -17,12 +17,12 @@
 
 #include "Utils.h"
 
-#include <boost/filesystem.hpp>
-#include <boost/filesystem/fstream.hpp>
 #include <cmath>
+#include <filesystem>
+#include <fstream>
 #include <limits>
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 namespace YouCompleteMe {
 
@@ -33,7 +33,7 @@ std::string ReadUtf8File( const fs::path &filepath ) {
   // "other" in this case means everything that is not a regular file,
   // directory or a symlink.
   if ( !fs::is_empty( filepath ) && fs::is_regular_file( filepath ) ) {
-    fs::ifstream file( filepath, std::ios::in | std::ios::binary );
+    std::ifstream file( filepath, std::ios::in | std::ios::binary );
     std::vector< char > contents( ( std::istreambuf_iterator< char >( file ) ),
                                   std::istreambuf_iterator< char >() );
     return std::string( contents.begin(), contents.end() );

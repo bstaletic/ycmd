@@ -157,20 +157,20 @@ endif()
 #############################################################################
 
 # Determining the presence of C++11 support in the compiler
-set( CPP11_AVAILABLE false )
+set( CPP17_AVAILABLE false )
 if ( CMAKE_COMPILER_IS_GNUCXX )
-  if ( NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.8 )
-    set( CPP11_AVAILABLE true )
+  if ( NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 8.0 )
+    set( CPP17_AVAILABLE true )
   endif()
 elseif( COMPILER_IS_CLANG )
-  if ( NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 3.3 )
-    set( CPP11_AVAILABLE true )
+  if ( NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 7.0 )
+    set( CPP17_AVAILABLE true )
     set( CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++11" )
     set( CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libc++" )
   endif()
 elseif( MSVC )
-  if ( NOT MSVC_VERSION LESS 1900 )
-    set( CPP11_AVAILABLE true )
+  if ( NOT MSVC_VERSION LESS 1914 )
+    set( CPP17_AVAILABLE true )
   endif()
 endif()
 
@@ -205,12 +205,12 @@ endif()
 #
 # Putting the flag in add_definitions() works around the issue, even though it
 # shouldn't in theory go there.
-if ( CPP11_AVAILABLE )
+if ( CPP17_AVAILABLE )
   # Cygwin needs its hand held a bit; see issue #473
   if ( CYGWIN AND CMAKE_COMPILER_IS_GNUCXX )
-    add_definitions( -std=gnu++11 )
+    add_definitions( -std=gnu++17 )
   elseif( NOT MSVC )
-    add_definitions( -std=c++11 )
+    add_definitions( -std=c++17 )
   endif()
 else()
   # Platform-specific advice goes here. In particular, we have plenty of users
