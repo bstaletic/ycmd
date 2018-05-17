@@ -28,7 +28,7 @@ from ycmd.completers.cpp.cquery_completer import ( CqueryCompleter,
                                                    ShouldEnableCqueryCompleter )
 
 def GetCompleter( user_options ):
-  if ShouldEnableCqueryCompleter()
+  if ShouldEnableCqueryCompleter():
     return CqueryCompleter( user_options )
   if ycm_core.HasClangSupport():
     return ClangCompleter( user_options )
