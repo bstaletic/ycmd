@@ -38,6 +38,3 @@
 [submodule "third_party/parallelstl"]
 	path = third_party/parallelstl
 	url = https://github.com/intel/parallelstl
-[submodule "third_party/tbb"]
-	path = third_party/tbb
-	url = https://github.com/01org/tbb/

@@ -203,9 +203,8 @@ endif()
 set( PYBIND11_INCLUDES_DIR "${CMAKE_SOURCE_DIR}/pybind11" )
 
 if ( NOT MSVC )
-  set( TBB_INCLUDES_DIR "${CMAKE_SOURCE_DIR}/../third_party/tbb/include" )
   set( PSTL_INCLUDES_DIR "${CMAKE_SOURCE_DIR}/../third_party/parallelstl/include" )
-  include_directories( SYSTEM ${PSTL_INCLUDES_DIR} ${TBB_INCLUDES_DIR} )
+  include_directories( SYSTEM ${PSTL_INCLUDES_DIR} )
 endif()
 
 file( GLOB_RECURSE SERVER_SOURCES *.h *.cpp )
@@ -331,12 +330,6 @@ set( EXTRA_LIBS "${EXTRA_LIBS}" )
 
 #############################################################################
 
-if ( NOT MSVC )
-  include( ${CMAKE_SOURCE_DIR}/../third_party/tbb/cmake/TBBBuild.cmake )
-  tbb_build( TBB_ROOT ${CMAKE_SOURCE_DIR}/../third_party/tbb
-             CONFIG_DIR TBB_DIR )
-  find_package( TBB REQUIRED tbb )
-endif()
 add_library( ${PROJECT_NAME} SHARED
              ${SERVER_SOURCES}
            )
@@ -352,7 +345,7 @@ target_link_libraries( ${PROJECT_NAME}
                        ${PYTHON_LIBRARIES}
                        ${LIBCLANG_TARGET}
                        ${EXTRA_LIBS}
-                       ${TBB_IMPORTED_TARGETS}
+		       tbb
                      )
 
 if( LIBCLANG_TARGET )
