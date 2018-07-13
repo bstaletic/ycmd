@@ -53,8 +53,8 @@ const RawCodePoint FindCodePoint( const char *text ) {
   // Do a binary search on the array of code points to find the raw code point
   // corresponding to the text. If no code point is found, return the default
   // raw code point for that text.
-  auto first = code_points.begin();
-  size_t count = code_points.size();
+  auto first = std::begin( code_points );
+  size_t count = sizeof( code_points ) / sizeof( code_points[ 0 ] );
 
   while ( count > 0 ) {
     size_t step = count / 2;
