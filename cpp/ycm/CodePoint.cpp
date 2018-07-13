@@ -71,7 +71,16 @@ const RawCodePoint FindCodePoint( const char *text ) {
     }
   }
 
-  return { text, text, text, text, false, false, false, 0, 0 };
+  return { { text[ 0 ], text[ 1 ], text[ 2 ], text[ 3 ], text[ 4 ] },
+           { text[ 0 ], text[ 1 ], text[ 2 ], text[ 3 ], text[ 4 ] },
+           { text[ 0 ], text[ 1 ], text[ 2 ], text[ 3 ], text[ 4 ] },
+           { text[ 0 ], text[ 1 ], text[ 2 ], text[ 3 ], text[ 4 ] },
+           false,
+	   false,
+	   false,
+	   0,
+	   0
+         };
 }
 
 } // unnamed namespace
