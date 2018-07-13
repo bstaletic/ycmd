@@ -23,6 +23,8 @@
 
 namespace YouCompleteMe {
 
+#include "UnicodeTable.inc"
+
 namespace {
 
 int GetCodePointLength( uint8_t leading_byte ) {
@@ -47,7 +49,6 @@ int GetCodePointLength( uint8_t leading_byte ) {
 
 
 const RawCodePoint FindCodePoint( const char *text ) {
-#include "UnicodeTable.inc"
 
   // Do a binary search on the array of code points to find the raw code point
   // corresponding to the text. If no code point is found, return the default
