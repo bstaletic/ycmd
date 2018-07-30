@@ -18,13 +18,12 @@
 #include "IdentifierUtils.h"
 #include "Utils.h"
 
-#include <boost/algorithm/string/regex.hpp>
-#include <boost/regex.hpp>
+#include <regex>
 #include <unordered_map>
 
 namespace YouCompleteMe {
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 namespace {
 
@@ -32,14 +31,14 @@ namespace {
 // http://ctags.sourceforge.net/FORMAT
 // TL;DR: The only supported format is the one Exuberant Ctags emits.
 const char *const TAG_REGEX =
-  "^([^\\t\\n\\r]+)"  // The first field is the identifier
-  "\\t"  // A TAB char is the field separator
+  R"((?:^|$|\r\n|\n)([^\t\n\r]+))"  // The first field is the identifier
+  R"(\t)"  // A TAB char is the field separator
   // The second field is the path to the file that has the identifier; either
   // absolute or relative to the tags file.
-  "([^\\t\\n\\r]+)"
-  "\\t.*?"  // Non-greedy everything
-  "language:([^\\t\\n\\r]+)"  // We want to capture the language of the file
-  ".*?$";
+  R"(([^\t\n\r]+))"
+  R"(\t.*?)"  // Non-greedy everything
+  R"(language:([^\t\n\r]+))"  // We want to capture the language of the file
+  R"(.*?(?:^|$|\r\n|\n))";
 
 // Only used as the equality comparer for the below unordered_map which stores
 // const char* pointers and not std::string but needs to hash based on string
@@ -177,11 +176,10 @@ FiletypeIdentifierMap ExtractIdentifiersFromTagsFile(
   std::string::const_iterator start = tags_file_contents.begin();
   std::string::const_iterator end   = tags_file_contents.end();
 
-  boost::smatch matches;
-  const boost::regex expression( TAG_REGEX );
-  const boost::match_flag_type options = boost::match_not_dot_newline;
+  std::smatch matches;
+  const std::regex expression( TAG_REGEX );
 
-  while ( boost::regex_search( start, end, matches, expression, options ) ) {
+  while ( std::regex_search( start, end, matches, expression ) ) {
     start = matches[ 0 ].second;
 
     std::string language( matches[ 3 ] );
@@ -191,7 +189,8 @@ FiletypeIdentifierMap ExtractIdentifiersFromTagsFile(
 
     std::string identifier( matches[ 1 ] );
     fs::path path( matches[ 2 ].str() );
-    path = NormalizePath( path, path_to_tag_file.parent_path() );
+    path = fs::weakly_canonical( path_to_tag_file.parent_path() / path )
+           .make_preferred();
 
     filetype_identifier_map[ filetype ][ path.string() ].push_back( identifier );
   }

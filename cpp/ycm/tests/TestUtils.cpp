@@ -17,8 +17,6 @@
 
 #include "TestUtils.h"
 
-namespace boost {
-
 namespace filesystem {
 
 void PrintTo( const fs::path &path, std::ostream *os ) {
@@ -27,9 +25,10 @@ void PrintTo( const fs::path &path, std::ostream *os ) {
 
 } // namespace filesystem
 
-} // namespace boost
 
 namespace YouCompleteMe {
+
+namespace fs = std::filesystem;
 
 std::ostream& operator<<( std::ostream& os, const CodePointTuple &code_point ) {
   os << "{ " << PrintToString( code_point.normal_ ) << ", "

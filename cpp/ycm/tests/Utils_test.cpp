@@ -26,7 +26,7 @@ class UtilsTest : public ::testing::Test {
 protected:
   virtual void SetUp() {
     // The returned temporary path is a symlink on macOS.
-    tmp_dir = fs::canonical( fs::temp_directory_path() ) / fs::unique_path();
+    tmp_dir = std::tmpnam( nullptr );
     existing_path = tmp_dir / "existing_path";
     symlink = tmp_dir / "symlink";
     fs::create_directories( existing_path );
@@ -65,29 +65,6 @@ TEST_F( UtilsTest, Lowercase ) {
   EXPECT_EQ( Lowercase( ';' ), ';' );
 
   EXPECT_EQ( Lowercase( "lOwER_CasE" ), "lower_case" );
-}
-
-
-TEST_F( UtilsTest, NormalizePath ) {
-  EXPECT_THAT( NormalizePath( "" ),   Equals( fs::current_path() ) );
-  EXPECT_THAT( NormalizePath( "." ),  Equals( fs::current_path() ) );
-  EXPECT_THAT( NormalizePath( "./" ), Equals( fs::current_path() ) );
-  EXPECT_THAT( NormalizePath( existing_path ),       Equals( existing_path ) );
-  EXPECT_THAT( NormalizePath( "", existing_path ),   Equals( existing_path ) );
-  EXPECT_THAT( NormalizePath( ".", existing_path ),  Equals( existing_path ) );
-  EXPECT_THAT( NormalizePath( "./", existing_path ), Equals( existing_path ) );
-  EXPECT_THAT( NormalizePath( symlink ),             Equals( existing_path ) );
-  EXPECT_THAT( NormalizePath( "", symlink ),         Equals( existing_path ) );
-  EXPECT_THAT( NormalizePath( ".", symlink ),        Equals( existing_path ) );
-  EXPECT_THAT( NormalizePath( "./", symlink ),       Equals( existing_path ) );
-  EXPECT_THAT( NormalizePath( existing_path / "foo/../bar/./xyz//" ),
-               Equals( existing_path / "bar" / "xyz" ) );
-  EXPECT_THAT( NormalizePath( "foo/../bar/./xyz//", existing_path ),
-               Equals( existing_path / "bar" / "xyz" ) );
-  EXPECT_THAT( NormalizePath( symlink / "foo/../bar/./xyz//" ),
-               Equals( existing_path / "bar" / "xyz" ) );
-  EXPECT_THAT( NormalizePath( "foo/../bar/./xyz//", symlink ),
-               Equals( existing_path / "bar" / "xyz" ) );
 }
 
 

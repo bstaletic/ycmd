@@ -21,11 +21,11 @@
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 namespace YouCompleteMe {
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 using ::testing::ElementsAre;
 using ::testing::ContainerEq;
 using ::testing::WhenSorted;

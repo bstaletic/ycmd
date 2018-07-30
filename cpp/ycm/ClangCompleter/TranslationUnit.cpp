@@ -22,7 +22,7 @@
 #include "Utils.h"
 
 #include <algorithm>
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include <cstdlib>
 #include <memory>
 
@@ -523,15 +523,16 @@ std::vector< FixIt > TranslationUnit::GetFixItsForLocationInFile(
 
   std::vector< FixIt > fixits;
 
-  auto normal_filename = NormalizePath( filename );
+  auto canonical_filename = std::filesystem::weakly_canonical( filename );
 
   {
     unique_lock< mutex > lock( diagnostics_mutex_ );
 
     for ( const Diagnostic& diagnostic : latest_diagnostics_ ) {
-      auto this_filename = NormalizePath( diagnostic.location_.filename_ );
+      auto this_filename = std::filesystem::weakly_canonical(
+        diagnostic.location_.filename_ );
 
-      if ( normal_filename != this_filename ) {
+      if ( canonical_filename != this_filename ) {
         continue;
       }
 

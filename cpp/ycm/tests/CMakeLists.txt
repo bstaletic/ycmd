@@ -58,7 +58,6 @@ include_directories(
   )
 
 link_directories(
-  ${Boost_LIBRARY_DIRS}
   ${PYTHON_LIBRARIES}
   )
 
@@ -106,9 +105,7 @@ if ( MSVC )
   endforeach()
 endif()
 
-# ycm_core must be linked after Boost libraries on Windows.
 target_link_libraries( ${PROJECT_NAME}
-                       ${Boost_LIBRARIES}
                        ycm_core
                        ${GTEST_LIBRARIES}
                        ${GMOCK_LIBRARIES} )
