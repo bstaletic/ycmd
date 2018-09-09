@@ -202,7 +202,6 @@ class JavaCompleter( language_server_completer.LanguageServerCompleter ):
     self._server_stderr = None
     self._workspace_path = None
     self._extra_conf = None
-    self._jdtls_setttings = {}
     self._CleanUp()
 
 
@@ -263,18 +262,6 @@ class JavaCompleter( language_server_completer.LanguageServerCompleter ):
     return self._connection
 
 
-  def OnFileReadyToParse( self, request_data ):
-    module = extra_conf_store.ModuleForSourceFile(
-        request_data[ 'filepath' ] )
-    if module:
-      settings = self._GetSettings( module, request_data[ 'extra_conf_data' ] )
-      self._jdtls_setttings = settings.get( 'jdt.ls' )
-
-    self._StartServer( request_data )
-
-    return super( JavaCompleter, self ).OnFileReadyToParse( request_data )
-
-
   def DebugInfo( self, request_data ):
     items = [
       responses.DebugInfoItem( 'Startup Status', self._server_init_status ),
@@ -332,7 +319,7 @@ class JavaCompleter( language_server_completer.LanguageServerCompleter ):
   def _RestartServer( self, request_data ):
     with self._server_state_mutex:
       self._StopServer()
-      self._StartServer( request_data )
+      self.StartServer( request_data )
 
 
   def _OpenProject( self, request_data, args ):
@@ -353,7 +340,7 @@ class JavaCompleter( language_server_completer.LanguageServerCompleter ):
 
     with self._server_state_mutex:
       self._StopServer()
-      self._StartServer( request_data, project_directory = project_directory )
+      self.StartServer( request_data, project_directory = project_directory )
 
 
   def _CleanUp( self ):
@@ -383,7 +370,7 @@ class JavaCompleter( language_server_completer.LanguageServerCompleter ):
     self.ServerReset()
 
 
-  def _StartServer( self, request_data, project_directory = None ):
+  def StartServer( self, request_data, project_directory = None ):
     with self._server_state_mutex:
       if self._server_started:
         return
@@ -443,19 +430,7 @@ class JavaCompleter( language_server_completer.LanguageServerCompleter ):
 
     _logger.info( 'jdt.ls Language Server started' )
 
-    self.SendInitialize( request_data, self._jdtls_setttings )
-
-
-  def _GetSettings( self, module, client_data ):
-    if hasattr( module, 'Settings' ):
-      settings = module.Settings( language = 'java',
-                                  client_data = client_data )
-      if settings is not None:
-        return settings
-
-    _logger.debug( 'No Settings function defined in %s', module.__file__ )
-
-    return {}
+    self.SendInitialize( request_data )
 
 
   def _StopServer( self ):
