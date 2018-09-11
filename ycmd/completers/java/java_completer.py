@@ -31,7 +31,7 @@ import tempfile
 import threading
 from subprocess import PIPE
 
-from ycmd import extra_conf_store, responses, utils
+from ycmd import responses, utils
 from ycmd.completers.language_server import language_server_completer
 from ycmd.completers.language_server import language_server_protocol as lsp
 
@@ -368,6 +368,10 @@ class JavaCompleter( language_server_completer.LanguageServerCompleter ):
     self._connection = None
 
     self.ServerReset()
+
+
+  def Language( self ):
+    return 'java'
 
 
   def StartServer( self, request_data, project_directory = None ):

@@ -581,6 +581,8 @@ class LanguageServerCompleter( Completer ):
       - Shutdown
       - ServerIsHealthy : Return True if the server is _running_
       - GetSubcommandsMap
+      - StartServer
+      - Language : a string used to identify the language in user's extra conf
 
   Startup
 
@@ -670,6 +672,11 @@ class LanguageServerCompleter( Completer ):
       self._server_capabilities = None
       self._resolve_completion_items = False
       self._settings = {}
+
+
+  @abc.abstractmethod
+  def Language( self ):
+    pass # pragma: no cover
 
 
   @abc.abstractmethod
@@ -891,7 +898,7 @@ class LanguageServerCompleter( Completer ):
 
   def _GetSettings( self, module, client_data ):
     if hasattr( module, 'Settings' ):
-      settings = module.Settings( language = self.SupportedFiletypes()[ 0 ],
+      settings = module.Settings( language = self.Language(),
                                   client_data = client_data )
       if settings is not None:
         return settings

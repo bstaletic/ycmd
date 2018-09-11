@@ -1,2 +1,2 @@
 def Settings( **kwargs ):
-  pass
+  return None
