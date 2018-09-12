@@ -201,7 +201,6 @@ class JavaCompleter( language_server_completer.LanguageServerCompleter ):
     self._server_handle = None
     self._server_stderr = None
     self._workspace_path = None
-    self._extra_conf = None
     self._CleanUp()
 
 
