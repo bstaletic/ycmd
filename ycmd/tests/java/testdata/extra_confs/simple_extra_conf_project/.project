@@ -7,7 +7,7 @@
      https://help.eclipse.org/oxygen/index.jsp?topic=%2Forg.eclipse.platform.doc.isv%2Freference%2Fmisc%2Fproject_description_file.html
 -->
 <projectDescription>
-  <name>Test</name>
+  <name>ExtraConf</name>
   <comment></comment>
   <projects>
   </projects>

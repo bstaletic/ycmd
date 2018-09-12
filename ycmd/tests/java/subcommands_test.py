@@ -1674,24 +1674,22 @@ def Subcommands_ExtraConf_SettingsValid_test( app ):
   filepath = PathToTestFile( 'extra_confs',
                              'simple_extra_conf_project',
                              'src',
-                             'com',
-                             'test',
-                             'TestLauncher.java' )
+                             'ExtraConf.java' )
   RunTest( app, {
     'description': 'RefactorRename is disabled in extra conf.',
     'request': {
       'command': 'RefactorRename',
       'arguments': [ 'renamed_l' ],
       'filepath': filepath,
-      'line_num': 28,
-      'column_num': 5,
+      'line_num': 1,
+      'column_num': 7,
     },
     'expect': {
       'response': requests.codes.ok,
       'data': has_entries( {
         'fixits': contains( has_entries( {
           'chunks': empty(),
-          'location': LocationMatcher( filepath, 28, 5 )
+          'location': LocationMatcher( filepath, 1, 7 )
         } ) )
       } )
     }
