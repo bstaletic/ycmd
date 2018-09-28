@@ -211,6 +211,8 @@ if ( CPP11_AVAILABLE )
     add_definitions( -std=gnu++17 )
   elseif( NOT MSVC )
     add_definitions( -std=c++17 )
+  else()
+    add_definitions( /std:c++17 )
   endif()
 else()
   # Platform-specific advice goes here. In particular, we have plenty of users
