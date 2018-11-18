@@ -24,7 +24,8 @@ from builtins import *  # noqa
 
 from protoycmd.completers.completer import Completer
 from protoycmd.utils import ExpandVariablesInPath, FindExecutable
-from protoycmd import extra_conf_store, responses
+from protoycmd import responses
+from ycmd import extra_conf_store
 
 import os
 import jedi

@@ -38,7 +38,8 @@ import stat
 import shutil
 
 from ycmd import handlers
-from protoycmd import extra_conf_store, user_options_store
+from protoycmd import user_options_store
+from ycmd import extra_conf_store
 from protoycmd.completers.completer import Completer
 from protoycmd.responses import BuildCompletionData
 from protoycmd.utils import ( GetCurrentDirectory,

@@ -32,7 +32,8 @@ import threading
 
 from protoycmd.completers.completer import Completer
 from protoycmd.completers.completer_utils import GetFileContents, GetFileLines
-from protoycmd import extra_conf_store, responses, utils
+from protoycmd import responses, utils
+from ycmd import extra_conf_store
 
 from ycmd.completers.language_server import language_server_protocol as lsp
 

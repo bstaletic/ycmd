@@ -33,7 +33,10 @@ import traceback
 from bottle import request
 
 import ycm_core
-from protoycmd import extra_conf_store, hmac_plugin, user_options_store
+from protoycmd import user_options_store
+from ycmd import hmac_plugin
+from ycmd import extra_conf_store
+from ycmd import extra_conf_store
 from ycmd import server_state
 from protoycmd.responses import ( BuildExceptionResponse,
                                   BuildCompletionResponse,

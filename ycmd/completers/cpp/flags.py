@@ -26,7 +26,7 @@ import ycm_core
 import os
 import inspect
 from future.utils import PY2, native
-from protoycmd import extra_conf_store
+from ycmd import extra_conf_store
 from protoycmd.utils import ( ListDirectory,
                               OnMac,
                               OnWindows,
