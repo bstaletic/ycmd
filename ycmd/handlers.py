@@ -36,7 +36,6 @@ import ycm_core
 from protoycmd import user_options_store
 from ycmd import hmac_plugin
 from ycmd import extra_conf_store
-from ycmd import extra_conf_store
 from ycmd import server_state
 from protoycmd.responses import ( BuildExceptionResponse,
                                   BuildCompletionResponse,
