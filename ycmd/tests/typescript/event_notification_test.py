@@ -26,7 +26,7 @@ from hamcrest import assert_that, contains, has_entries
 
 from ycmd.tests.typescript import IsolatedYcmd, PathToTestFile
 from ycmd.tests.test_utils import BuildRequest, CompletionEntryMatcher
-from ycmd.utils import ReadFile
+from protoycmd.utils import ReadFile
 
 
 @IsolatedYcmd()

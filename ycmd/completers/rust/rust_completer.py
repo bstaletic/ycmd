@@ -22,10 +22,10 @@ from __future__ import absolute_import
 # Not installing aliases from python-future; it's unreliable and slow.
 from builtins import *  # noqa
 
-from ycmd.utils import ( ExpandVariablesInPath, FindExecutable, ToUnicode,
-                         ToBytes, SetEnviron, ProcessIsRunning, urljoin )
-from ycmd.completers.completer import Completer
-from ycmd import responses, utils, hmac_utils
+from protoycmd.utils import ( ExpandVariablesInPath, FindExecutable, ToUnicode,
+                              ToBytes, SetEnviron, ProcessIsRunning, urljoin )
+from protoycmd.completers.completer import Completer
+from protoycmd import responses, utils, hmac_utils
 
 from future.utils import iteritems, native
 import logging

@@ -28,8 +28,8 @@ from collections import defaultdict
 from future.utils import iteritems
 from nose.tools import eq_, ok_
 
-from ycmd.completers import completer_utils as cu
-from ycmd.utils import re
+from protoycmd.completers import completer_utils as cu
+from protoycmd.utils import re
 
 
 def _ExtractPatternsFromFiletypeTriggerDict( triggerDict ):

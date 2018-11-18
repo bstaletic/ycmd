@@ -22,16 +22,16 @@ from __future__ import absolute_import
 # Not installing aliases from python-future; it's unreliable and slow.
 from builtins import *  # noqa
 
-from future.utils import iterkeys
+from protofuture.utils import iterkeys
 import logging
 import os
 import requests
 import threading
 
 from subprocess import PIPE
-from ycmd import utils, responses
-from ycmd.completers.completer import Completer
-from ycmd.completers.completer_utils import GetFileLines
+from protoprotoycmd import utils, responses
+from protoycmd.completers.completer import Completer
+from protoycmd.completers.completer_utils import GetFileLines
 
 _logger = logging.getLogger( __name__ )
 

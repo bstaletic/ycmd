@@ -26,16 +26,16 @@ import ycm_core
 import os
 import inspect
 from future.utils import PY2, native
-from ycmd import extra_conf_store
-from ycmd.utils import ( ListDirectory,
-                         OnMac,
-                         OnWindows,
-                         PathsToAllParentFolders,
-                         re,
-                         ToCppStringCompatible,
-                         ToBytes,
-                         ToUnicode )
-from ycmd.responses import NoExtraConfDetected
+from protoycmd import extra_conf_store
+from protoycmd.utils import ( ListDirectory,
+                              OnMac,
+                              OnWindows,
+                              PathsToAllParentFolders,
+                              re,
+                              ToCppStringCompatible,
+                              ToBytes,
+                              ToUnicode )
+from protoycmd.responses import NoExtraConfDetected
 
 # -include-pch and --sysroot= must be listed before -include and --sysroot
 # respectively because the latter is a prefix of the former (and the algorithm

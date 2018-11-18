@@ -31,7 +31,7 @@ import requests
 
 from ycmd.tests.test_utils import BuildRequest, ErrorMatcher
 from ycmd.tests.tern import IsolatedYcmd, PathToTestFile
-from ycmd import utils
+from protoycmd import utils
 
 
 @IsolatedYcmd

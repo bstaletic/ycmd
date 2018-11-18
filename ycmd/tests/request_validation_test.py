@@ -24,8 +24,8 @@ from builtins import *  # noqa
 
 from hamcrest import raises, assert_that, calling
 from nose.tools import ok_
-from ycmd.request_validation import EnsureRequestValid
-from ycmd.responses import ServerError
+from protoycmd.request_validation import EnsureRequestValid
+from protoycmd.responses import ServerError
 
 
 def BasicData():

@@ -25,7 +25,7 @@ from builtins import *  # noqa
 from hamcrest import assert_that, contains, has_entries, has_entry
 import os.path
 
-from ycmd.utils import ReadFile
+from protoycmd.utils import ReadFile
 from ycmd.tests.python import PathToTestFile, SharedYcmd
 from ycmd.tests.test_utils import BuildRequest, LocationMatcher, ErrorMatcher
 

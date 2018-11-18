@@ -25,7 +25,11 @@ import sys
 import os
 
 sys.path.insert( 0, os.path.dirname( os.path.abspath( __file__ ) ) )
-from server_utils import SetUpPythonPath, CompatibleWithCurrentCore
+sys.path.append( os.path.join( os.path.dirname( os.path.apbspath( __file__ ) ),
+                               '..',
+                               'third_party',
+                               'protoycmd' ) )
+from protoycmd.server_utils import SetUpPythonPath, CompatibleWithCurrentCore
 SetUpPythonPath()
 
 # Not installing aliases from python-future; it's unreliable and slow.
@@ -40,9 +44,9 @@ import signal
 import os
 import base64
 
-from ycmd import extra_conf_store, user_options_store, utils
+from protoycmd import extra_conf_store, user_options_store, utils
 from ycmd.hmac_plugin import HmacPlugin
-from ycmd.utils import ToBytes, ReadFile, OpenForStdHandle
+from protoycmd.utils import ToBytes, ReadFile, OpenForStdHandle
 from ycmd.wsgi_server import StoppableWSGIServer
 
 

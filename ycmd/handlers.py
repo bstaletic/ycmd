@@ -33,13 +33,15 @@ import traceback
 from bottle import request
 
 import ycm_core
-from ycmd import extra_conf_store, hmac_plugin, server_state, user_options_store
-from ycmd.responses import ( BuildExceptionResponse, BuildCompletionResponse,
-                             UnknownExtraConf )
-from ycmd.request_wrap import RequestWrap
+from protoycmd import extra_conf_store, hmac_plugin, user_options_store
+from ycmd import server_state
+from protoycmd.responses import ( BuildExceptionResponse,
+                                  BuildCompletionResponse,
+                                  UnknownExtraConf )
+from protoycmd.request_wrap import RequestWrap
 from ycmd.bottle_utils import SetResponseHeader
-from ycmd.completers.completer_utils import FilterAndSortCandidatesWrap
-from ycmd.utils import StartThread
+from protoycmd.completers.completer_utils import FilterAndSortCandidatesWrap
+from protoycmd.utils import StartThread
 
 
 # num bytes for the request body buffer; request.json only works if the request

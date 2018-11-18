@@ -25,7 +25,7 @@ from builtins import *  # noqa
 from binascii import hexlify
 from nose.tools import eq_, ok_
 from hamcrest import raises, assert_that, calling
-from ycmd import hmac_utils as hu
+from protoycmd import hmac_utils as hu
 from ycmd.tests.test_utils import Py2Only
 
 

@@ -35,7 +35,7 @@ from pprint import pprint
 
 from ycmd.tests.clang import SharedYcmd, IsolatedYcmd, PathToTestFile
 from ycmd.tests.test_utils import BuildRequest, LocationMatcher, RangeMatcher
-from ycmd.utils import ReadFile
+from protoycmd.utils import ReadFile
 
 
 @IsolatedYcmd()

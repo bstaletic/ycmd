@@ -43,14 +43,15 @@ from ycmd.completers.language_server.language_server_completer import (
     NO_HOVER_INFORMATION )
 from ycmd.completers.language_server import language_server_protocol as lsp
 from ycmd.tests.language_server import MockConnection
-from ycmd.request_wrap import RequestWrap
+from protoycmd.request_wrap import RequestWrap
 from ycmd.tests.test_utils import ( BuildRequest,
                                     ChunkMatcher,
                                     DummyCompleter,
                                     LocationMatcher,
                                     RangeMatcher )
 from ycmd.tests.language_server import IsolatedYcmd, PathToTestFile
-from ycmd import handlers, utils, responses
+from protoycmd import utils, responses
+from ycmd import handlers
 import os
 
 
@@ -275,7 +276,7 @@ def LanguageServerCompleter_GoToDeclaration_test():
       'line_num': 1,
     } ), False
 
-  with patch( 'ycmd.completers.completer_utils.GetFileContents',
+  with patch( 'protoycmd.completers.completer_utils.GetFileContents',
               side_effect = lsp.IOError ):
     yield Test, {
       'result': {

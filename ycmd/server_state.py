@@ -26,10 +26,11 @@ import os
 import threading
 import logging
 from future.utils import itervalues
-from ycmd.utils import LoadPythonSource
+from protoycmd.utils import LoadPythonSource
 from ycmd.completers.general.general_completer_store import (
     GeneralCompleterStore )
-from ycmd.completers.completer_utils import PathToFiletypeCompleterPluginLoader
+from protoycmd.completers.completer_utils import (
+    PathToFiletypeCompleterPluginLoader )
 
 _logger = logging.getLogger( __name__ )
 

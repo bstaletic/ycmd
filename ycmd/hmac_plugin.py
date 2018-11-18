@@ -26,8 +26,8 @@ import logging
 import requests
 from base64 import b64decode, b64encode
 from bottle import request, abort
-from ycmd import hmac_utils
-from ycmd.utils import ToBytes, urlparse
+from protoycmd import hmac_utils
+from protoycmd.utils import ToBytes, urlparse
 from ycmd.bottle_utils import SetResponseHeader
 
 _HMAC_HEADER = 'x-ycm-hmac'

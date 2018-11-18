@@ -29,10 +29,10 @@ import os
 import subprocess
 import threading
 
-from ycmd import responses
-from ycmd import utils
-from ycmd.utils import ToBytes, ToUnicode, ExecutableName
-from ycmd.completers.completer import Completer
+from protoycmd import responses
+from protoycmd import utils
+from protoycmd.utils import ToBytes, ToUnicode, ExecutableName
+from protoycmd.completers.completer import Completer
 
 BINARY_NOT_FOUND_MESSAGE = ( '{0} binary not found. Did you build it? '
                              'You can do so by running '

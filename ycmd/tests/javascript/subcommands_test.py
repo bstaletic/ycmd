@@ -40,7 +40,7 @@ from ycmd.tests.test_utils import ( BuildRequest,
                                     ErrorMatcher,
                                     LocationMatcher,
                                     MessageMatcher )
-from ycmd.utils import ReadFile
+from protoycmd.utils import ReadFile
 
 
 def RunTest( app, test ):

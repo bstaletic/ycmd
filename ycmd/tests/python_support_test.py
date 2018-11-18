@@ -33,7 +33,7 @@ from future.utils import native
 
 import ycm_core
 from ycmd.tests.test_utils import ClangOnly, Py2Only, Py3Only
-from ycmd.utils import ToBytes, ToUnicode, OnWindows
+from protoycmd.utils import ToBytes, ToUnicode, OnWindows
 
 
 # We don't use PathToTestFile from test_utils module because this module

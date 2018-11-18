@@ -25,14 +25,14 @@ from builtins import *  # noqa
 from hamcrest import assert_that, calling, empty, equal_to, has_length, raises
 from mock import patch
 
-from ycmd.server_utils import ( CompatibleWithCurrentCore,
-                                GetStandardLibraryIndexInSysPath )
+from protoycmd.server_utils import ( CompatibleWithCurrentCore,
+                                     GetStandardLibraryIndexInSysPath )
 from ycmd.tests import PathToTestFile
 
 
-@patch( 'ycmd.server_utils._logger', autospec = True )
+@patch( 'protoycmd.server_utils._logger', autospec = True )
 def RunCompatibleWithCurrentCoreImportException( test, logger ):
-  with patch( 'ycmd.server_utils.ImportCore',
+  with patch( 'protoycmd.server_utils.ImportCore',
               side_effect = ImportError( test[ 'exception_message' ] ) ):
     assert_that( CompatibleWithCurrentCore(),
                  equal_to( test[ 'exit_status' ] ) )
@@ -41,7 +41,7 @@ def RunCompatibleWithCurrentCoreImportException( test, logger ):
   logger.exception.assert_called_with( test[ 'logged_message' ] )
 
 
-@patch( 'ycmd.server_utils._logger', autospec = True )
+@patch( 'protoycmd.server_utils._logger', autospec = True )
 def CompatibleWithCurrentCore_Compatible_test( logger ):
   assert_that( CompatibleWithCurrentCore(), equal_to( 0 ) )
   assert_that( logger.method_calls, empty() )
@@ -111,7 +111,7 @@ def CompatibleWithCurrentCore_Python3_test():
 
 
 @patch( 'ycm_core.YcmCoreVersion', side_effect = AttributeError() )
-@patch( 'ycmd.server_utils._logger', autospec = True )
+@patch( 'protoycmd.server_utils._logger', autospec = True )
 def CompatibleWithCurrentCore_Outdated_NoYcmCoreVersionMethod_test( logger,
                                                                     *args ):
   assert_that( CompatibleWithCurrentCore(), equal_to( 7 ) )
@@ -122,8 +122,8 @@ def CompatibleWithCurrentCore_Outdated_NoYcmCoreVersionMethod_test( logger,
 
 
 @patch( 'ycm_core.YcmCoreVersion', return_value = 10 )
-@patch( 'ycmd.server_utils.ExpectedCoreVersion', return_value = 11 )
-@patch( 'ycmd.server_utils._logger', autospec = True )
+@patch( 'protoycmd.server_utils.ExpectedCoreVersion', return_value = 11 )
+@patch( 'protoycmd.server_utils._logger', autospec = True )
 def CompatibleWithCurrentCore_Outdated_NoVersionMatch_test( logger, *args ):
   assert_that( CompatibleWithCurrentCore(), equal_to( 7 ) )
   assert_that( logger.method_calls, has_length( 1 ) )

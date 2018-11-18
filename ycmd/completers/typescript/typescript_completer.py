@@ -33,11 +33,11 @@ from functools import partial
 
 from tempfile import NamedTemporaryFile
 
-from ycmd import responses
-from ycmd import utils
-from ycmd.completers.completer import Completer
-from ycmd.completers.completer_utils import GetFileLines
-from ycmd.utils import re
+from protoycmd import responses
+from protoycmd import utils
+from protoycmd.completers.completer import Completer
+from protoycmd.completers.completer_utils import GetFileLines
+from protoycmd.utils import re
 
 SERVER_NOT_RUNNING_MESSAGE = 'TSServer is not running.'
 NO_DIAGNOSTIC_MESSAGE = 'No diagnostic for current line!'

@@ -33,6 +33,6 @@ def ShouldEnableTypeScriptCompleter_NodeAndTsserverFound_test():
   ok_( ShouldEnableTypeScriptCompleter() )
 
 
-@patch( 'ycmd.utils.FindExecutable', return_value = None )
+@patch( 'protoycmd.utils.FindExecutable', return_value = None )
 def ShouldEnableTypeScriptCompleter_TsserverNotFound_test( *args ):
   ok_( not ShouldEnableTypeScriptCompleter() )

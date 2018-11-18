@@ -34,7 +34,7 @@ from hamcrest import ( assert_that, calling, equal_to, has_property,
 from mock import patch, call
 from nose.tools import eq_, ok_
 from types import ModuleType
-from ycmd import utils
+from protoycmd import utils
 from ycmd.tests.test_utils import ( Py2Only, Py3Only, WindowsOnly, UnixOnly,
                                     CurrentWorkingDirectory,
                                     TemporaryExecutable )
@@ -336,7 +336,7 @@ def SafePopen_ReplaceStdinWindowsPIPEOnWindows_test( *args ):
 
 
 @WindowsOnly
-@patch( 'ycmd.utils.GetShortPathName', side_effect = lambda x: x )
+@patch( 'protoycmd.utils.GetShortPathName', side_effect = lambda x: x )
 @patch( 'subprocess.Popen' )
 def SafePopen_WindowsPath_test( *args ):
   tempfile = PathToTestFile( 'safe-popen-file' )
@@ -588,7 +588,7 @@ def FindExecutable_AdditionalPathExt_test():
     eq_( executable, utils.FindExecutable( executable ) )
 
 
-@patch( 'ycmd.utils.ProcessIsRunning', return_value = True )
+@patch( 'protoycmd.utils.ProcessIsRunning', return_value = True )
 def WaitUntilProcessIsTerminated_TimedOut_test( *args ):
   assert_that(
     calling( utils.WaitUntilProcessIsTerminated ).with_args( None,

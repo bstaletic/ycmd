@@ -34,7 +34,7 @@ from ycmd.tests.test_utils import ( BuildRequest,
                                     CurrentWorkingDirectory,
                                     CompletionEntryMatcher,
                                     WindowsOnly )
-from ycmd.utils import GetCurrentDirectory, ToBytes
+from protoycmd.utils import GetCurrentDirectory, ToBytes
 
 TEST_DIR = os.path.dirname( os.path.abspath( __file__ ) )
 DATA_DIR = os.path.join( TEST_DIR,

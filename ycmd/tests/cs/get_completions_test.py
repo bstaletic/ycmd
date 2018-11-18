@@ -31,7 +31,7 @@ from webtest import AppError
 
 from ycmd.tests.cs import PathToTestFile, SharedYcmd, WrapOmniSharpServer
 from ycmd.tests.test_utils import BuildRequest, CompletionEntryMatcher
-from ycmd.utils import ReadFile
+from protoycmd.utils import ReadFile
 
 
 @SharedYcmd
