@@ -42,7 +42,7 @@ from ycmd.completers.cpp.flags import ( Flags, PrepareFlagsForClang,
                                         UserIncludePaths )
 from ycmd.completers.cpp.ephemeral_values_set import EphemeralValuesSet
 from ycmd.completers.cpp.include_cache import IncludeCache, IncludeList
-from ycmd.responses import NoExtraConfDetected, UnknownExtraConf
+from protoycmd.responses import NoExtraConfDetected, UnknownExtraConf
 
 CLANG_FILETYPES = { 'c', 'cpp', 'cuda', 'objc', 'objcpp' }
 PARSING_FILE_MESSAGE = 'Still parsing file.'
