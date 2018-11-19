@@ -25,11 +25,7 @@ import sys
 import os
 
 sys.path.insert( 0, os.path.dirname( os.path.abspath( __file__ ) ) )
-sys.path.append( os.path.join( os.path.dirname( os.path.abspath( __file__ ) ),
-                               '..',
-                               'third_party',
-                               'protoycmd' ) )
-from protoycmd.server_utils import SetUpPythonPath, CompatibleWithCurrentCore
+from ycmd.server_utils import SetUpPythonPath, CompatibleWithCurrentCore
 SetUpPythonPath()
 
 # Not installing aliases from python-future; it's unreliable and slow.

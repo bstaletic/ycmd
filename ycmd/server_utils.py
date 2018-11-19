@@ -148,5 +148,6 @@ def SetUpPythonPath():
                       p.join( DIR_OF_THIRD_PARTY, 'frozendict' ),
                       p.join( DIR_OF_THIRD_PARTY, 'jedi' ),
                       p.join( DIR_OF_THIRD_PARTY, 'parso' ),
+                      p.join( DIR_OF_THIRD_PARTY, 'protoycmd' ),
                       p.join( DIR_OF_THIRD_PARTY, 'requests' ),
                       p.join( DIR_OF_THIRD_PARTY, 'waitress' ) ]
