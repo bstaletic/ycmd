@@ -45,7 +45,8 @@ from ycmd.tests.test_utils import ( BuildRequest,
                                     MockProcessTerminationTimingOut,
                                     TemporaryTestDir,
                                     WaitUntilCompleterServerReady )
-from protoycmd import utils, handlers
+from protoycmd import utils
+from ycmd import handlers
 
 
 def _ProjectDirectoryMatcher( project_directory ):
