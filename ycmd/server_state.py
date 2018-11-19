@@ -29,10 +29,21 @@ from future.utils import itervalues
 from protoycmd.utils import LoadPythonSource
 from ycmd.completers.general.general_completer_store import (
     GeneralCompleterStore )
-from protoycmd.completers.completer_utils import (
-    PathToFiletypeCompleterPluginLoader )
 
 _logger = logging.getLogger( __name__ )
+
+
+def _PathToCompletersFolder():
+  dir_of_current_script = os.path.dirname( os.path.abspath( __file__ ) )
+  return os.path.join( dir_of_current_script, 'completers' )
+
+
+def PathToFiletypeCompleterPluginLoader( filetype ):
+  return os.path.join( _PathToCompletersFolder(), filetype, 'hook.py' )
+
+
+def FiletypeCompleterExistsForFiletype( filetype ):
+  return os.path.exists( PathToFiletypeCompleterPluginLoader( filetype ) )
 
 
 class ServerState( object ):
