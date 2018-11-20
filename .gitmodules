@@ -36,3 +36,9 @@
 [submodule "third_party/cregex"]
 	path = third_party/cregex
 	url = https://github.com/micbou/regex.git
+[submodule "third_party/abseil"]
+	path = cpp/absail
+	url = https://github.com/abseil/abseil-cpp
+[submodule "third_party/cctz"]
+	path = cpp/cctz
+	url = https://github.com/google/cctz

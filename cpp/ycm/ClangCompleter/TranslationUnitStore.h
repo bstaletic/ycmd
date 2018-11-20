@@ -25,7 +25,7 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include <unordered_map>
+#include <absl/container/flat_hash_map.h>
 
 using CXIndex = void*;
 
@@ -68,9 +68,9 @@ private:
 
 
   using TranslationUnitForFilename =
-    std::unordered_map< std::string, std::shared_ptr< TranslationUnit > >;
+    absl::flat_hash_map< std::string, std::shared_ptr< TranslationUnit > >;
 
-  using FlagsHashForFilename = std::unordered_map< std::string, std::size_t >;
+  using FlagsHashForFilename = absl::flat_hash_map< std::string, std::size_t >;
 
   CXIndex clang_index_;
   TranslationUnitForFilename filename_to_translation_unit_;

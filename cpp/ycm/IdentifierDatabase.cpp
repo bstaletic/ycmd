@@ -23,7 +23,7 @@
 #include "Result.h"
 #include "Utils.h"
 
-#include <unordered_set>
+#include <absl/container/flat_hash_set.h>
 
 namespace YouCompleteMe {
 
@@ -81,7 +81,7 @@ void IdentifierDatabase::ResultsForQueryAndType(
   }
   Word query_object( query );
 
-  std::unordered_set< const Candidate * > seen_candidates;
+  absl::flat_hash_set< const Candidate * > seen_candidates;
   seen_candidates.reserve( candidate_repository_.NumStoredCandidates() );
 
   {
@@ -114,7 +114,7 @@ void IdentifierDatabase::ResultsForQueryAndType(
 
 // WARNING: You need to hold the filetype_candidate_map_mutex_ before calling
 // this function and while using the returned set.
-std::set< const Candidate * > &IdentifierDatabase::GetCandidateSet(
+absl::flat_hash_set< const Candidate * > &IdentifierDatabase::GetCandidateSet(
   const std::string &filetype,
   const std::string &filepath ) {
   std::shared_ptr< FilepathToCandidates > &path_to_candidates =
@@ -124,11 +124,11 @@ std::set< const Candidate * > &IdentifierDatabase::GetCandidateSet(
     path_to_candidates.reset( new FilepathToCandidates() );
   }
 
-  std::shared_ptr< std::set< const Candidate * > > &candidates =
+  std::shared_ptr< absl::flat_hash_set< const Candidate * > > &candidates =
     ( *path_to_candidates )[ filepath ];
 
   if ( !candidates ) {
-    candidates.reset( new std::set< const Candidate * >() );
+    candidates.reset( new absl::flat_hash_set< const Candidate * >() );
   }
 
   return *candidates;
@@ -141,7 +141,7 @@ void IdentifierDatabase::AddIdentifiersNoLock(
   const std::vector< std::string > &new_candidates,
   const std::string &filetype,
   const std::string &filepath ) {
-  std::set< const Candidate *> &candidates =
+  absl::flat_hash_set< const Candidate *> &candidates =
     GetCandidateSet( filetype, filepath );
 
   std::vector< const Candidate * > repository_candidates =
