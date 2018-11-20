@@ -18,6 +18,7 @@
 #ifndef UTILS_H_KEPMRPBH
 #define UTILS_H_KEPMRPBH
 
+#include <algorithm>
 #include <boost/filesystem.hpp>
 #include <cmath>
 #include <limits>

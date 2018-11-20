@@ -20,15 +20,15 @@
 
 #include "Character.h"
 
+#include <absl/container/flat_hash_map.h>
 #include <memory>
 #include <mutex>
 #include <string>
-#include <unordered_map>
 #include <vector>
 
 namespace YouCompleteMe {
 
-using CharacterHolder = std::unordered_map< std::string,
+using CharacterHolder = absl::flat_hash_map< std::string,
                                             std::unique_ptr< Character > >;
 
 

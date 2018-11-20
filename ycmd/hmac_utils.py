@@ -59,7 +59,7 @@ def CreateRequestHmac( method, path, body, hmac_secret ):
   return CreateHmac( joined_hmac_input, hmac_secret )
 
 
-# This is the compare_digest function from python 3.4
+# This is the compare_digest function from python 3.5
 #   http://hg.python.org/cpython/file/460407f35aa9/Lib/hmac.py#l16
 def SecureBytesEqual( a, b ):
   """Returns the equivalent of 'a == b', but avoids content based short
