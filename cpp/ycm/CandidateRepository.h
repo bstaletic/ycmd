@@ -26,9 +26,11 @@
 #include <unordered_map>
 #include <vector>
 
+#include <absl/container/flat_hash_map.h>
+
 namespace YouCompleteMe {
 
-using CandidateHolder = std::unordered_map< std::string,
+using CandidateHolder = absl::flat_hash_map< std::string,
                                             std::unique_ptr< Candidate > >;
 
 

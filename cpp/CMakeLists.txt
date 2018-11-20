@@ -273,4 +273,5 @@ if (NOT USE_SYSTEM_BOOST)
   add_subdirectory( BoostParts )
 endif()
 
+add_subdirectory( absail )
 add_subdirectory( ycm )

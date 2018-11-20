@@ -23,12 +23,12 @@
 #include <memory>
 #include <mutex>
 #include <string>
-#include <unordered_map>
+#include <absl/container/flat_hash_map.h>
 #include <vector>
 
 namespace YouCompleteMe {
 
-using CodePointHolder = std::unordered_map< std::string,
+using CodePointHolder = absl::flat_hash_map< std::string,
                                             std::unique_ptr< CodePoint > >;
 
 
