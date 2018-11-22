@@ -71,7 +71,7 @@ public:
                                const size_t max_results ) const;
 
 private:
-  absl::flat_hash_set< const Candidate * > &GetCandidateSet(
+  std::unordered_set< const Candidate * > &GetCandidateSet(
     const std::string &filetype,
     const std::string &filepath );
 
@@ -84,7 +84,7 @@ private:
   // filepath -> *( *candidate )
   using FilepathToCandidates =
     absl::flat_hash_map < std::string,
-                         std::shared_ptr< absl::flat_hash_set< const Candidate * > > >;
+                         std::shared_ptr< std::unordered_set< const Candidate * > > >;
 
   // filetype -> *( filepath -> *( *candidate ) )
   using FiletypeCandidateMap =

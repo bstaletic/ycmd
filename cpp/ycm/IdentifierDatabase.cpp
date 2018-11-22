@@ -114,7 +114,7 @@ void IdentifierDatabase::ResultsForQueryAndType(
 
 // WARNING: You need to hold the filetype_candidate_map_mutex_ before calling
 // this function and while using the returned set.
-absl::flat_hash_set< const Candidate * > &IdentifierDatabase::GetCandidateSet(
+std::unordered_set< const Candidate * > &IdentifierDatabase::GetCandidateSet(
   const std::string &filetype,
   const std::string &filepath ) {
   std::shared_ptr< FilepathToCandidates > &path_to_candidates =
@@ -124,11 +124,11 @@ absl::flat_hash_set< const Candidate * > &IdentifierDatabase::GetCandidateSet(
     path_to_candidates.reset( new FilepathToCandidates() );
   }
 
-  std::shared_ptr< absl::flat_hash_set< const Candidate * > > &candidates =
+  std::shared_ptr< std::unordered_set< const Candidate * > > &candidates =
     ( *path_to_candidates )[ filepath ];
 
   if ( !candidates ) {
-    candidates.reset( new absl::flat_hash_set< const Candidate * >() );
+    candidates.reset( new std::unordered_set< const Candidate * >() );
   }
 
   return *candidates;
@@ -141,7 +141,7 @@ void IdentifierDatabase::AddIdentifiersNoLock(
   const std::vector< std::string > &new_candidates,
   const std::string &filetype,
   const std::string &filepath ) {
-  absl::flat_hash_set< const Candidate *> &candidates =
+	std::unordered_set< const Candidate *> &candidates =
     GetCandidateSet( filetype, filepath );
 
   std::vector< const Candidate * > repository_candidates =
