@@ -30,6 +30,7 @@ import itertools
 import threading
 from collections import defaultdict
 from functools import partial
+import time
 
 from tempfile import NamedTemporaryFile
 
@@ -524,11 +525,18 @@ class TypeScriptCompleter( Completer ):
 
 
   def GetDetailedDiagnostic( self, request_data ):
+    print('T1 = {}'.format(time.time_ns()))
     ts_diagnostics = self.GetTsDiagnosticsForCurrentFile( request_data )
-    ts_diagnostics_on_line = list( filter(
-      partial( IsLineInTsDiagnosticRange, request_data[ 'line_num' ] ),
-      ts_diagnostics
-    ) )
+    print('T2 = {}'.format(time.time_ns()))
+    #ts_diagnostics_on_line = list( filter(
+    #  partial( IsLineInTsDiagnosticRange, request_data[ 'line_num' ] ),
+    #  ts_diagnostics
+    #) )
+    line = request_data[ 'line_num' ]
+    ts_diagnostics_on_line = [ diagnostic for diagnostic in ts_diagnostics
+                               if IsLineInTsDiagnosticRange( line,
+                                                             diagnostic ) ]
+    print('T3 = {}'.format(time.time_ns()))
 
     if not ts_diagnostics_on_line:
       raise ValueError( NO_DIAGNOSTIC_MESSAGE )
@@ -554,6 +562,7 @@ class TypeScriptCompleter( Completer ):
       request_data,
       closest_ts_diagnostic )
 
+    print('T4 = {}'.format(time.time_ns()))
     return responses.BuildDisplayMessageResponse( closest_diagnostic.text_ )
 
 
