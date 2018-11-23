@@ -29,7 +29,7 @@ from hamcrest import ( assert_that, has_item, has_items, has_entry,
                        has_entries, contains, empty, contains_string )
 import requests
 
-from ycmd.utils import ReadFile
+from protoycmd.utils import ReadFile
 from ycmd.tests.python import IsolatedYcmd, PathToTestFile, SharedYcmd
 from ycmd.tests.test_utils import ( BuildRequest,
                                     CombineRequest,

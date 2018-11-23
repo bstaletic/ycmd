@@ -35,14 +35,14 @@ import subprocess
 import sys
 import time
 
-from ycmd.hmac_utils import CreateHmac, CreateRequestHmac, SecureBytesEqual
+from protoycmd.hmac_utils import CreateHmac, CreateRequestHmac, SecureBytesEqual
 from ycmd.tests import PathToTestFile
 from ycmd.tests.test_utils import BuildRequest
-from ycmd.user_options_store import DefaultOptions
-from ycmd.utils import ( CloseStandardStreams, CreateLogfile,
-                         GetUnusedLocalhostPort, ReadFile, RemoveIfExists,
-                         SafePopen, SetEnviron, ToBytes, ToUnicode, urljoin,
-                         urlparse )
+from protoycmd.user_options_store import DefaultOptions
+from protoycmd.utils import ( CloseStandardStreams, CreateLogfile,
+                              GetUnusedLocalhostPort, ReadFile, RemoveIfExists,
+                              SafePopen, SetEnviron, ToBytes, ToUnicode,
+                              urljoin, urlparse )
 
 HEADERS = { 'content-type': 'application/json' }
 HMAC_HEADER = 'x-ycm-hmac'

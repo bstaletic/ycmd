@@ -44,7 +44,7 @@ from ycmd.tests.test_utils import ( BuildRequest,
                                     MessageMatcher,
                                     MockProcessTerminationTimingOut,
                                     WaitUntilCompleterServerReady )
-from ycmd.utils import ReadFile
+from protoycmd.utils import ReadFile
 
 
 def RunTest( app, test ):
@@ -889,7 +889,7 @@ def Subcommands_RefactorRename_SimpleUnicode_test( app ):
 
 
 @IsolatedYcmd()
-@patch( 'ycmd.utils.WaitUntilProcessIsTerminated',
+@patch( 'protoycmd.utils.WaitUntilProcessIsTerminated',
         MockProcessTerminationTimingOut )
 def Subcommands_StopServer_Timeout_test( app ):
   WaitUntilCompleterServerReady( app, 'typescript' )

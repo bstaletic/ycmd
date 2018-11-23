@@ -27,7 +27,7 @@ from mock import patch
 from nose.tools import eq_
 import requests
 
-from ycmd.responses import NoDiagnosticSupport, BuildDisplayMessageResponse
+from protoycmd.responses import NoDiagnosticSupport, BuildDisplayMessageResponse
 from ycmd.tests import SharedYcmd
 from ycmd.tests.test_utils import ( BuildRequest, DummyCompleter, ErrorMatcher,
                                     MessageMatcher, PatchCompleter )

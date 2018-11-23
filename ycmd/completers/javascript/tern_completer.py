@@ -29,9 +29,9 @@ import requests
 import threading
 
 from subprocess import PIPE
-from ycmd import utils, responses
-from ycmd.completers.completer import Completer
-from ycmd.completers.completer_utils import GetFileLines
+from protoycmd import utils, responses
+from protoycmd.completers.completer import Completer
+from protoycmd.completers.completer_utils import GetFileLines
 
 _logger = logging.getLogger( __name__ )
 

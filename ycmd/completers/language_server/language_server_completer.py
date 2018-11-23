@@ -30,9 +30,10 @@ import os
 import queue
 import threading
 
-from ycmd.completers.completer import Completer
-from ycmd.completers.completer_utils import GetFileContents, GetFileLines
-from ycmd import extra_conf_store, responses, utils
+from protoycmd.completers.completer import Completer
+from protoycmd.completers.completer_utils import GetFileContents, GetFileLines
+from ycmd import extra_conf_store
+from protoycmd import responses, utils
 
 from ycmd.completers.language_server import language_server_protocol as lsp
 

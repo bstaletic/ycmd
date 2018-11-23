@@ -45,7 +45,7 @@ from ycmd.tests.test_utils import ( BuildRequest,
                                     ChunkMatcher,
                                     LocationMatcher,
                                     LineColMatcher )
-from ycmd.utils import ReadFile
+from protoycmd.utils import ReadFile
 
 
 @SharedYcmd

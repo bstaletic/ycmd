@@ -28,6 +28,13 @@ import os.path as p
 import re
 import sys
 
+from protoycmd.server_exit_status import ( CORE_COMPATIBLE_STATUS,
+                                           CORE_UNEXPECTED_STATUS,
+                                           CORE_MISSING_STATUS,
+                                           CORE_PYTHON2_STATUS,
+                                           CORE_PYTHON3_STATUS,
+                                           CORE_OUTDATED_STATUS )
+
 PYTHON_STDLIB_ZIP_REGEX = re.compile( "python[23][0-9]\\.zip" )
 CORE_MISSING_ERROR_REGEX = re.compile( "No module named '?ycm_core'?" )
 CORE_PYTHON2_ERROR_REGEX = re.compile(
@@ -48,25 +55,6 @@ CORE_PYTHON3_MESSAGE = (
 CORE_OUTDATED_MESSAGE = (
   'ycm_core library too old; PLEASE RECOMPILE by running the build.py script. '
   'See the documentation for more details.' )
-
-# Exit statuses returned by the CompatibleWithCurrentCore function:
-#  - CORE_COMPATIBLE_STATUS: ycm_core is compatible;
-#  - CORE_UNEXPECTED_STATUS: unexpected error while loading ycm_core;
-#  - CORE_MISSING_STATUS   : ycm_core is missing;
-#  - CORE_PYTHON2_STATUS   : ycm_core is compiled with Python 2 but loaded with
-#    Python 3;
-#  - CORE_PYTHON3_STATUS   : ycm_core is compiled with Python 3 but loaded with
-#    Python 2;
-#  - CORE_OUTDATED_STATUS  : ycm_core version is outdated.
-# Values 1 and 2 are not used because 1 is for general errors and 2 has often a
-# special meaning for Unix programs. See
-# https://docs.python.org/2/library/sys.html#sys.exit
-CORE_COMPATIBLE_STATUS  = 0
-CORE_UNEXPECTED_STATUS  = 3
-CORE_MISSING_STATUS     = 4
-CORE_PYTHON2_STATUS     = 5
-CORE_PYTHON3_STATUS     = 6
-CORE_OUTDATED_STATUS    = 7
 
 VERSION_FILENAME = 'CORE_VERSION'
 
@@ -161,4 +149,5 @@ def SetUpPythonPath():
                       p.join( DIR_OF_THIRD_PARTY, 'jedi' ),
                       p.join( DIR_OF_THIRD_PARTY, 'parso' ),
                       p.join( DIR_OF_THIRD_PARTY, 'requests' ),
+                      p.join( DIR_OF_THIRD_PARTY, 'protoycmd' ),
                       p.join( DIR_OF_THIRD_PARTY, 'waitress' ) ]

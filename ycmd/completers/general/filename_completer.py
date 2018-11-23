@@ -24,15 +24,15 @@ from builtins import *  # noqa
 
 import os
 
-from ycmd.completers.completer import Completer
-from ycmd.utils import ( ExpandVariablesInPath,
-                         GetCurrentDirectory,
-                         GetModificationTime,
-                         ListDirectory,
-                         OnWindows,
-                         re,
-                         ToUnicode )
-from ycmd import responses
+from protoycmd.completers.completer import Completer
+from protoycmd.utils import ToUnicode
+from protoycmd.utils import ( ExpandVariablesInPath,
+                              GetCurrentDirectory,
+                              GetModificationTime,
+                              ListDirectory,
+                              OnWindows,
+                              re )
+from protoycmd import responses
 
 FILE = 1
 DIR = 2

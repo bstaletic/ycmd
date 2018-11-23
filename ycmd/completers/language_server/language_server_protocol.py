@@ -26,14 +26,14 @@ import os
 import json
 import hashlib
 
-from ycmd.utils import ( ByteOffsetToCodepointOffset,
-                         pathname2url,
-                         ToBytes,
-                         ToUnicode,
-                         unquote,
-                         url2pathname,
-                         urlparse,
-                         urljoin )
+from protoycmd.utils import ( ByteOffsetToCodepointOffset,
+                              pathname2url,
+                              ToBytes,
+                              ToUnicode,
+                              unquote,
+                              url2pathname,
+                              urlparse,
+                              urljoin )
 
 
 INSERT_TEXT_FORMAT = [

@@ -43,7 +43,7 @@ from ycmd.tests.test_utils import ( CombineRequest,
                                     CompletionEntryMatcher,
                                     LocationMatcher,
                                     WithRetry )
-from ycmd.utils import ReadFile
+from protoycmd.utils import ReadFile
 from mock import patch
 
 

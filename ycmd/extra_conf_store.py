@@ -31,10 +31,9 @@ import string
 import sys
 import logging
 from threading import Lock
-from ycmd import user_options_store
-from ycmd.responses import UnknownExtraConf, YCM_EXTRA_CONF_FILENAME
-from ycmd.utils import ( ExpandVariablesInPath, LoadPythonSource,
-                         PathsToAllParentFolders )
+from protoycmd import user_options_store
+from protoycmd.responses import UnknownExtraConf, YCM_EXTRA_CONF_FILENAME
+from protoycmd.utils import ExpandVariablesInPath, PathsToAllParentFolders, LoadPythonSource
 from fnmatch import fnmatch
 
 

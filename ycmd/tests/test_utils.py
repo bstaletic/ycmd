@@ -37,14 +37,15 @@ import time
 import stat
 import shutil
 
-from ycmd import extra_conf_store, handlers, user_options_store
-from ycmd.completers.completer import Completer
-from ycmd.responses import BuildCompletionData
-from ycmd.utils import ( GetCurrentDirectory,
-                         OnMac,
-                         OnWindows,
-                         ToUnicode,
-                         WaitUntilProcessIsTerminated )
+from ycmd import extra_conf_store, handlers
+from protoycmd import user_options_store
+from protoycmd.completers.completer import Completer
+from protoycmd.responses import BuildCompletionData
+from protoycmd.utils import ToUnicode
+from protoycmd.utils import ( GetCurrentDirectory,
+                              OnMac,
+                              OnWindows,
+                              WaitUntilProcessIsTerminated )
 import ycm_core
 
 try:
@@ -213,7 +214,7 @@ def SetUpApp( custom_options = {} ):
 
 @contextlib.contextmanager
 def IgnoreExtraConfOutsideTestsFolder():
-  with patch( 'ycmd.utils.IsRootDirectory',
+  with patch( 'protoycmd.utils.IsRootDirectory',
               lambda path, parent: path in [ parent, TESTS_DIR ] ):
     yield
 

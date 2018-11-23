@@ -29,12 +29,11 @@ import os
 import requests
 import threading
 
-from ycmd.completers.completer import Completer
-from ycmd.completers.completer_utils import GetFileLines
+from protoycmd.completers.completer import Completer
+from protoycmd.completers.completer_utils import GetFileLines
 from ycmd.completers.cs import solutiondetection
-from ycmd.utils import CodepointOffsetToByteOffset, re, urljoin
-from ycmd import responses
-from ycmd import utils
+from protoycmd.utils import CodepointOffsetToByteOffset, re, urljoin
+from protoycmd import responses, utils
 
 SERVER_NOT_FOUND_MSG = ( 'OmniSharp server binary not found at {0}. ' +
                          'Did you compile it? You can do so by running ' +

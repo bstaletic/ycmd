@@ -22,9 +22,10 @@ from __future__ import absolute_import
 # Not installing aliases from python-future; it's unreliable and slow.
 from builtins import *  # noqa
 
-from ycmd.completers.completer import Completer
-from ycmd.utils import ExpandVariablesInPath, FindExecutable
-from ycmd import extra_conf_store, responses
+from protoycmd.completers.completer import Completer
+from protoycmd.utils import ExpandVariablesInPath, FindExecutable
+from ycmd import extra_conf_store
+from protoycmd import responses
 
 import os
 import jedi

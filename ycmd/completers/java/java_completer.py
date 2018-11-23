@@ -31,7 +31,7 @@ import tempfile
 import threading
 from subprocess import PIPE
 
-from ycmd import responses, utils
+from protoycmd import responses, utils
 from ycmd.completers.language_server import language_server_completer
 from ycmd.completers.language_server import language_server_protocol as lsp
 

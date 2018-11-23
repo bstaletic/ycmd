@@ -27,7 +27,7 @@ import copy
 import logging
 from threading import Lock
 from ycmd.handlers import ServerShutdown
-from ycmd.utils import StartThread
+from protoycmd.utils import StartThread
 
 _logger = logging.getLogger( __name__ )
 

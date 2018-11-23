@@ -28,7 +28,7 @@ import glob
 import logging
 from inspect import getfile
 from ycmd import extra_conf_store
-from ycmd.utils import ToUnicode
+from protoycmd.utils import ToUnicode
 
 __logger = logging.getLogger( __name__ )
 

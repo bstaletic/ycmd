@@ -23,7 +23,7 @@ from __future__ import absolute_import
 from builtins import *  # noqa
 
 from future.utils import PY2
-from ycmd.utils import ToCppStringCompatible, ToUnicode
+from protoycmd.utils import ToCppStringCompatible, ToUnicode
 import bottle
 
 

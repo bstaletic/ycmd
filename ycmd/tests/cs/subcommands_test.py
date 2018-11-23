@@ -29,7 +29,7 @@ from webtest import AppError
 import pprint
 import os.path
 
-from ycmd import user_options_store
+from protoycmd import user_options_store
 from ycmd.tests.cs import ( IsolatedYcmd, PathToTestFile, SharedYcmd,
                             WrapOmniSharpServer )
 from ycmd.tests.test_utils import ( BuildRequest,
@@ -37,7 +37,7 @@ from ycmd.tests.test_utils import ( BuildRequest,
                                     LocationMatcher,
                                     MockProcessTerminationTimingOut,
                                     WaitUntilCompleterServerReady )
-from ycmd.utils import ReadFile
+from protoycmd.utils import ReadFile
 
 
 @SharedYcmd
@@ -574,7 +574,7 @@ def Subcommands_StopServer_DoNotKeepLogFiles_test( app ):
 
 
 @IsolatedYcmd()
-@patch( 'ycmd.utils.WaitUntilProcessIsTerminated',
+@patch( 'protoycmd.utils.WaitUntilProcessIsTerminated',
         MockProcessTerminationTimingOut )
 def Subcommands_StopServer_Timeout_test( app ):
   filepath = PathToTestFile( 'testy', 'GotoTestCase.cs' )

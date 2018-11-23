@@ -40,9 +40,10 @@ import signal
 import os
 import base64
 
-from ycmd import extra_conf_store, user_options_store, utils
+from ycmd import extra_conf_store
+from protoycmd import utils, user_options_store
 from ycmd.hmac_plugin import HmacPlugin
-from ycmd.utils import ToBytes, ReadFile, OpenForStdHandle
+from protoycmd.utils import ToBytes, ReadFile, OpenForStdHandle
 from ycmd.wsgi_server import StoppableWSGIServer
 
 

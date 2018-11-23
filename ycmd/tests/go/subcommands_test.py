@@ -34,7 +34,7 @@ from ycmd.tests.test_utils import ( BuildRequest,
                                     ErrorMatcher,
                                     MockProcessTerminationTimingOut,
                                     WaitUntilCompleterServerReady )
-from ycmd.utils import ReadFile
+from protoycmd.utils import ReadFile
 
 
 @SharedYcmd
@@ -147,7 +147,7 @@ def Subcommands_GoTo_WindowsNewlines_test():
 
 
 @IsolatedYcmd
-@patch( 'ycmd.utils.WaitUntilProcessIsTerminated',
+@patch( 'protoycmd.utils.WaitUntilProcessIsTerminated',
         MockProcessTerminationTimingOut )
 def Subcommands_StopServer_Timeout_test( app ):
   WaitUntilCompleterServerReady( app, 'go' )

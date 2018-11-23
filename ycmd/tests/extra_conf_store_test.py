@@ -28,7 +28,7 @@ from mock import patch
 from hamcrest import ( assert_that, calling, equal_to, has_length, has_property,
                        none, raises, same_instance )
 from ycmd import extra_conf_store
-from ycmd.responses import UnknownExtraConf
+from protoycmd.responses import UnknownExtraConf
 from ycmd.tests import IsolatedYcmd, PathToTestFile
 from ycmd.tests.test_utils import TemporarySymlink, UnixOnly, WindowsOnly
 

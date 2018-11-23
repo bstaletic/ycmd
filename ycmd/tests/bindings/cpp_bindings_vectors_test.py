@@ -22,9 +22,9 @@ from __future__ import absolute_import
 # Not installing aliases from python-future; it's unreliable and slow.
 from builtins import *  # noqa
 
-from ycmd.utils import ToCppStringCompatible as ToCppStr
+from protoycmd.utils import ToCppStringCompatible as ToCppStr
 from ycmd.completers.cpp.clang_completer import ConvertCompletionData
-from ycmd.responses import BuildDiagnosticData
+from protoycmd.responses import BuildDiagnosticData
 from ycmd.tests.bindings import PathToTestFile
 from ycmd.tests.test_utils import ClangOnly
 

@@ -31,7 +31,7 @@ import requests
 from ycmd.tests.tern import ( IsolatedYcmd, PathToTestFile, SharedYcmd,
                               StartJavaScriptCompleterServerInDirectory )
 from ycmd.tests.test_utils import CombineRequest, CompletionEntryMatcher
-from ycmd.utils import ReadFile
+from protoycmd.utils import ReadFile
 
 # The following properties/methods are in Object.prototype, so are present
 # on all objects:
