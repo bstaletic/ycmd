@@ -68,7 +68,7 @@ def BuildRequest( line_num, column_num ):
 def SetUpGoCompleter( test ):
   @functools.wraps( test )
   def Wrapper( *args, **kwargs ):
-    protouser_options = user_options_store.DefaultOptions()
+    user_options = user_options_store.DefaultOptions()
     user_options[ 'gocode_binary_path' ] = DUMMY_BINARY
     with patch( 'protoycmd.utils.SafePopen' ):
       completer = GoCompleter( user_options )
@@ -77,7 +77,7 @@ def SetUpGoCompleter( test ):
 
 
 def FindGoCodeBinary_test():
-  protouser_options = user_options_store.DefaultOptions()
+  user_options = user_options_store.DefaultOptions()
 
   eq_( GO_BINARIES.get( "gocode" ), FindBinary( "gocode", user_options ) )
 

@@ -35,8 +35,9 @@ from bottle import request
 import ycm_core
 from ycmd import extra_conf_store, hmac_plugin, server_state
 from protoycmd import user_options_store
-from protoycmd.responses import ( BuildExceptionResponse, BuildCompletionResponse,
-                             UnknownExtraConf )
+from protoycmd.responses import ( BuildExceptionResponse,
+                                  BuildCompletionResponse,
+                                  UnknownExtraConf )
 from protoycmd.request_wrap import RequestWrap
 from ycmd.bottle_utils import SetResponseHeader
 from protoycmd.completers.completer_utils import FilterAndSortCandidatesWrap
