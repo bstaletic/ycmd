@@ -202,11 +202,8 @@ endif()
 
 set( PYBIND11_INCLUDES_DIR "${CMAKE_SOURCE_DIR}/pybind11" )
 
-if ( NOT MSVC )
-  set( TBB_INCLUDES_DIR "${CMAKE_SOURCE_DIR}/../third_party/tbb/include" )
-  set( PSTL_INCLUDES_DIR "${CMAKE_SOURCE_DIR}/../third_party/parallelstl/include" )
-  include_directories( SYSTEM ${PSTL_INCLUDES_DIR} ${TBB_INCLUDES_DIR} )
-endif()
+set( TBB_INCLUDES_DIR "${CMAKE_SOURCE_DIR}/tbb/include" )
+set( PSTL_INCLUDES_DIR "${CMAKE_SOURCE_DIR}/parallelstl/include" )
 
 file( GLOB_RECURSE SERVER_SOURCES *.h *.cpp )
 
@@ -244,6 +241,7 @@ include_directories(
   SYSTEM
   ${Boost_INCLUDE_DIR}
   ${PYBIND11_INCLUDES_DIR}
+  ${TBB_INCLUDES_DIR}
   ${PSTL_INCLUDES_DIR}
   ${PYTHON_INCLUDE_DIRS}
   ${CLANG_INCLUDES_DIR}
@@ -327,16 +325,23 @@ if ( UNIX AND NOT ( APPLE OR SYSTEM_IS_OPENBSD OR HAIKU ) )
   set( EXTRA_LIBS rt )
 endif()
 
-set( EXTRA_LIBS "${EXTRA_LIBS}" )
-
 #############################################################################
-
-if ( NOT MSVC )
-  include( ${CMAKE_SOURCE_DIR}/../third_party/tbb/cmake/TBBBuild.cmake )
-  tbb_build( TBB_ROOT ${CMAKE_SOURCE_DIR}/../third_party/tbb
+option( USE_SYSTEM_TBB "If on, find the system install TBB" OFF )
+if( NOT USE_SYSTEM_TBB )
+  include( ${CMAKE_SOURCE_DIR}/tbb/cmake/TBBBuild.cmake )
+  tbb_build( TBB_ROOT ${CMAKE_SOURCE_DIR}/tbb
+             MAKE_ARGS "tbb_build_dir=${CMAKE_SOURCE_DIR}/../tbb"
              CONFIG_DIR TBB_DIR )
   find_package( TBB REQUIRED tbb )
+else()
+  find_library( TBB tbb )
+  if( NOT TBB )
+    message( FATAL_ERROR "TBB not found" )
+  else()
+    set( TBB_IMPORTED_TARGETS ${TBB} )
+  endif()
 endif()
+
 add_library( ${PROJECT_NAME} SHARED
              ${SERVER_SOURCES}
            )
@@ -447,10 +452,6 @@ if ( USE_DEV_FLAGS AND ( CMAKE_COMPILER_IS_GNUCXX OR COMPILER_IS_CLANG ) AND
      NOT CMAKE_GENERATOR_IS_XCODE )
   # We want all warnings, and warnings should be treated as errors
   set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror" )
-endif()
-
-if ( NOT MSVC )
-  set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp" )
 endif()
 
 #############################################################################

@@ -82,6 +82,10 @@ get_python_inc(),
 '-isystem',
 'cpp/ycm/tests/gmock/include',
 '-isystem',
+'cpp/parallelstl/include',
+'-isystem',
+'cpp/tbb/include',
+'-isystem',
 'cpp/ycm/benchmarks/benchmark/include',
 ]
 
@@ -90,12 +94,6 @@ get_python_inc(),
 # versions.
 if platform.system() != 'Windows':
   flags.append( '-std=c++11' )
-  flags.extend( [ '-isystem', os.path.join( DIR_OF_THIRD_PARTY,
-                                            'tbb',
-                                            'include' ),
-                  '-isystem', os.path.join( DIR_OF_THIRD_PARTY,
-                                            'parallelstl',
-                                            'include' ) ] )
 
 
 # Set this to the absolute path to the folder (NOT the file!) containing the

@@ -46,6 +46,10 @@ PYTHON_USED_DURING_BUILDING
 cpp/BoostParts/libs/*/build
 cpp/BoostParts/libs/*/test
 
+# Exclude Intel TBB build directories
+tbb/tbb_cmake_build_subdir_debug
+tbb/tbb_cmake_build_subdir_release
+
 # Exclude auto generated vim doc tags.
 doc/tags
 

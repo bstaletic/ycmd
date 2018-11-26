@@ -24,10 +24,8 @@
 #include <string>
 #include <vector>
 
-#ifndef _WIN32
 #include <pstl/algorithm>
 #include <pstl/execution>
-#endif
 
 namespace fs = boost::filesystem;
 
@@ -135,14 +133,12 @@ void PartialSort( std::vector< Element > &elements,
     std::partial_sort( elements.begin(),
                        elements.begin() + max_elements,
                        elements.end() );
-#ifndef _WIN32
   } else if ( nb_elements >= 2048 && max_elements >= 2048 ) {
     std::nth_element( std::execution::par,
                       elements.begin(),
                       elements.begin() + max_elements,
                       elements.end() );
     std::sort( std::execution::par, elements.begin(), elements.begin() + max_elements );
-#endif
   } else {
     std::nth_element( elements.begin(),
                       elements.begin() + max_elements,
