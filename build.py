@@ -741,6 +741,10 @@ def EnableTypeScriptCompleter( args ):
              quiet = args.quiet,
              status_message = 'Installing TSServer for JavaScript '
                               'and TypeScript completion' )
+  CheckCall( [ npm, 'install', '-g', '--prefix', tsserver_folder,
+               'ts-vue-plugin' ],
+             quiet = args.quiet,
+             status_message = 'Installing ts-vue-plugin for Vue completion' )
 
 
 def WritePythonUsedDuringBuild():
