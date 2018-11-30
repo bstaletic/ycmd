@@ -42,9 +42,21 @@ DIR_OF_CPP_SOURCES = os.path.join( DIR_OF_THIS_SCRIPT, 'cpp', 'ycm' )
 UNICODE_TABLE_TEMPLATE = (
   """// This file was automatically generated with the update_unicode.py script
 // using version {unicode_version} of the Unicode Character Database.
-static const std::array< const RawCodePoint, {size} > code_points = {{ {{
+#include <array>
+struct RawCodePointArray {{
+std::array< char[5], {size} > original;
+std::array< char[13], {size} > normal;
+std::array< char[13], {size} > folded_case;
+std::array< char[13], {size} > swapped_case;
+std::array< bool, {size} > is_letter;
+std::array< bool, {size} > is_punctuation;
+std::array< bool, {size} > is_uppercase;
+std::array< uint8_t, {size} > break_property;
+std::array< uint8_t, {size} > combining_class;
+}};
+static const RawCodePointArray code_points = {{
 {code_points}
-}} }};""" )
+}};""" )
 UNICODE_VERSION_REGEX = re.compile( r'Version (?P<version>\d+(?:\.\d+){2})' )
 GRAPHEME_BREAK_PROPERTY_REGEX = re.compile(
   r'^(?P<value>[A-F0-9.]+)\s+; (?P<property>\w+) # .*$' )
@@ -489,17 +501,52 @@ def CppBool( statement ):
 def GenerateUnicodeTable( header_path, code_points ):
   unicode_version = GetUnicodeVersion()
   size = len( code_points )
-  code_points = '\n'.join( [
-    ( '{' + CppChar( code_point[ 'original' ] ) + ',' +
-            CppChar( code_point[ 'normal' ] ) + ',' +
-            CppChar( code_point[ 'folded_case' ] ) + ',' +
-            CppChar( code_point[ 'swapped_case' ] ) + ',' +
-            CppBool( code_point[ 'is_letter' ] ) + ',' +
-            CppBool( code_point[ 'is_punctuation' ] ) + ',' +
-            CppBool( code_point[ 'is_uppercase' ] ) + ',' +
-            str( code_point[ 'break_property' ] ) + ',' +
-            str( code_point[ 'combining_class' ] ) + '},' )
-    for code_point in code_points ] )
+  original = '{{'
+  normal = '{{'
+  folded_case = '{{'
+  swapped_case = '{{'
+  is_letter = '{{'
+  is_punctuation = '{{'
+  is_uppercase = '{{'
+  break_property = '{{'
+  combining_class = '{{'
+  for code_point in code_points:
+    original += CppChar( code_point[ 'original' ] ) + ','
+    normal += CppChar( code_point[ 'normal' ] ) + ','
+    folded_case += CppChar( code_point[ 'folded_case' ] ) + ','
+    swapped_case += CppChar( code_point[ 'swapped_case' ] ) + ','
+    is_letter += CppBool( code_point[ 'is_letter' ] ) + ','
+    is_punctuation += CppBool( code_point[ 'is_punctuation' ] ) + ','
+    is_uppercase += CppBool( code_point[ 'is_uppercase' ] ) + ','
+    break_property += str( code_point[ 'break_property' ] ) + ','
+    combining_class += str( code_point[ 'combining_class' ] ) + ','
+  original = original.rstrip( ',' )
+  original += '}},'
+  normal = normal.rstrip( ',' )
+  normal += '}},'
+  folded_case = folded_case.rstrip( ',' )
+  folded_case += '}},'
+  swapped_case = swapped_case.rstrip( ',' )
+  swapped_case += '}},'
+  is_letter = is_letter.rstrip( ',' )
+  is_letter += '}},'
+  is_punctuation = is_punctuation.rstrip( ',' )
+  is_punctuation += '}},'
+  is_uppercase = is_uppercase.rstrip( ',' )
+  is_uppercase += '}},'
+  break_property = break_property.rstrip( ',' )
+  break_property += '}},'
+  combining_class = combining_class.rstrip( ',' )
+  combining_class += '}}'
+  code_points = '\n'.join( [ original,
+                             normal,
+                             folded_case,
+                             swapped_case,
+                             is_letter,
+                             is_punctuation,
+                             is_uppercase,
+                             break_property,
+                             combining_class ] )
   contents = UNICODE_TABLE_TEMPLATE.format( unicode_version = unicode_version,
                                             size = size,
                                             code_points = code_points )
