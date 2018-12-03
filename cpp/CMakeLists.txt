@@ -156,7 +156,7 @@ endif()
 
 #############################################################################
 
-# Determining the presence of C++11 support in the compiler
+# Determining the presence of C++17 support in the compiler
 set( CPP17_AVAILABLE false )
 if ( CMAKE_COMPILER_IS_GNUCXX )
   if ( NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 8.0 )
@@ -165,11 +165,11 @@ if ( CMAKE_COMPILER_IS_GNUCXX )
 elseif( COMPILER_IS_CLANG )
   if ( NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 7.0 )
     set( CPP17_AVAILABLE true )
-    set( CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++11" )
+    set( CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++17" )
     set( CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libc++" )
   endif()
 elseif( MSVC )
-  if ( NOT MSVC_VERSION LESS 1940 )
+  if ( NOT MSVC_VERSION LESS 1914 )
     set( CPP17_AVAILABLE true )
   endif()
 endif()
@@ -192,9 +192,9 @@ endif()
 
 #############################################################################
 
-# When used with Clang, adding the -std=c++11 flag to CMAKE_CXX_FLAGS will cause
+# When used with Clang, adding the -std=c++17 flag to CMAKE_CXX_FLAGS will cause
 # the compiler to output a warning during linking:
-#  clang: warning: argument unused during compilation: '-std=c++11'
+#  clang: warning: argument unused during compilation: '-std=c++17'
 # This is caused by cmake passing this flag to the linking stage which it
 # shouldn't do. It's ignored so it does no harm, but the warning is annoying.
 #
@@ -233,7 +233,7 @@ else()
     endif()
   endif()
 
-  message( FATAL_ERROR "Your C++ compiler does NOT fully support C++11." )
+  message( FATAL_ERROR "Your C++ compiler does NOT fully support C++17." )
 endif()
 
 # Note: build.py always explicitly sets this option, so the default used here
