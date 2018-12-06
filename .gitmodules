@@ -42,3 +42,6 @@
 [submodule "third_party/cctz"]
 	path = cpp/cctz
 	url = https://github.com/google/cctz
+[submodule "cpp/absail"]
+	url = https://github.com/bstaletic/abseil-cpp
+	branch = master
