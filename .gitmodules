@@ -42,3 +42,4 @@
 [submodule "cpp/absail"]
 	url = https://github.com/bstaletic/abseil-cpp
 	branch = master
+	path = cpp/absail
