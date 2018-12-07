@@ -188,7 +188,7 @@ endif()
 # number of sections that an object file can hold. This is needed for storing
 # the Unicode table. Also, force MSVC to treat source files as UTF-8 encoded.
 if ( MSVC )
-  add_definitions( /DUNICODE /D_UNICODE /Zc:wchar_t- )
+  add_definitions( /DUNICODE /D_UNICODE )
   set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:wchar_t /MP /bigobj /utf-8" )
 endif()
 
