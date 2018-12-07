@@ -189,7 +189,7 @@ endif()
 # the Unicode table. Also, force MSVC to treat source files as UTF-8 encoded.
 if ( MSVC )
   add_definitions( /DUNICODE /D_UNICODE )
-  set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:wchar_t /MP /bigobj /utf-8" )
+  set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /bigobj /utf-8" )
 endif()
 
 if( MSVC OR CYGWIN OR MSYS)
