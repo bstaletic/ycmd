@@ -273,5 +273,9 @@ if (NOT USE_SYSTEM_BOOST)
   add_subdirectory( BoostParts )
 endif()
 
+# Abseil uses these variables to set default compiler flags.
+list( APPEND LLVM_FLAGS "-fPIC" )
+list( APPEND GCC_FLAGS "-fPIC" )
+
 add_subdirectory( absail )
 add_subdirectory( ycm )
