@@ -22,28 +22,8 @@
 
 namespace YouCompleteMe {
 
-class UtilsTest : public ::testing::Test {
-protected:
-  virtual void SetUp() {
-    // The returned temporary path is a symlink on macOS.
-    tmp_dir = std::tmpnam( nullptr );
-    existing_path = tmp_dir / "existing_path";
-    symlink = tmp_dir / "symlink";
-    fs::create_directories( existing_path );
-    fs::create_directory_symlink( existing_path, symlink );
-  }
 
-  virtual void TearDown() {
-    fs::remove_all( tmp_dir );
-  }
-
-  fs::path tmp_dir;
-  fs::path existing_path;
-  fs::path symlink;
-};
-
-
-TEST_F( UtilsTest, IsUppercase ) {
+TEST( UtilsTest, IsUppercase ) {
   EXPECT_TRUE( IsUppercase( 'A' ) );
   EXPECT_TRUE( IsUppercase( 'B' ) );
   EXPECT_TRUE( IsUppercase( 'Z' ) );
@@ -57,7 +37,7 @@ TEST_F( UtilsTest, IsUppercase ) {
   EXPECT_FALSE( IsUppercase( '~' ) );
 }
 
-TEST_F( UtilsTest, Lowercase ) {
+TEST( UtilsTest, Lowercase ) {
   EXPECT_EQ( Lowercase( 'a' ), 'a' );
   EXPECT_EQ( Lowercase( 'z' ), 'z' );
   EXPECT_EQ( Lowercase( 'A' ), 'a' );
