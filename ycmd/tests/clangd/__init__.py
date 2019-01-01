@@ -36,7 +36,7 @@ from ycmd.tests.test_utils import ( ClearCompletionsCache,
                                     SetUpApp,
                                     StopCompleterServer,
                                     WaitUntilCompleterServerReady )
-from ycmd.utils import ReadFile
+from protoycmd.utils import ReadFile
 from ycmd.completers.cpp import clangd_completer
 
 shared_app = None

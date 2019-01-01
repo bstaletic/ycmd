@@ -209,7 +209,7 @@ def ClangdCompleter_ShutdownFail_test( app ):
 
 def ClangdCompleter_Get3rdParty_test():
   CLANGD = '/third_party/clangd'
-  with patch( 'ycmd.utils.GetExecutable', return_value = CLANGD ):
+  with patch( 'protoycmd.utils.GetExecutable', return_value = CLANGD ):
     with patch( 'ycmd.completers.cpp.clangd_completer.CheckClangdVersion',
                 return_value = True ):
       eq_( clangd_completer.Get3rdPartyClangd(), CLANGD )

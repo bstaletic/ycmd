@@ -29,7 +29,7 @@ from hamcrest import ( assert_that,
                        matches_regexp )
 import os.path
 
-from ycmd.utils import ReadFile
+from protoycmd.utils import ReadFile
 from ycmd.tests.python import PathToTestFile, SharedYcmd
 from ycmd.tests.test_utils import BuildRequest, LocationMatcher, ErrorMatcher
 

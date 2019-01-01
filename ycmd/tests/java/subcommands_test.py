@@ -35,7 +35,7 @@ from nose.tools import eq_
 from pprint import pformat
 import requests
 
-from ycmd.utils import ReadFile
+from protoycmd.utils import ReadFile
 from ycmd.completers.java.java_completer import NO_DOCUMENTATION_MESSAGE
 from ycmd.tests.java import ( DEFAULT_PROJECT_DIR,
                               PathToTestFile,

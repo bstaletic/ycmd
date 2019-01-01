@@ -26,7 +26,7 @@ import json
 import os
 from frozendict import frozendict
 
-from ycmd.utils import ReadFile
+from protoycmd.utils import ReadFile
 
 _USER_OPTIONS = {}
 

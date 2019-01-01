@@ -37,7 +37,7 @@ from ycmd.tests.clangd import ( IsolatedYcmd,
                                 PathToTestFile,
                                 RunAfterInitialized )
 from ycmd.tests.test_utils import BuildRequest, LocationMatcher, RangeMatcher
-from ycmd.utils import ReadFile
+from protoycmd.utils import ReadFile
 from ycmd import handlers
 
 

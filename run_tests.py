@@ -35,6 +35,7 @@ python_path = [
           'cregex',
           'regex_{}'.format( sys.version_info[ 0 ] ) ),
   p.join( DIR_OF_THIRD_PARTY, 'frozendict' ),
+  p.join( DIR_OF_THIRD_PARTY, 'protoycmd' ),
   p.join( DIR_OF_THIRD_PARTY, 'jedi_deps', 'jedi' ),
   p.join( DIR_OF_THIRD_PARTY, 'jedi_deps', 'parso' ),
   p.join( DIR_OF_THIRD_PARTY, 'requests_deps', 'certifi' ),

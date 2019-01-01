@@ -37,7 +37,7 @@ import requests
 from ycmd.tests.javascript import PathToTestFile, SharedYcmd
 from ycmd.tests.test_utils import ( BuildRequest, ChunkMatcher,
                                     CompletionEntryMatcher, LocationMatcher )
-from ycmd.utils import ReadFile
+from protoycmd.utils import ReadFile
 
 
 def RunTest( app, test ):

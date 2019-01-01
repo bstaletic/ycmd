@@ -37,7 +37,7 @@ from hamcrest import ( all_of,
                        is_not )
 import requests
 
-from ycmd.utils import ReadFile
+from protoycmd.utils import ReadFile
 from ycmd.tests.python import IsolatedYcmd, PathToTestFile, SharedYcmd
 from ycmd.tests.test_utils import ( BuildRequest,
                                     CombineRequest,

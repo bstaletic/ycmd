@@ -30,7 +30,7 @@ from hamcrest import ( assert_that, contains, contains_inanyorder, has_entries,
 
 from ycmd.tests.typescript import IsolatedYcmd, PathToTestFile, SharedYcmd
 from ycmd.tests.test_utils import BuildRequest, LocationMatcher, RangeMatcher
-from ycmd.utils import ReadFile
+from protoycmd.utils import ReadFile
 
 
 @SharedYcmd

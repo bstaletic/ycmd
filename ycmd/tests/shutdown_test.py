@@ -28,7 +28,7 @@ import time
 import requests
 
 from ycmd.tests.client_test import Client_test
-from ycmd.utils import StartThread
+from protoycmd.utils import StartThread
 
 # Time to wait for all the servers to shutdown. Tweak for the CI environment.
 #

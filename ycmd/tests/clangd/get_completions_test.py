@@ -43,7 +43,7 @@ from ycmd.tests.test_utils import ( BuildRequest,
                                     skipIf,
                                     WaitUntilCompleterServerReady,
                                     WindowsOnly )
-from ycmd.utils import ReadFile
+from protoycmd.utils import ReadFile
 from ycmd.user_options_store import DefaultOptions
 
 Clangd8Only = skipIf(

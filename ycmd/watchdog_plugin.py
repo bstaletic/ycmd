@@ -26,7 +26,7 @@ import time
 import copy
 from threading import Lock
 from ycmd.handlers import ServerShutdown
-from ycmd.utils import LOGGER, StartThread
+from protoycmd.utils import LOGGER, StartThread
 
 
 # This class implements the Bottle plugin API:

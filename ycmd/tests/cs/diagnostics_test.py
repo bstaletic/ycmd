@@ -31,7 +31,7 @@ from ycmd.tests.test_utils import ( BuildRequest, LocationMatcher,
                                     RangeMatcher,
                                     WaitUntilCompleterServerReady,
                                     StopCompleterServer )
-from ycmd.utils import ReadFile
+from protoycmd.utils import ReadFile
 
 
 @SharedYcmd

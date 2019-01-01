@@ -44,7 +44,7 @@ from ycmd.tests.test_utils import ( BuildRequest,
                                     CompletionEntryMatcher,
                                     LocationMatcher,
                                     StopCompleterServer )
-from ycmd.utils import ReadFile
+from protoycmd.utils import ReadFile
 
 
 def RunTest( app, test ):

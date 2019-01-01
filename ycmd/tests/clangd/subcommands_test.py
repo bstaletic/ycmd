@@ -37,7 +37,7 @@ from ycmd.tests.clangd import ( IsolatedYcmd,
 from ycmd.tests.test_utils import ( BuildRequest,
                                     ChunkMatcher,
                                     LineColMatcher )
-from ycmd.utils import ReadFile
+from protoycmd.utils import ReadFile
 
 
 # This test is isolated to trigger objcpp hooks, rather than fetching completer

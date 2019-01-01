@@ -45,7 +45,7 @@ from ycmd.tests.test_utils import ( BuildRequest,
                                     MockProcessTerminationTimingOut,
                                     TemporaryTestDir,
                                     WaitUntilCompleterServerReady )
-from ycmd import utils, handlers
+from protoycmd import utils, handlers
 
 
 def _ProjectDirectoryMatcher( project_directory ):
@@ -344,7 +344,7 @@ def ServerManagement_ProjectDetection_NoParent_test():
 
 @IsolatedYcmd()
 @patch( 'shutil.rmtree', side_effect = OSError )
-@patch( 'ycmd.utils.WaitUntilProcessIsTerminated',
+@patch( 'protoycmd.utils.WaitUntilProcessIsTerminated',
         MockProcessTerminationTimingOut )
 def ServerManagement_CloseServer_Unclean_test( app, *args ):
   StartJavaCompleterServerInDirectory(

@@ -203,6 +203,7 @@ def PythonSysPath( **kwargs ):
                    p.join( DIR_OF_THIRD_PARTY, 'python-future', 'src' ) )
   sys_path[ 0:0 ] = [ p.join( DIR_OF_THIS_SCRIPT ),
                       p.join( DIR_OF_THIRD_PARTY, 'bottle' ),
+                      p.join( DIR_OF_THIRD_PARTY, 'protoycmd' ),
                       p.join( DIR_OF_THIRD_PARTY, 'cregex',
                               'regex_{}'.format( major_version ) ),
                       p.join( DIR_OF_THIRD_PARTY, 'frozendict' ),

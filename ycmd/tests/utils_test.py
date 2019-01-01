@@ -40,15 +40,17 @@ from hamcrest import ( assert_that,
 from mock import patch, call
 from nose.tools import eq_, ok_
 from types import ModuleType
-from ycmd import utils
+from protoycmd import utils
 from ycmd.tests.test_utils import ( Py2Only, Py3Only, WindowsOnly, UnixOnly,
                                     CurrentWorkingDirectory,
                                     TemporaryExecutable )
 from ycmd.tests import PathToTestFile
-from ycmd.utils import CompatibleWithCurrentCore
+from protoycmd.utils import CompatibleWithCurrentCore
 
 # NOTE: isinstance() vs type() is carefully used in this test file. Before
 # changing things here, read the comments in utils.ToBytes.
+
+DIR_OF_THIS_SCRIPT = os.path.abspath( os.path.dirname( __file__ ) )
 
 
 @Py2Only
@@ -343,7 +345,7 @@ def SafePopen_ReplaceStdinWindowsPIPEOnWindows_test( *args ):
 
 
 @WindowsOnly
-@patch( 'ycmd.utils.GetShortPathName', side_effect = lambda x: x )
+@patch( 'protoycmd.utils.GetShortPathName', side_effect = lambda x: x )
 @patch( 'subprocess.Popen' )
 def SafePopen_WindowsPath_test( *args ):
   tempfile = PathToTestFile( 'safe-popen-file' )
@@ -595,7 +597,7 @@ def FindExecutable_AdditionalPathExt_test():
     eq_( executable, utils.FindExecutable( executable ) )
 
 
-@patch( 'ycmd.utils.ProcessIsRunning', return_value = True )
+@patch( 'protoycmd.utils.ProcessIsRunning', return_value = True )
 def WaitUntilProcessIsTerminated_TimedOut_test( *args ):
   assert_that(
     calling( utils.WaitUntilProcessIsTerminated ).with_args( None,
@@ -638,20 +640,25 @@ def HashableDict_Equality_test():
   ok_( utils.HashableDict( dict1 ) != utils.HashableDict( dict2 ) )
 
 
-@patch( 'ycmd.utils.LOGGER', autospec = True )
+@patch( 'protoycmd.utils.LOGGER', autospec = True )
 def RunCompatibleWithCurrentCoreImportException( test, logger ):
-  with patch( 'ycmd.utils.ImportCore',
+  with patch( 'protoycmd.utils.ImportCore',
               side_effect = ImportError( test[ 'exception_message' ] ) ):
-    assert_that( CompatibleWithCurrentCore(),
+    assert_that( CompatibleWithCurrentCore( os.path.join( DIR_OF_THIS_SCRIPT,
+                                                          '..',
+                                                          '..' ) ),
                  equal_to( test[ 'exit_status' ] ) )
 
   assert_that( logger.method_calls, has_length( 1 ) )
   logger.exception.assert_called_with( test[ 'logged_message' ] )
 
 
-@patch( 'ycmd.utils.LOGGER', autospec = True )
+@patch( 'protoycmd.utils.LOGGER', autospec = True )
 def CompatibleWithCurrentCore_Compatible_test( logger ):
-  assert_that( CompatibleWithCurrentCore(), equal_to( 0 ) )
+  assert_that( CompatibleWithCurrentCore( os.path.join( DIR_OF_THIS_SCRIPT,
+                                                        '..',
+                                                        '..' ) ),
+               equal_to( 0 ) )
   assert_that( logger.method_calls, empty() )
 
 
@@ -719,10 +726,13 @@ def CompatibleWithCurrentCore_Python3_test():
 
 
 @patch( 'ycm_core.YcmCoreVersion', side_effect = AttributeError() )
-@patch( 'ycmd.utils.LOGGER', autospec = True )
+@patch( 'protoycmd.utils.LOGGER', autospec = True )
 def CompatibleWithCurrentCore_Outdated_NoYcmCoreVersionMethod_test( logger,
                                                                     *args ):
-  assert_that( CompatibleWithCurrentCore(), equal_to( 7 ) )
+  assert_that( CompatibleWithCurrentCore( os.path.join( DIR_OF_THIS_SCRIPT,
+                                                        '..',
+                                                        '..' ) ),
+               equal_to( 7 ) )
   assert_that( logger.method_calls, has_length( 1 ) )
   logger.exception.assert_called_with(
     'ycm_core library too old; PLEASE RECOMPILE by running the build.py '
@@ -730,10 +740,13 @@ def CompatibleWithCurrentCore_Outdated_NoYcmCoreVersionMethod_test( logger,
 
 
 @patch( 'ycm_core.YcmCoreVersion', return_value = 10 )
-@patch( 'ycmd.utils.ExpectedCoreVersion', return_value = 11 )
-@patch( 'ycmd.utils.LOGGER', autospec = True )
+@patch( 'protoycmd.utils.ExpectedCoreVersion', return_value = 11 )
+@patch( 'protoycmd.utils.LOGGER', autospec = True )
 def CompatibleWithCurrentCore_Outdated_NoVersionMatch_test( logger, *args ):
-  assert_that( CompatibleWithCurrentCore(), equal_to( 7 ) )
+  assert_that( CompatibleWithCurrentCore( os.path.join( DIR_OF_THIS_SCRIPT,
+                                                        '..',
+                                                        '..' ) ),
+               equal_to( 7 ) )
   assert_that( logger.method_calls, has_length( 1 ) )
   logger.error.assert_called_with(
     'ycm_core library too old; PLEASE RECOMPILE by running the build.py '

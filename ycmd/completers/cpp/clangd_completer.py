@@ -27,11 +27,11 @@ import os
 import threading
 import re
 
-from ycmd import responses, utils
-from ycmd.completers.completer_utils import GetFileLines
+from protoycmd import responses, utils
+from protoycmd.completers.completer_utils import GetFileLines
 from ycmd.completers.language_server import language_server_completer
 from ycmd.completers.language_server import language_server_protocol as lsp
-from ycmd.utils import LOGGER
+from protoycmd.utils import LOGGER
 
 MIN_SUPPORTED_VERSION = '7.0.0'
 INCLUDE_REGEX = re.compile(

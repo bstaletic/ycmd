@@ -39,9 +39,9 @@ import shutil
 import json
 
 from ycmd import extra_conf_store, handlers, user_options_store
-from ycmd.completers.completer import Completer
-from ycmd.responses import BuildCompletionData
-from ycmd.utils import ( GetCurrentDirectory,
+from protoycmd.completers.completer import Completer
+from protoycmd.responses import BuildCompletionData
+from protoycmd.utils import ( GetCurrentDirectory,
                          OnMac,
                          OnWindows,
                          ToUnicode,
@@ -208,7 +208,7 @@ def SetUpApp( custom_options = {} ):
 
 @contextlib.contextmanager
 def IgnoreExtraConfOutsideTestsFolder():
-  with patch( 'ycmd.utils.IsRootDirectory',
+  with patch( 'protoycmd.utils.IsRootDirectory',
               lambda path, parent: path in [ parent, TESTS_DIR ] ):
     yield
 

@@ -24,7 +24,7 @@ from __future__ import absolute_import
 from builtins import *  # noqa
 
 from ycmd.completers.general_completer import GeneralCompleter
-from ycmd import responses
+from protoycmd import responses
 
 
 class UltiSnipsCompleter( GeneralCompleter ):

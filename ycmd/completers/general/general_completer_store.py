@@ -22,7 +22,7 @@ from __future__ import absolute_import
 # Not installing aliases from python-future; it's unreliable and slow.
 from builtins import *  # noqa
 
-from ycmd.completers.completer import Completer
+from protoycmd.completers.completer import Completer
 from ycmd.completers.all.identifier_completer import IdentifierCompleter
 from ycmd.completers.general.filename_completer import FilenameCompleter
 from ycmd.completers.general.ultisnips_completer import UltiSnipsCompleter

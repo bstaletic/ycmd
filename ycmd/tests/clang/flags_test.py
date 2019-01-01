@@ -31,7 +31,7 @@ from mock import patch, MagicMock
 from types import ModuleType
 from ycmd.tests.test_utils import ( MacOnly, TemporaryTestDir, WindowsOnly,
                                     TemporaryClangProject )
-from ycmd.responses import NoExtraConfDetected
+from protoycmd.responses import NoExtraConfDetected
 from ycmd.completers.cpp.flags import _ShouldAllowWinStyleFlags
 
 from hamcrest import ( assert_that,

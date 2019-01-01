@@ -28,8 +28,8 @@ from hamcrest import ( assert_that, calling, contains, empty, equal_to,
                        has_entry, has_string, matches_regexp, raises )
 from nose.tools import eq_
 
-from ycmd.utils import ToBytes
-from ycmd.request_wrap import RequestWrap
+from protoycmd.utils import ToBytes
+from protoycmd.request_wrap import RequestWrap
 
 
 def PrepareJson( contents = '',

@@ -28,7 +28,7 @@ from hamcrest import all_of, assert_that, has_item, has_items
 
 from ycmd.tests.go import PathToTestFile, SharedYcmd
 from ycmd.tests.test_utils import BuildRequest, CompletionEntryMatcher
-from ycmd.utils import ReadFile
+from protoycmd.utils import ReadFile
 
 
 @SharedYcmd

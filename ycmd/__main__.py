@@ -40,9 +40,10 @@ import signal
 import os
 import base64
 
-from ycmd import extra_conf_store, user_options_store, utils
+from ycmd import extra_conf_store, user_options_store
 from ycmd.hmac_plugin import HmacPlugin
-from ycmd.utils import ( CompatibleWithCurrentCore,
+from protoycmd import utils
+from protoycmd.utils import ( CompatibleWithCurrentCore,
                          OpenForStdHandle,
                          ReadFile,
                          ToBytes )
@@ -163,7 +164,8 @@ def Main():
   YcmCoreSanityCheck()
   extra_conf_store.CallGlobalExtraConfYcmCorePreloadIfExists()
 
-  code = CompatibleWithCurrentCore()
+  code = CompatibleWithCurrentCore(
+      os.path.join( os.path.dirname( os.path.abspath( __file__ ) ), '..' ) )
   if code:
     sys.exit( code )
 

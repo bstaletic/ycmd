@@ -27,7 +27,7 @@ import os
 import inspect
 from future.utils import PY2, native
 from ycmd import extra_conf_store
-from ycmd.utils import ( ListDirectory,
+from protoycmd.utils import ( ListDirectory,
                          OnMac,
                          OnWindows,
                          PathsToAllParentFolders,
@@ -35,7 +35,7 @@ from ycmd.utils import ( ListDirectory,
                          ToCppStringCompatible,
                          ToBytes,
                          ToUnicode )
-from ycmd.responses import NoExtraConfDetected
+from protoycmd.responses import NoExtraConfDetected
 
 # -include-pch and --sysroot= must be listed before -include and --sysroot
 # respectively because the latter is a prefix of the former (and the algorithm

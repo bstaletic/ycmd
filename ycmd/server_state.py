@@ -27,7 +27,7 @@ from future.utils import itervalues
 from importlib import import_module
 from ycmd.completers.general.general_completer_store import (
     GeneralCompleterStore )
-from ycmd.utils import LOGGER
+from protoycmd.utils import LOGGER
 
 
 class ServerState( object ):
@@ -62,7 +62,10 @@ class ServerState( object ):
       try:
         module = import_module( 'ycmd.completers.{}.hook'.format( filetype ) )
         completer = module.GetCompleter( self._user_options )
-      except ImportError:
+      except ImportError as e:
+        LOGGER.debug( '\n\n\n' )
+        LOGGER.debug( e )
+        LOGGER.debug( '\n\n\n' )
         completer = None
 
       supported_filetypes = { filetype }
@@ -82,7 +85,6 @@ class ServerState( object ):
     for completer in completers:
       if completer:
         return completer
-
     raise ValueError( 'No semantic completer exists for filetypes: {0}'.format(
         current_filetypes ) )
 

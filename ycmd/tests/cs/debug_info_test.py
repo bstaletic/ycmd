@@ -28,7 +28,7 @@ from hamcrest import ( assert_that, contains, empty, has_entries, has_entry,
 from ycmd.tests.cs import PathToTestFile, SharedYcmd
 from ycmd.tests.test_utils import ( BuildRequest,
                                     WaitUntilCompleterServerReady )
-from ycmd.utils import ReadFile
+from protoycmd.utils import ReadFile
 
 
 @SharedYcmd

@@ -26,9 +26,9 @@ import os
 import ycm_core
 from collections import defaultdict
 from ycmd.completers.general_completer import GeneralCompleter
-from ycmd import identifier_utils
-from ycmd.utils import LOGGER, ToCppStringCompatible, SplitLines
-from ycmd import responses
+from protoycmd import identifier_utils
+from protoycmd.utils import LOGGER, ToCppStringCompatible, SplitLines
+from protoycmd import responses
 
 SYNTAX_FILENAME = 'YCM_PLACEHOLDER_FOR_SYNTAX'
 

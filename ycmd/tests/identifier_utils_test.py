@@ -25,7 +25,7 @@ from __future__ import absolute_import
 from builtins import *  # noqa
 
 from nose.tools import eq_, ok_
-from ycmd import identifier_utils as iu
+from protoycmd import identifier_utils as iu
 from hamcrest import assert_that, has_item
 
 

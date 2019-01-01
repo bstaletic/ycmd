@@ -30,8 +30,8 @@ import string
 import sys
 from threading import Lock
 from ycmd import user_options_store
-from ycmd.responses import UnknownExtraConf, YCM_EXTRA_CONF_FILENAME
-from ycmd.utils import ( ExpandVariablesInPath, LoadPythonSource, LOGGER,
+from protoycmd.responses import UnknownExtraConf, YCM_EXTRA_CONF_FILENAME
+from protoycmd.utils import ( ExpandVariablesInPath, LoadPythonSource, LOGGER,
                          PathsToAllParentFolders )
 from fnmatch import fnmatch
 

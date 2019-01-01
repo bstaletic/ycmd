@@ -27,7 +27,7 @@ from nose.tools import eq_
 from ycmd.user_options_store import DefaultOptions
 from ycmd.completers.all import identifier_completer as ic
 from ycmd.completers.all.identifier_completer import IdentifierCompleter
-from ycmd.request_wrap import RequestWrap
+from protoycmd.request_wrap import RequestWrap
 from ycmd.tests import PathToTestFile
 from ycmd.tests.test_utils import BuildRequest
 

@@ -65,6 +65,7 @@ def SetUpPythonPath():
                    p.join( DIR_OF_THIRD_PARTY, 'python-future', 'src' ) )
   sys.path[ 0:0 ] = [ p.join( ROOT_DIR ),
                       p.join( DIR_OF_THIRD_PARTY, 'bottle' ),
+                      p.join( DIR_OF_THIRD_PARTY, 'protoycmd' ),
                       p.join( DIR_OF_THIRD_PARTY, 'cregex',
                               'regex_{}'.format( sys.version_info[ 0 ] ) ),
                       p.join( DIR_OF_THIRD_PARTY, 'frozendict' ),

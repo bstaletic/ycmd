@@ -45,7 +45,7 @@ from ycmd import handlers
 from ycmd.completers.cpp.clang_completer import ( NO_COMPLETIONS_MESSAGE,
                                                   NO_COMPILE_FLAGS_MESSAGE,
                                                   PARSING_FILE_MESSAGE )
-from ycmd.responses import UnknownExtraConf, NoExtraConfDetected
+from protoycmd.responses import UnknownExtraConf, NoExtraConfDetected
 from ycmd.tests.clang import ( IsolatedYcmd,
                                MockCoreClangCompleter,
                                PathToTestFile,
@@ -58,7 +58,7 @@ from ycmd.tests.test_utils import ( BuildRequest,
                                     ExpectedFailure,
                                     LocationMatcher,
                                     WindowsOnly )
-from ycmd.utils import ReadFile
+from protoycmd.utils import ReadFile
 
 NO_COMPLETIONS_ERROR = ErrorMatcher( RuntimeError, NO_COMPLETIONS_MESSAGE )
 

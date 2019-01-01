@@ -33,9 +33,9 @@ import os
 
 from ycmd.completers.go.go_completer import ( _ComputeOffset, GoCompleter,
                                               GO_BINARIES, FindBinary )
-from ycmd.request_wrap import RequestWrap
+from protoycmd.request_wrap import RequestWrap
 from ycmd import user_options_store
-from ycmd.utils import ReadFile, ToBytes
+from protoycmd.utils import ReadFile, ToBytes
 
 TEST_DIR = os.path.dirname( os.path.abspath( __file__ ) )
 DATA_DIR = os.path.join( TEST_DIR, 'testdata' )
@@ -70,7 +70,7 @@ def SetUpGoCompleter( test ):
   def Wrapper( *args, **kwargs ):
     user_options = user_options_store.DefaultOptions()
     user_options[ 'gocode_binary_path' ] = DUMMY_BINARY
-    with patch( 'ycmd.utils.SafePopen' ):
+    with patch( 'protoycmd.utils.SafePopen' ):
       completer = GoCompleter( user_options )
       return test( completer, *args, **kwargs )
   return Wrapper

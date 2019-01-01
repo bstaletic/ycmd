@@ -72,7 +72,7 @@ def Shutdown_Clean_test( app ):
 
 @IsolatedYcmd()
 @patch( 'os.remove', side_effect = OSError )
-@patch( 'ycmd.utils.WaitUntilProcessIsTerminated',
+@patch( 'protoycmd.utils.WaitUntilProcessIsTerminated',
         MockProcessTerminationTimingOut )
 def Shutdown_Unclean_test( app, *args ):
   StartClangd( app )

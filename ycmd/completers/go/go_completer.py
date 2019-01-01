@@ -28,10 +28,10 @@ import os
 import subprocess
 import threading
 
-from ycmd import responses
-from ycmd import utils
-from ycmd.utils import LOGGER, ToBytes, ToUnicode, ExecutableName
-from ycmd.completers.completer import Completer
+from protoycmd import responses
+from protoycmd import utils
+from protoycmd.utils import LOGGER, ToBytes, ToUnicode, ExecutableName
+from protoycmd.completers.completer import Completer
 
 SHELL_ERROR_MESSAGE = ( 'Command {command} failed with code {code} and error '
                         '"{error}".' )

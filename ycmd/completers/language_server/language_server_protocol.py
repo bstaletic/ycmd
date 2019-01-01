@@ -26,7 +26,7 @@ import os
 import json
 import hashlib
 
-from ycmd.utils import ( ByteOffsetToCodepointOffset,
+from protoycmd.utils import ( ByteOffsetToCodepointOffset,
                          pathname2url,
                          ToBytes,
                          ToUnicode,

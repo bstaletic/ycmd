@@ -26,7 +26,7 @@ import os
 import glob
 from inspect import getfile
 from ycmd import extra_conf_store
-from ycmd.utils import LOGGER
+from protoycmd.utils import LOGGER
 
 
 def FindSolutionPath( filepath ):

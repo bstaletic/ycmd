@@ -30,10 +30,10 @@ import os
 import threading
 
 from collections import defaultdict, namedtuple
-from ycmd import responses
+from protoycmd import responses
 from ycmd.completers.general.filename_completer import ( GetPathType,
                                                          GetPathTypeName )
-from ycmd.utils import GetModificationTime, ListDirectory
+from protoycmd.utils import GetModificationTime, ListDirectory
 
 
 """ Represents single include completion candidate.

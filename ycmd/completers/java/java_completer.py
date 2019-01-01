@@ -30,10 +30,10 @@ import tempfile
 import threading
 from subprocess import PIPE
 
-from ycmd import responses, utils
+from protoycmd import responses, utils
 from ycmd.completers.language_server import language_server_completer
 from ycmd.completers.language_server import language_server_protocol as lsp
-from ycmd.utils import LOGGER
+from protoycmd.utils import LOGGER
 
 NO_DOCUMENTATION_MESSAGE = 'No documentation available for current context'
 

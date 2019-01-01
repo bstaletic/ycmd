@@ -30,11 +30,12 @@ import os
 import queue
 import threading
 
-from ycmd import extra_conf_store, responses, utils
-from ycmd.completers.completer import Completer
-from ycmd.completers.completer_utils import GetFileContents, GetFileLines
-from ycmd.utils import LOGGER
+from protoycmd import responses, utils
+from protoycmd.completers.completer import Completer
+from protoycmd.completers.completer_utils import GetFileContents, GetFileLines
+from protoycmd.utils import LOGGER
 
+from ycmd import extra_conf_store
 from ycmd.completers.language_server import language_server_protocol as lsp
 
 NO_HOVER_INFORMATION = 'No hover information.'

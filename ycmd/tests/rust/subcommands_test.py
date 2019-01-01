@@ -30,7 +30,7 @@ from ycmd.tests.rust import IsolatedYcmd, PathToTestFile, SharedYcmd
 from ycmd.tests.test_utils import ( BuildRequest,
                                     MockProcessTerminationTimingOut,
                                     WaitUntilCompleterServerReady )
-from ycmd.utils import ReadFile
+from protoycmd.utils import ReadFile
 
 
 @SharedYcmd
@@ -111,7 +111,7 @@ def Subcommands_GetDoc_Fail_Method_test( app ):
 
 
 @IsolatedYcmd()
-@patch( 'ycmd.utils.WaitUntilProcessIsTerminated',
+@patch( 'protoycmd.utils.WaitUntilProcessIsTerminated',
         MockProcessTerminationTimingOut )
 def Subcommands_StopServer_Timeout_test( app ):
   WaitUntilCompleterServerReady( app, 'rust' )

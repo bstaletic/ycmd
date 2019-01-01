@@ -41,7 +41,7 @@ from ycmd.tests.test_utils import ( BuildRequest,
                                     ErrorMatcher,
                                     LocationMatcher,
                                     MockProcessTerminationTimingOut )
-from ycmd.utils import ReadFile
+from protoycmd.utils import ReadFile
 
 
 @SharedYcmd
@@ -516,7 +516,7 @@ def Subcommands_RefactorRename_Unicode_test( app ):
 
 
 @IsolatedYcmd
-@patch( 'ycmd.utils.WaitUntilProcessIsTerminated',
+@patch( 'protoycmd.utils.WaitUntilProcessIsTerminated',
         MockProcessTerminationTimingOut )
 def Subcommands_StopServer_Timeout_test( app ):
   StartJavaScriptCompleterServerInDirectory( app, PathToTestFile() )
