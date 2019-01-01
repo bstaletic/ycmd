@@ -59,7 +59,7 @@ if [ "${YCMD_PYTHON_VERSION}" == "2.7" ]; then
   # FIXME: pip 10 fails to upgrade packages on Python 2.7.3 or older. See
   # https://github.com/pypa/pip/issues/5231 for the error. Revert to 2.7.2 once
   # this is fixed in pip.
-  PYENV_VERSION="2.7.9"
+  PYENV_VERSION="2.7.6"
 else
   PYENV_VERSION="3.4.0"
 fi
