@@ -29,7 +29,8 @@ import time
 
 from hamcrest import assert_that, contains, empty, has_entries, has_entry
 
-from ycmd import handlers, utils
+from protoycmd import utils
+from ycmd import handlers
 from ycmd.tests.clangd import ( IsolatedYcmd, PathToTestFile,
                                 RunAfterInitialized )
 from ycmd.tests.test_utils import ( BuildRequest, StopCompleterServer,

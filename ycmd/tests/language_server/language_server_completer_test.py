@@ -38,6 +38,7 @@ from hamcrest import ( all_of,
                        is_not,
                        raises )
 
+from protoycmd import utils, responses
 from ycmd.completers.language_server import language_server_completer as lsc
 from ycmd.completers.language_server.language_server_completer import (
     NO_HOVER_INFORMATION )
@@ -50,7 +51,7 @@ from ycmd.tests.test_utils import ( BuildRequest,
                                     LocationMatcher,
                                     RangeMatcher )
 from ycmd.tests.language_server import IsolatedYcmd, PathToTestFile
-from protoycmd import handlers, utils, responses
+from ycmd import handlers
 import os
 
 

@@ -46,7 +46,7 @@ from ycmd.tests.java import ( DEFAULT_PROJECT_DIR,
 from ycmd.tests.test_utils import ( BuildRequest, LocationMatcher, RangeMatcher,
                                     WithRetry )
 from protoycmd.utils import ReadFile, StartThread
-from ycmd.completers import completer
+from protoycmd.completers import completer
 
 from pprint import pformat
 from mock import patch
