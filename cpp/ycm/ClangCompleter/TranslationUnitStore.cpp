@@ -20,6 +20,7 @@
 #include "Utils.h"
 
 #include <functional>
+#include <numeric>
 
 using std::lock_guard;
 using std::shared_ptr;
@@ -34,11 +35,14 @@ std::size_t HashForFlags( const std::vector< std::string > &flags ) {
   // The algorithm has been taken straight from a TR1:
   // "Library Extension Technical Report - Issue List" section 6.18.
   // This is also the way Boost implements it.
-  size_t seed = 0;
-  for ( const auto &flag : flags )  {
-    seed ^= std::hash< std::string >()( flag ) + ( seed << 6 ) + ( seed >> 2 );
-  }
-  return seed;
+  return std::accumulate( flags.begin(),
+                          flags.end(),
+                          0,
+                          []( size_t seed, const std::string &flag ) {
+                            return seed ^ std::hash< std::string >()( flag ) +
+                                   ( seed << 6 ) +
+                                   ( seed >> 2 );
+                          } );
 }
 
 }  // unnamed namespace

@@ -42,9 +42,9 @@ size_t LongestCommonSubsequenceLength( const CharacterSequence &first,
       }
     }
 
-    for ( size_t j = 0; j < shorter_len; ++j ) {
-      previous[ j + 1 ] = current[ j + 1 ];
-    }
+    std::memcpy( previous.data() + 1,
+                 current.data() + 1,
+                 shorter_len * sizeof( size_t ) );
   }
 
   return current[ shorter_len ];

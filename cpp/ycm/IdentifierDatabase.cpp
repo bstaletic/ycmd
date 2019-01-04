@@ -36,10 +36,8 @@ void IdentifierDatabase::AddIdentifiers(
   const FiletypeIdentifierMap &filetype_identifier_map ) {
   std::lock_guard< std::mutex > locker( filetype_candidate_map_mutex_ );
 
-  for ( const FiletypeIdentifierMap::value_type & filetype_and_map :
-            filetype_identifier_map ) {
-    for ( const FilepathToIdentifiers::value_type & filepath_and_identifiers :
-             filetype_and_map.second ) {
+  for ( const auto & filetype_and_map : filetype_identifier_map ) {
+    for ( const auto & filepath_and_identifiers : filetype_and_map.second ) {
       AddIdentifiersNoLock( filepath_and_identifiers.second,
                             filetype_and_map.first,
                             filepath_and_identifiers.first );
@@ -86,8 +84,7 @@ void IdentifierDatabase::ResultsForQueryAndType(
 
   {
     std::lock_guard< std::mutex > locker( filetype_candidate_map_mutex_ );
-    for ( const FilepathToCandidates::value_type & path_and_candidates :
-              *it->second ) {
+    for ( const auto & path_and_candidates : *it->second ) {
       for ( const Candidate * candidate : *path_and_candidates.second ) {
         if ( ContainsKey( seen_candidates, candidate ) ) {
           continue;

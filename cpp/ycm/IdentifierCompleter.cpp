@@ -88,9 +88,10 @@ std::vector< std::string > IdentifierCompleter::CandidatesForQueryAndType(
   std::vector< std::string > candidates;
   candidates.reserve( results.size() );
 
-  for ( const Result & result : results ) {
-    candidates.push_back( result.Text() );
-  }
+  std::transform( results.begin(),
+                  results.end(),
+                  std::back_inserter( candidates ),
+                  []( const Result & result ) { return result.Text(); } );
 
   return candidates;
 }

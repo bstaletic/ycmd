@@ -55,22 +55,22 @@ std::vector< const Candidate * > CandidateRepository::GetCandidatesForStrings(
 
   {
     std::lock_guard< std::mutex > locker( candidate_holder_mutex_ );
+    std::transform( strings.begin(),
+                    strings.end(),
+                    std::back_inserter( candidates ),
+                    [ this ]( const std::string& candidate_text ) {
+                      const std::string &validated_candidate_text =
+                        ValidatedCandidateText( candidate_text );
+                      std::unique_ptr< Candidate > &candidate =
+                        GetValueElseInsert( candidate_holder_,
+                                            validated_candidate_text,
+                                            nullptr );
 
-    for ( const std::string & candidate_text : strings ) {
-      const std::string &validated_candidate_text =
-        ValidatedCandidateText( candidate_text );
-
-      std::unique_ptr< Candidate > &candidate = GetValueElseInsert(
-                                                  candidate_holder_,
-                                                  validated_candidate_text,
-                                                  nullptr );
-
-      if ( !candidate ) {
-        candidate.reset( new Candidate( validated_candidate_text ) );
-      }
-
-      candidates.push_back( candidate.get() );
-    }
+                      if ( !candidate ) {
+                        candidate.reset( new Candidate( validated_candidate_text ) );
+                      }
+                      return candidate.get();
+                    } );
   }
 
   return candidates;

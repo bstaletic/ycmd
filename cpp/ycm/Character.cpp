@@ -19,15 +19,11 @@
 #include "CodePoint.h"
 
 #include <algorithm>
+#include <numeric>
 
 namespace YouCompleteMe {
 
 namespace {
-
-bool CodePointCompare( const CodePoint *left, const CodePoint *right ) {
-  return *left < *right;
-}
-
 
 // Sort the code points according to the Canonical Ordering Algorithm.
 // See https://www.unicode.org/versions/Unicode10.0.0/ch03.pdf#G49591
@@ -46,7 +42,11 @@ CodePointSequence CanonicalSort( CodePointSequence code_points ) {
       ++code_point_end;
     }
 
-    std::sort( code_point_start, code_point_end, CodePointCompare );
+    std::sort( code_point_start,
+               code_point_end,
+               []( const CodePoint *left, const CodePoint *right ) {
+                 return *left < *right;
+               } );
 
     if ( code_point_end == code_points.end() ) {
       break;
@@ -64,11 +64,14 @@ CodePointSequence CanonicalSort( CodePointSequence code_points ) {
 // https://www.unicode.org/versions/Unicode10.0.0/ch03.pdf#G733
 CodePointSequence CanonicalDecompose( const std::string &text ) {
   CodePointSequence code_points = BreakIntoCodePoints( text );
-  std::string normal;
-
-  for ( const auto &code_point : code_points ) {
-    normal.append( code_point->Normal() );
-  }
+  std::string normal =
+    std::accumulate( code_points.begin(),
+                     code_points.end(),
+                     std::string{},
+                     [] ( std::string& current,
+                          const CodePoint* cp ) {
+                       return std::move( current ).append( cp->Normal() );
+                     } );
 
   return CanonicalSort( BreakIntoCodePoints( normal ) );
 }
@@ -84,24 +87,25 @@ Character::Character( const std::string &character )
   // https://www.unicode.org/versions/Unicode10.0.0/ch03.pdf#G49621
   CodePointSequence code_points = CanonicalDecompose( character );
 
-  for ( const auto &code_point : code_points ) {
-    normal_.append( code_point->Normal() );
-    folded_case_.append( code_point->FoldedCase() );
-    swapped_case_.append( code_point->SwappedCase() );
-    is_letter_ |= code_point->IsLetter();
-    is_punctuation_ |= code_point->IsPunctuation();
-    is_uppercase_ |= code_point->IsUppercase();
-
-    switch ( code_point->GetBreakProperty() ) {
-      case BreakProperty::PREPEND:
-      case BreakProperty::EXTEND:
-      case BreakProperty::SPACINGMARK:
-        is_base_ = false;
-        break;
-      default:
-        base_.append( code_point->FoldedCase() );
-    }
-  }
+  std::for_each( code_points.begin(),
+                 code_points.end(),
+                 [ & ] ( const CodePoint * cp ) {
+                   normal_.append( cp->Normal() );
+                   folded_case_.append( cp->FoldedCase() );
+                   swapped_case_.append( cp->SwappedCase() );
+                   is_letter_ |= cp->IsLetter();
+                   is_punctuation_ |= cp->IsPunctuation();
+                   is_uppercase_ |= cp->IsUppercase();
+                   switch ( cp->GetBreakProperty() ) {
+                     case BreakProperty::PREPEND:
+                     case BreakProperty::EXTEND:
+                     case BreakProperty::SPACINGMARK:
+                       is_base_ = false;
+                       break;
+                     default:
+                       base_.append( cp->FoldedCase() );
+                   }
+                 } );
 }
 
 } // namespace YouCompleteMe

@@ -18,12 +18,20 @@
 #include "Candidate.h"
 #include "Result.h"
 
+#include <algorithm>
+#include <numeric>
+
 namespace YouCompleteMe {
 
 void Candidate::ComputeCaseSwappedText() {
-  for ( const auto &character : Characters() ) {
-    case_swapped_text_.append( character->SwappedCase() );
-  }
+  case_swapped_text_ =
+    std::accumulate( Characters().begin(),
+                     Characters().end(),
+                     std::string{},
+                     [] ( std::string& current, const Character* character ) {
+                       return std::move( current )
+                                .append( character->SwappedCase() );
+                     } );
 }
 
 
@@ -56,14 +64,11 @@ void Candidate::ComputeWordBoundaryChars() {
 
 
 void Candidate::ComputeTextIsLowercase() {
-  for ( const auto &character : Characters() ) {
-    if ( character->IsUppercase() ) {
-      text_is_lowercase_ = false;
-      return;
-    }
-  }
-
-  text_is_lowercase_ = true;
+  text_is_lowercase_ = std::none_of( Characters().begin(),
+                                     Characters().end(),
+                                     []( const Character * c ) {
+                                       return c->IsUppercase();
+                                     } );
 }
 
 

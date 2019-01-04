@@ -82,10 +82,10 @@ TranslationUnit::TranslationUnit(
   : clang_translation_unit_( nullptr ) {
   std::vector< const char * > pointer_flags;
   pointer_flags.reserve( flags.size() );
-
-  for ( const std::string & flag : flags ) {
-    pointer_flags.push_back( flag.c_str() );
-  }
+  std::transform( flags.begin(),
+                  flags.end(),
+                  std::back_inserter( pointer_flags ),
+                  []( const std::string &flag ) { return flag.c_str(); } );
 
   EnsureCompilerNamePresent( pointer_flags );
 

@@ -21,6 +21,7 @@
 #include "Result.h"
 #include "Utils.h"
 
+#include <numeric>
 #include <utility>
 #include <vector>
 
@@ -44,16 +45,20 @@ std::vector< const Candidate * > CandidatesFromObjectList(
   // Store the property in a native Python string so that the below doesn't need
   // to reconvert over and over:
   str py_prop( candidate_property );
-
-  for ( size_t i = 0; i < num_candidates; ++i ) {
-    if ( candidate_property.empty() ) {
-      candidate_strings.emplace_back( GetUtf8String( candidates[ i ] ) );
-    } else {
-      candidate_strings.emplace_back( GetUtf8String(
-                                        candidates[ i ][ py_prop ] ) );
-    }
-  }
-
+  
+  std::transform( candidates.begin(),
+                  candidates.end(),
+                  std::back_inserter( candidate_strings ),
+                  [ & ]( pybind11::handle ) -> std::string {
+                    static size_t i = 0;
+                    if ( candidate_property.empty() ) {
+                      return { GetUtf8String( candidates[ i ] ) };
+                    } else {
+                      return { GetUtf8String( candidates[ i ][ py_prop ] ) };
+                    }
+                    ++i;
+                  } );
+  
   return CandidateRepository::Instance().GetCandidatesForStrings(
            candidate_strings );
 }

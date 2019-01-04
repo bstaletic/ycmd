@@ -42,19 +42,20 @@ CharacterSequence CharacterRepository::GetCharacters(
 
   {
     std::lock_guard< std::mutex > locker( character_holder_mutex_ );
+    std::transform( characters.begin(),
+                    characters.end(),
+                    std::back_inserter( character_objects ),
+                    [ this ]( const std::string& character ) {
+                      std::unique_ptr< Character > &character_object =
+                        GetValueElseInsert( character_holder_,
+                                            character,
+                                            nullptr );
 
-    for ( const std::string & character : characters ) {
-      std::unique_ptr< Character > &character_object = GetValueElseInsert(
-                                                         character_holder_,
-                                                         character,
-                                                         nullptr );
-
-      if ( !character_object ) {
-        character_object.reset( new Character( character ) );
-      }
-
-      character_objects.push_back( character_object.get() );
-    }
+                      if ( !character_object ) {
+                        character_object.reset( new Character( character ) );
+                      }
+                      return character_object.get();
+                    } );
   }
 
   return character_objects;

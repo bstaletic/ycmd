@@ -42,19 +42,20 @@ CodePointSequence CodePointRepository::GetCodePoints(
 
   {
     std::lock_guard< std::mutex > locker( code_point_holder_mutex_ );
+    std::transform( code_points.begin(),
+                    code_points.end(),
+                    std::back_inserter( code_point_objects ),
+                    [ this ]( const std::string& code_point ) {
+                      std::unique_ptr< CodePoint > &code_point_object =
+                        GetValueElseInsert( code_point_holder_,
+                                            code_point,
+                                            nullptr );
 
-    for ( const std::string & code_point : code_points ) {
-      std::unique_ptr< CodePoint > &code_point_object = GetValueElseInsert(
-                                                          code_point_holder_,
-                                                          code_point,
-                                                          nullptr );
-
-      if ( !code_point_object ) {
-        code_point_object.reset( new CodePoint( code_point ) );
-      }
-
-      code_point_objects.push_back( code_point_object.get() );
-    }
+                      if ( !code_point_object ) {
+                        code_point_object.reset( new CodePoint( code_point ) );
+                      }
+                      return code_point_object.get();
+                    } );
   }
 
   return code_point_objects;
