@@ -86,14 +86,14 @@ typename Container::mapped_type
 FindWithDefault( Container &container,
                  const Key &key,
                  const typename Container::mapped_type &value ) {
-  typename Container::const_iterator it = container.find( key );
+  auto it = container.find( key );
   return it != container.end() ? it->second : value;
 }
 
 
 template <class Container, class Key>
 bool Erase( Container &container, const Key &key ) {
-  typename Container::iterator it = container.find( key );
+  auto it = container.find( key );
 
   if ( it != container.end() ) {
     container.erase( it );
@@ -139,6 +139,17 @@ void PartialSort( std::vector< Element > &elements,
   // require a default constructor on Element.
   elements.erase( elements.begin() + max_elements, elements.end() );
 }
+
+template<typename Tp>
+struct MakeUniq
+{ using single_object = std::unique_ptr<Tp>; };
+
+/// std::make_unique for single objects
+template<typename Tp, typename... Args>
+inline typename MakeUniq<Tp>::single_object
+make_unique(Args&&... args)
+{ return std::unique_ptr<Tp>(new Tp(std::forward<Args>(args)...)); }
+
 
 } // namespace YouCompleteMe
 

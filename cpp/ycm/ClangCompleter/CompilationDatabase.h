@@ -39,6 +39,8 @@ public:
   explicit CompilationDatabase( const pybind11::object &path_to_directory );
   CompilationDatabase( const CompilationDatabase& ) = delete;
   CompilationDatabase& operator=( const CompilationDatabase& ) = delete;
+  CompilationDatabase( CompilationDatabase&& ) = delete;
+  CompilationDatabase& operator=( CompilationDatabase&& ) = delete;
   ~CompilationDatabase();
 
   bool DatabaseSuccessfullyLoaded();

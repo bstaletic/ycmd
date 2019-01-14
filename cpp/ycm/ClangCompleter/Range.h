@@ -26,9 +26,9 @@ namespace YouCompleteMe {
 struct Range {
   Range() = default;
 
-  Range( const Location &start_location, const Location &end_location )
-    : start_( start_location ),
-      end_( end_location ) {
+  Range( Location start_location, Location end_location )
+    : start_( std::move( start_location ) ),
+      end_( std::move( end_location ) ) {
   }
 
   explicit Range( const CXSourceRange &range );

@@ -26,8 +26,7 @@ namespace YouCompleteMe {
 
 class Result {
 public:
-  Result();
-  ~Result() = default;
+  Result() = default;
 
   Result( const Candidate *candidate,
           const Word *query,
@@ -55,20 +54,20 @@ private:
   // in the candidate text, e.g. the characters "abc" are a subsequence for
   // "xxaygbefc" but not for "axxcb" since they occur in the correct order ('a'
   // then 'b' then 'c') in the first string but not in the second.
-  bool is_subsequence_;
+  bool is_subsequence_{ false };
 
   // true when the first character of the query and the candidate match
-  bool first_char_same_in_query_and_text_;
+  bool first_char_same_in_query_and_text_{ false };
 
   // true when the query is a prefix of the candidate string, e.g. "foo" query
   // for "foobar" candidate.
-  bool query_is_candidate_prefix_;
+  bool query_is_candidate_prefix_{ false };
 
   // The sum of the indexes of all the letters the query "hit" in the candidate
   // text. For instance, the result for the query "abc" in the candidate
   // "012a45bc8" has char_match_index_sum of 3 + 6 + 7 = 16 because those are
   // the char indexes of those letters in the candidate string.
-  size_t char_match_index_sum_;
+  size_t char_match_index_sum_{ 0 };
 
   // The number of characters in the query that match word boundary characters
   // in the candidate. Characters must match in the same order of appearance
@@ -78,7 +77,7 @@ private:
   //  - this is the first character and not a punctuation;
   //  - the character is uppercase but not the previous one;
   //  - the character is a letter and the previous one is a punctuation.
-  size_t num_wb_matches_;
+  size_t num_wb_matches_{ 0 };
 
   // NOTE: we don't use references for the query and the candidate because we
   // are sorting results through std::sort or std::partial_sort and these
@@ -86,10 +85,10 @@ private:
   // members.
 
   // Points to the candidate.
-  const Candidate *candidate_;
+  const Candidate *candidate_{ nullptr };
 
   // Points to the query.
-  const Word *query_;
+  const Word *query_{ nullptr };
 };
 
 template< class T >

@@ -121,14 +121,14 @@ std::set< const Candidate * > &IdentifierDatabase::GetCandidateSet(
     filetype_candidate_map_[ filetype ];
 
   if ( !path_to_candidates ) {
-    path_to_candidates.reset( new FilepathToCandidates() );
+    path_to_candidates = std::make_shared< FilepathToCandidates >();
   }
 
   std::shared_ptr< std::set< const Candidate * > > &candidates =
     ( *path_to_candidates )[ filepath ];
 
   if ( !candidates ) {
-    candidates.reset( new std::set< const Candidate * >() );
+    candidates = std::make_shared< std::set< const Candidate * > >();
   }
 
   return *candidates;

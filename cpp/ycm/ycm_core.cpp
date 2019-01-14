@@ -35,7 +35,7 @@
 #include <pybind11/stl_bind.h>
 
 namespace py = pybind11;
-using namespace YouCompleteMe;
+using namespace YouCompleteMe; // NOLINT
 
 bool HasClangSupport() {
 #ifdef USE_CLANG_COMPLETER
@@ -55,7 +55,7 @@ PYBIND11_MAKE_OPAQUE( std::vector< FixIt > );
 PYBIND11_MAKE_OPAQUE( std::vector< FixItChunk > );
 #endif // USE_CLANG_COMPLETER
 
-PYBIND11_MODULE( ycm_core, mod )
+PYBIND11_MODULE( ycm_core, mod ) // NOLINT
 {
   mod.def( "HasClangSupport", &HasClangSupport );
 

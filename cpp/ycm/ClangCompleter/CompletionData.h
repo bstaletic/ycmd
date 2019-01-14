@@ -93,7 +93,7 @@ struct CompletionData {
 
   std::string return_type_;
 
-  CompletionKind kind_;
+  CompletionKind kind_{};
 
   // The original, raw completion string. For a function like "int foo(int x)",
   // the original string is "foo". For a member data variable like "foo_", this

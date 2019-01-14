@@ -46,6 +46,8 @@ public:
   // Make class noncopyable
   CandidateRepository( const CandidateRepository& ) = delete;
   CandidateRepository& operator=( const CandidateRepository& ) = delete;
+  CandidateRepository( CandidateRepository&& ) = delete;
+  CandidateRepository& operator=( CandidateRepository&& ) = delete;
 
   size_t NumStoredCandidates();
 

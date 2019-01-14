@@ -27,18 +27,14 @@ namespace YouCompleteMe {
 
 struct Location {
   // Creates an invalid location
-  Location()
-    : line_number_( 0 ),
-      column_number_( 0 ),
-      filename_( "" ) {
-  }
+  Location() = default;
 
-  Location( const std::string &filename,
+  Location( std::string filename,
             unsigned int line,
             unsigned int column )
     : line_number_( line ),
       column_number_( column ),
-      filename_( filename ) {
+      filename_( std::move( filename ) ) {
   }
 
   explicit Location( const CXSourceLocation &location ) {
@@ -62,11 +58,11 @@ struct Location {
     return !filename_.empty();
   }
 
-  unsigned int line_number_;
-  unsigned int column_number_;
+  unsigned int line_number_{ 0 };
+  unsigned int column_number_{ 0 };
 
   // The full, absolute path
-  std::string filename_;
+  std::string filename_{ "" };
 };
 
 } // namespace YouCompleteMe

@@ -43,6 +43,8 @@ public:
   // Make class noncopyable
   CharacterRepository( const CharacterRepository& ) = delete;
   CharacterRepository& operator=( const CharacterRepository& ) = delete;
+  CharacterRepository( CharacterRepository&& ) = delete;
+  CharacterRepository& operator=( CharacterRepository&& ) = delete;
 
   YCM_EXPORT size_t NumStoredCharacters();
 

@@ -91,8 +91,6 @@ TranslationUnit::TranslationUnit(
 
   std::vector< CXUnsavedFile > cxunsaved_files =
     ToCXUnsavedFiles( unsaved_files );
-  const CXUnsavedFile *unsaved = cxunsaved_files.empty()
-                                 ? nullptr : &cxunsaved_files[ 0 ];
 
   // Actually parse the translation unit.
   CXErrorCode failure = clang_parseTranslationUnit2FullArgv(
@@ -100,7 +98,8 @@ TranslationUnit::TranslationUnit(
                           filename.c_str(),
                           &pointer_flags[ 0 ],
                           pointer_flags.size(),
-                          const_cast<CXUnsavedFile *>( unsaved ),
+                          cxunsaved_files.empty()
+                          ? nullptr : &cxunsaved_files[ 0 ],
                           cxunsaved_files.size(),
                           EditingOptions(),
                           &clang_translation_unit_ );
@@ -161,8 +160,6 @@ std::vector< CompletionData > TranslationUnit::CandidatesForLocation(
 
   std::vector< CXUnsavedFile > cxunsaved_files =
     ToCXUnsavedFiles( unsaved_files );
-  const CXUnsavedFile *unsaved = cxunsaved_files.empty()
-                                 ? nullptr : &cxunsaved_files[ 0 ];
 
   // codeCompleteAt reparses the TU if the underlying source file has changed on
   // disk since the last time the TU was updated and there are no unsaved files.
@@ -179,7 +176,8 @@ std::vector< CompletionData > TranslationUnit::CandidatesForLocation(
                           filename.c_str(),
                           line,
                           column,
-                          const_cast<CXUnsavedFile *>( unsaved ),
+                          cxunsaved_files.empty()
+                          ? nullptr : &cxunsaved_files[ 0 ],
                           cxunsaved_files.size(),
                           CompletionOptions() ),
     clang_disposeCodeCompleteResults );

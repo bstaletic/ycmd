@@ -37,7 +37,7 @@ struct Diagnostic {
 
   std::vector< Range > ranges_;
 
-  DiagnosticKind kind_;
+  DiagnosticKind kind_ = DiagnosticKind::INFORMATION;
 
   std::string text_;
 

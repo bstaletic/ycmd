@@ -18,6 +18,8 @@
 #include "Candidate.h"
 #include "Result.h"
 
+#include <algorithm>
+
 namespace YouCompleteMe {
 
 void Candidate::ComputeCaseSwappedText() {
@@ -55,23 +57,12 @@ void Candidate::ComputeWordBoundaryChars() {
 }
 
 
-void Candidate::ComputeTextIsLowercase() {
-  for ( const auto &character : Characters() ) {
-    if ( character->IsUppercase() ) {
-      text_is_lowercase_ = false;
-      return;
-    }
-  }
-
-  text_is_lowercase_ = true;
-}
-
-
-Candidate::Candidate( const std::string &text )
-  : Word( text ) {
+Candidate::Candidate( std::string text )
+  : Word( std::move( text ) ) {
   ComputeCaseSwappedText();
   ComputeWordBoundaryChars();
-  ComputeTextIsLowercase();
+  text_is_lowercase_ = std::none_of( Characters().begin(), Characters().end(),
+      []( const Character* ch ) { return ch->IsUppercase(); } );
 }
 
 
@@ -89,11 +80,11 @@ Result Candidate::QueryMatchResult( const Word &query ) const {
   // is a prefix of the candidate.
 
   if ( query.IsEmpty() ) {
-    return Result( this, &query, 0, false );
+    return { this, &query, 0, false };
   }
 
   if ( Length() < query.Length() ) {
-    return Result();
+    return {};
   }
 
   size_t query_index = 0;
@@ -117,17 +108,14 @@ Result Candidate::QueryMatchResult( const Word &query ) const {
 
       ++query_character_pos;
       if ( query_character_pos == query_characters.end() ) {
-        return Result( this,
-                       &query,
-                       index_sum,
-                       candidate_index == query_index );
+        return { this, &query, index_sum, candidate_index == query_index };
       }
 
       ++query_index;
     }
   }
 
-  return Result();
+  return {};
 }
 
 } // namespace YouCompleteMe

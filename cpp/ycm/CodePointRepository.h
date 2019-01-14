@@ -43,6 +43,8 @@ public:
   // Make class noncopyable
   CodePointRepository( const CodePointRepository& ) = delete;
   CodePointRepository& operator=( const CodePointRepository& ) = delete;
+  CodePointRepository( CodePointRepository&& ) = delete;
+  CodePointRepository& operator=( CodePointRepository&& ) = delete;
 
   YCM_EXPORT size_t NumStoredCodePoints();
 

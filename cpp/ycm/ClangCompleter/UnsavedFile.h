@@ -21,11 +21,9 @@
 #include <string>
 
 struct UnsavedFile {
-  UnsavedFile() : filename_( "" ), contents_( "" ), length_( 0 ) {}
-
-  std::string filename_;
-  std::string contents_;
-  unsigned long length_;
+  std::string filename_{ "" };
+  std::string contents_{ "" };
+  uint64_t length_{ 0 };
 };
 
 

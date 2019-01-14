@@ -55,6 +55,9 @@ public:
   YCM_EXPORT IdentifierDatabase();
   IdentifierDatabase( const IdentifierDatabase& ) = delete;
   IdentifierDatabase& operator=( const IdentifierDatabase& ) = delete;
+  IdentifierDatabase( IdentifierDatabase&& ) = delete;
+  IdentifierDatabase& operator=( IdentifierDatabase&& ) = delete;
+  ~IdentifierDatabase() = default;
 
   void AddIdentifiers( const FiletypeIdentifierMap &filetype_identifier_map );
 

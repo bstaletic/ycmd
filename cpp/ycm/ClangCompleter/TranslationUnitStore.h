@@ -37,6 +37,8 @@ public:
   YCM_EXPORT ~TranslationUnitStore();
   TranslationUnitStore( const TranslationUnitStore& ) = delete;
   TranslationUnitStore& operator=( const TranslationUnitStore& ) = delete;
+  TranslationUnitStore( TranslationUnitStore&& ) = delete;
+  TranslationUnitStore& operator=( TranslationUnitStore&& ) = delete;
 
   // You can even call this function for the same filename from multiple
   // threads; the TU store will ensure only one TU is created.

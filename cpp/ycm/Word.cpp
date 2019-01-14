@@ -62,16 +62,14 @@ std::vector< std::string > BreakCodePointsIntoCharacters(
 
     switch( previous_property ) {
       case BreakProperty::CR:
-        switch( property ) {
-          // Rule GB3: do not break between a CR and LF.
-          case BreakProperty::LF:
-            character.append( code_point );
-            break;
-          // Rule GB4: otherwise, break after CR.
-          default:
-            characters.push_back( character );
-            character = code_point;
-        }
+        // Rule GB3: do not break between a CR and LF.
+	if ( property == BreakProperty::LF ) {
+          character.append( code_point );
+        // Rule GB3: do not break between a CR and LF.
+	} else {
+          characters.push_back( character );
+          character = code_point;
+	}
         break;
       // Rule GB4: break after controls and LF.
       case BreakProperty::CONTROL:
@@ -286,8 +284,8 @@ void Word::ComputeBytesPresent() {
 }
 
 
-Word::Word( const std::string &text )
-  : text_( text ) {
+Word::Word( std::string text )
+  : text_( std::move( text ) ) {
   BreakIntoCharacters();
   ComputeBytesPresent();
 }

@@ -43,6 +43,8 @@ public:
   YCM_EXPORT ~ClangCompleter();
   ClangCompleter( const ClangCompleter& ) = delete;
   ClangCompleter& operator=( const ClangCompleter& ) = delete;
+  ClangCompleter( ClangCompleter&& ) = delete;
+  ClangCompleter& operator=( ClangCompleter&& ) = delete;
 
   bool UpdatingTranslationUnit( const std::string &filename );
 

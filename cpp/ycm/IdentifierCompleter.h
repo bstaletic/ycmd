@@ -34,6 +34,9 @@ public:
 
   IdentifierCompleter( const IdentifierCompleter& ) = delete;
   IdentifierCompleter& operator=( const IdentifierCompleter& ) = delete;
+  IdentifierCompleter( IdentifierCompleter&& ) = delete;
+  IdentifierCompleter& operator=( IdentifierCompleter&& ) = delete;
+  ~IdentifierCompleter() = default;
 
   YCM_EXPORT IdentifierCompleter() = default;
   YCM_EXPORT explicit IdentifierCompleter(

@@ -42,6 +42,8 @@ public:
   YCM_EXPORT TranslationUnit();
   TranslationUnit( const TranslationUnit& ) = delete;
   TranslationUnit& operator=( const TranslationUnit& ) = delete;
+  TranslationUnit( TranslationUnit&& ) = delete;
+  TranslationUnit& operator=( TranslationUnit&& ) = delete;
 
   YCM_EXPORT TranslationUnit(
     const std::string &filename,
@@ -140,7 +142,7 @@ private:
   std::vector< Diagnostic > latest_diagnostics_;
 
   mutable std::mutex clang_access_mutex_;
-  CXTranslationUnit clang_translation_unit_;
+  CXTranslationUnit clang_translation_unit_{ nullptr };
 };
 
 } // namespace YouCompleteMe

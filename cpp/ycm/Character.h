@@ -36,6 +36,9 @@ public:
   // Make class noncopyable
   Character( const Character& ) = delete;
   Character& operator=( const Character& ) = delete;
+  Character( const Character&& ) = delete;
+  Character& operator=( const Character&& ) = delete;
+  ~Character() = default;
 
   inline std::string Normal() const {
     return normal_;
