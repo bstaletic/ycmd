@@ -21,7 +21,7 @@
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
-#include <boost/filesystem.hpp>
+#include <boost/filesystem/operations.hpp>
 
 namespace YouCompleteMe {
 

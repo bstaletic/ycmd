@@ -22,7 +22,7 @@
 #include "CodePoint.h"
 #include "Word.h"
 
-#include <boost/filesystem.hpp>
+#include <boost/filesystem/path.hpp>
 #include <gmock/gmock.h>
 #include <string>
 #include <vector>

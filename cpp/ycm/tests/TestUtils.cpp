@@ -17,6 +17,8 @@
 
 #include "TestUtils.h"
 
+#include <boost/filesystem/operations.hpp>
+
 namespace boost {
 
 namespace filesystem {
