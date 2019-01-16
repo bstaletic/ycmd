@@ -17,7 +17,6 @@
 
 #include "Utils.h"
 
-#include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <cmath>
 #include <limits>

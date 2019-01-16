@@ -18,7 +18,8 @@
 #ifndef UTILS_H_KEPMRPBH
 #define UTILS_H_KEPMRPBH
 
-#include <boost/filesystem.hpp>
+#include <boost/filesystem/path.hpp>
+#include <boost/filesystem/operations.hpp>
 #include <cmath>
 #include <limits>
 #include <string>

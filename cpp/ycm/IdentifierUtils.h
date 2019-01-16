@@ -20,7 +20,7 @@
 
 #include "IdentifierDatabase.h"
 
-#include <boost/filesystem.hpp>
+#include <boost/filesystem/path.hpp>
 
 namespace YouCompleteMe {
 
