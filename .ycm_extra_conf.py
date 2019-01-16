@@ -60,6 +60,8 @@ flags = [
 '-x',
 'c++',
 '-isystem',
+'cpp/ctre',
+'-isystem',
 'cpp/pybind11',
 '-isystem',
 'cpp/BoostParts',

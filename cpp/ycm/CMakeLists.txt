@@ -193,6 +193,8 @@ endif()
 
 set( PYBIND11_INCLUDES_DIR "${CMAKE_SOURCE_DIR}/pybind11" )
 
+set( CTRE_INCLUDES_DIR "${CMAKE_SOURCE_DIR}/ctre" )
+
 file( GLOB_RECURSE SERVER_SOURCES *.h *.cpp )
 
 # The test and benchmark sources are a part of a different target, so we remove
@@ -228,6 +230,7 @@ endif()
 include_directories(
   SYSTEM
   ${PYBIND11_INCLUDES_DIR}
+  ${CTRE_INCLUDES_DIR}
   ${PYTHON_INCLUDE_DIRS}
   ${CLANG_INCLUDES_DIR}
   )

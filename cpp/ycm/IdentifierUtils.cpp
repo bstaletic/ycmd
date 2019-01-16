@@ -18,7 +18,8 @@
 #include "IdentifierUtils.h"
 #include "Utils.h"
 
-#include <regex>
+#include <ctll.hpp>
+#include <ctre.hpp>
 #include <unordered_map>
 
 namespace YouCompleteMe {
@@ -30,15 +31,15 @@ namespace {
 // For details on the tag format supported, see here for details:
 // http://ctags.sourceforge.net/FORMAT
 // TL;DR: The only supported format is the one Exuberant Ctags emits.
-const char *const TAG_REGEX =
-  R"((?:^|$|\r\n|\n)([^\t\n\r]+))"  // The first field is the identifier
+static constexpr ctll::basic_fixed_string TAG_REGEX =
+  R"((?:^|\r\n|\n)([^\t\n\r]+))"  // The first field is the identifier
   R"(\t)"  // A TAB char is the field separator
   // The second field is the path to the file that has the identifier; either
   // absolute or relative to the tags file.
   R"(([^\t\n\r]+))"
   R"(\t.*?)"  // Non-greedy everything
   R"(language:([^\t\n\r]+))"  // We want to capture the language of the file
-  R"(.*?(?:^|$|\r\n|\n))";
+  R"(.*?(?:$|\r\n|\n))";
 
 // Only used as the equality comparer for the below unordered_map which stores
 // const char* pointers and not std::string but needs to hash based on string
@@ -176,19 +177,16 @@ FiletypeIdentifierMap ExtractIdentifiersFromTagsFile(
   std::string::const_iterator start = tags_file_contents.begin();
   std::string::const_iterator end   = tags_file_contents.end();
 
-  std::smatch matches;
-  const std::regex expression( TAG_REGEX );
+  while ( auto matches = ctre::re< TAG_REGEX >().search_2( start, end ) ) {
+    start = matches.get_end_position();
 
-  while ( std::regex_search( start, end, matches, expression ) ) {
-    start = matches[ 0 ].second;
-
-    std::string language( matches[ 3 ] );
+    std::string language( matches.get< 3 >() );
     std::string filetype = FindWithDefault( LANG_TO_FILETYPE,
                                             language.c_str(),
                                             Lowercase( language ).c_str() );
 
-    std::string identifier( matches[ 1 ] );
-    fs::path path( matches[ 2 ].str() );
+    std::string identifier( matches.get< 1 >() );
+    fs::path path( std::string( matches.get< 2 >() ) );
     path = fs::weakly_canonical( path_to_tag_file.parent_path() / path )
            .make_preferred();
 
