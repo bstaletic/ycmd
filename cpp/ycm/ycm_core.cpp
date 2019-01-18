@@ -90,7 +90,7 @@ PYBIND11_MODULE( ycm_core, mod )
           py::arg( "filetype" ),
           py::arg( "max_candidates" ) = 0 );
 
-  py::bind_vector< std::vector< std::string > >( mod, "StringVector" );
+  py::bind_vector< std::vector< std::string > >( mod, "StringVector", "sv" );
 
 #ifdef USE_CLANG_COMPLETER
   py::register_exception< ClangParseError >( mod, "ClangParseError" );
@@ -107,7 +107,7 @@ PYBIND11_MODULE( ycm_core, mod )
     .def_readwrite( "contents_", &UnsavedFile::contents_ )
     .def_readwrite( "length_", &UnsavedFile::length_ );
 
-  py::bind_vector< std::vector< UnsavedFile > >( mod, "UnsavedFileVector" );
+  py::bind_vector< std::vector< UnsavedFile > >( mod, "UnsavedFileVector", "ufv" );
 
   py::class_< ClangCompleter >( mod, "ClangCompleter" )
     .def( py::init<>() )
@@ -170,7 +170,7 @@ PYBIND11_MODULE( ycm_core, mod )
     .def_readonly( "fixit_", &CompletionData::fixit_ );
 
   py::bind_vector< std::vector< CompletionData > >( mod,
-                                                    "CompletionVector" );
+                                                    "CompletionVector", "cvs" );
 
   py::class_< Location >( mod, "Location" )
     .def( py::init<>() )
@@ -184,14 +184,14 @@ PYBIND11_MODULE( ycm_core, mod )
     .def_readonly( "start_", &Range::start_ )
     .def_readonly( "end_", &Range::end_ );
 
-  py::bind_vector< std::vector< Range > >( mod, "RangeVector" );
+  py::bind_vector< std::vector< Range > >( mod, "RangeVector", "rv" );
 
   py::class_< FixItChunk >( mod, "FixItChunk" )
     .def( py::init<>() )
     .def_readonly( "replacement_text", &FixItChunk::replacement_text )
     .def_readonly( "range", &FixItChunk::range );
 
-  py::bind_vector< std::vector< FixItChunk > >( mod, "FixItChunkVector" );
+  py::bind_vector< std::vector< FixItChunk > >( mod, "FixItChunkVector", "fcv" );
 
   py::class_< FixIt >( mod, "FixIt" )
     .def( py::init<>() )
@@ -199,7 +199,7 @@ PYBIND11_MODULE( ycm_core, mod )
     .def_readonly( "location", &FixIt::location )
     .def_readonly( "text", &FixIt::text );
 
-  py::bind_vector< std::vector< FixIt > >( mod, "FixItVector" );
+  py::bind_vector< std::vector< FixIt > >( mod, "FixItVector", "fv" );
 
   py::enum_< DiagnosticKind >( mod, "DiagnosticKind" )
     .value( "ERROR", DiagnosticKind::ERROR )
@@ -216,7 +216,7 @@ PYBIND11_MODULE( ycm_core, mod )
     .def_readonly( "long_formatted_text_", &Diagnostic::long_formatted_text_ )
     .def_readonly( "fixits_", &Diagnostic::fixits_ );
 
-  py::bind_vector< std::vector< Diagnostic > >( mod, "DiagnosticVector" );
+  py::bind_vector< std::vector< Diagnostic > >( mod, "DiagnosticVector", "dv" );
 
   py::class_< DocumentationData >( mod, "DocumentationData" )
     .def( py::init<>() )
