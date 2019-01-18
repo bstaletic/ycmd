@@ -46,7 +46,7 @@ const char *const TAG_REGEX =
 // When passed a const char* this will create a temporary std::string for
 // comparison, but it's fast enough for our use case.
 struct StringEqualityComparer :
-    std::binary_function< std::string, std::string, bool > {
+    std::function< bool( const std::string&, const std::string& ) > {
   bool operator()( const std::string &a, const std::string &b ) const {
     return a == b;
   }

@@ -326,7 +326,6 @@ target_link_libraries( ${PROJECT_NAME}
                        ${PYTHON_LIBRARIES}
                        ${LIBCLANG_TARGET}
                        ${EXTRA_LIBS}
-		       stdc++fs
                      )
 
 if( LIBCLANG_TARGET )
