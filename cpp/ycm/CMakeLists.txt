@@ -325,11 +325,17 @@ if ( USE_CLANG_COMPLETER AND NOT LIBCLANG_TARGET )
                           "your configuration" )
 endif()
 
+if ( CMAKE_COMPILER_IS_GNUCXX )
+  set( STL_FILESYSTEM stdc++fs )
+elseif( COMPILER_IS_CLANG )
+  set( STL_FILESYSTEM c++fs )
+endif()
+
 target_link_libraries( ${PROJECT_NAME}
                        ${PYTHON_LIBRARIES}
                        ${LIBCLANG_TARGET}
                        ${EXTRA_LIBS}
-		       stdc++fs
+		       ${STL_FILESYSTEM}
                      )
 
 if( LIBCLANG_TARGET )
