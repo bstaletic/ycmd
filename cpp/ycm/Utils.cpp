@@ -36,10 +36,8 @@ std::string ReadUtf8File( const fs::path &filepath ) {
   // symlink.
   if ( !fs::is_empty( filepath ) && fs::is_regular_file( filepath ) ) {
     std::ifstream file( filepath, std::ios::in | std::ios::binary );
-    file.seekg( 0, std::ios::end );
-    contents.resize( file.tellg() );
-    file.seekg( 0, std::ios::beg );
-    file.read( &contents[ 0 ], contents.size() );
+    contents.resize( fs::file_size( filepath ) );
+    file.read( contents.data(), contents.size() );
   }
   return contents;
 }
