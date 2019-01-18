@@ -32,14 +32,16 @@ namespace {
 // http://ctags.sourceforge.net/FORMAT
 // TL;DR: The only supported format is the one Exuberant Ctags emits.
 static constexpr ctll::basic_fixed_string TAG_REGEX =
-  R"((?:^|\r\n|\n)([^\t\n\r]+))"  // The first field is the identifier
-  R"(\t)"  // A TAB char is the field separator
-  // The second field is the path to the file that has the identifier; either
-  // absolute or relative to the tags file.
-  R"(([^\t\n\r]+))"
-  R"(\t.*?)"  // Non-greedy everything
-  R"(language:([^\t\n\r]+))"  // We want to capture the language of the file
-  R"(.*?(?:$|\r\n|\n))";
+  "(?:^|\\r\\n|\\n)"          // Beginning of stream or a line separator
+  "([^\\t\\n\\r]++)"          // The identifier
+  "\\t"                       // A single tab is a fiel separator
+  "([^\\t\\n\\r]++)"          // The path
+  "\\t"                       // Field separator
+  "[^\r\n]*?"                 // Junk until "language:" barring line separators
+  "language:([^\\t\\n\\r]++)" // "language:" followed by language name
+  "[^\r\n]*?"                 // Junk until the end of line or end of stream
+			      // barring line separators
+  "(?:$|\\r\\n|\\n)";         // Ending of stream or a line separator
 
 // Only used as the equality comparer for the below unordered_map which stores
 // const char* pointers and not std::string but needs to hash based on string
