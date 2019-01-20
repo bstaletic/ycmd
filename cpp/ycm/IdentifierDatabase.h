@@ -19,11 +19,11 @@
 #define IDENTIFIERDATABASE_H_ZESX3CVR
 
 #include <absl/container/flat_hash_map.h>
+#include <absl/container/flat_hash_set.h>
 #include <memory>
 #include <mutex>
-#include <vector>
 #include <string>
-#include <absl/container/flat_hash_set.h>
+#include <vector>
 
 namespace YouCompleteMe {
 
