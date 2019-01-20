@@ -20,10 +20,10 @@
 
 #include "Character.h"
 
+#include <absl/container/flat_hash_map.h>
 #include <memory>
 #include <mutex>
 #include <string>
-#include <absl/container/flat_hash_map.h>
 #include <vector>
 
 namespace YouCompleteMe {

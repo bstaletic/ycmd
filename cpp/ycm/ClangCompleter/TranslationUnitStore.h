@@ -21,11 +21,11 @@
 #include "TranslationUnit.h"
 #include "UnsavedFile.h"
 
+#include <absl/container/flat_hash_map.h>
 #include <memory>
 #include <mutex>
 #include <string>
 #include <vector>
-#include <absl/container/flat_hash_map.h>
 
 using CXIndex = void*;
 

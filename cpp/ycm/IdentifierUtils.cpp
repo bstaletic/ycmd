@@ -18,9 +18,9 @@
 #include "IdentifierUtils.h"
 #include "Utils.h"
 
+#include <absl/container/flat_hash_map.h>
 #include <boost/algorithm/string/regex.hpp>
 #include <boost/regex.hpp>
-#include <absl/container/flat_hash_map.h>
 
 namespace YouCompleteMe {
 
