@@ -82,6 +82,12 @@ def RunCompleterCommand():
       request_data ) )
 
 
+@app.post( '/start_column' )
+def GetStartColumn():
+  LOGGER.info( 'Received completion start column request' )
+  return _JsonResponse( RequestWrap( request.json )[ 'start_column' ] )
+
+
 @app.post( '/completions' )
 def GetCompletions():
   LOGGER.info( 'Received completion request' )
