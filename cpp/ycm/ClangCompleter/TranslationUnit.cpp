@@ -503,7 +503,8 @@ struct sort_by_location {
     unsigned int a_distance = a.location.column_number_ - column_;
     unsigned int b_distance = b.location.column_number_ - column_;
 
-    return a_distance < b_distance;
+    return std::abs( static_cast< int >( a_distance ) ) <
+           std::abs( static_cast< int >( b_distance ) );
   }
 
 private:
