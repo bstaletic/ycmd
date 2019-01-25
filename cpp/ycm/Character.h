@@ -71,7 +71,7 @@ public:
 
   inline bool operator== ( const Character &other ) const {
     return normal_ == other.normal_;
-  };
+  }
 
   inline bool EqualsBase( const Character &other ) const {
     return base_ == other.base_;
@@ -79,7 +79,7 @@ public:
 
   inline bool EqualsIgnoreCase( const Character &other ) const {
     return folded_case_ == other.folded_case_;
-  };
+  }
 
   // Smart base matching on top of smart case matching, e.g.:
   //  - e matches e, é, E, É;
@@ -91,7 +91,7 @@ public:
              ( !is_uppercase_ || other.is_uppercase_ ) ) ||
            ( !is_uppercase_ && EqualsIgnoreCase( other ) ) ||
            normal_ == other.normal_;
-  };
+  }
 
 private:
   std::string normal_;

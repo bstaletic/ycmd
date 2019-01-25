@@ -53,7 +53,7 @@ struct CompletionData {
   CompletionData( CXCompletionString completion_string,
                   CXCursorKind kind,
                   CXCodeCompleteResults *results,
-                  size_t index );
+                  unsigned int index );
 
   // What should actually be inserted into the buffer. For a function like
   // "int foo(int x)", this is just "foo". Same for a data member like "foo_":
@@ -110,12 +110,13 @@ struct CompletionData {
 private:
 
   void ExtractDataFromChunk( CXCompletionString completion_string,
-                             size_t chunk_num,
+                             unsigned int chunk_num,
                              bool &saw_left_paren,
                              bool &saw_function_params,
                              bool &saw_placeholder );
 
-  void BuildCompletionFixIt( CXCodeCompleteResults *results, size_t index );
+  void BuildCompletionFixIt( CXCodeCompleteResults *results,
+                             unsigned int index );
 };
 
 } // namespace YouCompleteMe

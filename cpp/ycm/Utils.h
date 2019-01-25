@@ -35,18 +35,18 @@ YCM_EXPORT inline bool IsUppercase( uint8_t ascii_character ) {
 
 // An uppercase ASCII character can be converted to lowercase and vice versa by
 // flipping its third most significant bit.
-YCM_EXPORT inline uint8_t Lowercase( uint8_t ascii_character ) {
+YCM_EXPORT inline char Lowercase( uint8_t ascii_character ) {
   if ( IsUppercase( ascii_character ) ) {
-    return ascii_character ^ 0x20;
+    return static_cast< char >( ascii_character ^ 0x20 );
   }
-  return ascii_character;
+  return static_cast< char >( ascii_character );
 }
 
 
 YCM_EXPORT inline std::string Lowercase( const std::string &text ) {
   std::string result;
-  for ( uint8_t ascii_character : text ) {
-    result.push_back( Lowercase( ascii_character ) );
+  for ( const char ascii_character : text ) {
+    result.push_back( Lowercase( static_cast< uint8_t>( ascii_character ) ) );
   }
   return result;
 }
@@ -109,12 +109,14 @@ bool Erase( Container &container, const Key &key ) {
 // vector.
 template <typename Element>
 void PartialSort( std::vector< Element > &elements,
-                  const size_t num_sorted_elements ) {
+                  typename std::vector< Element >::difference_type
+                  num_sorted_elements ) {
 
-  size_t nb_elements = elements.size();
-  size_t max_elements = num_sorted_elements > 0 &&
-                        nb_elements >= num_sorted_elements ?
-                        num_sorted_elements : nb_elements;
+  using diff_type = typename std::vector< Element >::difference_type;
+  diff_type nb_elements = static_cast< diff_type >( elements.size() );
+  diff_type max_elements = num_sorted_elements > 0 &&
+                           nb_elements >= num_sorted_elements ?
+                           num_sorted_elements : nb_elements;
 
   // When the number of elements to sort is more than 1024 and one sixty-fourth
   // of the total number of elements, switch to std::nth_element followed by
@@ -123,8 +125,7 @@ void PartialSort( std::vector< Element > &elements,
   // number of elements to sort is small and that std::nth_element (introselect)
   // combined with std::sort (introsort) always perform better than std::sort
   // alone in other cases.
-  if ( max_elements <= std::max( static_cast< size_t >( 1024 ),
-                                 nb_elements / 64 ) ) {
+  if ( max_elements <= std::max( 1024l, nb_elements / 64 ) ) {
     std::partial_sort( elements.begin(),
                        elements.begin() + max_elements,
                        elements.end() );

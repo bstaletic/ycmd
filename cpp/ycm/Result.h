@@ -27,7 +27,6 @@ namespace YouCompleteMe {
 class Result {
 public:
   Result();
-  ~Result() = default;
 
   Result( const Candidate *candidate,
           const Word *query,

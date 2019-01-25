@@ -34,7 +34,6 @@ public:
   // Make class noncopyable
   Candidate( const Candidate& ) = delete;
   Candidate& operator=( const Candidate& ) = delete;
-  ~Candidate() = default;
 
   inline const std::string &CaseSwappedText() const {
     return case_swapped_text_;

@@ -96,8 +96,8 @@ std::vector< CompletionData >
 ClangCompleter::CandidatesForLocationInFile(
   const std::string &translation_unit,
   const std::string &filename,
-  int line,
-  int column,
+  unsigned int line,
+  unsigned int column,
   const std::vector< UnsavedFile > &unsaved_files,
   const std::vector< std::string > &flags ) {
   shared_ptr< TranslationUnit > unit =
@@ -115,8 +115,8 @@ ClangCompleter::CandidatesForLocationInFile(
 Location ClangCompleter::GetDeclarationLocation(
   const std::string &translation_unit,
   const std::string &filename,
-  int line,
-  int column,
+  unsigned int line,
+  unsigned int column,
   const std::vector< UnsavedFile > &unsaved_files,
   const std::vector< std::string > &flags,
   bool reparse ) {
@@ -136,8 +136,8 @@ Location ClangCompleter::GetDeclarationLocation(
 Location ClangCompleter::GetDefinitionLocation(
   const std::string &translation_unit,
   const std::string &filename,
-  int line,
-  int column,
+  unsigned int line,
+  unsigned int column,
   const std::vector< UnsavedFile > &unsaved_files,
   const std::vector< std::string > &flags,
   bool reparse ) {
@@ -156,8 +156,8 @@ Location ClangCompleter::GetDefinitionLocation(
 Location ClangCompleter::GetDefinitionOrDeclarationLocation(
   const std::string &translation_unit,
   const std::string &filename,
-  int line,
-  int column,
+  unsigned int line,
+  unsigned int column,
   const std::vector< UnsavedFile > &unsaved_files,
   const std::vector< std::string > &flags,
   bool reparse ) {
@@ -176,8 +176,8 @@ Location ClangCompleter::GetDefinitionOrDeclarationLocation(
 std::string ClangCompleter::GetTypeAtLocation(
   const std::string &translation_unit,
   const std::string &filename,
-  int line,
-  int column,
+  unsigned int line,
+  unsigned int column,
   const std::vector< UnsavedFile > &unsaved_files,
   const std::vector< std::string > &flags,
   bool reparse ) {
@@ -197,8 +197,8 @@ std::string ClangCompleter::GetTypeAtLocation(
 std::string ClangCompleter::GetEnclosingFunctionAtLocation(
   const std::string &translation_unit,
   const std::string &filename,
-  int line,
-  int column,
+  unsigned int line,
+  unsigned int column,
   const std::vector< UnsavedFile > &unsaved_files,
   const std::vector< std::string > &flags,
   bool reparse ) {
@@ -219,8 +219,8 @@ std::vector< FixIt >
 ClangCompleter::GetFixItsForLocationInFile(
   const std::string &translation_unit,
   const std::string &filename,
-  int line,
-  int column,
+  unsigned int line,
+  unsigned int column,
   const std::vector< UnsavedFile > &unsaved_files,
   const std::vector< std::string > &flags,
   bool reparse ) {
@@ -242,8 +242,8 @@ ClangCompleter::GetFixItsForLocationInFile(
 DocumentationData ClangCompleter::GetDocsForLocationInFile(
   const std::string &translation_unit,
   const std::string &filename,
-  int line,
-  int column,
+  unsigned int line,
+  unsigned int column,
   const std::vector< UnsavedFile > &unsaved_files,
   const std::vector< std::string > &flags,
   bool reparse ) {

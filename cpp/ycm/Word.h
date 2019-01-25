@@ -40,7 +40,6 @@ public:
   // Make class noncopyable
   Word( const Word& ) = delete;
   Word& operator=( const Word& ) = delete;
-  ~Word() = default;
 
   inline const CharacterSequence &Characters() const {
     return characters_;

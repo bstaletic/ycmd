@@ -69,7 +69,7 @@ void IdentifierDatabase::ResultsForQueryAndType(
   const std::string &query,
   const std::string &filetype,
   std::vector< Result > &results,
-  const size_t max_results ) const {
+  const long max_results ) const {
   FiletypeCandidateMap::const_iterator it;
   {
     std::lock_guard< std::mutex > locker( filetype_candidate_map_mutex_ );

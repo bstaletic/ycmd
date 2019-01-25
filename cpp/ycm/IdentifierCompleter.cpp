@@ -69,7 +69,7 @@ void IdentifierCompleter::AddIdentifiersToDatabaseFromTagFiles(
 
 std::vector< std::string > IdentifierCompleter::CandidatesForQuery(
   const std::string &query,
-  const size_t max_candidates ) const {
+  const long max_candidates ) const {
   return CandidatesForQueryAndType( query, "", max_candidates );
 }
 
@@ -77,7 +77,7 @@ std::vector< std::string > IdentifierCompleter::CandidatesForQuery(
 std::vector< std::string > IdentifierCompleter::CandidatesForQueryAndType(
   const std::string &query,
   const std::string &filetype,
-  const size_t max_candidates ) const {
+  const long max_candidates ) const {
 
   std::vector< Result > results;
   identifier_database_.ResultsForQueryAndType( query,

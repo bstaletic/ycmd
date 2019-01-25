@@ -54,7 +54,6 @@ public:
 
 private:
   CodePointRepository() = default;
-  ~CodePointRepository() = default;
 
   // This data structure owns all the CodePoint pointers
   CodePointHolder code_point_holder_;

@@ -65,7 +65,7 @@ pylist FilterAndSortCandidates(
   const pylist &candidates,
   const std::string &candidate_property,
   const std::string &query,
-  const size_t max_candidates ) {
+  const long max_candidates ) {
   pylist filtered_candidates;
 
   size_t num_candidates = len( candidates );

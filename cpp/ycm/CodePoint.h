@@ -122,7 +122,7 @@ public:
 
   inline bool operator< ( const CodePoint &other ) const {
     return combining_class_ < other.combining_class_;
-  };
+  }
 
 private:
   explicit CodePoint( const RawCodePoint &code_point );

@@ -54,7 +54,6 @@ public:
 
 private:
   CharacterRepository() = default;
-  ~CharacterRepository() = default;
 
   // This data structure owns all the Character pointers
   CharacterHolder character_holder_;

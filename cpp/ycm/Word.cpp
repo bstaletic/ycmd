@@ -279,8 +279,8 @@ void Word::BreakIntoCharacters() {
 
 void Word::ComputeBytesPresent() {
   for ( const auto &character : characters_ ) {
-    for ( uint8_t byte : character->Base() ) {
-      bytes_present_.set( byte );
+    for ( const char byte : character->Base() ) {
+      bytes_present_.set( static_cast< size_t >( byte ) );
     }
   }
 }

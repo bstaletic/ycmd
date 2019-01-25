@@ -25,7 +25,7 @@ namespace YouCompleteMe {
 
 namespace {
 
-int GetCodePointLength( uint8_t leading_byte ) {
+int GetCodePointLength( const char leading_byte ) {
   // 0xxxxxxx
   if ( ( leading_byte & 0x80 ) == 0x00 ) {
     return 1;
@@ -62,7 +62,7 @@ const RawCodePoint FindCodePoint( const char *text ) {
     auto it = first + step;
     int cmp = std::strcmp( *it, text );
     if ( cmp == 0 ) {
-      size_t index = std::distance( start, it );
+      size_t index = static_cast< size_t >( std::distance( start, it ) );
       return { *it,
                code_points.normal[ index ],
                code_points.folded_case[ index ],

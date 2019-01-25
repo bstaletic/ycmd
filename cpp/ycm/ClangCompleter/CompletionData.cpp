@@ -103,7 +103,7 @@ bool IsMainCompletionTextInfo( CXCompletionChunkKind kind ) {
 
 
 std::string ChunkToString( CXCompletionString completion_string,
-                           size_t chunk_num ) {
+                           unsigned int chunk_num ) {
   if ( !completion_string ) {
     return std::string();
   }
@@ -114,7 +114,7 @@ std::string ChunkToString( CXCompletionString completion_string,
 
 
 std::string OptionalChunkToString( CXCompletionString completion_string,
-                                   size_t chunk_num ) {
+                                   unsigned int chunk_num ) {
   std::string final_string;
 
   if ( !completion_string ) {
@@ -128,10 +128,10 @@ std::string OptionalChunkToString( CXCompletionString completion_string,
     return final_string;
   }
 
-  size_t optional_num_chunks = clang_getNumCompletionChunks(
+  unsigned int optional_num_chunks = clang_getNumCompletionChunks(
                                optional_completion_string );
 
-  for ( size_t j = 0; j < optional_num_chunks; ++j ) {
+  for ( unsigned int j = 0; j < optional_num_chunks; ++j ) {
     CXCompletionChunkKind kind = clang_getCompletionChunkKind(
                                    optional_completion_string, j );
 
@@ -177,13 +177,13 @@ std::string RemoveTrailingParens( std::string text ) {
 CompletionData::CompletionData( CXCompletionString completion_string,
                                 CXCursorKind kind,
                                 CXCodeCompleteResults *results,
-                                size_t index ) {
-  size_t num_chunks = clang_getNumCompletionChunks( completion_string );
+                                unsigned int index ) {
+  unsigned int num_chunks = clang_getNumCompletionChunks( completion_string );
   bool saw_left_paren = false;
   bool saw_function_params = false;
   bool saw_placeholder = false;
 
-  for ( size_t j = 0; j < num_chunks; ++j ) {
+  for ( unsigned int j = 0; j < num_chunks; ++j ) {
     ExtractDataFromChunk( completion_string,
                           j,
                           saw_left_paren,
@@ -207,7 +207,7 @@ CompletionData::CompletionData( CXCompletionString completion_string,
 
 
 void CompletionData::ExtractDataFromChunk( CXCompletionString completion_string,
-                                           size_t chunk_num,
+                                           unsigned int chunk_num,
                                            bool &saw_left_paren,
                                            bool &saw_function_params,
                                            bool &saw_placeholder ) {
@@ -266,15 +266,15 @@ void CompletionData::ExtractDataFromChunk( CXCompletionString completion_string,
 
 
 void CompletionData::BuildCompletionFixIt( CXCodeCompleteResults *results,
-                                           size_t index ) {
-  size_t num_chunks = clang_getCompletionNumFixIts( results, index );
+                                           unsigned int index ) {
+  unsigned int num_chunks = clang_getCompletionNumFixIts( results, index );
   if ( !num_chunks ) {
     return;
   }
 
   fixit_.chunks.reserve( num_chunks );
 
-  for ( size_t chunk_index = 0; chunk_index < num_chunks; ++chunk_index ) {
+  for ( unsigned int chunk_index = 0; chunk_index < num_chunks; ++chunk_index ) {
     FixItChunk chunk;
     CXSourceRange range;
     chunk.replacement_text = CXStringToString(

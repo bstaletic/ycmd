@@ -91,7 +91,7 @@ TranslationUnit::TranslationUnit(
 
   std::vector< CXUnsavedFile > cxunsaved_files =
     ToCXUnsavedFiles( unsaved_files );
-  const CXUnsavedFile *unsaved = cxunsaved_files.empty()
+  CXUnsavedFile *unsaved = cxunsaved_files.empty()
                                  ? nullptr : &cxunsaved_files[ 0 ];
 
   // Actually parse the translation unit.
@@ -99,9 +99,9 @@ TranslationUnit::TranslationUnit(
                           clang_index,
                           filename.c_str(),
                           &pointer_flags[ 0 ],
-                          pointer_flags.size(),
-                          const_cast<CXUnsavedFile *>( unsaved ),
-                          cxunsaved_files.size(),
+                          static_cast< int >( pointer_flags.size() ),
+                          unsaved,
+                          static_cast< unsigned int >( cxunsaved_files.size() ),
                           EditingOptions(),
                           &clang_translation_unit_ );
   if ( failure != CXError_Success ) {
@@ -150,8 +150,8 @@ std::vector< Diagnostic > TranslationUnit::Reparse(
 
 std::vector< CompletionData > TranslationUnit::CandidatesForLocation(
   const std::string &filename,
-  int line,
-  int column,
+  unsigned int line,
+  unsigned int column,
   const std::vector< UnsavedFile > &unsaved_files ) {
   unique_lock< mutex > lock( clang_access_mutex_ );
 
@@ -161,7 +161,7 @@ std::vector< CompletionData > TranslationUnit::CandidatesForLocation(
 
   std::vector< CXUnsavedFile > cxunsaved_files =
     ToCXUnsavedFiles( unsaved_files );
-  const CXUnsavedFile *unsaved = cxunsaved_files.empty()
+  CXUnsavedFile *unsaved = cxunsaved_files.empty()
                                  ? nullptr : &cxunsaved_files[ 0 ];
 
   // codeCompleteAt reparses the TU if the underlying source file has changed on
@@ -179,8 +179,8 @@ std::vector< CompletionData > TranslationUnit::CandidatesForLocation(
                           filename.c_str(),
                           line,
                           column,
-                          const_cast<CXUnsavedFile *>( unsaved ),
-                          cxunsaved_files.size(),
+                          unsaved,
+                          static_cast< unsigned int >( cxunsaved_files.size() ),
                           CompletionOptions() ),
     clang_disposeCodeCompleteResults );
 
@@ -207,8 +207,8 @@ Location TranslationUnit::GetDeclarationLocationForCursor( CXCursor cursor ) {
 
 Location TranslationUnit::GetDeclarationLocation(
   const std::string &filename,
-  int line,
-  int column,
+  unsigned int line,
+  unsigned int column,
   const std::vector< UnsavedFile > &unsaved_files,
   bool reparse ) {
   if ( reparse ) {
@@ -242,8 +242,8 @@ Location TranslationUnit::GetDefinitionLocationForCursor( CXCursor cursor ) {
 
 Location TranslationUnit::GetDefinitionLocation(
   const std::string &filename,
-  int line,
-  int column,
+  unsigned int line,
+  unsigned int column,
   const std::vector< UnsavedFile > &unsaved_files,
   bool reparse ) {
   if ( reparse ) {
@@ -267,8 +267,8 @@ Location TranslationUnit::GetDefinitionLocation(
 
 Location TranslationUnit::GetDefinitionOrDeclarationLocation(
   const std::string &filename,
-  int line,
-  int column,
+  unsigned int line,
+  unsigned int column,
   const std::vector< UnsavedFile > &unsaved_files,
   bool reparse ) {
   if ( reparse ) {
@@ -308,8 +308,8 @@ Location TranslationUnit::GetDefinitionOrDeclarationLocation(
 
 std::string TranslationUnit::GetTypeAtLocation(
   const std::string &filename,
-  int line,
-  int column,
+  unsigned int line,
+  unsigned int column,
   const std::vector< UnsavedFile > &unsaved_files,
   bool reparse ) {
 
@@ -388,8 +388,8 @@ std::string TranslationUnit::GetTypeAtLocation(
 
 std::string TranslationUnit::GetEnclosingFunctionAtLocation(
   const std::string &filename,
-  int line,
-  int column,
+  unsigned int line,
+  unsigned int column,
   const std::vector< UnsavedFile > &unsaved_files,
   bool reparse ) {
 
@@ -438,7 +438,7 @@ void TranslationUnit::Reparse(
 // non-const pointer to clang. This function (and clang too) will not modify the
 // param though.
 void TranslationUnit::Reparse( std::vector< CXUnsavedFile > &unsaved_files,
-                               size_t parse_options ) {
+                               unsigned int parse_options ) {
   CXErrorCode failure;
   {
     unique_lock< mutex > lock( clang_access_mutex_ );
@@ -454,7 +454,8 @@ void TranslationUnit::Reparse( std::vector< CXUnsavedFile > &unsaved_files,
     // int instead.
     failure = static_cast< CXErrorCode >(
       clang_reparseTranslationUnit( clang_translation_unit_,
-                                    unsaved_files.size(),
+                                    static_cast< unsigned int >
+                                        ( unsaved_files.size() ),
                                     unsaved,
                                     parse_options ) );
   }
@@ -472,10 +473,11 @@ void TranslationUnit::UpdateLatestDiagnostics() {
   unique_lock< mutex > lock2( diagnostics_mutex_ );
 
   latest_diagnostics_.clear();
-  size_t num_diagnostics = clang_getNumDiagnostics( clang_translation_unit_ );
+  unsigned int num_diagnostics =
+      clang_getNumDiagnostics( clang_translation_unit_ );
   latest_diagnostics_.reserve( num_diagnostics );
 
-  for ( size_t i = 0; i < num_diagnostics; ++i ) {
+  for ( unsigned int i = 0; i < num_diagnostics; ++i ) {
     Diagnostic diagnostic =
       BuildDiagnostic(
         DiagnosticWrap( clang_getDiagnostic( clang_translation_unit_, i ),
@@ -495,25 +497,25 @@ namespace {
 ///
 /// PreCondition: All FixIts in the container are on the same line.
 struct sort_by_location {
-  explicit sort_by_location( int column ) : column_( column ) { }
+  explicit sort_by_location( unsigned int column ) : column_( column ) { }
 
   bool operator()( const FixIt &a, const FixIt &b ) {
-    int a_distance = a.location.column_number_ - column_;
-    int b_distance = b.location.column_number_ - column_;
+    unsigned int a_distance = a.location.column_number_ - column_;
+    unsigned int b_distance = b.location.column_number_ - column_;
 
-    return std::abs( a_distance ) < std::abs( b_distance );
+    return a_distance < b_distance;
   }
 
 private:
-  int column_;
+  unsigned int column_;
 };
 
 } // unnamed namespace
 
 std::vector< FixIt > TranslationUnit::GetFixItsForLocationInFile(
   const std::string &filename,
-  int line,
-  int column,
+  unsigned int line,
+  unsigned int column,
   const std::vector< UnsavedFile > &unsaved_files,
   bool reparse ) {
 
@@ -596,8 +598,8 @@ bool TranslationUnit::LocationIsInSystemHeader( const Location &location ) {
 
 CXSourceLocation TranslationUnit::GetSourceLocation(
   const std::string &filename,
-  int line,
-  int column ) {
+  unsigned int line,
+  unsigned int column ) {
 
   // ASSUMES A LOCK IS ALREADY HELD ON clang_access_mutex_ AND THE TU IS VALID!
   CXFile file = clang_getFile( clang_translation_unit_, filename.c_str() );
@@ -605,8 +607,8 @@ CXSourceLocation TranslationUnit::GetSourceLocation(
 }
 
 CXCursor TranslationUnit::GetCursor( const std::string &filename,
-                                     int line,
-                                     int column ) {
+                                     const unsigned int line,
+                                     const unsigned int column ) {
   // ASSUMES A LOCK IS ALREADY HELD ON clang_access_mutex_ AND THE TU IS VALID!
   return clang_getCursor( clang_translation_unit_,
                           GetSourceLocation( filename, line, column ) );

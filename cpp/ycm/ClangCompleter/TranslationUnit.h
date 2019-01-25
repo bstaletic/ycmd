@@ -60,49 +60,49 @@ public:
 
   YCM_EXPORT std::vector< CompletionData > CandidatesForLocation(
     const std::string &filename,
-    int line,
-    int column,
+    unsigned int line,
+    unsigned int column,
     const std::vector< UnsavedFile > &unsaved_files );
 
   YCM_EXPORT Location GetDeclarationLocation(
     const std::string &filename,
-    int line,
-    int column,
+    unsigned int line,
+    unsigned int column,
     const std::vector< UnsavedFile > &unsaved_files,
     bool reparse = true );
 
   YCM_EXPORT Location GetDefinitionLocation(
     const std::string &filename,
-    int line,
-    int column,
+    unsigned int line,
+    unsigned int column,
     const std::vector< UnsavedFile > &unsaved_files,
     bool reparse = true );
 
   YCM_EXPORT Location GetDefinitionOrDeclarationLocation(
     const std::string &filename,
-    int line,
-    int column,
+    unsigned int line,
+    unsigned int column,
     const std::vector< UnsavedFile > &unsaved_files,
     bool reparse = true );
 
   YCM_EXPORT std::string GetTypeAtLocation(
     const std::string &filename,
-    int line,
-    int column,
+    unsigned int line,
+    unsigned int column,
     const std::vector< UnsavedFile > &unsaved_files,
     bool reparse = true );
 
   YCM_EXPORT std::string GetEnclosingFunctionAtLocation(
     const std::string &filename,
-    int line,
-    int column,
+    unsigned int line,
+    unsigned int column,
     const std::vector< UnsavedFile > &unsaved_files,
     bool reparse = true );
 
   std::vector< FixIt > GetFixItsForLocationInFile(
     const std::string &filename,
-    int line,
-    int column,
+    unsigned int line,
+    unsigned int column,
     const std::vector< UnsavedFile > &unsaved_files,
     bool reparse = true );
 
@@ -117,16 +117,18 @@ private:
   void Reparse( std::vector< CXUnsavedFile > &unsaved_files );
 
   void Reparse( std::vector< CXUnsavedFile > &unsaved_files,
-                size_t parse_options );
+                unsigned int parse_options );
 
   void UpdateLatestDiagnostics();
 
   // These four methods must be called under the clang_access_mutex_ lock.
   CXSourceLocation GetSourceLocation( const std::string& filename,
-                                      int line,
-                                      int column );
+                                      unsigned int line,
+                                      unsigned int column );
 
-  CXCursor GetCursor( const std::string& filename, int line, int column );
+  CXCursor GetCursor( const std::string& filename,
+                      const unsigned int line,
+                      const unsigned int column );
 
   Location GetDeclarationLocationForCursor( CXCursor cursor );
 

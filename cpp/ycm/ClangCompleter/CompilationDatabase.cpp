@@ -94,10 +94,10 @@ CompilationInfoForFile CompilationDatabase::GetCompilationInfoForFile(
   info.compiler_working_dir_ = CXStringToString(
                                  clang_CompileCommand_getDirectory( command ) );
 
-  size_t num_flags = clang_CompileCommand_getNumArgs( command );
+  unsigned int num_flags = clang_CompileCommand_getNumArgs( command );
   info.compiler_flags_.reserve( num_flags );
 
-  for ( size_t i = 0; i < num_flags; ++i ) {
+  for ( unsigned int i = 0; i < num_flags; ++i ) {
     info.compiler_flags_.push_back(
       CXStringToString( clang_CompileCommand_getArg( command, i ) ) );
   }
