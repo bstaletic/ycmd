@@ -125,7 +125,7 @@ void PartialSort( std::vector< Element > &elements,
   // number of elements to sort is small and that std::nth_element (introselect)
   // combined with std::sort (introsort) always perform better than std::sort
   // alone in other cases.
-  if ( max_elements <= std::max( 1024l, nb_elements / 64 ) ) {
+  if ( max_elements <= std::max( diff_type{ 1024 }, nb_elements / 64 ) ) {
     std::partial_sort( elements.begin(),
                        elements.begin() + max_elements,
                        elements.end() );
