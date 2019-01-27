@@ -372,7 +372,6 @@ class Completer( with_metaclass( abc.ABCMeta, object ) ):
     return filetypes[ 0 ]
 
 
-  @abc.abstractmethod
   def SupportedFiletypes( self ):
     return set()
 

@@ -27,6 +27,7 @@ from future.utils import itervalues
 from importlib import import_module
 from ycmd.completers.general.general_completer_store import (
     GeneralCompleterStore )
+from ycmd.completers.completer import Completer
 from ycmd.utils import LOGGER
 
 
@@ -36,6 +37,7 @@ class ServerState( object ):
     self._filetype_completers = {}
     self._filetype_completers_lock = threading.Lock()
     self._gencomp = GeneralCompleterStore( self._user_options )
+    self._basic_completer = Completer( self._user_options )
 
 
   @property
@@ -135,3 +137,7 @@ class ServerState( object ):
       return False
     else:
       return not all( x in filetype_to_disable for x in current_filetypes )
+
+
+  def GetBasicCompleter( self ):
+    return self._basic_completer

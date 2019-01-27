@@ -37,6 +37,7 @@ from ycmd.responses import ( BuildExceptionResponse, BuildCompletionResponse,
 from ycmd.request_wrap import RequestWrap
 from ycmd.bottle_utils import SetResponseHeader
 from ycmd.completers.completer_utils import FilterAndSortCandidatesWrap
+from ycmd.completers.completer import Completer
 from ycmd.utils import LOGGER, StartThread
 
 
@@ -125,6 +126,16 @@ def GetCompletions():
       BuildCompletionResponse( completions if completions else [],
                                request_data[ 'start_column' ],
                                errors = errors ) )
+
+
+@app.post( '/should_use_now' )
+def ShouldUseNow():
+  LOGGER.info( 'Received should use now request' )
+  LOGGER.info( request.json )
+  request_data = RequestWrap( request.json )
+  completer = _server_state.GetBasicCompleter()
+  LOGGER.info( completer.ShouldUseNow( request_data ) )
+  return _JsonResponse( completer.ShouldUseNow( request_data ) )
 
 
 @app.post( '/filter_and_sort_candidates' )
