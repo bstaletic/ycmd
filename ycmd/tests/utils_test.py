@@ -170,59 +170,6 @@ def ToUnicode_None_test():
 
 
 @Py2Only
-def JoinLinesAsUnicode_Py2Bytes_test():
-  value = utils.JoinLinesAsUnicode( [ bytes( 'abc' ), bytes( 'xyz' ) ] )
-  eq_( value, u'abc\nxyz' )
-  ok_( isinstance( value, str ) )
-
-
-@Py2Only
-def JoinLinesAsUnicode_Py2Str_test():
-  value = utils.JoinLinesAsUnicode( [ 'abc', 'xyz' ] )
-  eq_( value, u'abc\nxyz' )
-  ok_( isinstance( value, str ) )
-
-
-@Py2Only
-def JoinLinesAsUnicode_Py2FutureStr_test():
-  value = utils.JoinLinesAsUnicode( [ str( 'abc' ), str( 'xyz' ) ] )
-  eq_( value, u'abc\nxyz' )
-  ok_( isinstance( value, str ) )
-
-
-@Py2Only
-def JoinLinesAsUnicode_Py2Unicode_test():
-  value = utils.JoinLinesAsUnicode( [ u'abc', u'xyz' ] )
-  eq_( value, u'abc\nxyz' )
-  ok_( isinstance( value, str ) )
-
-
-def JoinLinesAsUnicode_Bytes_test():
-  value = utils.JoinLinesAsUnicode( [ bytes( b'abc' ), bytes( b'xyz' ) ] )
-  eq_( value, u'abc\nxyz' )
-  ok_( isinstance( value, str ) )
-
-
-def JoinLinesAsUnicode_Str_test():
-  value = utils.JoinLinesAsUnicode( [ u'abc', u'xyz' ] )
-  eq_( value, u'abc\nxyz' )
-  ok_( isinstance( value, str ) )
-
-
-def JoinLinesAsUnicode_EmptyList_test():
-  value = utils.JoinLinesAsUnicode( [] )
-  eq_( value, u'' )
-  ok_( isinstance( value, str ) )
-
-
-def JoinLinesAsUnicode_BadInput_test():
-  assert_that(
-    calling( utils.JoinLinesAsUnicode ).with_args( [ 42 ] ),
-    raises( ValueError, 'lines must contain either strings or bytes' )
-  )
-
-
-@Py2Only
 def ToCppStringCompatible_Py2Str_test():
   value = utils.ToCppStringCompatible( 'abc' )
   eq_( value, 'abc' )
