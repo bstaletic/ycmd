@@ -37,7 +37,6 @@ from ycmd.responses import ( BuildExceptionResponse, BuildCompletionResponse,
 from ycmd.request_wrap import RequestWrap
 from ycmd.bottle_utils import SetResponseHeader
 from ycmd.completers.completer_utils import FilterAndSortCandidatesWrap
-from ycmd.completers.completer import Completer
 from ycmd.utils import LOGGER, StartThread
 
 
