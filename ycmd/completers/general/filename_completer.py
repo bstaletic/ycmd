@@ -23,6 +23,7 @@ from __future__ import absolute_import
 from builtins import *  # noqa
 
 import os
+import fnmatch
 
 from ycmd.completers.completer import Completer
 from ycmd.utils import ( ExpandVariablesInPath,
@@ -206,7 +207,7 @@ class FilenameCompleter( Completer ):
     return []
 
 
-  def GetCandidatesForDirectory( self, directory ):
+  def GetCandidatesForDirectory( self, directory, ignore_patterns ):
     mtime = GetModificationTime( directory )
 
     try:
@@ -216,7 +217,7 @@ class FilenameCompleter( Completer ):
     except KeyError:
       pass
 
-    candidates = _GeneratePathCompletionCandidates( directory )
+    candidates = _GeneratePathCompletionCandidates( directory, ignore_patterns )
     if mtime:
       self._candidates_for_directory[ directory ] = {
         'candidates': candidates,
@@ -237,7 +238,8 @@ class FilenameCompleter( Completer ):
     old_start_codepoint = request_data[ 'start_codepoint' ]
     request_data[ 'start_codepoint' ] = start_codepoint
 
-    candidates = self.GetCandidatesForDirectory( directory )
+    patterns = request_data[ 'ignored_filepaths' ].split( ',' )
+    candidates = self.GetCandidatesForDirectory( directory, patterns )
     candidates = self.FilterAndSortCandidates( candidates,
                                                request_data[ 'query' ] )
     if not candidates:
@@ -248,16 +250,21 @@ class FilenameCompleter( Completer ):
     return candidates
 
 
-def _GeneratePathCompletionCandidates( path_dir ):
+def _GeneratePathCompletionCandidates( path_dir, ignore_patterns ):
   completions = []
 
   unicode_path = ToUnicode( path_dir )
 
   for rel_path in ListDirectory( unicode_path ):
+    ignored = False
     absolute_path = os.path.join( unicode_path, rel_path )
     path_type = GetPathTypeName( GetPathType( absolute_path ) )
-    completions.append(
-      responses.BuildCompletionData( rel_path, path_type ) )
+    for pattern in ignore_patterns:
+      if fnmatch.fnmatch( absolute_path, pattern ):
+        ignored = True
+    if not ignored:
+      completions.append(
+        responses.BuildCompletionData( rel_path, path_type ) )
 
   return completions
 

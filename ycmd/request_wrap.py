@@ -91,6 +91,8 @@ class RequestWrap( object ):
 
       'force_semantic': ( self._GetForceSemantic, None ),
 
+      'ignored_filepaths': ( self._GetIgnorePatterns, None ),
+
       'lines': ( self._CurrentLines, None ),
 
       'extra_conf_data': ( self._GetExtraConfData, None )
@@ -124,14 +126,15 @@ class RequestWrap( object ):
 
 
   def __eq__( self, other ):
-    if ( self[ 'filepath' ]         != other[ 'filepath' ] or
-         self[ 'filetypes' ]        != other[ 'filetypes' ] or
-         self[ 'line_num' ]         != other[ 'line_num' ] or
-         self[ 'start_column' ]     != other[ 'start_column' ] or
-         self[ 'prefix' ]           != other[ 'prefix' ] or
-         self[ 'force_semantic' ]   != other[ 'force_semantic' ] or
-         self[ 'extra_conf_data' ]  != other[ 'extra_conf_data' ] or
-         len( self[ 'file_data' ] ) != len( other[ 'file_data' ] ) ):
+    if ( self[ 'filepath' ]          != other[ 'filepath' ] or
+         self[ 'filetypes' ]         != other[ 'filetypes' ] or
+         self[ 'line_num' ]          != other[ 'line_num' ] or
+         self[ 'start_column' ]      != other[ 'start_column' ] or
+         self[ 'prefix' ]            != other[ 'prefix' ] or
+         self[ 'force_semantic' ]    != other[ 'force_semantic' ] or
+         self[ 'ignored_filepaths' ] != other[ 'ignored_filepaths' ] or
+         self[ 'extra_conf_data' ]   != other[ 'extra_conf_data' ] or
+         len( self[ 'file_data' ] )  != len( other[ 'file_data' ] ) ):
       return False
 
     for filename, file_data in iteritems( self[ 'file_data' ] ):
@@ -247,6 +250,9 @@ class RequestWrap( object ):
     path = self[ 'filepath' ]
     return self[ 'file_data' ][ path ][ 'filetypes' ]
 
+
+  def _GetIgnorePatterns( self ):
+    return self._request.get( 'ignored_filepaths', '' )
 
   def _GetForceSemantic( self ):
     return bool( self._request.get( 'force_semantic', False ) )
