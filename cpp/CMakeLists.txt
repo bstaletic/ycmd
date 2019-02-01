@@ -274,8 +274,7 @@ if (NOT USE_SYSTEM_BOOST)
 endif()
 
 # Abseil uses these variables to set default compiler flags.
-list( APPEND LLVM_FLAGS "-fPIC" )
-list( APPEND GCC_FLAGS "-fPIC" )
+set(CMAKE_POSITION_INDEPENDENT_CODE TRUE)
 
 add_subdirectory( absail )
 add_subdirectory( ycm )

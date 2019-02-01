@@ -335,8 +335,9 @@ endif()
 
 target_link_libraries( ${PROJECT_NAME}
                        ${Boost_LIBRARIES}
-		       absl::hash
-		       absl::container
+                       absl::hash
+                       absl::flat_hash_set
+                       absl::flat_hash_map
                        ${PYTHON_LIBRARIES}
                        ${LIBCLANG_TARGET}
                        ${EXTRA_LIBS}
