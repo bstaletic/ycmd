@@ -31,7 +31,7 @@ namespace {
 
 DiagnosticKind DiagnosticSeverityToType( CXDiagnosticSeverity severity ) {
 #ifdef ERROR
-#undef ERROR
+#error ERROR is a macro
 #endif
   switch ( severity ) {
     case CXDiagnostic_Ignored:
