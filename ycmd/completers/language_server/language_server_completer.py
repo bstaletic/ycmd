@@ -710,6 +710,7 @@ class LanguageServerCompleter( Completer ):
     #     synchronise on this mutex for that.
     self._server_info_mutex = threading.Lock()
     self.ServerReset()
+    self._is_complete = True
 
 
   def ServerReset( self ):
@@ -806,7 +807,9 @@ class LanguageServerCompleter( Completer ):
   def GetCodepointForCompletionRequest( self, request_data ):
     """Returns the 1-based codepoint offset on the current line at which to make
     the completion request"""
-    return request_data[ 'start_codepoint' ]
+    return ( request_data[ 'start_codepoint' ]
+             if self._is_complete
+             else request_data[ 'column_codepoint' ] )
 
 
   def ComputeCandidatesInner( self, request_data ):
@@ -827,8 +830,10 @@ class LanguageServerCompleter( Completer ):
 
     if isinstance( response[ 'result' ], list ):
       items = response[ 'result' ]
+      self._is_complete = True
     else:
       items = response[ 'result' ][ 'items' ]
+      self._is_complete = not response[ 'result' ][ 'isIncomplete' ]
 
     # Note: _CandidatesFromCompletionItems does a lot of work on the actual
     # completion text to ensure that the returned text and start_codepoint are
@@ -839,9 +844,10 @@ class LanguageServerCompleter( Completer ):
     # should be based on ycmd's version of the insertion_text. Fortunately it's
     # likely much quicker to do the simple calculations inline rather than a
     # series of potentially many blocking server round trips.
-    return self._CandidatesFromCompletionItems( items,
-                                                False, # don't do resolve
-                                                request_data )
+    return ( self._CandidatesFromCompletionItems( items,
+                                                  False, # don't do resolve
+                                                  request_data ),
+             self._is_complete )
 
 
   def DetailCandidates( self, request_data, completions ):

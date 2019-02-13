@@ -313,6 +313,9 @@ class ClangdCompleter( language_server_completer.LanguageServerCompleter ):
     # items and does filtering/ranking. Instead, we use the filtering/ranking
     # results from clangd, thus we pass "column_codepoint" (which includes the
     # whole query string e.g. "std::u_p") to clangd.
+    if self._use_ycmd_caching:
+      return super( ClangdCompleter,
+                    self ).GetCodepointForCompletionRequest( request_data )
     return request_data[ 'column_codepoint' ]
 
 

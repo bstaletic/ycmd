@@ -246,7 +246,13 @@ class Completer( with_metaclass( abc.ABCMeta, object ) ):
       return cache_completions
 
     raw_completions = self.ComputeCandidatesInner( request_data )
-    self._completions_cache.Update( request_data, raw_completions )
+    if isinstance( raw_completions, tuple ):
+      should_cache_completions = raw_completions[ 1 ]
+      raw_completions = raw_completions[ 0 ]
+    else:
+      should_cache_completions = True
+    if should_cache_completions:
+      self._completions_cache.Update( request_data, raw_completions )
     return raw_completions
 
 
