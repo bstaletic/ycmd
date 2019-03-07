@@ -201,6 +201,7 @@ class CsharpCompleter( Completer ):
 
     return responses.BuildDiagnosticResponse( diagnostics,
                                               request_data[ 'filepath' ],
+                                              request_data[ 'filetypes' ],
                                               self.max_diagnostics_to_display )
 
 

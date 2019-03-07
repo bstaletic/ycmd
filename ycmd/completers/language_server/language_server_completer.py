@@ -1109,7 +1109,10 @@ class LanguageServerCompleter( Completer ):
         diagnostics = [ _BuildDiagnostic( contents, uri, diag )
                         for diag in self._latest_diagnostics[ uri ] ]
         return responses.BuildDiagnosticResponse(
-          diagnostics, filepath, self.max_diagnostics_to_display )
+            diagnostics,
+            filepath,
+            request_data[ 'filetypes' ],
+            self.max_diagnostics_to_display )
 
 
   def PollForMessagesInner( self, request_data, timeout ):
@@ -1245,7 +1248,10 @@ class LanguageServerCompleter( Completer ):
                       for x in params[ 'diagnostics' ] ]
       return {
         'diagnostics': responses.BuildDiagnosticResponse(
-          diagnostics, filepath, self.max_diagnostics_to_display ),
+             diagnostics,
+             filepath,
+             request_data[ 'filetypes' ],
+             self.max_diagnostics_to_display ),
         'filepath': filepath
       }
 

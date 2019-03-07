@@ -24,6 +24,7 @@ from builtins import *  # noqa
 
 import os
 from ycmd.utils import ProcessIsRunning
+from ycmd.diagnostic_filter import CreateFromOptions
 
 
 YCM_EXTRA_CONF_FILENAME = '.ycm_extra_conf.py'
@@ -37,6 +38,8 @@ NO_EXTRA_CONF_FILENAME_MESSAGE = ( 'No {0} file detected, so no compile flags '
 
 NO_DIAGNOSTIC_SUPPORT_MESSAGE = ( 'YCM has no diagnostics support for this '
   'filetype; refer to Syntastic docs if using Syntastic.' )
+
+FILTER = CreateFromOptions()
 
 
 class ServerError( Exception ):
@@ -239,7 +242,9 @@ def BuildDiagnosticData( diagnostic ):
 
 def BuildDiagnosticResponse( diagnostics,
                              filename,
+                             filetypes,
                              max_diagnostics_to_display ):
+  diagnostics = _ApplyDiagnosticFilter( diagnostics, filetypes )
   if ( max_diagnostics_to_display and
        len( diagnostics ) > max_diagnostics_to_display ):
     diagnostics = diagnostics[ : max_diagnostics_to_display ]
@@ -253,6 +258,11 @@ def BuildDiagnosticResponse( diagnostics,
       'ERROR'
     ) )
   return [ BuildDiagnosticData( diagnostic ) for diagnostic in diagnostics ]
+
+
+def _ApplyDiagnosticFilter( diags, filetypes ):
+  FILTER.SubsetForTypes( filetypes )
+  return filter( FILTER.IsAllowed, diags )
 
 
 def BuildFixItResponse( fixits ):

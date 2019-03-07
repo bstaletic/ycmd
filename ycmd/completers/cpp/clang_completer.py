@@ -391,6 +391,7 @@ class ClangCompleter( Completer ):
     self._diagnostic_store = DiagnosticsToDiagStructure( diagnostics )
     return responses.BuildDiagnosticResponse( diagnostics,
                                               request_data[ 'filepath' ],
+                                              request_data[ 'filetypes' ],
                                               self.max_diagnostics_to_display )
 
 

@@ -465,6 +465,7 @@ class TypeScriptCompleter( Completer ):
       self._latest_diagnostics_for_file[ filepath ] = diagnostics
     return responses.BuildDiagnosticResponse( diagnostics,
                                               filepath,
+                                              request_data[ 'filetypes' ],
                                               self.max_diagnostics_to_display )
 
 
