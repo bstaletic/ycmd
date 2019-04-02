@@ -27,7 +27,21 @@ from future.utils import itervalues
 from importlib import import_module
 from ycmd.completers.general.general_completer_store import (
     GeneralCompleterStore )
+from ycmd.completers.language_server import simple_language_server_completer
 from ycmd.utils import LOGGER
+
+def _LSPServerFromEnvVar( filetype, user_options ):
+  try:
+    lsp_cmdline = os.environ[ 'YCM_' + filetype.upper() + '_SERVER' ]
+    completer_class = type( filetype + 'Completer',
+                 ( simple_language_server_completer.SimpleLSPCompleter, ),
+                 { 'Language' : lambda self: [ filetype ],
+                   'GetServerName': lambda self: filetype + 'completer',
+                   'GetCommandLine': lambda self: lsp_cmdline.split( ' ' ),
+                   'SupportedFiletypes': lambda self: [ filetype ] } )
+    return clang_completer( user_options )
+  except KeyError:
+    return None
 
 
 class ServerState( object ):
@@ -63,7 +77,7 @@ class ServerState( object ):
         module = import_module( 'ycmd.completers.{}.hook'.format( filetype ) )
         completer = module.GetCompleter( self._user_options )
       except ImportError:
-        completer = None
+        completer = _LSPServerFromEnvVar( filetype, self._user_options )
 
       supported_filetypes = { filetype }
       if completer:
