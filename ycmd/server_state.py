@@ -31,14 +31,13 @@ from ycmd.utils import LOGGER, FindExecutable, ToUnicode
 
 
 def _LSPServerFromEnvVar( filetype, user_options ):
-  import os
   from ycmd.completers.language_server import simple_language_server_completer
 
   def GetDoc( self, request_data, _ ):
     return ToUnicode( self.GetHoverResponse( request_data ) )
 
   try:
-    lsp_cmdline = os.environ[ 'YCM_' + filetype.upper() + '_SERVER' ]
+    lsp_cmdline = user_options[ filepath + '_server' ]
     lsp_cmdline = lsp_cmdline.split( ' ' )
     lsp_cmdline[ 0 ] = FindExecutable( lsp_cmdline[ 0 ] )
     completer_class = type(
