@@ -29,6 +29,7 @@ from ycmd.completers.general.general_completer_store import (
     GeneralCompleterStore )
 from ycmd.utils import LOGGER, FindExecutable, ToUnicode
 
+
 def _LSPServerFromEnvVar( filetype, user_options ):
   import os
   from ycmd.completers.language_server import simple_language_server_completer
