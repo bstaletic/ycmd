@@ -27,19 +27,30 @@ from future.utils import itervalues
 from importlib import import_module
 from ycmd.completers.general.general_completer_store import (
     GeneralCompleterStore )
-from ycmd.completers.language_server import simple_language_server_completer
-from ycmd.utils import LOGGER
+from ycmd.utils import LOGGER, FindExecutable, ToUnicode
 
 def _LSPServerFromEnvVar( filetype, user_options ):
+  import os
+  from ycmd.completers.language_server import simple_language_server_completer
+
+  def GetDoc( self, request_data, _ ):
+    return ToUnicode( self.GetHoverResponse( request_data ) )
+
   try:
     lsp_cmdline = os.environ[ 'YCM_' + filetype.upper() + '_SERVER' ]
-    completer_class = type( filetype + 'Completer',
-                 ( simple_language_server_completer.SimpleLSPCompleter, ),
-                 { 'Language' : lambda self: [ filetype ],
-                   'GetServerName': lambda self: filetype + 'completer',
-                   'GetCommandLine': lambda self: lsp_cmdline.split( ' ' ),
-                   'SupportedFiletypes': lambda self: [ filetype ] } )
-    return clang_completer( user_options )
+    lsp_cmdline = lsp_cmdline.split( ' ' )
+    lsp_cmdline[ 0 ] = FindExecutable( lsp_cmdline[ 0 ] )
+    completer_class = type(
+        filetype + 'Completer',
+        ( simple_language_server_completer.SimpleLSPCompleter, ),
+        { 'Language' : lambda self: [ filetype ],
+          'GetServerName': lambda self: filetype + 'completer',
+          'GetCommandLine': lambda self: lsp_cmdline,
+          'GetCustomSubcommands': lambda self: {
+                'GetDoc': lambda self, request_data, args:
+                    ToUnicode( self.GetHoverResponse( request_data ) ) },
+          'SupportedFiletypes': lambda self: [ filetype ] } )
+    return completer_class( user_options )
   except KeyError:
     return None
 
