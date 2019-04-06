@@ -41,3 +41,6 @@
 	path = third_party/go/src/golang.org/x/tools
 	url = https://go.googlesource.com/tools
 	ignore = dirty
+[submodule "cpp/abseil"]
+	path = cpp/abseil
+	url = https://github.com/abseil/abseil-cpp

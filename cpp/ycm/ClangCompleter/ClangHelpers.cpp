@@ -23,10 +23,8 @@
 #include "UnsavedFile.h"
 #include "Utils.h"
 
-#include <unordered_map>
+#include <absl/container/flat_hash_map.h>
 #include <utility>
-
-using std::unordered_map;
 
 namespace YouCompleteMe {
 namespace {
@@ -213,7 +211,7 @@ std::vector< CompletionData > ToCompletionDataVector(
   }
 
   completions.reserve( results->NumResults );
-  unordered_map< std::string, size_t > seen_data;
+  absl::flat_hash_map< std::string, size_t > seen_data;
 
   for ( size_t i = 0; i < results->NumResults; ++i ) {
     CXCompletionResult result = results->Results[ i ];
