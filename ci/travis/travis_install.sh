@@ -21,6 +21,7 @@ if [ "${YCM_COMPILER}" == "clang" ]; then
   ln -s /usr/bin/clang++ ${HOME}/bin/c++
   ln -s /usr/bin/clang ${HOME}/bin/cc
   # Tell CMake to compile with libc++ when using Clang.
+  export CXXFLAGS='-isystem/usr/include/libcxxabi'
   export EXTRA_CMAKE_ARGS="${EXTRA_CMAKE_ARGS} -DHAS_LIBCXX11=ON"
 else
   ln -s /usr/bin/g++-4.9 ${HOME}/bin/c++
@@ -105,13 +106,18 @@ nvm install 4
 # Java 8 setup
 ###############
 # Make sure we have the appropriate java for jdt.ls
-set +e
-jdk_switcher use oraclejdk8
-set -e
-
 java -version
 JAVA_VERSION=$(java -version 2>&1 | awk -F '"' '/version/ {print $2}')
-if [[ "$JAVA_VERSION" < "1.8" ]]; then
+# Everything before the first `.`
+JAVA_VERSION_MAJOR=${JAVA_VERSION%%.*}
+# Everything after the first dot
+JAVA_VERSION_MINOR=${JAVA_VERSION#*.}
+# Minor may contain patch information as well, so strip that
+JAVA_VERSION_MINOR=${JAVA_VERSION_MINOR%%.*}
+if [[ $JAVA_VERSION_MAJOR -eq 1 && $JAVA_VERSION_MINOR -lt 8 ]]; then
+  echo "Java version $JAVA_VERSION is too old" 1>&2
+  exit 1
+elif [[ $JAVA_VERSION_MAJOR -lt 8 ]]; then
   echo "Java version $JAVA_VERSION is too old" 1>&2
   exit 1
 fi

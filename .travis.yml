@@ -1,5 +1,5 @@
 language: generic
-dist: trusty
+dist: xenial
 sudo: false
 before_install:
   - git submodule update --init --recursive
@@ -42,6 +42,7 @@ addons:
      - clang
      - clang-tidy-3.9
      - libc++-dev
+     - libc++abi-dev
      # Required to build the OmniSharp server.
      - mono-devel
      # Everything below is a Python build dep (though it depends on Python
