@@ -239,6 +239,8 @@ include_directories(
   ${PYBIND11_INCLUDES_DIR}
   ${PYTHON_INCLUDE_DIRS}
   ${CLANG_INCLUDES_DIR}
+  # Ubuntu 16.04 libc++abi packaging was screwed
+  /usr/include/libcxxabi/
   )
 
 #############################################################################
