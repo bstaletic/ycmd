@@ -49,10 +49,14 @@ LANGUAGE_SERVER_HOME = os.path.abspath( os.path.join(
 
 PATH_TO_JAVA = utils.PathToFirstExistingExecutable( [ 'java' ] )
 
+# We search for gradle/maven _first_. This is because these are somewhat
+# caononical, whereas jdt.ls itself will spam .project files all over the
+# project directories. This can cause havoc if it is interrupted midway through,
+# e.g. importing gradle projects.
 PROJECT_FILE_TAILS = [
-  '.project',
   'pom.xml',
-  'build.gradle'
+  'build.gradle',
+  '.project',
 ]
 
 WORKSPACE_ROOT_PATH = os.path.abspath( os.path.join(
@@ -150,7 +154,7 @@ def _FindProjectDir( starting_dir ):
     if project_type:
       break
 
-  if project_type:
+  if project_type and project_type != '.project':
     # We've found a project marker file (like build.gradle). Search parent
     # directories for that same project type file and find the topmost one as
     # the project root.
