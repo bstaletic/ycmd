@@ -21,8 +21,6 @@ if [ "${YCM_COMPILER}" == "clang" ]; then
   ln -s /usr/bin/clang++ ${HOME}/bin/c++
   ln -s /usr/bin/clang ${HOME}/bin/cc
   # Tell CMake to compile with libc++ when using Clang.
-  ls /usr/include/libcxxabi/
-  export CXXFLAGS='-isystem/usr/include/libcxxabi'
   export EXTRA_CMAKE_ARGS="${EXTRA_CMAKE_ARGS} -DHAS_LIBCXX11=ON"
 else
   ln -s /usr/bin/g++-4.9 ${HOME}/bin/c++
