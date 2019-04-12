@@ -68,6 +68,7 @@ ClangOnly = skipIf( not ycm_core.HasClangSupport(),
                     'Only when Clang support available' )
 MacOnly = skipIf( not OnMac(), 'Mac only' )
 UnixOnly = skipIf( OnWindows(), 'Unix only' )
+NoWinPy2 = skipIf( OnWindows() and PY2, 'Disabled on Windows with Python 2' )
 
 
 def BuildRequest( **kwargs ):
