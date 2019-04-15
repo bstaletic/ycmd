@@ -69,7 +69,7 @@ instructions][ycm-install] (ignore the Vim-specific parts).
 Supported compilers
 -------------------
 
-- GCC 4.9 and later
+- GCC 4.8 and later
 - Clang 3.3 and later
 - Microsoft Visual Studio 2015 Update 3 and later
 
