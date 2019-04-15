@@ -192,7 +192,7 @@ if ( APPLE )
 endif()
 
 if ( USE_SYSTEM_BOOST )
-  set( Boost_COMPONENTS filesystem regex )
+  set( Boost_COMPONENTS filesystem )
   find_package( Boost REQUIRED COMPONENTS ${Boost_COMPONENTS} )
 else()
   set( Boost_INCLUDE_DIR ${BoostParts_SOURCE_DIR} )
@@ -200,6 +200,11 @@ else()
 endif()
 
 set( PYBIND11_INCLUDES_DIR "${CMAKE_SOURCE_DIR}/pybind11" )
+if ( USE_SYSTEM_RE2 )
+  set( RE2_INCLUDES_DIR "" )
+else()
+  set( RE2_INCLUDES_DIR "${CMAKE_SOURCE_DIR}/re2" )
+endif()
 
 file( GLOB_RECURSE SERVER_SOURCES *.h *.cpp )
 
@@ -235,6 +240,7 @@ endif()
 # including these directories after ours.
 include_directories(
   SYSTEM
+  ${RE2_INCLUDES_DIR}
   ${Boost_INCLUDE_DIR}
   ${PYBIND11_INCLUDES_DIR}
   ${PYTHON_INCLUDE_DIRS}
@@ -335,6 +341,7 @@ target_link_libraries( ${PROJECT_NAME}
                        ${PYTHON_LIBRARIES}
                        ${LIBCLANG_TARGET}
                        ${EXTRA_LIBS}
+		       re2
                      )
 
 if( LIBCLANG_TARGET )

@@ -18,7 +18,7 @@
 #include "IdentifierUtils.h"
 #include "Utils.h"
 
-#include <regex>
+#include <re2/re2.h>
 #include <unordered_map>
 
 namespace YouCompleteMe {
@@ -31,14 +31,15 @@ namespace {
 // http://ctags.sourceforge.net/FORMAT
 // TL;DR: The only supported format is the one Exuberant Ctags emits.
 const char *const TAG_REGEX =
-  "(?:^|\\n|\\r\\n)([^\\t\\n\\r]+)"  // The first field is the identifier
+  "(?m)" // Multiline flag
+  "^([^\\t\\n\\r]+)"  // The first field is the identifier
   "\\t"  // A TAB char is the field separator
   // The second field is the path to the file that has the identifier; either
   // absolute or relative to the tags file.
   "([^\\t\\n\\r]+)"
   "\\t.*?"  // Non-greedy everything
   "language:([^\\t\\n\\r]+)"  // We want to capture the language of the file
-  ".*?(?:$|\\n|\\r\\n)";
+  ".*?$";
 
 // Only used as the equality comparer for the below unordered_map which stores
 // const char* pointers and not std::string but needs to hash based on string
@@ -176,19 +177,17 @@ FiletypeIdentifierMap ExtractIdentifiersFromTagsFile(
   std::string::const_iterator start = tags_file_contents.begin();
   std::string::const_iterator end   = tags_file_contents.end();
 
-  std::smatch matches;
-  const std::regex expression( TAG_REGEX );
+  //std::smatch matches;
+  const RE2 expression( TAG_REGEX );
 
-  while ( std::regex_search( start, end, matches, expression ) ) {
-    start = matches[ 0 ].second;
-
-    std::string language( matches[ 3 ] );
+  std::string identifier, p, language;
+  re2::StringPiece str( tags_file_contents );
+  while ( RE2::FindAndConsume( &str, expression, &identifier, &p, &language ) ) {
     std::string filetype = FindWithDefault( LANG_TO_FILETYPE,
                                             language.c_str(),
                                             Lowercase( language ).c_str() );
 
-    std::string identifier( matches[ 1 ] );
-    fs::path path( matches[ 2 ].str() );
+    fs::path path( p );
     path = NormalizePath( path, path_to_tag_file.parent_path() );
 
     filetype_identifier_map[ filetype ][ path.string() ].push_back( identifier );

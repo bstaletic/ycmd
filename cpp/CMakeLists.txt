@@ -260,9 +260,15 @@ endif()
 #############################################################################
 
 option( USE_SYSTEM_BOOST "Set to ON to use the system boost libraries" OFF )
+set(CMAKE_POSITION_INDEPENDENT_CODE TRUE)
 
 if (NOT USE_SYSTEM_BOOST)
   add_subdirectory( BoostParts )
 endif()
 
+option( USE_SYSTEM_RE2 "Set to oN to use the system re2 library" OFF )
+
+if ( NOT USE_SYSTEM_RE2 )
+  add_subdirectory( re2 )
+endif()
 add_subdirectory( ycm )
