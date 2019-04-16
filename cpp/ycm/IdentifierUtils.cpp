@@ -174,10 +174,6 @@ FiletypeIdentifierMap ExtractIdentifiersFromTagsFile(
     return filetype_identifier_map;
   }
 
-  std::string::const_iterator start = tags_file_contents.begin();
-  std::string::const_iterator end   = tags_file_contents.end();
-
-  //std::smatch matches;
   const RE2 expression( TAG_REGEX );
 
   std::string identifier, p, language;
@@ -187,9 +183,7 @@ FiletypeIdentifierMap ExtractIdentifiersFromTagsFile(
                                             language.c_str(),
                                             Lowercase( language ).c_str() );
 
-    fs::path path( p );
-    path = NormalizePath( path, path_to_tag_file.parent_path() );
-
+    fs::path path = NormalizePath( p, path_to_tag_file.parent_path() );
     filetype_identifier_map[ filetype ][ path.string() ].push_back( identifier );
   }
 
