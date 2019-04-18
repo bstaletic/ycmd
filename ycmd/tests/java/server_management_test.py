@@ -26,18 +26,15 @@ from builtins import *  # noqa
 import functools
 import os
 import psutil
-import requests
 import time
 
 from mock import patch
-from hamcrest import assert_that, contains, equal_to, has_entry
+from hamcrest import assert_that, contains, has_entry
 from ycmd.tests.java import ( PathToTestFile,
                               IsolatedYcmd,
-                              SharedYcmd,
                               StartJavaCompleterServerInDirectory )
 from ycmd.tests.test_utils import ( BuildRequest,
                                     CompleterProjectDirectoryMatcher,
-                                    ErrorMatcher,
                                     MockProcessTerminationTimingOut,
                                     TemporaryTestDir,
                                     WaitUntilCompleterServerReady )
@@ -267,7 +264,6 @@ def ServerManagement_ProjectDetection_GradleParent_test( app ):
 #   request_data = BuildRequest( filetype = 'java' )
 #   assert_that( app.post_json( '/debug_info', request_data ).json,
 #                CompleterProjectDirectoryMatcher( maven_project ) )
-
 
 
 # @SharedYcmd
