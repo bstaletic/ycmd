@@ -900,19 +900,19 @@ def Main():
   if not args.skip_build or not args.no_regex:
     DoCmakeBuilds( args )
   if args.cs_completer or args.omnisharp_completer or args.all_completers:
-    EnableCsCompleter( args )
+    # EnableCsCompleter( args )
   if args.go_completer or args.gocode_completer or args.all_completers:
-    EnableGoCompleter( args )
+    # EnableGoCompleter( args )
   if args.js_completer or args.tern_completer or args.all_completers:
-    EnableJavaScriptCompleter( args )
+    # EnableJavaScriptCompleter( args )
   if args.rust_completer or args.racer_completer or args.all_completers:
-    EnableRustCompleter( args )
+    # EnableRustCompleter( args )
   if args.java_completer or args.all_completers:
-    EnableJavaCompleter( args )
+    # EnableJavaCompleter( args )
   if args.ts_completer or args.all_completers:
-    EnableTypeScriptCompleter( args )
+    # EnableTypeScriptCompleter( args )
   if args.clangd_completer:
-    EnableClangdCompleter( args )
+    # EnableClangdCompleter( args )
 
 
 if __name__ == '__main__':

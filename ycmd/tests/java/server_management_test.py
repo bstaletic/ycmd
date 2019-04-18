@@ -270,43 +270,43 @@ def ServerManagement_ProjectDetection_GradleParent_test( app ):
 
 
 
-@SharedYcmd
-def ServerManagement_OpenProject_RelativePathNoWD_test( app ):
-  response = app.post_json(
-    '/run_completer_command',
-    BuildRequest(
-      filetype = 'java',
-      command_arguments = [
-        'OpenProject',
-        os.path.join( '..', 'simple_maven_project' ),
-      ],
-    ),
-    expect_errors = True,
-  )
-  assert_that( response.status_code,
-               equal_to( requests.codes.internal_server_error ) )
-  assert_that( response.json,
-               ErrorMatcher( ValueError,
-                             'Project directory must be absolute' ) )
-
-
-@SharedYcmd
-def ServerManagement_OpenProject_RelativePathNoPath_test( app ):
-  response = app.post_json(
-    '/run_completer_command',
-    BuildRequest(
-      filetype = 'java',
-      command_arguments = [
-        'OpenProject',
-      ],
-    ),
-    expect_errors = True,
-  )
-  assert_that( response.status_code,
-               equal_to( requests.codes.internal_server_error ) )
-  assert_that( response.json,
-               ErrorMatcher( ValueError,
-                             'Usage: OpenProject <project directory>' ) )
+# @SharedYcmd
+# def ServerManagement_OpenProject_RelativePathNoWD_test( app ):
+#   response = app.post_json(
+#     '/run_completer_command',
+#     BuildRequest(
+#       filetype = 'java',
+#       command_arguments = [
+#         'OpenProject',
+#         os.path.join( '..', 'simple_maven_project' ),
+#       ],
+#     ),
+#     expect_errors = True,
+#   )
+#   assert_that( response.status_code,
+#                equal_to( requests.codes.internal_server_error ) )
+#   assert_that( response.json,
+#                ErrorMatcher( ValueError,
+#                              'Project directory must be absolute' ) )
+#
+#
+# @SharedYcmd
+# def ServerManagement_OpenProject_RelativePathNoPath_test( app ):
+#   response = app.post_json(
+#     '/run_completer_command',
+#     BuildRequest(
+#       filetype = 'java',
+#       command_arguments = [
+#         'OpenProject',
+#       ],
+#     ),
+#     expect_errors = True,
+#   )
+#   assert_that( response.status_code,
+#                equal_to( requests.codes.internal_server_error ) )
+#   assert_that( response.json,
+#                ErrorMatcher( ValueError,
+#                              'Usage: OpenProject <project directory>' ) )
 
 
 def ServerManagement_ProjectDetection_NoParent_test():
