@@ -19,7 +19,7 @@
 #include "CodePointRepository.h"
 
 #include <array>
-#include <cstring>
+#include <string_view>
 
 namespace YouCompleteMe {
 
@@ -46,39 +46,28 @@ int GetCodePointLength( uint8_t leading_byte ) {
 }
 
 
-const RawCodePoint FindCodePoint( const char *text ) {
+const RawCodePoint FindCodePoint( std::string_view text ) {
 #include "UnicodeTable.inc"
 
   // Do a binary search on the array of code points to find the raw code point
   // corresponding to the text. If no code point is found, return the default
   // raw code point for that text.
   const auto& original = code_points.original;
-  auto first = original.begin();
-  const auto start = first;
-  size_t count = original.size();
+  const auto first = original.cbegin();
+  const auto last = original.cend();
 
-  while ( count > 0 ) {
-    size_t step = count / 2;
-    auto it = first + step;
-    int cmp = std::strcmp( *it, text );
-    if ( cmp == 0 ) {
-      size_t index = std::distance( start, it );
-      return { *it,
-               code_points.normal[ index ],
-               code_points.folded_case[ index ],
-               code_points.swapped_case[ index ],
-               code_points.is_letter[ index ],
-               code_points.is_punctuation[ index ],
-               code_points.is_uppercase[ index ],
-               code_points.break_property[ index ],
-               code_points.combining_class[ index ] };
-    }
-    if ( cmp < 0 ) {
-      first = ++it;
-      count -= step + 1;
-    } else {
-      count = step;
-    }
+  auto it = std::lower_bound( first, last, text );
+  if ( it != last && *it == text ) {
+    size_t index = std::distance( first, it );
+    return { *it,
+             code_points.normal[ index ],
+             code_points.folded_case[ index ],
+             code_points.swapped_case[ index ],
+             code_points.is_letter[ index ],
+             code_points.is_punctuation[ index ],
+             code_points.is_uppercase[ index ],
+             code_points.break_property[ index ],
+             code_points.combining_class[ index ] };
   }
 
   return { text, text, text, text, false, false, false, 0, 0 };
@@ -87,7 +76,7 @@ const RawCodePoint FindCodePoint( const char *text ) {
 } // unnamed namespace
 
 CodePoint::CodePoint( const std::string &code_point )
-  : CodePoint( FindCodePoint( code_point.c_str() ) ) {
+  : CodePoint( FindCodePoint( code_point ) ) {
 }
 
 

@@ -49,12 +49,11 @@ DIR_OF_CPP_SOURCES = p.join( DIR_OF_THIS_SCRIPT, 'cpp', 'ycm' )
 UNICODE_TABLE_TEMPLATE = (
   """// This file was automatically generated with the update_unicode.py script
 // using version {unicode_version} of the Unicode Character Database.
-#include <array>
 struct RawCodePointArray {{
-std::array< char[{original_size}], {size} > original;
-std::array< char[{normal_size}], {size} > normal;
-std::array< char[{folded_case_size}], {size} > folded_case;
-std::array< char[{swapped_case_size}], {size} > swapped_case;
+std::array< std::string_view, {size} > original;
+std::array< std::string_view, {size} > normal;
+std::array< std::string_view, {size} > folded_case;
+std::array< std::string_view, {size} > swapped_case;
 std::array< bool, {size} > is_letter;
 std::array< bool, {size} > is_punctuation;
 std::array< bool, {size} > is_uppercase;
@@ -505,28 +504,14 @@ def CppBool( statement ):
   return '0'
 
 
-# If a codepoint is written in hex (\x61) instead of a literal (a)
-# then the backslash needs to be escaped in order for the correct
-# string end up in the generated C++ file.
-# To calculate the actual length for these, we can't count bytes.
-# Instead, we split on '\\x', leaving only the an array of hex values.
-# \\x61 would end up as [ '', '61' ]
-def CppLength( utf8_code_point ):
-  nb_utf8_hex = len( utf8_code_point.split( '\\x' )[ 1: ] )
-  if nb_utf8_hex > 0:
-    # +1 for NULL terminator
-    return nb_utf8_hex + 1
-  return len( bytearray( utf8_code_point, encoding = 'utf8' ) ) + 1
-
-
 def GenerateUnicodeTable( header_path, code_points ):
   unicode_version = GetUnicodeVersion()
   size = len( code_points )
   table = {
-    'original': { 'output': StringIO(), 'size': 0, 'converter': CppChar },
-    'normal': { 'output': StringIO(), 'size': 0, 'converter': CppChar },
-    'folded_case': { 'output': StringIO(), 'size': 0, 'converter': CppChar },
-    'swapped_case': { 'output': StringIO(), 'size': 0, 'converter': CppChar },
+    'original': { 'output': StringIO(), 'converter': CppChar },
+    'normal': { 'output': StringIO(), 'converter': CppChar },
+    'folded_case': { 'output': StringIO(), 'converter': CppChar },
+    'swapped_case': { 'output': StringIO(), 'converter': CppChar },
     'is_letter': { 'output': StringIO(), 'converter': CppBool },
     'is_punctuation': { 'output': StringIO(), 'converter': CppBool },
     'is_uppercase': { 'output': StringIO(), 'converter': CppBool },
@@ -542,8 +527,6 @@ def GenerateUnicodeTable( header_path, code_points ):
       cp = code_point[ t ]
       d[ 'output' ].write( d[ 'converter' ]( cp ) )
       d[ 'output' ].write( ',' )
-      if d[ 'converter' ] == CppChar:
-        d[ 'size' ] = max( CppLength( cp ), d[ 'size' ] )
 
   for t, d in table.items():
     if t == 'combining_class':
@@ -564,10 +547,6 @@ def GenerateUnicodeTable( header_path, code_points ):
   contents = UNICODE_TABLE_TEMPLATE.format(
     unicode_version = unicode_version,
     size = size,
-    original_size = table[ 'original' ][ 'size' ],
-    normal_size = table[ 'normal' ][ 'size' ],
-    folded_case_size = table[ 'folded_case' ][ 'size' ],
-    swapped_case_size = table[ 'swapped_case' ][ 'size' ],
     code_points = code_points )
 
   with open( header_path, 'w', newline = '\n', encoding='utf8' ) as header_file:

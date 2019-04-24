@@ -164,7 +164,7 @@ endif()
 
 #############################################################################
 
-# Determining the presence of C++11 support in the compiler
+# Determining the presence of C++17 support in the compiler
 set( CPP11_AVAILABLE false )
 if ( CMAKE_COMPILER_IS_GNUCXX )
   if ( NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.8 )
@@ -173,7 +173,7 @@ if ( CMAKE_COMPILER_IS_GNUCXX )
 elseif( COMPILER_IS_CLANG )
   if ( NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 3.3 )
     set( CPP11_AVAILABLE true )
-    set( CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++11" )
+    set( CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++17" )
     set( CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libc++" )
   endif()
 elseif( MSVC )
@@ -208,9 +208,9 @@ endif()
 if ( CPP11_AVAILABLE )
   # Cygwin needs its hand held a bit; see issue #473
   if ( CYGWIN AND CMAKE_COMPILER_IS_GNUCXX )
-    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11" )
+    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++17" )
   elseif( NOT MSVC )
-    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11" )
+    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17" )
   endif()
 else()
   # Platform-specific advice goes here. In particular, we have plenty of users
@@ -236,7 +236,7 @@ else()
     endif()
   endif()
 
-  message( FATAL_ERROR "Your C++ compiler does NOT fully support C++11." )
+  message( FATAL_ERROR "Your C++ compiler does NOT fully support C++17." )
 endif()
 
 # Note: build.py always explicitly sets this option, so the default used here
