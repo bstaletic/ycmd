@@ -214,7 +214,6 @@ def BuildYcmdLibs( args ):
       sys.executable,
       p.join( DIR_OF_THIS_SCRIPT, 'build.py' ),
       '--core-tests',
-      '--quiet',
     ]
 
     for key in COMPLETERS:
