@@ -85,7 +85,7 @@ jobs:
     displayName: Send coverage
     condition: and(succeeded(), eq(variables['COVERAGE'], 'true'))
     env:
-      CODECOV_TOKEN: $(CODECOV_TOKEN)
+      CODECOV_TOKEN: '$(CODECOV_TOKEN)'
       CODECOV_JOB_NAME: '$(Agent.JobName)'
 - job: windows_msvc14
   displayName: 'Windows Visual Studio 2015'
