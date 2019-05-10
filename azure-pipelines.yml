@@ -48,7 +48,7 @@ jobs:
     displayName: Send coverage
     condition: and(succeeded(), eq(variables['COVERAGE'], 'true'))
     env:
-      CODECOV_TOKEN: $(CODECOV_TOKEN)
+      CODECOV_TOKEN: 809dd9e9-037b-46fc-832a-b61941e152d7
       CODECOV_JOB_NAME: '$(Agent.JobName)'
 - job: macos
   displayName: 'macOS'
