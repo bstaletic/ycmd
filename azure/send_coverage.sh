@@ -6,6 +6,7 @@ test -d /home/linuxbrew/.linuxbrew && eval $(/home/linuxbrew/.linuxbrew/bin/brew
 eval "$(pyenv init -)"
 
 pyenv global ${YCM_PYTHON_VERSION}
+echo ${CODECOV_TOKEN}
 
 codecov --name "${CODECOV_JOB_NAME}"
 
