@@ -702,33 +702,6 @@ def EnableRustCompleter( args ):
              status_message = 'Building racerd for Rust completion' )
 
 
-def EnableJavaScriptCompleter( args ):
-  npm = FindExecutableOrDie( 'npm', 'npm is required to set up Tern.' )
-
-  # We install Tern into a runtime directory. This allows us to control
-  # precisely the version (and/or git commit) that is used by ycmd.  We use a
-  # separate runtime directory rather than a submodule checkout directory
-  # because we want to allow users to install third party plugins to
-  # node_modules of the Tern runtime.  We also want to be able to install our
-  # own plugins to improve the user experience for all users.
-  #
-  # This is not possible if we use a git submodule for Tern and simply run 'npm
-  # install' within the submodule source directory, as subsequent 'npm install
-  # tern-my-plugin' will (heinously) install another (arbitrary) version of Tern
-  # within the Tern source tree (e.g. third_party/tern/node_modules/tern. The
-  # reason for this is that the plugin that gets installed has "tern" as a
-  # dependency, and npm isn't smart enough to know that you're installing
-  # *within* the Tern distribution. Or it isn't intended to work that way.
-  #
-  # So instead, we have a package.json within our "Tern runtime" directory
-  # (third_party/tern_runtime) that defines the packages that we require,
-  # including Tern and any plugins which we require as standard.
-  os.chdir( p.join( DIR_OF_THIS_SCRIPT, 'third_party', 'tern_runtime' ) )
-  CheckCall( [ npm, 'install', '--production' ],
-             quiet = args.quiet,
-             status_message = 'Setting up Tern for JavaScript completion' )
-
-
 def EnableJavaCompleter( switches ):
   def Print( *args, **kwargs ):
     if not switches.quiet:
@@ -783,9 +756,8 @@ def EnableJavaCompleter( switches ):
 
 def EnableTypeScriptCompleter( args ):
   npm = FindExecutableOrDie( 'npm', 'npm is required to install TSServer.' )
-  tsserver_folder = p.join( DIR_OF_THIRD_PARTY, 'tsserver' )
-  CheckCall( [ npm, 'install', '-g', '--prefix', tsserver_folder,
-               'typescript@{version}'.format( version = TSSERVER_VERSION ) ],
+  tsserver_folder = p.join( DIR_OF_THIRD_PARTY, 'js-ts-lsp' )
+  CheckCall( [ npm, 'run', 'build' ],
              quiet = args.quiet,
              status_message = 'Installing TSServer for JavaScript '
                               'and TypeScript completion' )
@@ -903,13 +875,11 @@ def Main():
     EnableCsCompleter( args )
   if args.go_completer or args.gocode_completer or args.all_completers:
     EnableGoCompleter( args )
-  if args.js_completer or args.tern_completer or args.all_completers:
-    EnableJavaScriptCompleter( args )
   if args.rust_completer or args.racer_completer or args.all_completers:
     EnableRustCompleter( args )
   if args.java_completer or args.all_completers:
     EnableJavaCompleter( args )
-  if args.ts_completer or args.all_completers:
+  if args.ts_completer or args.js_completer or args.all_completers:
     EnableTypeScriptCompleter( args )
   if args.clangd_completer:
     EnableClangdCompleter( args )

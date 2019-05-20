@@ -28,10 +28,10 @@ from ycmd.completers.language_server.simple_language_server_completer import (
 
 
 class GenericLSPCompleter( SimpleLSPCompleter ):
-  def __init__( self, user_options, filetype, cmdline ):
-    self._filetype = filetype
+  def __init__( self, user_options, filetypes, cmdline ):
+    self._filetypes = filetypes
     super( GenericLSPCompleter, self ).__init__( user_options )
-    self._language = [ self._filetype ]
+    self._language = ','.join( self._filetypes )
     self._command_line = cmdline
     self._command_line[ 0 ] = utils.FindExecutable( self._command_line[ 0 ] )
 
@@ -41,7 +41,7 @@ class GenericLSPCompleter( SimpleLSPCompleter ):
 
 
   def GetServerName( self ):
-    return self._filetype + 'completer'
+    return ''.join( self._filetypes ) + 'completer'
 
 
   def GetCommandLine( self ):
@@ -55,4 +55,4 @@ class GenericLSPCompleter( SimpleLSPCompleter ):
 
 
   def SupportedFiletypes( self ):
-    return [ self._filetype ]
+    return self._filetypes

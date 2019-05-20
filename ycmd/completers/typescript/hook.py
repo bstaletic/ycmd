@@ -23,11 +23,11 @@ from __future__ import absolute_import
 from builtins import *  # noqa
 
 from ycmd.completers.typescript.typescript_completer import (
-    ShouldEnableTypeScriptCompleter, TypeScriptCompleter )
+    ShouldEnableJsTsCompleter, JsTsCompleter )
 
 
 def GetCompleter( user_options ):
-  if not ShouldEnableTypeScriptCompleter():
+  if not ShouldEnableJsTsCompleter():
     return None
 
-  return TypeScriptCompleter( user_options )
+  return JsTsCompleter( user_options )

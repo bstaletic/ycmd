@@ -28,9 +28,12 @@ import json
 import requests
 from hamcrest import ( assert_that,
                        contains,
+                       empty,
                        equal_to,
                        has_entries,
-                       has_items )
+                       has_entry,
+                       has_items,
+                       instance_of )
 from mock import patch
 from nose.tools import eq_
 from os import path as p
@@ -154,3 +157,93 @@ def GenericLSPCompleter_Hover_HasResponse_test( app, *args ):
   eq_( response, {
     'message': 'asd'
   } )
+
+
+@IsolatedYcmd( { 'language_server':
+  { 'foo': [ 'node', PATH_TO_GENERIC_COMPLETER, '--stdio' ] } } )
+def GenericLSPCompleter_DebugInfo_SingleFiletype_test( app ):
+  request = BuildRequest( filepath = TEST_FILE,
+                          filetype = 'foo',
+                          line_num = 1,
+                          column_num = 1,
+                          contents = TEST_FILE_CONTENT,
+                          event_name = 'FileReadyToParse' )
+
+  app.post_json( '/event_notification', request )
+  WaitUntilCompleterServerReady( app, 'foo' )
+  request.pop( 'event_name' )
+  response = app.post_json( '/debug_info', request )
+  assert_that( response.json, has_entry( 'completer', has_entries( {
+    'name': 'foo',
+    'servers': contains( has_entries( {
+      'name': 'foocompleter',
+      'is_running': True,
+      'executable': contains( instance_of( str ),
+                              instance_of( str ),
+                              instance_of( str ) ),
+      'address': None,
+      'port': None,
+      'pid': instance_of( int ),
+      'logfiles': contains( instance_of( str ) ),
+      'extras': contains(
+        has_entries( {
+          'key': 'Server State',
+          'value': 'Initialized'
+        } ),
+        has_entries( {
+          'key': 'Project Directory',
+          'value': instance_of( str )
+        } ),
+        has_entries( {
+          'key': 'Settings',
+          'value': '{}'
+        } ),
+      )
+    } ) ),
+    'items': empty(),
+  } ) ) )
+
+
+@IsolatedYcmd( { 'language_server':
+  { 'foo,bar': [ 'node', PATH_TO_GENERIC_COMPLETER, '--stdio' ] } } )
+def GenericLSPCompleter_DebugInfo_MultipleFiletypes_test( app ):
+  request = BuildRequest( filepath = TEST_FILE,
+                          filetype = 'foo',
+                          line_num = 1,
+                          column_num = 1,
+                          contents = TEST_FILE_CONTENT,
+                          event_name = 'FileReadyToParse' )
+
+  app.post_json( '/event_notification', request )
+  WaitUntilCompleterServerReady( app, 'foo' )
+  request.pop( 'event_name' )
+  response = app.post_json( '/debug_info', request )
+  assert_that( response.json, has_entry( 'completer', has_entries( {
+    'name': 'foo,bar',
+    'servers': contains( has_entries( {
+      'name': 'foobarcompleter',
+      'is_running': True,
+      'executable': contains( instance_of( str ),
+                              instance_of( str ),
+                              instance_of( str ) ),
+      'address': None,
+      'port': None,
+      'pid': instance_of( int ),
+      'logfiles': contains( instance_of( str ) ),
+      'extras': contains(
+        has_entries( {
+          'key': 'Server State',
+          'value': 'Initialized'
+        } ),
+        has_entries( {
+          'key': 'Project Directory',
+          'value': instance_of( str )
+        } ),
+        has_entries( {
+          'key': 'Settings',
+          'value': '{}'
+        } ),
+      )
+    } ) ),
+    'items': empty(),
+  } ) ) )

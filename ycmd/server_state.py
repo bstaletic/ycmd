@@ -23,7 +23,7 @@ from __future__ import absolute_import
 from builtins import *  # noqa
 
 import threading
-from future.utils import itervalues
+from future.utils import itervalues, iteritems
 from importlib import import_module
 from ycmd.completers.general.general_completer_store import (
     GeneralCompleterStore )
@@ -33,11 +33,14 @@ from ycmd.utils import LOGGER
 
 def _GetGenericLSPCompleter( user_options, filetype ):
   lsp_cmdline = user_options[ 'language_server' ].get( filetype )
-  if lsp_cmdline is not None:
-    return generic_lsp_completer.GenericLSPCompleter(
-        user_options, filetype, lsp_cmdline )
-  else:
-    return None
+  user_language_servers = user_options[ 'language_server' ]
+  for filetypes, lsp_cmdline in iteritems( user_language_servers ):
+    list_of_types = filetypes.split( ',' )
+    if filetype in list_of_types:
+      # Found it!
+      return generic_lsp_completer.GenericLSPCompleter(
+          user_options, list_of_types, lsp_cmdline )
+  return None
 
 
 class ServerState( object ):

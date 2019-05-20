@@ -22,15 +22,11 @@ from __future__ import absolute_import
 # Not installing aliases from python-future; it's unreliable and slow.
 from builtins import *  # noqa
 
-from ycmd.completers.javascript.tern_completer import (
-  ShouldEnableTernCompleter, TernCompleter )
 from ycmd.completers.typescript.typescript_completer import (
-  ShouldEnableTypeScriptCompleter, TypeScriptCompleter )
+  ShouldEnableJsTsCompleter, JsTsCompleter )
 
 
 def GetCompleter( user_options ):
-  if ShouldEnableTernCompleter():
-    return TernCompleter( user_options )
-  if ShouldEnableTypeScriptCompleter():
-    return TypeScriptCompleter( user_options )
+  if ShouldEnableJsTsCompleter():
+    return JsTsCompleter( user_options )
   return None
