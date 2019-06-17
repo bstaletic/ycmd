@@ -1382,6 +1382,14 @@ class LanguageServerCompleter( Completer ):
                                        file_data[ 'contents' ] )
 
         self.GetConnection().SendNotification( msg )
+
+        # TODO: Figure out how to drop unused workspaces on didClose.
+        extra_conf_dir = self._GetSettingsFromExtraConf( request_data )
+        project_directory = self.GetProjectDirectory( request_data,
+                                                      extra_conf_dir )
+        msg = lsp.DidChangeWorkspaceFolders( [ project_directory ], [] )
+        self.GetConnection().SendNotification( msg )
+
       elif action == lsp.ServerFileState.CHANGE_FILE:
         # FIXME: DidChangeTextDocument doesn't actually do anything
         # different from DidOpenTextDocument other than send the right

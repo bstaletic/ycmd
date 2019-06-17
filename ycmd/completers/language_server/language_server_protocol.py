@@ -311,6 +311,12 @@ def DidChangeTextDocument( file_state, file_contents ):
   } )
 
 
+def DidChangeWorkspaceFolders( added_workspaces, removed_workspaces ):
+  return BuildNotification( 'workspace/didChangeWorkspaceFolders',
+      'added': added_workspaces,
+      'removed': removed_workspaces )
+
+
 def DidCloseTextDocument( file_state ):
   return BuildNotification( 'textDocument/didClose', {
     'textDocument': {
