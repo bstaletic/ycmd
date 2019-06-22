@@ -246,7 +246,6 @@ def ServerManagement_ProjectDetection_MavenParent_Submodule_test( app ):
                CompleterProjectDirectoryMatcher( project ) )
 
 
-@NoWinPy2
 @TidyJDTProjectFiles( PathToTestFile( 'simple_gradle_project' ) )
 @IsolatedYcmd()
 def ServerManagement_ProjectDetection_GradleParent_test( app ):
@@ -266,7 +265,6 @@ def ServerManagement_ProjectDetection_GradleParent_test( app ):
                CompleterProjectDirectoryMatcher( project ) )
 
 
-@NoWinPy2
 @TidyJDTProjectFiles( PathToTestFile( 'simple_gradle_project' ) )
 @TidyJDTProjectFiles( PathToTestFile( 'simple_maven_project' ) )
 @IsolatedYcmd()
@@ -305,7 +303,6 @@ def ServerManagement_OpenProject_AbsolutePath_test( app ):
                CompleterProjectDirectoryMatcher( maven_project ) )
 
 
-@NoWinPy2
 @TidyJDTProjectFiles( PathToTestFile( 'simple_gradle_project' ) )
 @TidyJDTProjectFiles( PathToTestFile( 'simple_maven_project' ) )
 @IsolatedYcmd()
