@@ -39,7 +39,6 @@ from ycmd.tests.test_utils import ( BuildRequest,
                                     CompleterProjectDirectoryMatcher,
                                     ErrorMatcher,
                                     MockProcessTerminationTimingOut,
-                                    NoWinPy2,
                                     TemporaryTestDir,
                                     WaitUntilCompleterServerReady )
 from ycmd import utils, handlers
