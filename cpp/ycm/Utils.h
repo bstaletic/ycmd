@@ -18,6 +18,8 @@
 #ifndef UTILS_H_KEPMRPBH
 #define UTILS_H_KEPMRPBH
 
+#include <algorithm>
+#include <execution>
 #include <boost/filesystem.hpp>
 #include <cmath>
 #include <limits>
@@ -128,6 +130,12 @@ void PartialSort( std::vector< Element > &elements,
     std::partial_sort( elements.begin(),
                        elements.begin() + max_elements,
                        elements.end() );
+  } else if ( 256 <= std::min( nb_elements, max_elements ) ) {
+    std::nth_element( std::execution::par,
+                      elements.begin(),
+                      elements.begin() + max_elements,
+                      elements.end() );
+    std::sort( std::execution::par, elements.begin(), elements.begin() + max_elements );
   } else {
     std::nth_element( elements.begin(),
                       elements.begin() + max_elements,

@@ -212,9 +212,9 @@ endif()
 if ( CPP11_AVAILABLE )
   # Cygwin needs its hand held a bit; see issue #473
   if ( CYGWIN AND CMAKE_COMPILER_IS_GNUCXX )
-    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11" )
+    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++17" )
   elseif( NOT MSVC )
-    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11" )
+    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17" )
   endif()
 else()
   # Platform-specific advice goes here. In particular, we have plenty of users
@@ -272,5 +272,6 @@ endif()
 # This adds -fPIC to everything
 set(CMAKE_POSITION_INDEPENDENT_CODE TRUE)
 
+add_subdirectory( mimalloc )
 add_subdirectory( abseil )
 add_subdirectory( ycm )

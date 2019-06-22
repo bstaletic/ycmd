@@ -337,6 +337,8 @@ target_link_libraries( ${PROJECT_NAME}
                        absl::hash
                        absl::flat_hash_map
                        absl::flat_hash_set
+		       mimalloc-static
+		       tbb
                        ${PYTHON_LIBRARIES}
                        ${LIBCLANG_TARGET}
                        ${EXTRA_LIBS}
