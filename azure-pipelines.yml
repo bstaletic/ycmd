@@ -18,6 +18,7 @@ jobs:
         YCM_PYTHON_VERSION: '3.5.1'
       'Python 3.5 using Clang compiler':
         YCM_PYTHON_VERSION: '3.5.1'
+        YCM_CORES: '1'
         YCM_COMPILER: 'clang'
       'C++ benchmark':
         YCM_PYTHON_VERSION: '3.5.1'
