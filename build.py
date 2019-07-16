@@ -129,9 +129,14 @@ def RemoveDirectory( directory ):
                                                          max_tries ) )
 
 
-def MakeCleanDirectory( directory_path ):
+
+def RemoveDirectoryIfExists( directory_path ):
   if p.exists( directory_path ):
     RemoveDirectory( directory_path )
+
+
+def MakeCleanDirectory( directory_path ):
+  RemoveDirectoryIfExists( directory_path )
   os.makedirs( directory_path )
 
 
@@ -1105,6 +1110,33 @@ def WritePythonUsedDuringBuild():
     f.write( sys.executable )
 
 
+def CompileWatchdog( script_args ):
+  try:
+    os.chdir( p.join( DIR_OF_THIRD_PARTY, 'watchdog' ) )
+    build_dir = os.path.join( DIR_OF_THIRD_PARTY,
+                              'watchdog',
+                              'build',
+                              str( sys.version_info[ 0 ] ) )
+    lib_dir = os.path.join( DIR_OF_THIRD_PARTY,
+                              'watchdog',
+                              'build',
+                              'lib{}'.format( sys.version_info[ 0 ] ) )
+
+    RemoveDirectoryIfExists( build_dir )
+    RemoveDirectoryIfExists( lib_dir )
+
+    CheckCall( [ sys.executable,
+                 'setup.py',
+                 'build',
+                 '--build-base=' + build_dir,
+                 '--build-lib=' + lib_dir ],
+               exit_message = 'Failed to build watchdog module.',
+               quiet = script_args.quiet,
+               status_message = 'Building watchdog module' )
+  finally:
+    os.chdir( DIR_OF_THIS_SCRIPT )
+
+
 def DoCmakeBuilds( args ):
   cmake = FindCmake()
   cmake_common_args = GetCmakeCommonArgs( args )
@@ -1116,6 +1148,8 @@ def DoCmakeBuilds( args ):
 
   if not args.no_regex:
     BuildRegexModule( cmake, cmake_common_args, args )
+
+  CompileWatchdog( args )
 
 
 def Main():

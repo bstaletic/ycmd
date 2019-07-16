@@ -32,6 +32,8 @@ import logging
 import os
 import queue
 import threading
+from watchdog.events import PatternMatchingEventHandler
+from watchdog.observers import Observer
 
 from ycmd import extra_conf_store, responses, utils
 from ycmd.completers.completer import Completer, CompletionsCache
@@ -688,6 +690,7 @@ class LanguageServerCompleter( Completer ):
       - GetProjectRootFiles
       - GetTriggerCharacters
       - GetDefaultNotificationHandler
+      - GetWatchedFiles
       - HandleNotificationInPollThread
       - Language
 
@@ -785,6 +788,7 @@ class LanguageServerCompleter( Completer ):
       lambda self, request_data:
         self._UpdateServerWithFileContents( request_data )
     )
+    self._observer = None
 
     self._signature_help_disabled = user_options[ 'disable_signature_help' ]
 
@@ -832,6 +836,9 @@ class LanguageServerCompleter( Completer ):
     # server by first sending a shutdown request, and on its completion sending
     # and exit notification (which does not receive a response). Some buggy
     # servers exit on receipt of the shutdown request, so we handle that too.
+    if self._observer:
+      self._observer.stop()
+      self._observer.join()
     if self._ServerIsInitialized():
       request_id = self.GetConnection().NextRequestId()
       msg = lsp.Shutdown( request_id )
@@ -1611,6 +1618,12 @@ class LanguageServerCompleter( Completer ):
     del self._server_file_state[ file_state.filename ]
 
 
+  def GetWatchedFiles( self ):
+    """Returns a list of globs that the server should monitor for the
+    DidChangeWatchedFiles notification."""
+    return []
+
+
   def GetProjectRootFiles( self ):
     """Returns a list of files that indicate the root of the project.
     It should be easier to override just this method than the whole
@@ -1661,6 +1674,13 @@ class LanguageServerCompleter( Completer ):
 
       self._project_directory = self.GetProjectDirectory( request_data,
                                                           extra_conf_dir )
+      watched_files = self.GetWatchedFiles()
+      if watched_files and self._project_directory:
+        self._observer = Observer()
+        self._observer.schedule(
+          WatchdogHandler( self, self.GetWatchedFiles() ),
+          self._project_directory )
+        self._observer.start()
       request_id = self.GetConnection().NextRequestId()
 
       # FIXME: According to the discussion on
@@ -2651,3 +2671,30 @@ class EditCollector( object ):
     assert request[ 'method' ] == 'workspace/applyEdit'
     self.requests.append( request[ 'params' ] )
     connection.SendResponse( lsp.ApplyEditResponse( request ) )
+
+
+class WatchdogHandler( PatternMatchingEventHandler ):
+  def __init__( self, server, patterns ):
+    super( WatchdogHandler, self ).__init__( patterns )
+    self._server = server
+
+
+  def on_created( self, event ):
+    if self._server.ServerIsReady():
+      with self._server._server_info_mutex:
+        msg = lsp.DidChangeWatchedFiles( event.src_path, 'create' )
+        self._server.GetConnection().SendNotification( msg )
+
+
+  def on_modified( self, event ):
+    if self._server.ServerIsReady():
+      with self._server._server_info_mutex:
+        msg = lsp.DidChangeWatchedFiles( event.src_path, 'modify' )
+        self._server.GetConnection().SendNotification( msg )
+
+
+  def on_deleted( self, event ):
+    if self._server.ServerIsReady():
+      with self._server._server_info_mutex:
+        msg = lsp.DidChangeWatchedFiles( event.src_path, 'delete' )
+        self._server.GetConnection().SendNotification( msg )

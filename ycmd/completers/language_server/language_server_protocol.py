@@ -110,6 +110,12 @@ SEVERITY = [
   'Hint',
 ]
 
+FILE_EVENT_KIND = {
+  'create': 1,
+  'modify': 2,
+  'delete': 3
+}
+
 
 class InvalidUriException( Exception ):
   """Raised when trying to convert a server URI to a file path but the scheme
@@ -327,6 +333,15 @@ def Accept( request, result ):
 def ApplyEditResponse( request ):
   msg = { 'applied': True }
   return Accept( request, msg )
+
+
+def DidChangeWatchedFiles( path, kind ):
+  return BuildNotification( 'workspace/didChangeWatchedFiles', {
+    'changes': [ {
+      'uri': FilePathToUri( path ),
+      'type': FILE_EVENT_KIND[ kind ]
+    } ]
+  } )
 
 
 def DidChangeConfiguration( config ):

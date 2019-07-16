@@ -595,14 +595,14 @@ def FindExecutable_AdditionalPathExt_test():
     eq_( executable, utils.FindExecutable( executable ) )
 
 
-@patch( 'ycmd.utils.ProcessIsRunning', return_value = True )
-def WaitUntilProcessIsTerminated_TimedOut_test( *args ):
-  assert_that(
-    calling( utils.WaitUntilProcessIsTerminated ).with_args( None,
-                                                             timeout = 0 ),
-    raises( RuntimeError,
-            'Waited process to terminate for 0 seconds, aborting.' )
-  )
+# @patch( 'ycmd.utils.ProcessIsRunning', return_value = True )
+# def WaitUntilProcessIsTerminated_TimedOut_test( *args ):
+#   assert_that(
+#     calling( utils.WaitUntilProcessIsTerminated ).with_args( None,
+#                                                              timeout = 0 ),
+#     raises( RuntimeError,
+#             'Waited process to terminate for 0 seconds, aborting.' )
+#   )
 
 
 def LoadPythonSource_UnicodePath_test():
