@@ -231,3 +231,7 @@ class RustCompleter( simple_language_server_completer.SimpleLSPCompleter ):
       return _ApplySuggestionsToFixIt( request_data, command )
     if command[ 'command' ].startswith( 'rls.applySuggestion' ):
       return _ApplySuggestionsToFixIt( request_data, command )
+
+
+  def GetWatchedFiles( self ):
+    return [ '*/Cargo.toml' ]
