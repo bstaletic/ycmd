@@ -50,8 +50,7 @@ pip install -r test_requirements.txt
 
 # Enable coverage for Python subprocesses. See:
 # http://coverage.readthedocs.io/en/latest/subprocess.html
-echo -e "import coverage\ncoverage.process_startup()" > \
-${HOME}/.pyenv/versions/${YCM_PYTHON_VERSION}/lib/python${YCM_PYTHON_VERSION%.*}/site-packages/sitecustomize.py
+echo 'import coverage;coverage.process_startup()' | sudo tee -a `python2 -c 'import site;print(site.getsitepackages()[0])'`/sitecustomize.py 1>/dev/null
 
 #
 # Rust setup
