@@ -1,11 +1,10 @@
 # Exit immediately if a command returns a non-zero status.
 set -e
 
-# Required to enable Homebrew on Linux.
-test -d /home/linuxbrew/.linuxbrew && eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
-eval "$(pyenv init -)"
-
-pyenv global ${YCM_PYTHON_VERSION}
+if [[ "$YCM_USE_PYENV" -eq 1 ]]; then
+  eval "$(pyenv init -)"
+  pyenv global ${YCM_PYTHON_VERSION}
+fi
 
 # It is quite easy to get the steps to configure Python wrong. Verify that the
 # version of Python actually in the PATH and used is the version that was

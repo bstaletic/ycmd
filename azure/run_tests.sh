@@ -3,9 +3,8 @@ set -e
 
 if [[ "$YCM_USE_PYENV" -eq 1 ]]; then
   eval "$(pyenv init -)"
+  pyenv global ${YCM_PYTHON_VERSION}
 fi
-
-pyenv global ${YCM_PYTHON_VERSION}
 
 # It is quite easy to get the steps to configure Python wrong. Verify that the
 # version of Python actually in the PATH and used is the version that was
