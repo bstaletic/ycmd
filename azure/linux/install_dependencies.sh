@@ -39,7 +39,7 @@ mkdir ${HOME}/.cache
 # Python setup
 #
 
-if [ "${YCM_PYTHON_VERSION}" == "2.7.1" ]; then
+if [ "${YCM_PYTHON_VERSION}" == "2.7.12" ]; then
   sudo apt-get install python python-wheel python-setuptools
 else
   sudo apt-get install python3 python3-wheel python3-setuptools
