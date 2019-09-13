@@ -40,9 +40,9 @@ mkdir ${HOME}/.cache
 #
 
 if [ "${YCM_PYTHON_VERSION}" == "2.7.1" ]; then
-  sudo apt-get install python, python-wheel
+  sudo apt-get install python python-wheel
 else
-  sudo apt-get install python3, python3-wheel
+  sudo apt-get install python3 python3-wheel
   sudo update-alternatives --install /usr/bin/python python /usr/bin/python3 100
 fi
 
