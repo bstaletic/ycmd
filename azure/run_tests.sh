@@ -1,11 +1,10 @@
 # Exit immediately if a command returns a non-zero status.
 set -e
 
-# Don't use pyenv on linux
-test -e /home/vsts/.linux || eval "$(pyenv init -)"
 if [[ "$YCM_USE_PYENV" -eq 1 ]]; then
   eval "$(pyenv init -)"
 fi
+
 pyenv global ${YCM_PYTHON_VERSION}
 
 # It is quite easy to get the steps to configure Python wrong. Verify that the
