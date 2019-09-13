@@ -2,7 +2,7 @@
 set -e
 
 # Don't use pyenv on linux
-test -e .linux || eval "$(pyenv init -)"
+test -e /home/vsts/.linux || eval "$(pyenv init -)"
 
 pyenv global ${YCM_PYTHON_VERSION}
 
