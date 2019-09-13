@@ -52,14 +52,4 @@ pip install -r test_requirements.txt
 # http://coverage.readthedocs.io/en/latest/subprocess.html
 echo 'import coverage;coverage.process_startup()' | sudo tee -a `python2 -c 'import site;print(site.getsitepackages()[0])'`/sitecustomize.py 1>/dev/null
 
-#
-# Rust setup
-#
-
-# rustup is required to enable the Rust completer on Python versions older than
-# 2.7.9.
-if [ "${YCM_PYTHON_VERSION}" == "2.7.1" ]; then
-  curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain none
-fi
-
 set +e
