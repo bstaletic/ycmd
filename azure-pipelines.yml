@@ -10,26 +10,26 @@ jobs:
       # Tests are failing on Python 2.7.0 with the exception
       # "TypeError: argument can't be <type 'unicode'>"
       'Python 2.7 without libclang completer':
-        YCM_PYTHON_VERSION: '2.7.1'
+        YCM_PYTHON_VERSION: '2.7.12'
         USE_CLANG_COMPLETER: false
         YCM_USE_PYENV: 0
       'Python 2.7':
-        YCM_PYTHON_VERSION: '2.7.1'
+        YCM_PYTHON_VERSION: '2.7.12'
         YCM_USE_PYENV: 0
       'Python 3.5':
-        YCM_PYTHON_VERSION: '3.5.1'
+        YCM_PYTHON_VERSION: '3.5.2'
         YCM_USE_PYENV: 0
       'Python 3.5 using Clang compiler':
-        YCM_PYTHON_VERSION: '3.5.1'
+        YCM_PYTHON_VERSION: '3.5.2'
         YCM_COMPILER: 'clang'
         YCM_USE_PYENV: 0
       'C++ benchmark':
-        YCM_PYTHON_VERSION: '3.5.1'
+        YCM_PYTHON_VERSION: '3.5.2'
         YCM_BENCHMARK: true
         COVERAGE: false
         YCM_USE_PYENV: 0
       'C++ linting':
-        YCM_PYTHON_VERSION: '3.5.1'
+        YCM_PYTHON_VERSION: '3.5.2'
         YCM_CLANG_TIDY: true
         COVERAGE: false
         YCM_USE_PYENV: 0
