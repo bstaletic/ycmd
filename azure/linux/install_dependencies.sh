@@ -39,27 +39,12 @@ mkdir ${HOME}/.cache
 # Python setup
 #
 
-# python build dependencies
-# See 
-sudo apt-get install make build-essential libssl-dev zlib1g-dev libbz2-dev \
-libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev \
-xz-utils tk-dev libffi-dev liblzma-dev python-openssl git
-
-sudo apt-get install libssl1.0.0-dev
-
-# Clone and enable pyenv
-git clone https://github.com/pyenv/pyenv.git ~/.pyenv
-export PYENV_ROOT="$HOME/.pyenv"
-export PATH="$PYENV_ROOT/bin:$PATH"
-eval "$(pyenv init -)"
-
-# In order to work with ycmd, Python *must* be built as a shared library. This
-# is set via the PYTHON_CONFIGURE_OPTS option.
-PYTHON_CONFIGURE_OPTS="--enable-shared" \
-CFLAGS="-I/usr/include/openssl" \
-LDFLAGS="-L/usr/lib" \
-pyenv install ${YCM_PYTHON_VERSION}
-pyenv global ${YCM_PYTHON_VERSION}
+if [ "${YCM_PYTHON_VERSION}" == "2.7.1" ]; then
+  sudo apt-get install python
+else
+  sudo apt-get install python3
+  sudo update-alternatives --install /usr/bin/python python /usr/bin/python3 100
+fi
 
 pip install -r test_requirements.txt
 
