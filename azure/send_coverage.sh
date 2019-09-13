@@ -6,6 +6,6 @@ if [[ "$YCM_USE_PYENV" -eq 1 ]]; then
   pyenv global ${YCM_PYTHON_VERSION}
 fi
 
-codecov --name "${CODECOV_JOB_NAME}"
+python -m codecov --name "${CODECOV_JOB_NAME}"
 
 set +e
