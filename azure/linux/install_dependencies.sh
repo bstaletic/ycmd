@@ -47,6 +47,7 @@ else
 fi
 
 pip install -r test_requirements.txt
+touch .linux
 
 # Enable coverage for Python subprocesses. See:
 # http://coverage.readthedocs.io/en/latest/subprocess.html
