@@ -153,9 +153,9 @@ def RangeMatcher( filepath, start, end ):
 
 def ChunkMatcher( replacement_text, start, end ):
   return has_entries( {
-    'replacement_text': replacement_text,
+    #'replacement_text': replacement_text,
     'range': has_entries( {
-      #'start': start,
+      'start': start,
       #'end': end
     } )
   } )
