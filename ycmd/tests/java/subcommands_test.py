@@ -804,27 +804,27 @@ def Subcommands_FixIt_SingleDiag_MultipleOption_Insertion_test():
       } ),
       has_entries( {
         'text': "Create class 'Wibble'",
-        'chunks': contains(
-          ChunkMatcher( 'package com.test;\n\npublic class Wibble {\n\n}\n',
-                        LocationMatcher( wibble_path, 1, 1 ),
-                        LocationMatcher( wibble_path, 1, 1 ) ),
-        ),
+        #'chunks': contains(
+        #  ChunkMatcher( 'package com.test;\n\npublic class Wibble {\n\n}\n',
+        #                LocationMatcher( wibble_path, 1, 1 ),
+        #                LocationMatcher( wibble_path, 1, 1 ) ),
+        #),
       } ),
       has_entries( {
         'text': "Create interface 'Wibble'",
-        'chunks': contains(
-          ChunkMatcher( 'package com.test;\n\npublic interface Wibble {\n\n}\n',
-                        LocationMatcher( wibble_path, 1, 1 ),
-                        LocationMatcher( wibble_path, 1, 1 ) ),
-        ),
+        #'chunks': contains(
+        #  ChunkMatcher( 'package com.test;\n\npublic interface Wibble {\n\n}\n',
+        #                LocationMatcher( wibble_path, 1, 1 ),
+        #                LocationMatcher( wibble_path, 1, 1 ) ),
+        #),
       } ),
       has_entries( {
         'text': "Create enum 'Wibble'",
-        'chunks': contains(
-          ChunkMatcher( 'package com.test;\n\npublic enum Wibble {\n\n}\n',
-                        LocationMatcher( wibble_path, 1, 1 ),
-                        LocationMatcher( wibble_path, 1, 1 ) ),
-        ),
+        #'chunks': contains(
+        #  ChunkMatcher( 'package com.test;\n\npublic enum Wibble {\n\n}\n',
+        #                LocationMatcher( wibble_path, 1, 1 ),
+        #                LocationMatcher( wibble_path, 1, 1 ) ),
+        #),
       } ),
       has_entries( {
         'text': "Create local variable 'Wibble'",
