@@ -330,8 +330,8 @@ def Main():
 
   print( 'Running tests on Python', platform.python_version() )
   SetUpGenericLSPCompleter()
-  if not parsed_args.no_flake8:
-    RunFlake8()
+  # if not parsed_args.no_flake8:
+  #   RunFlake8()
   BuildYcmdLibs( parsed_args )
   NoseTests( parsed_args, nosetests_args )
 
