@@ -130,7 +130,7 @@ def RunTest( app, test, contents = None ):
   if not contents:
     contents = ReadFile( test[ 'request' ][ 'filepath' ] )
     print( '================================' )
-    print( repr( 'contens = {}'.format( contents ) ) )
+    print( '\r\n' in contents )
     print( '================================' )
 
   # Because we aren't testing this command, we *always* ignore errors. This
