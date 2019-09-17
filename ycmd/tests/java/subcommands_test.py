@@ -129,6 +129,9 @@ def Subcommands_ServerNotInitialized_test():
 def RunTest( app, test, contents = None ):
   if not contents:
     contents = ReadFile( test[ 'request' ][ 'filepath' ] )
+    print( '================================' )
+    print( 'contens = {}'.format( contents ) )
+    print( '================================' )
 
   # Because we aren't testing this command, we *always* ignore errors. This
   # is mainly because we (may) want to test scenarios where the completer
