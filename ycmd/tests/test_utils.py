@@ -140,7 +140,7 @@ def LocationMatcher( filepath, line_num, column_num ):
   return has_entries( {
     'line_num': line_num,
     'column_num': column_num,
-    #'filepath': filepath
+    'filepath': filepath
   } )
 
 
