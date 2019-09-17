@@ -1126,10 +1126,10 @@ def Main():
   #  EnableJavaScriptCompleter( args )
   #if args.rust_completer or args.racer_completer or args.all_completers:
   #  EnableRustCompleter( args )
-  #if args.java_completer or args.all_completers:
-  #  EnableJavaCompleter( args )
-  if args.ts_completer or args.all_completers:
-    EnableTypeScriptCompleter( args )
+  if args.java_completer or args.all_completers:
+    EnableJavaCompleter( args )
+  #if args.ts_completer or args.all_completers:
+  #  EnableTypeScriptCompleter( args )
   #if args.clangd_completer:
   #  EnableClangdCompleter( args )
 
