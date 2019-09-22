@@ -2408,22 +2408,19 @@ class WatchdogHandler( PatternMatchingEventHandler ):
   def on_created( self, event ):
     if self._server.ServerIsReady():
       with self._server._server_info_mutex:
-        pass
-        # msg = lsp.DidChangeWatchedFiles( event.src_path, 'create' )
-        # self._server.GetConnection().SendNotification( msg )
+        msg = lsp.DidChangeWatchedFiles( event.src_path, 'create' )
+        self._server.GetConnection().SendNotification( msg )
 
 
   def on_modified( self, event ):
     if self._server.ServerIsReady():
       with self._server._server_info_mutex:
-        pass
-        # msg = lsp.DidChangeWatchedFiles( event.src_path, 'modify' )
-        # self._server.GetConnection().SendNotification( msg )
+        msg = lsp.DidChangeWatchedFiles( event.src_path, 'modify' )
+        self._server.GetConnection().SendNotification( msg )
 
 
   def on_deleted( self, event ):
     if self._server.ServerIsReady():
       with self._server._server_info_mutex:
-        pass
-        # msg = lsp.DidChangeWatchedFiles( event.src_path, 'delete' )
-        # self._server.GetConnection().SendNotification( msg )
+        msg = lsp.DidChangeWatchedFiles( event.src_path, 'delete' )
+        self._server.GetConnection().SendNotification( msg )
