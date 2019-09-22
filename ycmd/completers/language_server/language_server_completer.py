@@ -674,7 +674,6 @@ class LanguageServerCompleter( Completer ):
       - GetProjectRootFiles
       - GetTriggerCharacters
       - GetDefaultNotificationHandler
-      - GetWatchedFiles
       - HandleNotificationInPollThread
       - Language
 
@@ -1511,12 +1510,6 @@ class LanguageServerCompleter( Completer ):
       self.GetConnection().SendNotification( msg )
 
     del self._server_file_state[ file_state.filename ]
-
-
-  def GetWatchedFiles( self ):
-    """Returns a list of globs that the server should monitor for the
-    DidChangeWatchedFiles notification."""
-    return []
 
 
   def GetProjectRootFiles( self ):
