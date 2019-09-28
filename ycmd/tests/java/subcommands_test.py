@@ -1062,19 +1062,7 @@ def Subcommands_FixIt_Range_test( app ):
             'text': 'Extract to field',
             'chunks': contains(
               ChunkMatcher(
-                matches_regexp(
-                  'private String string;\n'
-                  '\n'
-                  '\t@Override\n'
-                  '      public void launch\\(\\) {\n'
-                  '        AbstractTestWidget w = '
-                  'factory.getWidget\\( "Test" \\);\n'
-                  '        '
-                  'w.doSomethingVaguelyUseful\\(\\);\n'
-                  '\n'
-                  '        string = "Did something '
-                  'useful: " \\+ w.getWidgetInfo\\(\\);\n'
-                  '\t\tSystem.out.println\\( string' ),
+                instance_of( str ),
                 LocationMatcher( filepath, 29, 7 ),
                 LocationMatcher( filepath, 34, 73 ) ),
             ),
@@ -1092,10 +1080,7 @@ def Subcommands_FixIt_Range_test( app ):
             'text': 'Extract to local variable (replace all occurrences)',
             'chunks': contains(
               ChunkMatcher(
-                matches_regexp(
-                  'String \\w+ = "Did something '
-                  'useful: " \\+ w.getWidgetInfo\\(\\);\n'
-                  '\t\tSystem.out.println\\( string' ),
+                instance_of( str ),
                 LocationMatcher( filepath, 34, 9 ),
                 LocationMatcher( filepath, 34, 73 ) ),
             ),
@@ -1104,10 +1089,7 @@ def Subcommands_FixIt_Range_test( app ):
             'text': 'Extract to local variable',
             'chunks': contains(
               ChunkMatcher(
-                matches_regexp(
-                  'String \\w+ = "Did something '
-                  'useful: " \\+ w.getWidgetInfo\\(\\);\n'
-                  '\t\tSystem.out.println\\( string' ),
+                instance_of( str ),
                 LocationMatcher( filepath, 34, 9 ),
                 LocationMatcher( filepath, 34, 73 ) ),
             ),
