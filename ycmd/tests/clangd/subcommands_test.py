@@ -163,14 +163,11 @@ def Subcommands_GoTo_all_test():
     # Local -> definition/declaration of Local
     { 'req': ( 'goto.cc', 24, 16 ), 'res': ( 'goto.cc', 2, 11 ) },
     # Local::out_of_line -> declaration of Local::out_of_line
-    { 'req': ( 'goto.cc', 25, 27 ), 'res': [ ( 'goto.cc', 14, 13 ),
-                                             ( 'goto.cc', 11, 10 ) ] },
+    { 'req': ( 'goto.cc', 25, 27 ), 'res': ( 'goto.cc', 14, 13 ) },
     # GoToDeclaration on definition of out_of_line moves to declaration
-    { 'req': ( 'goto.cc', 14, 13 ), 'res': [ ( 'goto.cc', 14, 13 ),
-                                             ( 'goto.cc', 11, 10 ) ] },
+    { 'req': ( 'goto.cc', 14, 13 ), 'res': ( 'goto.cc', 11, 10 ) },
     # test -> definition and declaration of test
-    { 'req': ( 'goto.cc', 21,  7 ), 'res': [ ( 'goto.cc', 21, 5 ),
-                                             ( 'goto.cc', 19, 5 ) ] },
+    { 'req': ( 'goto.cc', 21,  7 ), 'res': ( 'goto.cc', 19, 5 ) },
     # Unicøde
     { 'req': ( 'goto.cc', 34,  9 ), 'res': ( 'goto.cc', 32, 26 ) },
     # Another_Unicøde
@@ -482,25 +479,39 @@ def FixIt_Check_cpp11_Repl( results ):
 
 def FixIt_Check_cpp11_DelAdd( results ):
   assert_that( results, has_entries( {
-    'fixits': contains( has_entries( {
-      'chunks': contains(
-        has_entries( {
-          'replacement_text': equal_to( '' ),
-          'range': has_entries( {
-            'start': has_entries( { 'line_num': 48, 'column_num': 3 } ),
-            'end'  : has_entries( { 'line_num': 48, 'column_num': 4 } ),
+    'fixits': contains(
+      has_entries( {
+        'chunks': contains(
+          has_entries( {
+            'replacement_text': equal_to( '' ),
+            'range': has_entries( {
+              'start': has_entries( { 'line_num': 48, 'column_num': 3 } ),
+              'end'  : has_entries( { 'line_num': 48, 'column_num': 4 } ),
+            } ),
           } ),
-        } ),
-        has_entries( {
-          'replacement_text': equal_to( '~' ),
-          'range': has_entries( {
-            'start': has_entries( { 'line_num': 48, 'column_num': 9 } ),
-            'end'  : has_entries( { 'line_num': 48, 'column_num': 9 } ),
+          has_entries( {
+            'replacement_text': equal_to( '~' ),
+            'range': has_entries( {
+              'start': has_entries( { 'line_num': 48, 'column_num': 9 } ),
+              'end'  : has_entries( { 'line_num': 48, 'column_num': 9 } ),
+            } ),
           } ),
-        } ),
-      ),
-      'location': has_entries( { 'line_num': 48, 'column_num': 3 } )
-    } ) )
+        ),
+        'location': has_entries( { 'line_num': 48, 'column_num': 3 } )
+      } ),
+      has_entries( {
+        'chunks': contains(
+          has_entries( {
+            'replacement_text': equal_to( '= default;' ),
+            'range': has_entries( {
+              'start': has_entries( { 'line_num': 48, 'column_num': 15 } ),
+              'end'  : has_entries( { 'line_num': 48, 'column_num': 17 } ),
+            } ),
+          } ),
+        ),
+        'location': has_entries( { 'line_num': 48, 'column_num': 3 } )
+      } ),
+    )
   } ) )
 
 
@@ -561,7 +572,19 @@ def FixIt_Check_cpp11_MultiFirst( results ):
           } ),
         ),
         'location': has_entries( { 'line_num': 54, 'column_num': 15 } )
-      } )
+      } ),
+      has_entries( {
+        'chunks': contains(
+          has_entries( {
+            'replacement_text': equal_to( '= default;' ),
+            'range': has_entries( {
+              'start': has_entries( { 'line_num': 54, 'column_num': 64 } ),
+              'end'  : has_entries( { 'line_num': 54, 'column_num': 67 } ),
+            } ),
+          } )
+        ),
+        'location': has_entries( { 'line_num': 54, 'column_num': 15 } )
+      } ),
     )
   } ) )
 
@@ -601,7 +624,19 @@ def FixIt_Check_cpp11_MultiSecond( results ):
           } ),
         ),
         'location': has_entries( { 'line_num': 54, 'column_num': 51 } )
-      } )
+      } ),
+      has_entries( {
+        'chunks': contains(
+          has_entries( {
+            'replacement_text': equal_to( '= default;' ),
+            'range': has_entries( {
+              'start': has_entries( { 'line_num': 54, 'column_num': 64 } ),
+              'end'  : has_entries( { 'line_num': 54, 'column_num': 67 } ),
+            } ),
+          } )
+        ),
+        'location': has_entries( { 'line_num': 54, 'column_num': 51 } )
+      } ),
     )
   } ) )
 
@@ -611,10 +646,10 @@ def FixIt_Check_unicode_Ins( results ):
     'fixits': contains( has_entries( {
       'chunks': contains(
         has_entries( {
-          'replacement_text': equal_to( ';' ),
+          'replacement_text': equal_to( '=' ),
           'range': has_entries( {
-            'start': has_entries( { 'line_num': 21, 'column_num': 39 } ),
-            'end'  : has_entries( { 'line_num': 21, 'column_num': 39 } ),
+            'start': has_entries( { 'line_num': 21, 'column_num': 9 } ),
+            'end'  : has_entries( { 'line_num': 21, 'column_num': 11 } ),
           } ),
         } )
       ),
@@ -747,22 +782,65 @@ def Subcommands_RefactorRename_test( app ):
         'fixits': contains( has_entries( {
           'chunks': contains(
             ChunkMatcher( 'Bar',
-                          LineColMatcher( 1, 8 ),
+                          LineColMatcher( 1,  8 ),
                           LineColMatcher( 1, 11 ) ),
-            ChunkMatcher( 'Bar',
-                          LineColMatcher( 9, 3 ),
-                          LineColMatcher( 9, 6 ) ),
-            # NOTE: Bug in clangd. It returns the same chunk twice which is a
-            # strict protocol violation.
+            ChunkMatcher( '\n        ',
+                          LineColMatcher( 1, 13 ),
+                          LineColMatcher( 2,  3 ) ),
+            ChunkMatcher( '\n        ',
+                          LineColMatcher( 2,  9 ),
+                          LineColMatcher( 3,  3 ) ),
+            ChunkMatcher( '\n        ',
+                          LineColMatcher( 3,  9 ),
+                          LineColMatcher( 4,  3 ) ),
+            ChunkMatcher( '\n        Bar',
+                          LineColMatcher( 8,  2 ),
+                          LineColMatcher( 9,  6 ) ),
+            ChunkMatcher( '\n        ',
+                          LineColMatcher( 9, 11 ),
+                          LineColMatcher( 10, 3 ) ),
+            ChunkMatcher( '\n        ',
+                          LineColMatcher( 10, 50 ),
+                          LineColMatcher( 11, 3 ) ),
+            ChunkMatcher( '\n\n',
+                          LineColMatcher( 12, 2 ),
+                          LineColMatcher( 15, 1 ) ),
             ChunkMatcher( 'Bar',
                           LineColMatcher( 15, 8 ),
                           LineColMatcher( 15, 11 ) ),
-            ChunkMatcher( 'Bar',
-                          LineColMatcher( 15, 8 ),
-                          LineColMatcher( 15, 11 ) ),
-            ChunkMatcher( 'Bar',
-                          LineColMatcher( 17, 3 ),
-                          LineColMatcher( 17, 6 ) )
+            ChunkMatcher( ' ',
+                          LineColMatcher( 15, 46 ),
+                          LineColMatcher( 16, 1 ) ),
+            ChunkMatcher( '\n        Bar',
+                          LineColMatcher( 16, 2 ),
+                          LineColMatcher( 17, 6 ) ),
+            ChunkMatcher( '',
+                          LineColMatcher( 17, 14 ),
+                          LineColMatcher( 17, 15 ) ),
+            ChunkMatcher( ' ',
+                          LineColMatcher( 17, 17 ),
+                          LineColMatcher( 17, 17 ) ),
+            ChunkMatcher( ' ',
+                          LineColMatcher( 17, 19 ),
+                          LineColMatcher( 17, 19 ) ),
+            ChunkMatcher( '\n        ',
+                          LineColMatcher( 17, 24 ),
+                          LineColMatcher( 18, 3 ) ),
+            ChunkMatcher( '',
+                          LineColMatcher( 18, 12 ),
+                          LineColMatcher( 18, 13 ) ),
+            ChunkMatcher( '\n                ',
+                          LineColMatcher( 18, 16 ),
+                          LineColMatcher( 19, 5 ) ),
+            ChunkMatcher( '\n                ',
+                          LineColMatcher( 19, 15 ),
+                          LineColMatcher( 20, 5 ) ),
+            ChunkMatcher( '\n        ',
+                          LineColMatcher( 20, 15 ),
+                          LineColMatcher( 21, 3 ) ),
+            ChunkMatcher( '\n\n        ',
+                          LineColMatcher( 21, 4 ),
+                          LineColMatcher( 23, 3 ) ),
           )
         } ) )
       } )
