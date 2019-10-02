@@ -869,6 +869,7 @@ def GetCompletions_SupportExtraConf_test( app ):
     }
   } )
 
+  # TODO: Figure out why this doesn't work
   RunTest( app, {
     'description': 'Flags for bar.cpp from extra conf file are used',
     'request': {
