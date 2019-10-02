@@ -35,7 +35,7 @@ if ( USE_CLANG_COMPLETER AND
   if ( APPLE )
     set( LIBCLANG_DIRNAME "libclang-${CLANG_VERSION}-x86_64-apple-darwin" )
     set( LIBCLANG_SHA256
-         "37e8a285cf5492c8e93c0f45e3f60ddc46a0d1f3733dd47b483b89472197742e" )
+         "7a8130814e3cbf5655b493af4dd72dde8c64660031813dc30e6436b92d8f6eae" )
   elseif ( WIN32 )
     if( 64_BIT_PLATFORM )
       set( LIBCLANG_DIRNAME "libclang-${CLANG_VERSION}-win64" )
