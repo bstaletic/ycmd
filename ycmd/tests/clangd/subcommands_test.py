@@ -162,12 +162,14 @@ def Subcommands_GoTo_all_test():
     { 'req': ( 'goto.cc', 24, 26 ), 'res': ( 'goto.cc', 6, 10 ) },
     # Local -> definition/declaration of Local
     { 'req': ( 'goto.cc', 24, 16 ), 'res': ( 'goto.cc', 2, 11 ) },
-    # Local::out_of_line -> declaration of Local::out_of_line
+    # Local::out_of_line -> definition of Local::out_of_line
     { 'req': ( 'goto.cc', 25, 27 ), 'res': ( 'goto.cc', 14, 13 ) },
-    # GoToDeclaration on definition of out_of_line moves to declaration
+    # GoToDeclaration alternates between definition and declaration
     { 'req': ( 'goto.cc', 14, 13 ), 'res': ( 'goto.cc', 11, 10 ) },
+    { 'req': ( 'goto.cc', 11, 10 ), 'res': ( 'goto.cc', 14, 13 ) },
     # test -> definition and declaration of test
-    { 'req': ( 'goto.cc', 21,  7 ), 'res': ( 'goto.cc', 19, 5 ) },
+    { 'req': ( 'goto.cc', 21,  5 ), 'res': ( 'goto.cc', 19, 5 ) },
+    { 'req': ( 'goto.cc', 19,  5 ), 'res': ( 'goto.cc', 21, 5 ) },
     # Unicøde
     { 'req': ( 'goto.cc', 34,  9 ), 'res': ( 'goto.cc', 32, 26 ) },
     # Another_Unicøde
@@ -180,8 +182,39 @@ def Subcommands_GoTo_all_test():
   ]
 
   for test in tests:
-    for cmd in [ 'GoToDeclaration', 'GoToDefinition', 'GoTo', 'GoToImprecise' ]:
+    for cmd in [ 'GoToDefinition', 'GoTo', 'GoToImprecise' ]:
       yield RunGoToTest_all, '', cmd, test
+
+
+def Subcommands_GoToDeclaration_all_test():
+  tests = [
+    # Local::x -> definition/declaration of x
+    { 'req': ( 'goto.cc', 23, 21 ), 'res': ( 'goto.cc', 4, 9 ) },
+    # Local::in_line -> definition/declaration of Local::in_line
+    { 'req': ( 'goto.cc', 24, 26 ), 'res': ( 'goto.cc', 6, 10 ) },
+    # Local -> definition/declaration of Local
+    { 'req': ( 'goto.cc', 24, 16 ), 'res': ( 'goto.cc', 2, 11 ) },
+    # Local::out_of_line -> declaration of Local::out_of_line
+    { 'req': ( 'goto.cc', 25, 27 ), 'res': ( 'goto.cc', 11, 10 ) },
+    # GoToDeclaration alternates between definition and declaration
+    { 'req': ( 'goto.cc', 14, 13 ), 'res': ( 'goto.cc', 11, 10 ) },
+    { 'req': ( 'goto.cc', 11, 10 ), 'res': ( 'goto.cc', 14, 13 ) },
+    # test -> definition and declaration of test
+    { 'req': ( 'goto.cc', 21,  5 ), 'res': ( 'goto.cc', 19, 5 ) },
+    { 'req': ( 'goto.cc', 19,  5 ), 'res': ( 'goto.cc', 21, 5 ) },
+    # Unicøde
+    { 'req': ( 'goto.cc', 34,  9 ), 'res': ( 'goto.cc', 32, 26 ) },
+    # Another_Unicøde
+    { 'req': ( 'goto.cc', 36, 17 ), 'res': ( 'goto.cc', 32, 54 ) },
+    { 'req': ( 'goto.cc', 36, 25 ), 'res': ( 'goto.cc', 32, 54 ) },
+    { 'req': ( 'goto.cc', 38,  3 ), 'res': ( 'goto.cc', 36, 28 ) },
+    # Expected failures
+    { 'req': ( 'goto.cc', 13,  1 ), 'res': 'Cannot jump to location' },
+    { 'req': ( 'goto.cc', 16,  6 ), 'res': 'Cannot jump to location' },
+  ]
+
+  for test in tests:
+    yield RunGoToTest_all, '', 'GoToDeclaration', test
 
 
 def Subcommands_GoToInclude_test():
