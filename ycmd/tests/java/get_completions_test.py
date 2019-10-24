@@ -500,7 +500,7 @@ def GetCompletions_ServerNotInitialized_test( app ):
 
   completer = handlers._server_state.GetFiletypeCompleter( [ 'java' ] )
 
-  with patch.object( completer, '_ServerIsInitialized', False ):
+  with patch.object( completer, '_ServerIsInitialized', return_value = False ):
     with patch.object( completer,
                        '_is_completion_provider',
                        return_value = False ):
