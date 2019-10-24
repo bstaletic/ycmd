@@ -734,7 +734,7 @@ def LanguageServerCompleter_GetCompletions_CompleteOnStartColumn_test():
           )
         )
 
-        # Since the server returned a complete list of 
+        # Since the server returned a complete list of
         # completions on the starting column, no request should be
         # sent to the server and the cache should be used instead.
         assert_that( response.call_count, equal_to( 0 ) )
@@ -825,8 +825,8 @@ def LanguageServerCompleter_GetCompletions_CompleteOnCurrentColumn_test():
           )
         )
 
-        # The server returned an incomplete list of completions the first time so
-        # a new completion request should have been sent.
+        # The server returned an incomplete list of completions the first time
+        # so a new completion request should have been sent.
         assert_that( response.call_count, equal_to( 1 ) )
 
       # User types the character "a" a third time.
@@ -848,8 +848,8 @@ def LanguageServerCompleter_GetCompletions_CompleteOnCurrentColumn_test():
         )
 
         # The server returned a complete list of completions the second time and
-        # the new query is a prefix of the cached one ("aa" is a prefix of "aaa")
-        # so the cache should be used.
+        # the new query is a prefix of the cached one ("aa" is a prefix of
+        # "aaa") so the cache should be used.
         assert_that( response.call_count, equal_to( 0 ) )
 
       # User deletes the third character.
