@@ -319,6 +319,7 @@ class JavaCompleter( language_server_completer.LanguageServerCompleter ):
     self._server_stderr = None
     self._workspace_path = None
     self._CleanUp()
+    self._command = []
 
 
   def DefaultSettings( self, request_data ):
@@ -509,7 +510,7 @@ class JavaCompleter( language_server_completer.LanguageServerCompleter ):
       self._launcher_config = _LauncherConfiguration( self._workspace_root_path,
                                                       wipe_config )
 
-      command = [
+      self._command = [
         PATH_TO_JAVA,
         '-Dfile.encoding=UTF-8',
         '-Declipse.application=org.eclipse.jdt.ls.core.id1',
@@ -522,11 +523,11 @@ class JavaCompleter( language_server_completer.LanguageServerCompleter ):
       ]
 
       LOGGER.debug( 'Starting java-server with the following command: %s',
-                    command )
+                    self._command )
 
       self._server_stderr = utils.CreateLogfile( 'jdt.ls_stderr_' )
       with utils.OpenForStdHandle( self._server_stderr ) as stderr:
-        self._server_handle = utils.SafePopen( command,
+        self._server_handle = utils.SafePopen( self._command,
                                                stdin = PIPE,
                                                stdout = PIPE,
                                                stderr = stderr )
@@ -753,3 +754,11 @@ class JavaCompleter( language_server_completer.LanguageServerCompleter ):
     return super( JavaCompleter, self ).CodeActionCommandToFixIt(
       request_data,
       command )
+
+
+  def GetCommandLine( self ):
+    return self._command
+
+
+  def GetServerName( self ):
+    return 'jdt.ls'
