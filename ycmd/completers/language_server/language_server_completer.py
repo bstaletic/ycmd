@@ -1281,7 +1281,7 @@ class LanguageServerCompleter( Completer ):
     with self._server_state_mutex:
       self.Shutdown()
       self._StartAndInitializeServer( request_data )
-    
+
 
 
   def _GetSubcommandProvider( self, provider_list ):

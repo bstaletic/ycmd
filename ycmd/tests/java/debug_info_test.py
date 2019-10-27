@@ -27,7 +27,6 @@ from hamcrest import ( assert_that,
                        equal_to,
                        has_entry,
                        has_entries,
-                       has_items,
                        instance_of )
 
 from mock import patch
