@@ -1140,10 +1140,19 @@ class LanguageServerCompleter( Completer ):
       'StopServer': (
         lambda self, request_data, args: self.Shutdown()
       ),
+      'RestartServer': (
+        lambda self, request_data, args: self._RestartServer( request_data ) )
     } )
     commands.update( self.GetCustomSubcommands() )
 
     return self._DiscoverSubcommandSupport( commands )
+
+
+  def _RestartServer( self, request_data ):
+    with self._server_state_mutex:
+      self.Shutdown()
+      self._StartAndInitializeServer( request_data )
+    
 
 
   def _GetSubcommandProvider( self, provider_list ):

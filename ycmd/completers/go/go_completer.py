@@ -93,9 +93,6 @@ class GoCompleter( simple_language_server_completer.SimpleLSPCompleter ):
 
   def GetCustomSubcommands( self ):
     return {
-      'RestartServer': (
-        lambda self, request_data, args: self._RestartServer( request_data )
-      ),
       'GetType': (
         # In addition to type information we show declaration.
         lambda self, request_data, args: self.GetType( request_data )

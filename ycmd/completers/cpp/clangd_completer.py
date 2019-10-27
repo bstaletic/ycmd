@@ -323,9 +323,6 @@ class ClangdCompleter( simple_language_server_completer.SimpleLSPCompleter ):
         lambda self, request_data, args: self.GoTo( request_data,
                                                     [ 'Definition' ] )
       ),
-      'RestartServer': (
-        lambda self, request_data, args: self._RestartServer( request_data )
-      ),
       'GetDoc': (
         lambda self, request_data, args: self.GetDoc( request_data )
       ),

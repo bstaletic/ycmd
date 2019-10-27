@@ -351,9 +351,6 @@ class JavaCompleter( simple_language_server_completer.SimpleLSPCompleter ):
       'OpenProject': (
         lambda self, request_data, args: self._OpenProject( request_data, args )
       ),
-      'RestartServer': (
-        lambda self, request_data, args: self._RestartServer( request_data )
-      ),
       'WipeWorkspace': (
         lambda self, request_data, args: self._WipeWorkspace( request_data,
                                                               args )
