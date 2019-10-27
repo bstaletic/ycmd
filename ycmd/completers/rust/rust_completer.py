@@ -132,9 +132,6 @@ class RustCompleter( simple_language_server_completer.SimpleLSPCompleter ):
       'GetType': (
         lambda self, request_data, args: self.GetType( request_data )
       ),
-      'RestartServer': (
-        lambda self, request_data, args: self._RestartServer( request_data )
-      )
     }
 
 
