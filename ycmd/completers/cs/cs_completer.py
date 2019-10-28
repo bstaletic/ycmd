@@ -600,7 +600,7 @@ class CsharpSolutionCompleter( object ):
   def _FixIt( self, request_data ):
     request = self._DefaultParameters( request_data )
     request[ 'WantsTextChanges' ] = True
-    code_action_range = request.get( 'range' )
+    code_action_range = request_data.get( 'range' )
     if code_action_range:
       start = code_action_range[ 'start' ]
       end = code_action_range[ 'end' ]
@@ -669,6 +669,7 @@ class CsharpSolutionCompleter( object ):
         request_data[ 'filepath' ],
         request_data ),
       response[ 'Text' ] )
+    fixit.chunks.sort( key = lambda c: c.range.start_.filename_ )
     return responses.BuildFixItResponse( [ fixit ] )
 
 
@@ -793,6 +794,7 @@ def _RoslynChangesToFixIt( changes, request_data ):
         change[ 'Changes' ],
         change[ 'FileName' ],
         request_data ) )
+  chunks.sort( key = lambda c: c.range.start_.filename_ )
   return responses.FixIt(
       _BuildLocation(
         request_data,

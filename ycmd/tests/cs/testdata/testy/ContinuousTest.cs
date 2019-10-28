@@ -7,6 +7,7 @@ namespace testy
 		public static void Main (string[] args)
 		{
 			var test = String
+			Main(
 		}
 	}
 }

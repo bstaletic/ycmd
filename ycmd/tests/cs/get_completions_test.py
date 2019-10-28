@@ -30,8 +30,6 @@ from hamcrest import ( assert_that,
                        has_entries,
                        has_items,
                        raises )
-from nose import SkipTest
-from nose.tools import eq_
 from webtest import AppError
 
 from ycmd.tests.cs import PathToTestFile, SharedYcmd, WrapOmniSharpServer
