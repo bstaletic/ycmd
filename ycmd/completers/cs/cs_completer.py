@@ -142,14 +142,6 @@ class CsharpCompleter( Completer ):
     return self._SolutionSubcommand( request_data, '_ResolveFixIt' )
 
 
-  def ShouldUseNowInner( self, request_data ):
-    """ Preempt the identity completer always, since the C# completer is fast
-    enough to do so and it will returns more relevant results. Fallback to use
-    the triggers, which are by default . -> and :: """
-    return ( self.QueryLengthAboveMinThreshold( request_data ) or
-             super( CsharpCompleter, self ).ShouldUseNowInner( request_data ) )
-
-
   def ComputeCandidatesInner( self, request_data ):
     solutioncompleter = self._GetSolutionCompleter( request_data )
     return [ responses.BuildCompletionData(
@@ -172,11 +164,6 @@ class CsharpCompleter( Completer ):
          self._SolutionSubcommand( request_data,
                                    method = '_RestartServer',
                                    no_request_data = True ) ),
-      # TODO: Add back when/if Omnisharp supports this properly
-      # 'ReloadSolution'                   : ( lambda self, request_data, args:
-      #    self._SolutionSubcommand( request_data,
-      #                              method = '_ReloadSolution',
-      #                              no_request_data = True ) ),
       'GoToDefinition'                   : ( lambda self, request_data, args:
          self._SolutionSubcommand( request_data,
                                    method = '_GoToDefinition' ) ),
@@ -493,16 +480,6 @@ class CsharpSolutionCompleter( object ):
       return self._StartServer()
 
 
-  # TODO: Add back when/if Omnisharp supports this properly
-  # def _ReloadSolution( self ):
-  #   """ Reloads the solutions in the OmniSharp server """
-  #   LOGGER.info( 'Reloading Solution in OmniSharp server' )
-  #   try:
-  #     return self._GetResponse( '/reloadsolution' )
-  #   except ValueError:
-  #     return False
-
-
   def _GetCompletions( self, request_data ):
     """ Ask server for completions """
     parameters = self._DefaultParameters( request_data )
@@ -569,7 +546,11 @@ class CsharpSolutionCompleter( object ):
 
   def _RefactorRename( self, request_data ):
     request = self._DefaultParameters( request_data )
-    request[ 'RenameTo' ] = request_data[ 'command_arguments' ][ 1 ]
+    try:
+      request[ 'RenameTo' ] = request_data[ 'command_arguments' ][ 1 ]
+    except IndexError:
+      raise ValueError( 'Please specify a new name to rename it to.\n'
+                        'Usage: RefactorRename <new name>' )
     request[ 'WantsTextChanges' ] = True
     response = self._GetResponse( '/rename', request )
     LOGGER.debug( 'response = %s', response )
