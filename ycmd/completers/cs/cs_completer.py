@@ -638,6 +638,19 @@ class CsharpSolutionCompleter( object ):
           code_action_name )
       fixits.append( fixit )
 
+    if len( fixits ) == 1:
+      return self._ResolveFixIt( {
+        'line_num': request_data[ 'line_num' ],
+        'lines': request_data[ 'lines' ],
+        'column_num': request_data[ 'column_num' ],
+        'column_codepoint': request_data[ 'column_codepoint' ],
+        'filepath': request_data[ 'filepath' ],
+        'file_data': request_data[ 'file_data' ],
+        'fixit': {
+          'command': fixits[ 0 ].command,
+          'resolve': fixits[ 0 ].resolve,
+        } } )
+
     return responses.BuildFixItResponse( fixits )
 
 

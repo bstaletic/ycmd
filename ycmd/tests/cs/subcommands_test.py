@@ -132,20 +132,6 @@ def Subcommands_FixIt_Range_test( app ):
       'end': { 'line_num': 4, 'column_num': 27 }
     } } )
     response = app.post_json( '/run_completer_command', request ).json
-    assert_that( response, has_entries( {
-      'fixits': contains( has_entries( {
-        'text': 'Extract Method',
-        'command': has_entries( {
-          'range': has_entries( {
-            'start': has_entries( { 'line_num': 4, 'column_num': 23 } ),
-            'end': has_entries( { 'line_num': 4, 'column_num': 27 } ),
-          } ),
-        } ),
-        'resolve': True } ) ) } ) )
-    request.pop( 'command_arguments' )
-    request.update( { 'fixit': response[ 'fixits' ][ 0 ] } )
-    response = app.post_json( '/resolve_fixit', request ).json
-    LOGGER.debug( 'r = %s', response )
     assert_that( response, has_entries( { 'fixits': contains( has_entries( {
       'location': LocationMatcher( fixit_test, 4, 23 ),
       'chunks': contains(
@@ -172,19 +158,6 @@ def Subcommands_FixIt_Single_test( app ):
                             filetype = 'cs',
                             filepath = fixit_test )
     response = app.post_json( '/run_completer_command', request ).json
-    assert_that( response, has_entries( {
-      'fixits': contains( has_entries( {
-        'text': 'Extract Method',
-        'command': has_entries( {
-          'range': has_entries( {
-            'start': has_entries( { 'line_num': 4, 'column_num': 0 } ),
-            'end': has_entries( { 'line_num': 4, 'column_num': 28 } ),
-          } ),
-        } ),
-        'resolve': True } ) ) } ) )
-    request.pop( 'command_arguments' )
-    request.update( { 'fixit': response[ 'fixits' ][ 0 ] } )
-    response = app.post_json( '/resolve_fixit', request ).json
     LOGGER.debug( 'r = %s', response )
     assert_that( response, has_entries( { 'fixits': contains( has_entries( {
       'location': LocationMatcher( fixit_test, 4, 23 ),
