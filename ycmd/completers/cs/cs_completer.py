@@ -563,7 +563,8 @@ class CsharpSolutionCompleter( object ):
 
 
   def _SignatureHelp( self, request_data ):
-    return self._GetResponse( '/signatureHelp', self._DefaultParameters( request_data ) )
+    request = self._DefaultParameters( request_data )
+    return self._GetResponse( '/signatureHelp', request )
 
 
   def _RefactorRename( self, request_data ):
@@ -676,12 +677,12 @@ class CsharpSolutionCompleter( object ):
       'SelectionEndLine': rng[ 'end' ][ 'line_num' ],
     } )
     response = self._GetResponse( '/runcodeaction', request )
-    fixit = responses.FixIt( 
+    fixit = responses.FixIt(
       _BuildLocation(
         request_data,
         request_data[ 'filepath' ],
         request_data[ 'line_num' ],
-        request_data[ 'column_num'] ),
+        request_data[ 'column_num' ] ),
       _RoslynChunksToFixItChunks(
         response[ 'Changes' ],
         request_data[ 'filepath' ],
@@ -816,5 +817,5 @@ def _RoslynChangesToFixIt( changes, request_data ):
         request_data,
         request_data[ 'filepath' ],
         request_data[ 'line_num' ],
-        request_data[ 'column_num'] ),
+        request_data[ 'column_num' ] ),
       chunks )
