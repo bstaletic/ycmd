@@ -66,6 +66,7 @@ class CsharpCompleter( Completer ):
     self._completer_per_solution = {}
     self._diagnostic_store = None
     self._solution_state_lock = threading.Lock()
+    self.signature_triggers.SetServerSemanticTriggers( [ '(', ',' ] )
 
     if not os.path.isfile( PATH_TO_ROSLYN_OMNISHARP_BINARY ):
       raise RuntimeError(
@@ -99,6 +100,46 @@ class CsharpCompleter( Completer ):
         self._completer_per_solution[ solution ] = completer
 
     return self._completer_per_solution[ solution ]
+
+
+  def SignatureHelpAvailable( self ):
+    if not self.ServerIsHealthy():
+      return responses.SignatureHelpAvailalability.PENDING
+    return responses.SignatureHelpAvailalability.AVAILABLE
+
+
+  def ComputeSignaturesInner( self, request_data ):
+    response = self._SolutionSubcommand( request_data, '_SignatureHelp' )
+    signatures = response[ 'Signatures' ]
+    signatures.sort( key = lambda s: len( s[ 'Label' ] ) )
+
+    def MakeSignature( s ):
+      sig_label = s[ 'Label' ]
+      end = 0
+      parameters = []
+      for arg in s[ 'Parameters' ]:
+        arg_label = arg[ 'Label' ]
+        begin = sig_label.find( arg_label, end )
+        end = begin + len( arg_label )
+        parameters.append( {
+          'label': [ CodepointOffsetToByteOffset( sig_label, begin ),
+                     CodepointOffsetToByteOffset( sig_label, end ) ]
+        } )
+
+      return {
+        'label': s[ 'Label' ],
+        'parameters': parameters
+      }
+
+    return {
+      'activeSignature': response[ 'ActiveSignature' ],
+      'activeParameter': response[ 'ActiveParameter' ],
+      'signatures': [ MakeSignature( s ) for s in signatures ]
+    }
+
+
+  def ResolveFixit( self, request_data ):
+    return self._SolutionSubcommand( request_data, '_ResolveFixIt' )
 
 
   def ShouldUseNowInner( self, request_data ):
@@ -163,13 +204,15 @@ class CsharpCompleter( Completer ):
       'GetType'                          : ( lambda self, request_data, args:
          self._SolutionSubcommand( request_data,
                                    method = '_GetType' ) ),
-      # To be re-enabled after FixIt support is added to Omnisharp
-      # 'FixIt'                            : ( lambda self, request_data, args:
-      #    self._SolutionSubcommand( request_data,
-      #                              method = '_FixIt' ) ),
+      'FixIt'                            : ( lambda self, request_data, args:
+         self._SolutionSubcommand( request_data,
+                                   method = '_FixIt' ) ),
       'GetDoc'                           : ( lambda self, request_data, args:
          self._SolutionSubcommand( request_data,
                                    method = '_GetDoc' ) ),
+      'RefactorRename'                   : ( lambda self, request_data, args:
+         self._SolutionSubcommand( request_data,
+                                   method = '_RefactorRename' ) ),
     }
 
 
@@ -519,6 +562,20 @@ class CsharpSolutionCompleter( object ):
         raise RuntimeError( 'No implementations found' )
 
 
+  def _SignatureHelp( self, request_data ):
+    return self._GetResponse( '/signatureHelp', self._DefaultParameters( request_data ) )
+
+
+  def _RefactorRename( self, request_data ):
+    request = self._DefaultParameters( request_data )
+    request[ 'RenameTo' ] = request_data[ 'command_arguments' ][ 1 ]
+    request[ 'WantsTextChanges' ] = True
+    response = self._GetResponse( '/rename', request )
+    LOGGER.debug( 'response = %s', response )
+    fixit = _RoslynChangesToFixIt( response[ 'Changes' ], request_data )
+    return responses.BuildFixItResponse( [ fixit ] )
+
+
   def _GoToReferences( self, request_data ):
     """ Jump to references of identifier under cursor """
     # _GetResponse can throw. Original code by @mispencer
@@ -558,23 +615,79 @@ class CsharpSolutionCompleter( object ):
     return responses.BuildDisplayMessageResponse( message )
 
 
-  # To be re-enabled after FixIt support is added to Omnisharp
-  # def _FixIt( self, request_data ):
-  #   request = self._DefaultParameters( request_data )
+  def _FixIt( self, request_data ):
+    request = self._DefaultParameters( request_data )
+    request[ 'WantsTextChanges' ] = True
+    code_action_range = request.get( 'range' )
+    if code_action_range:
+      start = code_action_range[ 'start' ]
+      end = code_action_range[ 'end' ]
+      chosen_range = { 'start': start, 'end': end }
+      request.update( {
+        'SelectionStartColumn': start[ 'column_num' ],
+        'SelectionStartLine': start[ 'line_num' ],
+        'SelectionEndColumn': end[ 'column_num' ],
+        'SelectionEndLine': end[ 'line_num' ]
+      } )
+    else:
+      line_number = request_data[ 'line_num' ]
+      line_length = len( request_data[ 'line_value' ] )
+      chosen_range = {
+        'start': {
+          'line_num': line_number,
+          'column_num': 0
+        },
+        'end': {
+          'line_num': line_number,
+          'column_num': line_length } }
+      request.update( {
+        'SelectionStartColumn': 0,
+        'SelectionStartLine': line_number,
+        'SelectionEndColumn': line_length,
+        'SelectionEndLine': line_number,
+      } )
 
-  #   result = self._GetResponse( '/fixcodeissue', request )
-  #   replacement_text = result[ "Text" ]
-  #   # Note: column_num is already a byte offset so we don't need to use
-  #   # _BuildLocation.
-  #   filepath = request_data[ 'filepath' ]
-  #   location = responses.Location( request_data[ 'line_num' ],
-  #                                  request_data[ 'column_num' ],
-  #                                  filepath )
-  #   fixits = [ responses.FixIt( location,
-  #                               _BuildChunks( request_data,
-  #                                             replacement_text ) ) ]
 
-  #   return responses.BuildFixItResponse( fixits )
+    result = self._GetResponse( '/getcodeactions', request )
+    fixits = []
+    for i, code_action_name in enumerate( result[ 'CodeActions' ] ):
+      fixit = responses.UnresolvedFixIt(
+          { 'range': chosen_range, 'index': i },
+          code_action_name )
+      fixits.append( fixit )
+
+    return responses.BuildFixItResponse( fixits )
+
+
+  def _ResolveFixIt( self, request_data ):
+    fixit = request_data[ 'fixit' ]
+    if not fixit[ 'resolve' ]:
+      return { 'fixits': [ fixit ] }
+    fixit = fixit[ 'command' ]
+    rng = fixit[ 'range' ]
+    code_action = fixit[ 'index' ]
+    request = self._DefaultParameters( request_data )
+    request.update( {
+      'CodeAction': code_action,
+      'WantsTextChanges': True,
+      'SelectionStartColumn': rng[ 'start' ][ 'column_num' ],
+      'SelectionStartLine': rng[ 'start' ][ 'line_num' ],
+      'SelectionEndColumn': rng[ 'end' ][ 'column_num' ],
+      'SelectionEndLine': rng[ 'end' ][ 'line_num' ],
+    } )
+    response = self._GetResponse( '/runcodeaction', request )
+    fixit = responses.FixIt( 
+      _BuildLocation(
+        request_data,
+        request_data[ 'filepath' ],
+        request_data[ 'line_num' ],
+        request_data[ 'column_num'] ),
+      _RoslynChunksToFixItChunks(
+        response[ 'Changes' ],
+        request_data[ 'filepath' ],
+        request_data ),
+      response[ 'Text' ] )
+    return responses.BuildFixItResponse( [ fixit ] )
 
 
   def _GetDoc( self, request_data ):
@@ -659,71 +772,6 @@ def DiagnosticsToDiagStructure( diagnostics ):
   return structure
 
 
-# To be re-enabled after FixIt support is added to Omnisharp
-# def _BuildChunks( request_data, new_buffer ):
-#   filepath = request_data[ 'filepath' ]
-#   old_buffer = request_data[ 'file_data' ][ filepath ][ 'contents' ]
-#   new_buffer = _FixLineEndings( old_buffer, new_buffer )
-#
-#   new_length = len( new_buffer )
-#   old_length = len( old_buffer )
-#   if new_length == old_length and new_buffer == old_buffer:
-#     return []
-#   min_length = min( new_length, old_length )
-#   start_index = 0
-#   end_index = min_length
-#   for i in range( 0, min_length - 1 ):
-#     if new_buffer[ i ] != old_buffer[ i ]:
-#       start_index = i
-#       break
-#   for i in range( 1, min_length ):
-#     if new_buffer[ new_length - i ] != old_buffer[ old_length - i ]:
-#       end_index = i - 1
-#       break
-#   # To handle duplicates, i.e aba => a
-#   if ( start_index + end_index > min_length ):
-#     start_index -= start_index + end_index - min_length
-#
-#   replacement_text = new_buffer[ start_index : new_length - end_index ]
-#
-#   ( start_line, start_column ) = _IndexToLineColumn( old_buffer, start_index )
-#   ( end_line, end_column ) = _IndexToLineColumn( old_buffer,
-#                                                  old_length - end_index )
-#
-#   # No need for _BuildLocation, because _IndexToLineColumn already converted
-#   # start_column and end_column to byte offsets for us.
-#   start = responses.Location( start_line, start_column, filepath )
-#   end = responses.Location( end_line, end_column, filepath )
-#   return [ responses.FixItChunk( replacement_text,
-#                                  responses.Range( start, end ) ) ]
-#
-#
-# def _FixLineEndings( old_buffer, new_buffer ):
-#   new_windows = "\r\n" in new_buffer
-#   old_windows = "\r\n" in old_buffer
-#   if new_windows != old_windows:
-#     if new_windows:
-#       new_buffer = new_buffer.replace( "\r\n", "\n" )
-#       new_buffer = new_buffer.replace( "\r", "\n" )
-#     else:
-#       new_buffer = re.sub( "\r(?!\n)|(?<!\r)\n", "\r\n", new_buffer )
-#   return new_buffer
-
-
-# # Adapted from http://stackoverflow.com/a/24495900
-# def _IndexToLineColumn( text, index ):
-#   """Get 1-based (line_number, col) of `index` in `string`, where string is a
-#   unicode string and col is a byte offset."""
-#   lines = text.splitlines( True )
-#   curr_pos = 0
-#   for linenum, line in enumerate( lines ):
-#     if curr_pos + len( line ) > index:
-#       return ( linenum + 1,
-#                CodepointOffsetToByteOffset( line, index - curr_pos + 1 ) )
-#     curr_pos += len( line )
-#   assert False
-
-
 def _BuildLocation( request_data, filename, line_num, column_num ):
   if line_num <= 0:
     return None
@@ -737,3 +785,36 @@ def _BuildLocation( request_data, filename, line_num, column_num ):
       line_num,
       CodepointOffsetToByteOffset( line_value, column_num ),
       filename )
+
+
+def _RoslynChunksToFixItChunks( chunks, filename, request_data ):
+  return [ responses.FixItChunk(
+      chunk[ 'NewText' ],
+      responses.Range(
+        _BuildLocation(
+          request_data,
+          filename,
+          chunk[ 'StartLine' ],
+          chunk[ 'StartColumn' ] ),
+        _BuildLocation(
+          request_data,
+          filename,
+          chunk[ 'EndLine' ],
+          chunk[ 'EndColumn' ] ) ) ) for chunk in chunks ]
+
+
+def _RoslynChangesToFixIt( changes, request_data ):
+  chunks = []
+  for change in changes:
+    chunks.extend(
+      _RoslynChunksToFixItChunks(
+        change[ 'Changes' ],
+        change[ 'FileName' ],
+        request_data ) )
+  return responses.FixIt(
+      _BuildLocation(
+        request_data,
+        request_data[ 'filepath' ],
+        request_data[ 'line_num' ],
+        request_data[ 'column_num'] ),
+      chunks )
