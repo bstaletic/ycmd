@@ -87,8 +87,7 @@ class GoCompleter( simple_language_server_completer.SimpleLSPCompleter ):
     assert self._settings[ 'hoverKind' ] == 'Structured'
     try:
       result = json.loads( self.GetHoverResponse( request_data )[ 'value' ] )
-      docs = result[ 'signature' ] + '\n\n' + result[ 'fullDocumentation' ]
-      utils.LOGGER.debug( 'doc = %s', docs )
+      docs = result[ 'signature' ] + '\n' + result[ 'fullDocumentation' ]
       return responses.BuildDisplayMessageResponse( docs.strip() )
     except RuntimeError as e:
       if e.args[ 0 ] == 'No hover information.':
@@ -98,8 +97,8 @@ class GoCompleter( simple_language_server_completer.SimpleLSPCompleter ):
 
   def GetType( self, request_data ):
     try:
-      utils.LOGGER.debug( 'hover = %s', self.GetHoverResponse( request_data ) )
-      result = json.loads( self.GetHoverResponse( request_data )[ 'value' ] )[ 'signature' ]
+      result = json.loads(
+          self.GetHoverResponse( request_data )[ 'value' ] )[ 'signature' ]
       return responses.BuildDisplayMessageResponse( result )
     except RuntimeError as e:
       if e.args[ 0 ] == 'No hover information.':
