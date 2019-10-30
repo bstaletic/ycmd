@@ -22,6 +22,7 @@ from __future__ import absolute_import
 # Not installing aliases from python-future; it's unreliable and slow.
 from builtins import *  # noqa
 
+import json
 import logging
 import os
 
@@ -83,9 +84,12 @@ class GoCompleter( simple_language_server_completer.SimpleLSPCompleter ):
 
 
   def GetDoc( self, request_data ):
+    assert self._settings[ 'hoverKind' ] == 'Structured'
     try:
-      result = self.GetHoverResponse( request_data )[ 'value' ]
-      return responses.BuildDisplayMessageResponse( result )
+      result = json.loads( self.GetHoverResponse( request_data )[ 'value' ] )
+      docs = result[ 'signature' ] + '\n\n' + result[ 'fullDocumentation' ]
+      utils.LOGGER.debug( 'doc = %s', docs )
+      return responses.BuildDisplayMessageResponse( docs.strip() )
     except RuntimeError as e:
       if e.args[ 0 ] == 'No hover information.':
         raise RuntimeError( 'No documentation available.' )
@@ -94,13 +98,18 @@ class GoCompleter( simple_language_server_completer.SimpleLSPCompleter ):
 
   def GetType( self, request_data ):
     try:
-      result = self.GetHoverResponse( request_data )[ 'value' ]
-      type_start = result.rfind( '\n' ) + 1
-      return responses.BuildDisplayMessageResponse( result[ type_start : ] )
+      utils.LOGGER.debug( 'hover = %s', self.GetHoverResponse( request_data ) )
+      result = json.loads( self.GetHoverResponse( request_data )[ 'value' ] )[ 'signature' ]
+      return responses.BuildDisplayMessageResponse( result )
     except RuntimeError as e:
       if e.args[ 0 ] == 'No hover information.':
         raise RuntimeError( 'Unknown type.' )
       raise
+
+
+  def DefaultSettings( self, request_data ):
+    return { 'hoverKind': 'Structured',
+             'fuzzyMatching': False }
 
 
   def GetCustomSubcommands( self ):
