@@ -291,7 +291,7 @@ def Subcommands_GetDoc_Function_test( app ):
     },
     'expect': {
       'response': requests.codes.ok,
-      'data': has_entry( 'message', 'Now with doc!\nfunc Hello()' ),
+      'data': has_entry( 'message', 'func Hello()\nNow with doc!' ),
     }
   } )
 
