@@ -35,8 +35,7 @@ from ycmd.tests.test_utils import ( LocationMatcher,
                                     PollForMessages,
                                     PollForMessagesTimeoutException,
                                     RangeMatcher,
-                                    WaitForDiagnosticsToBeReady,
-                                    WithRetry )
+                                    WaitForDiagnosticsToBeReady )
 from ycmd.utils import ReadFile
 
 
