@@ -57,7 +57,6 @@ DIAG_MATCHERS_PER_FILE = {
 }
 
 
-@WithRetry
 @SharedYcmd
 def Diagnostics_FileReadyToParse_test( app ):
   filepath = PathToTestFile( 'goto.go' )
@@ -70,7 +69,6 @@ def Diagnostics_FileReadyToParse_test( app ):
   assert_that( results, DIAG_MATCHERS_PER_FILE[ filepath ] )
 
 
-@WithRetry
 @SharedYcmd
 def Diagnostics_Poll_test( app ):
   filepath = PathToTestFile( 'goto.go' )
@@ -85,8 +83,6 @@ def Diagnostics_Poll_test( app ):
                                     { 'filepath': filepath,
                                       'contents': contents,
                                       'filetype': 'go' } ):
-      if message[ 'diagnostics' ][ 0 ][ 'text' ] == "expected ';', found 'EOF'":
-        continue
       print( 'Message {}'.format( pformat( message ) ) )
       if 'diagnostics' in message:
         seen[ message[ 'filepath' ] ] = True
