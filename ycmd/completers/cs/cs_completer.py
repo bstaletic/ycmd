@@ -554,7 +554,7 @@ class CsharpSolutionCompleter( object ):
     request[ 'WantsTextChanges' ] = True
     response = self._GetResponse( '/rename', request )
     LOGGER.debug( 'response = %s', response )
-    fixit = _RoslynChangesToFixIt( response[ 'Changes' ], request_data )
+    fixit = _ModifiedFilesToFixIt( response[ 'Changes' ], request_data )
     return responses.BuildFixItResponse( [ fixit ] )
 
 
@@ -677,7 +677,7 @@ class CsharpSolutionCompleter( object ):
         request_data[ 'filepath' ],
         request_data[ 'line_num' ],
         request_data[ 'column_num' ] ),
-      _RoslynChunksToFixItChunks(
+      _LinePositionSpanTextChangeToFixItChunks(
         response[ 'Changes' ],
         request_data[ 'filepath' ],
         request_data ),
@@ -783,7 +783,7 @@ def _BuildLocation( request_data, filename, line_num, column_num ):
       filename )
 
 
-def _RoslynChunksToFixItChunks( chunks, filename, request_data ):
+def _LinePositionSpanTextChangeToFixItChunks( chunks, filename, request_data ):
   return [ responses.FixItChunk(
       chunk[ 'NewText' ],
       responses.Range(
@@ -799,11 +799,11 @@ def _RoslynChunksToFixItChunks( chunks, filename, request_data ):
           chunk[ 'EndColumn' ] ) ) ) for chunk in chunks ]
 
 
-def _RoslynChangesToFixIt( changes, request_data ):
+def _ModifiedFilesToFixIt( changes, request_data ):
   chunks = []
   for change in changes:
     chunks.extend(
-      _RoslynChunksToFixItChunks(
+      _LinePositionSpanTextChangeToFixItChunks(
         change[ 'Changes' ],
         change[ 'FileName' ],
         request_data ) )
