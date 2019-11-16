@@ -357,7 +357,13 @@ class JavaCompleter( language_server_completer.LanguageServerCompleter ):
     return self._connection
 
 
-  def DebugInfo( self, request_data ):
+  def AdditionalLogFiles( self ):
+    if self._workspace_path:
+      return [ os.path.join( self._workspace_path, '.metadata', '.log' ) ]
+    return []
+
+
+  def ExtraDebugItems( self, request_data ):
     items = [
       responses.DebugInfoItem( 'Startup Status', self._server_init_status ),
       responses.DebugInfoItem( 'Java Path', PATH_TO_JAVA ),
@@ -374,24 +380,7 @@ class JavaCompleter( language_server_completer.LanguageServerCompleter ):
     items.append( responses.DebugInfoItem( 'Extension Path',
                                            self._extension_path ) )
 
-    items.extend( self.CommonDebugItems() )
-
-
-    return responses.BuildDebugInfoResponse(
-      name = "Java",
-      servers = [
-        responses.DebugInfoServer(
-          name = "jdt.ls Java Language Server",
-          handle = self._server_handle,
-          executable = self._launcher_path,
-          logfiles = [
-            self._stderr_file,
-            ( os.path.join( self._workspace_path, '.metadata', '.log' )
-              if self._workspace_path else None )
-          ],
-          extras = items
-        )
-      ] )
+    return items
 
 
   def ServerIsReady( self ):
