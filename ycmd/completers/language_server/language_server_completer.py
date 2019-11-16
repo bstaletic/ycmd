@@ -1674,15 +1674,13 @@ class LanguageServerCompleter( Completer ):
 
       self._project_directory = self.GetProjectDirectory( request_data,
                                                           extra_conf_dir )
-      # FIXME: Figure out why this doesn't work on Mac
-      if not utils.OnMac():
-        watched_files = self.GetWatchedFiles()
-        if watched_files and self._project_directory:
-          self._observer = Observer()
-          self._observer.schedule(
-            WatchdogHandler( self, self.GetWatchedFiles() ),
-            self._project_directory )
-          self._observer.start()
+      watched_files = self.GetWatchedFiles()
+      if watched_files and self._project_directory:
+        self._observer = Observer()
+        self._observer.schedule(
+          WatchdogHandler( self, self.GetWatchedFiles() ),
+          self._project_directory )
+        self._observer.start()
       request_id = self.GetConnection().NextRequestId()
 
       # FIXME: According to the discussion on
