@@ -29,7 +29,6 @@ import os
 import shutil
 import tempfile
 import threading
-from subprocess import PIPE
 
 from ycmd import responses, utils
 from ycmd.completers.language_server import language_server_completer
