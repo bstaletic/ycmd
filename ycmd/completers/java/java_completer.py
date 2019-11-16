@@ -353,10 +353,6 @@ class JavaCompleter( language_server_completer.LanguageServerCompleter ):
     }
 
 
-  def GetConnection( self ):
-    return self._connection
-
-
   def AdditionalLogFiles( self ):
     if self._workspace_path:
       return [ os.path.join( self._workspace_path, '.metadata', '.log' ) ]
