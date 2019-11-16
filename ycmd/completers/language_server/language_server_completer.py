@@ -737,8 +737,7 @@ class LanguageServerCompleter( Completer ):
     """Method that must be implemented by derived classes to return an instance
     of LanguageServerConnection appropriate for the language server in
     question"""
-    with self._server_state_mutex:
-      return self._connection
+    return self._connection
 
 
   def HandleServerCommandResponse( self,
