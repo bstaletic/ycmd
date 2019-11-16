@@ -1149,7 +1149,7 @@ def DoCmakeBuilds( args ):
   if not args.no_regex:
     BuildRegexModule( cmake, cmake_common_args, args )
 
-  CompileWatchdog( args )
+  # CompileWatchdog( args )
 
 
 def Main():
