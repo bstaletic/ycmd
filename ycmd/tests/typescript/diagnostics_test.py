@@ -25,12 +25,52 @@ from future import standard_library
 standard_library.install_aliases()
 from builtins import *  # noqa
 
+from future.utils import iterkeys
+from pprint import pformat
 from hamcrest import ( assert_that, contains, contains_inanyorder, has_entries,
                        has_entry )
 
 from ycmd.tests.typescript import IsolatedYcmd, PathToTestFile, SharedYcmd
-from ycmd.tests.test_utils import BuildRequest, LocationMatcher, RangeMatcher
+from ycmd.tests.test_utils import BuildRequest, LocationMatcher, RangeMatcher, WithRetry, WaitForDiagnosticsToBeReady, PollForMessagesTimeoutException, PollForMessages
 from ycmd.utils import ReadFile
+
+MAIN_FILEPATH = PathToTestFile( 'test.ts' )
+DIAG_MATCHERS_PER_FILE = {
+  MAIN_FILEPATH: contains_inanyorder(
+    has_entries( {
+      'kind': 'ERROR',
+      'text': "Property 'mA' does not exist on type 'Foo'.",
+      'location': LocationMatcher( MAIN_FILEPATH, 17, 5 ),
+      'location_extent': RangeMatcher( MAIN_FILEPATH, ( 17, 5 ), ( 17, 7 ) ),
+      'ranges': contains( RangeMatcher( MAIN_FILEPATH, ( 17, 5 ), ( 17, 7 ) ) ),
+      'fixit_available': True
+    } ),
+    has_entries( {
+      'kind': 'ERROR',
+      'text': "Property 'nonExistingMethod' does not exist on type 'Bar'.",
+      'location': LocationMatcher( MAIN_FILEPATH, 35, 5 ),
+      'location_extent': RangeMatcher( MAIN_FILEPATH, ( 35, 5 ), ( 35, 22 ) ),
+      'ranges': contains( RangeMatcher( MAIN_FILEPATH, ( 35, 5 ), ( 35, 22 ) ) ),
+      'fixit_available': True
+    } ),
+    has_entries( {
+      'kind': 'ERROR',
+      'text': 'Expected 1-2 arguments, but got 0.',
+      'location': LocationMatcher( MAIN_FILEPATH, 37, 5 ),
+      'location_extent': RangeMatcher( MAIN_FILEPATH, ( 37, 5 ), ( 37, 12 ) ),
+      'ranges': contains( RangeMatcher( MAIN_FILEPATH, ( 37, 5 ), ( 37, 12 ) ) ),
+      'fixit_available': False
+    } ),
+    has_entries( {
+      'kind': 'ERROR',
+      'text': "Cannot find name 'Bår'.",
+      'location': LocationMatcher( MAIN_FILEPATH, 39, 1 ),
+      'location_extent': RangeMatcher( MAIN_FILEPATH, ( 39, 1 ), ( 39, 5 ) ),
+      'ranges': contains( RangeMatcher( MAIN_FILEPATH, ( 39, 1 ), ( 39, 5 ) ) ),
+      'fixit_available': True
+    } ),
+  )
+}
 
 
 @SharedYcmd
@@ -38,56 +78,14 @@ def Diagnostics_FileReadyToParse_test( app ):
   filepath = PathToTestFile( 'test.ts' )
   contents = ReadFile( filepath )
 
-  event_data = BuildRequest( filepath = filepath,
-                             filetype = 'typescript',
-                             contents = contents,
-                             event_name = 'BufferVisit' )
-  app.post_json( '/event_notification', event_data )
+  # It can take a while for the diagnostics to be ready.
+  results = WaitForDiagnosticsToBeReady( app, filepath, contents, 'typescript' )
+  print( 'completer response: {}'.format( pformat( results ) ) )
 
-  event_data = BuildRequest( filepath = filepath,
-                             filetype = 'typescript',
-                             contents = contents,
-                             event_name = 'FileReadyToParse' )
-
-  assert_that(
-    app.post_json( '/event_notification', event_data ).json,
-    contains_inanyorder(
-      has_entries( {
-        'kind': 'ERROR',
-        'text': "Property 'mA' does not exist on type 'Foo'.",
-        'location': LocationMatcher( filepath, 17, 5 ),
-        'location_extent': RangeMatcher( filepath, ( 17, 5 ), ( 17, 7 ) ),
-        'ranges': contains( RangeMatcher( filepath, ( 17, 5 ), ( 17, 7 ) ) ),
-        'fixit_available': True
-      } ),
-      has_entries( {
-        'kind': 'ERROR',
-        'text': "Property 'nonExistingMethod' does not exist on type 'Bar'.",
-        'location': LocationMatcher( filepath, 35, 5 ),
-        'location_extent': RangeMatcher( filepath, ( 35, 5 ), ( 35, 22 ) ),
-        'ranges': contains( RangeMatcher( filepath, ( 35, 5 ), ( 35, 22 ) ) ),
-        'fixit_available': True
-      } ),
-      has_entries( {
-        'kind': 'ERROR',
-        'text': 'Expected 1-2 arguments, but got 0.',
-        'location': LocationMatcher( filepath, 37, 5 ),
-        'location_extent': RangeMatcher( filepath, ( 37, 5 ), ( 37, 12 ) ),
-        'ranges': contains( RangeMatcher( filepath, ( 37, 5 ), ( 37, 12 ) ) ),
-        'fixit_available': False
-      } ),
-      has_entries( {
-        'kind': 'ERROR',
-        'text': "Cannot find name 'Bår'.",
-        'location': LocationMatcher( filepath, 39, 1 ),
-        'location_extent': RangeMatcher( filepath, ( 39, 1 ), ( 39, 5 ) ),
-        'ranges': contains( RangeMatcher( filepath, ( 39, 1 ), ( 39, 5 ) ) ),
-        'fixit_available': True
-      } ),
-    )
-  )
+  assert_that( results, DIAG_MATCHERS_PER_FILE[ filepath ] )
 
 
+@WithRetry
 @SharedYcmd
 def Diagnostics_DetailedDiagnostics_test( app ):
   filepath = PathToTestFile( 'test.ts' )
@@ -113,40 +111,40 @@ def Diagnostics_DetailedDiagnostics_test( app ):
   )
 
 
-@IsolatedYcmd( { 'max_diagnostics_to_display': 1 } )
-def Diagnostics_MaximumDiagnosticsNumberExceeded_test( app ):
+@SharedYcmd
+def Diagnostics_Poll_test( app ):
   filepath = PathToTestFile( 'test.ts' )
   contents = ReadFile( filepath )
+  # Poll until we receive _all_ the diags asynchronously.
+  to_see = sorted( iterkeys( DIAG_MATCHERS_PER_FILE ) )
+  seen = {}
 
-  event_data = BuildRequest( filepath = filepath,
-                             filetype = 'typescript',
-                             contents = contents,
-                             event_name = 'BufferVisit' )
-  app.post_json( '/event_notification', event_data )
+  try:
+    for message in PollForMessages( app,
+                                    { 'filepath': filepath,
+                                      'contents': contents,
+                                      'filetype': 'typescript' } ):
+      print( 'Message {}'.format( pformat( message ) ) )
+      if 'diagnostics' in message:
+        seen[ message[ 'filepath' ] ] = True
+        if message[ 'filepath' ] not in DIAG_MATCHERS_PER_FILE:
+          raise AssertionError(
+            'Received diagnostics for unexpected file {}. '
+            'Only expected {}'.format( message[ 'filepath' ], to_see ) )
+        assert_that( message, has_entries( {
+          'diagnostics': DIAG_MATCHERS_PER_FILE[ message[ 'filepath' ] ],
+          'filepath': message[ 'filepath' ]
+        } ) )
 
-  event_data = BuildRequest( filepath = filepath,
-                             filetype = 'typescript',
-                             contents = contents,
-                             event_name = 'FileReadyToParse' )
+      if sorted( iterkeys( seen ) ) == to_see:
+        break
 
-  assert_that(
-    app.post_json( '/event_notification', event_data ).json,
-    contains_inanyorder(
-      has_entries( {
-        'kind': 'ERROR',
-        'text': "Property 'mA' does not exist on type 'Foo'.",
-        'location': LocationMatcher( filepath, 17, 5 ),
-        'location_extent': RangeMatcher( filepath, ( 17, 5 ), ( 17, 7 ) ),
-        'ranges': contains( RangeMatcher( filepath, ( 17, 5 ), ( 17, 7 ) ) ),
-        'fixit_available': True
-      } ),
-      has_entries( {
-        'kind': 'ERROR',
-        'text': 'Maximum number of diagnostics exceeded.',
-        'location': LocationMatcher( filepath, 1, 1 ),
-        'location_extent': RangeMatcher( filepath, ( 1, 1 ), ( 1, 1 ) ),
-        'ranges': contains( RangeMatcher( filepath, ( 1, 1 ), ( 1, 1 ) ) ),
-        'fixit_available': False
-      } ),
-    )
-  )
+      # Eventually PollForMessages will throw a timeout exception and we'll fail
+      # if we don't see all of the expected diags.
+  except PollForMessagesTimeoutException as e:
+    raise AssertionError(
+      str( e ) +
+      'Timed out waiting for full set of diagnostics. '
+      'Expected to see diags for {}, but only saw {}.'.format(
+        json.dumps( to_see, indent=2 ),
+        json.dumps( sorted( iterkeys( seen ) ), indent=2 ) ) )

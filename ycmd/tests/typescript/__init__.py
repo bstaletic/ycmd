@@ -78,7 +78,8 @@ def SharedYcmd( test ):
   @functools.wraps( test )
   def Wrapper( *args, **kwargs ):
     ClearCompletionsCache()
-    return test( shared_app, *args, **kwargs )
+    with IgnoreExtraConfOutsideTestsFolder():
+      return test( shared_app, *args, **kwargs )
   return Wrapper
 
 

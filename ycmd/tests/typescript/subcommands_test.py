@@ -27,6 +27,7 @@ from builtins import *  # noqa
 from hamcrest import ( assert_that,
                        contains,
                        contains_inanyorder,
+                       contains_string,
                        has_entries,
                        has_entry,
                        matches_regexp )
@@ -39,10 +40,12 @@ from ycmd.tests.typescript import IsolatedYcmd, PathToTestFile, SharedYcmd
 from ycmd.tests.test_utils import ( BuildRequest,
                                     ChunkMatcher,
                                     CombineRequest,
+                                    ExpectedFailure,
                                     ErrorMatcher,
                                     LocationMatcher,
                                     MessageMatcher,
                                     MockProcessTerminationTimingOut,
+                                    WaitForDiagnosticsToBeReady,
                                     WaitUntilCompleterServerReady )
 from ycmd.utils import ReadFile
 
@@ -95,10 +98,12 @@ def Subcommands_DefinedSubcommands_test( app ):
   assert_that(
     app.post_json( '/defined_subcommands', subcommands_data ).json,
     contains_inanyorder(
+      'ExecuteCommand',
       'Format',
       'GoTo',
       'GoToDeclaration',
       'GoToDefinition',
+      'GoToImplementation',
       'GoToType',
       'GetDoc',
       'GetType',
@@ -265,6 +270,8 @@ def Subcommands_Format_WholeFile_Tabs_test( app ):
   } )
 
 
+@ExpectedFailure( 'formatRange not supported in typescript-language-server',
+                  contains_string( '-32601' ) )
 @SharedYcmd
 def Subcommands_Format_Range_Spaces_test( app ):
   filepath = PathToTestFile( 'test.ts' )
@@ -290,7 +297,7 @@ def Subcommands_Format_Range_Spaces_test( app ):
       }
     },
     'expect': {
-      'response': requests.codes.ok,
+      'response': requests.codes.server_error,
       'data': has_entries( {
         'fixits': contains( has_entries( {
           'chunks': contains(
@@ -319,6 +326,8 @@ def Subcommands_Format_Range_Spaces_test( app ):
   } )
 
 
+@ExpectedFailure( 'formatRange not supported in typescript-language-server',
+                  contains_string( '-32601' ) )
 @SharedYcmd
 def Subcommands_Format_Range_Tabs_test( app ):
   filepath = PathToTestFile( 'test.ts' )
@@ -344,7 +353,7 @@ def Subcommands_Format_Range_Tabs_test( app ):
       }
     },
     'expect': {
-      'response': requests.codes.ok,
+      'response': requests.codes.server_error,
       'data': has_entries( {
         'fixits': contains( has_entries( {
           'chunks': contains(
@@ -464,6 +473,23 @@ def Subcommands_GetDoc_Class_Unicode_test( app ):
          'detailed_info': 'class Båøz\n\n'
                           'Test unicøde st††††',
       } )
+    }
+  } )
+
+
+@SharedYcmd
+def Subcommands_GetDoc_NoDocstring_test( app ):
+  RunTest( app, {
+    'description': 'GetDoc returns an error on a keyword',
+    'request': {
+      'command': 'GetType',
+      'line_num': 32,
+      'column_num': 1,
+      'filepath': PathToTestFile( 'test.ts' ),
+    },
+    'expect': {
+      'response': requests.codes.internal_server_error,
+      'data': ErrorMatcher( RuntimeError, 'No content available.' )
     }
   } )
 
@@ -596,7 +622,7 @@ def Subcommands_GoTo_Fail( app, goto_command ):
     },
     'expect': {
       'response': requests.codes.internal_server_error,
-      'data': ErrorMatcher( RuntimeError, 'Could not find definition.' )
+      'data': ErrorMatcher( RuntimeError, 'Cannot jump to location' )
     }
   } )
 
@@ -635,20 +661,23 @@ def Subcommands_GoToType_Fail_test( app ):
     },
     'expect': {
       'response': requests.codes.internal_server_error,
-      'data': ErrorMatcher( RuntimeError, 'Could not find type definition.' )
+      'data': ErrorMatcher( RuntimeError, 'Cannot jump to location' )
     }
   } )
 
 
 @SharedYcmd
 def Subcommands_FixIt_test( app ):
+  filepath = PathToTestFile( 'test.ts' )
+  contents = ReadFile( filepath )
+  WaitForDiagnosticsToBeReady( app, filepath, contents, 'typescript' )
   RunTest( app, {
     'description': 'FixIt works on a non-existing method',
     'request': {
       'command': 'FixIt',
       'line_num': 35,
       'column_num': 12,
-      'filepath': PathToTestFile( 'test.ts' ),
+      'filepath': filepath,
     },
     'expect': {
       'response': requests.codes.ok,
@@ -766,8 +795,7 @@ def Subcommands_RefactorRename_NotPossible_test( app ):
     'expect': {
       'response': requests.codes.internal_server_error,
       'data': ErrorMatcher( RuntimeError,
-                            'Value cannot be renamed: '
-                            'You cannot rename this element.' )
+                            'Cannot rename the symbol under cursor.' )
     }
   } )
 
@@ -896,6 +924,11 @@ def Subcommands_RefactorRename_SimpleUnicode_test( app ):
 @patch( 'ycmd.utils.WaitUntilProcessIsTerminated',
         MockProcessTerminationTimingOut )
 def Subcommands_StopServer_Timeout_test( app ):
+  app.post_json( '/event_notification',
+                 BuildRequest(
+                   filepath = PathToTestFile( 'test.ts' ),
+                   event_name = 'FileReadyToParse',
+                   filetype = 'typescript' ) )
   WaitUntilCompleterServerReady( app, 'typescript' )
 
   app.post_json(

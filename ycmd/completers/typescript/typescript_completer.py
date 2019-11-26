@@ -25,8 +25,9 @@ from builtins import *  # noqa
 import os
 import logging
 
-from ycmd import utils
+from ycmd import utils, responses
 from ycmd.completers.language_server import simple_language_server_completer
+from ycmd.completers.language_server import language_server_protocol as lsp
 from ycmd.utils import LOGGER
 
 LOGFILE_FORMAT = 'tsserver_'
@@ -87,15 +88,28 @@ class TypeScriptCompleter( simple_language_server_completer.SimpleLSPCompleter )
     return [ 'typescript', 'typescriptreact', 'javascript' ]
 
   def GetDoc( self, request_data ):
-    return self.GetHoverResponse( request_data )[ 1 ]
+    hover = self.GetHoverResponse( request_data )
+    if not hover:
+      raise RuntimeError( 'No content available.' )
+    docstring = hover[ 0 ][ 'value' ] + '\n\n' + hover[ 1 ]
+    return responses.BuildDetailedInfoResponse( docstring )
 
 
   def GetType( self, request_data ):
-    return self.GetHoverResponse( request_data )[ 0 ][ 'value' ]
+    hover = self.GetHoverResponse( request_data )
+    if not hover:
+      raise RuntimeError( 'No content available.' )
+    return responses.BuildDisplayMessageResponse( hover[ 0 ][ 'value' ] )
 
 
   def GetCustomSubcommands( self ):
     return {
+      'OrganizeImports': ( lambda self, request_data, args:
+                           self._OrganizeImports( request_data )
+      ),
+      'RestartServer': (
+        lambda self, request_data, args: self._RestartServer( request_data )
+      ),
       'GetDoc': (
         lambda self, request_data, args: self.GetDoc( request_data )
       ),
@@ -103,3 +117,17 @@ class TypeScriptCompleter( simple_language_server_completer.SimpleLSPCompleter )
         lambda self, request_data, args: self.GetType( request_data )
       ),
     }
+
+
+  def _OrganizeImports( self, request_data ):
+    fixit = {
+      'resolve': True,
+      'command': {
+        'title': 'Organize Imports',
+        'command': '_typescript.organizeImports',
+        'arguments': [ {
+          'file': request_data[ 'filepath' ]
+        } ]
+      }
+    }
+    return self._ResolveFixit( request_data, fixit )
