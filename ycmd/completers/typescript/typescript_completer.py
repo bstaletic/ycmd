@@ -125,9 +125,7 @@ class TypeScriptCompleter( simple_language_server_completer.SimpleLSPCompleter )
       'command': {
         'title': 'Organize Imports',
         'command': '_typescript.organizeImports',
-        'arguments': [ {
-          'file': request_data[ 'filepath' ]
-        } ]
+        'arguments': [ request_data[ 'filepath' ] ]
       }
     }
     return self._ResolveFixit( request_data, fixit )
