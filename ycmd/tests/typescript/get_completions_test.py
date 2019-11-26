@@ -92,78 +92,27 @@ def GetCompletions_Basic_test( app ):
             'methodA',
             '(method) Foo.methodA(): void',
             extra_params = {
-              'kind': 'method',
-              'detailed_info': '(method) Foo.methodA(): void\n\n'
-                               'Unicode string: 说话'
+              'kind': 'Method',
+              'detailed_info': 'methodA\n\nUnicode string: 说话'
             }
           ),
           CompletionEntryMatcher(
             'methodB',
             '(method) Foo.methodB(): void',
             extra_params = {
-              'kind': 'method',
-              'detailed_info': '(method) Foo.methodB(): void'
+              'kind': 'Method',
+              'detailed_info': 'methodB\n\n'
             }
           ),
           CompletionEntryMatcher(
             'methodC',
-            '(method) Foo.methodC(a: { foo: string; bar: number; }): void',
+            '(method) Foo.methodC(a: {\n    foo: string;\n    bar: number;\n}): void',
             extra_params = {
-              'kind': 'method',
-              'detailed_info': '(method) Foo.methodC(a: {\n'
-                               '    foo: string;\n'
-                               '    bar: number;\n'
-                               '}): void'
+              'kind': 'Method',
+              'detailed_info': 'methodC\n\n'
             }
           )
         )
-      } )
-    }
-  } )
-
-  RunTest( app, {
-    'description': 'Filtering works',
-    'request': {
-      'line_num': 17,
-      'column_num': 7,
-      'filepath': PathToTestFile( 'test.ts' )
-    },
-    'expect': {
-      'response': requests.codes.ok,
-      'data': has_entries( {
-        'completions': contains_inanyorder(
-          CompletionEntryMatcher(
-            'methodA',
-            '(method) Foo.methodA(): void',
-            extra_params = {
-              'kind': 'method',
-              'detailed_info': '(method) Foo.methodA(): void\n\n'
-                               'Unicode string: 说话'
-            }
-          )
-        )
-      } )
-    }
-  } )
-
-
-@SharedYcmd
-def GetCompletions_Keyword_test( app ):
-  RunTest( app, {
-    'description': 'No extra and detailed info when completion is a keyword',
-    'request': {
-      'line_num': 2,
-      'column_num': 5,
-      'filepath': PathToTestFile( 'test.ts' ),
-    },
-    'expect': {
-      'response': requests.codes.ok,
-      'data': has_entries( {
-        'completions': has_item( {
-          'insertion_text': 'class',
-          'kind':           'keyword',
-          'extra_data':     {}
-        } )
       } )
     }
   } )
@@ -219,38 +168,6 @@ def GetCompletions_AfterRestart_test( app ):
   )
 
 
-@IsolatedYcmd()
-def GetCompletions_ServerIsNotRunning_test( app ):
-  StopCompleterServer( app, filetype = 'typescript' )
-
-  filepath = PathToTestFile( 'test.ts' )
-  contents = ReadFile( filepath )
-
-  # Check that sending a request to TSServer (the response is ignored) raises
-  # the proper exception.
-  event_data = BuildRequest( filepath = filepath,
-                             filetype = 'typescript',
-                             contents = contents,
-                             event_name = 'BufferVisit' )
-
-  assert_that(
-    calling( app.post_json ).with_args( '/event_notification', event_data ),
-    raises( AppError, 'TSServer is not running.' ) )
-
-  # Check that sending a command to TSServer (the response is processed) raises
-  # the proper exception.
-  completion_data = BuildRequest( filepath = filepath,
-                                  filetype = 'typescript',
-                                  contents = contents,
-                                  force_semantic = True,
-                                  line_num = 17,
-                                  column_num = 6 )
-
-  assert_that(
-    calling( app.post_json ).with_args( '/completions', completion_data ),
-    raises( AppError, 'TSServer is not running.' ) )
-
-
 @SharedYcmd
 def GetCompletions_AutoImport_test( app ):
   filepath = PathToTestFile( 'test.ts' )
@@ -267,13 +184,14 @@ def GetCompletions_AutoImport_test( app ):
       'data': has_entries( {
         'completions': has_item( has_entries( {
           'insertion_text':  'Bår',
-          'extra_menu_info': 'class Bår',
-          'detailed_info':   'class Bår',
-          'kind':            'class',
+          'menu_text':       'Bår',
+          'extra_menu_info': "Auto import from './unicode'\nclass Bår",
+          'detailed_info':   'Bår\n\n',
+          'kind':            'Class',
           'extra_data': has_entries( {
             'fixits': contains_inanyorder(
               has_entries( {
-                'text': 'Import \'Bår\' from module "./unicode"',
+                'text': '',
                 'chunks': contains(
                   ChunkMatcher(
                     matches_regexp( '^import { Bår } from "./unicode";\r?\n' ),
@@ -281,7 +199,7 @@ def GetCompletions_AutoImport_test( app ):
                     LocationMatcher( filepath, 1, 1 )
                   )
                 ),
-                'location': LocationMatcher( filepath, 39, 5 )
+                'location': LocationMatcher( filepath, 1, 1 )
               } )
             )
           } )
