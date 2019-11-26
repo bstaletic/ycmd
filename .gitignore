@@ -76,6 +76,7 @@ third_party/eclipse.jdt.ls
 
 # TSServer
 third_party/tsserver
+third_party/typescript-language-server
 
 # clangd local installation
 third_party/clangd

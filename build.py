@@ -94,6 +94,7 @@ JDTLS_SHA256 = (
 )
 
 TSSERVER_VERSION = '3.7.2'
+TYPESCRIPT_LANG_SERVER_VERSION = '0.4.0'
 
 RUST_TOOLCHAIN = 'nightly-2019-09-05'
 RLS_DIR = p.join( DIR_OF_THIRD_PARTY, 'rls' )
@@ -1008,6 +1009,12 @@ def EnableTypeScriptCompleter( args ):
              quiet = args.quiet,
              status_message = 'Installing TSServer for JavaScript '
                               'and TypeScript completion' )
+  CheckCall( [ npm, 'install', '-g', '--prefix', tsserver_folder,
+               'typescript-language-server@{version}'.format(
+                   version = TYPESCRIPT_LANG_SERVER_VERSION ) ],
+             quiet = args.quiet,
+             status_message = 'Installing typescript language server for '
+                              'JavaScript and TypeScript completion' )
 
 
 def GetClangdTarget():

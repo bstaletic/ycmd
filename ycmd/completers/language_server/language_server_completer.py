@@ -1043,7 +1043,7 @@ class LanguageServerCompleter( Completer ):
 
       try:
         insertion_text, extra_data, start_codepoint = (
-          _InsertionTextForItem( request_data, item ) )
+          _InsertionTextForItem( request_data, item, self.GetServerName() != 'TSServer' ) )
       except IncompatibleCompletionException:
         LOGGER.exception( 'Ignoring incompatible completion suggestion %s',
                           item )
@@ -2235,7 +2235,7 @@ def _FixUpCompletionPrefixes( completions,
   return completions
 
 
-def _InsertionTextForItem( request_data, item ):
+def _InsertionTextForItem( request_data, item, assert_no_snippets ):
   """Determines the insertion text for the completion item |item|, and any
   additional FixIts that need to be applied when selecting it.
 
@@ -2248,8 +2248,9 @@ def _InsertionTextForItem( request_data, item ):
   # We do not support completion types of "Snippet". This is implicit in that we
   # don't say it is a "capability" in the initialize request.
   # Abort this request if the server is buggy and ignores us.
-  assert lsp.INSERT_TEXT_FORMAT[
-    item.get( 'insertTextFormat' ) or 1 ] == 'PlainText'
+  if assert_no_snippets:
+    assert lsp.INSERT_TEXT_FORMAT[
+      item.get( 'insertTextFormat' ) or 1 ] == 'PlainText'
 
   fixits = None
 

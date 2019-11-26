@@ -25,8 +25,12 @@ from builtins import *  # noqa
 import functools
 import os
 
-from ycmd.tests.test_utils import ( ClearCompletionsCache, IsolatedApp,
-                                    SetUpApp, StopCompleterServer,
+from ycmd.tests.test_utils import ( BuildRequest,
+                                    ClearCompletionsCache,
+                                    IgnoreExtraConfOutsideTestsFolder,
+                                    IsolatedApp,
+                                    SetUpApp,
+                                    StopCompleterServer,
                                     WaitUntilCompleterServerReady )
 
 shared_app = None
@@ -45,7 +49,17 @@ def setUpPackage():
   global shared_app
 
   shared_app = SetUpApp()
-  WaitUntilCompleterServerReady( shared_app, 'typescript' )
+  with IgnoreExtraConfOutsideTestsFolder():
+    StartTypeScriptCompleterServerInDirectory( shared_app, PathToTestFile() )
+
+
+def StartTypeScriptCompleterServerInDirectory( app, directory ):
+  app.post_json( '/event_notification',
+                 BuildRequest(
+                   filepath = os.path.join( directory, 'file2.ts' ),
+                   event_name = 'FileReadyToParse',
+                   filetype = 'typescript' ) )
+  WaitUntilCompleterServerReady( app, 'typescript' )
 
 
 def tearDownPackage():

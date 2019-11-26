@@ -25,7 +25,7 @@ from builtins import *  # noqa
 from hamcrest import ( any_of, assert_that, contains, has_entries, has_entry,
                        instance_of )
 
-from ycmd.tests.typescript import SharedYcmd
+from ycmd.tests.typescript import SharedYcmd, IsolatedYcmd, PathToTestFile, StartTypeScriptCompleterServerInDirectory
 from ycmd.tests.test_utils import BuildRequest
 
 
@@ -38,16 +38,61 @@ def DebugInfo_test( app ):
       'name': 'TypeScript',
       'servers': contains( has_entries( {
         'name': 'TSServer',
-        'is_running': True,
-        'executable': instance_of( str ),
-        'pid': instance_of( int ),
+        'is_running': instance_of( bool ),
+        'executable': instance_of( list ),
         'address': None,
         'port': None,
+        'pid': instance_of( int ),
         'logfiles': contains( instance_of( str ) ),
-        'extras': contains( has_entries( {
-          'key': 'version',
-          'value': any_of( None, instance_of( str ) )
-        } ) )
-      } ) )
+        'extras': contains(
+          has_entries( {
+            'key': 'Server State',
+            'value': instance_of( str ),
+          } ),
+          has_entries( {
+            'key': 'Project Directory',
+            'value': PathToTestFile(),
+          } ),
+          has_entries( {
+            'key': 'Settings',
+            'value': '{}'
+          } ),
+        )
+      } ) ),
+    } ) )
+  )
+
+
+@IsolatedYcmd()
+def DebugInfo_ProjectDirectory_test( app ):
+  project_dir = PathToTestFile( 'buffer_unload' )
+  StartTypeScriptCompleterServerInDirectory( app, project_dir )
+  assert_that(
+    app.post_json( '/debug_info', BuildRequest( filetype = 'typescript' ) ).json,
+    has_entry( 'completer', has_entries( {
+      'name': 'TypeScript',
+      'servers': contains( has_entries( {
+        'name': 'TSServer',
+        'is_running': instance_of( bool ),
+        'executable': instance_of( list ),
+        'address': None,
+        'port': None,
+        'pid': instance_of( int ),
+        'logfiles': contains( instance_of( str ) ),
+        'extras': contains(
+          has_entries( {
+            'key': 'Server State',
+            'value': instance_of( str ),
+          } ),
+          has_entries( {
+            'key': 'Project Directory',
+            'value': PathToTestFile(),
+          } ),
+          has_entries( {
+            'key': 'Settings',
+            'value': '{}'
+          } ),
+        )
+      } ) ),
     } ) )
   )
