@@ -1109,6 +1109,9 @@ class LanguageServerCompleter( Completer ):
                                                  REQUEST_TIMEOUT_COMPLETION )
 
     result = response[ 'result' ]
+    if result is None:
+      return {}
+
     for sig in result[ 'signatures' ]:
       sig_label = sig[ 'label' ]
       end = 0
