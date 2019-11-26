@@ -34,9 +34,10 @@ from nose.tools import eq_
 import pprint
 import requests
 
-from ycmd.tests.javascript import IsolatedYcmd, PathToTestFile, SharedYcmd
+from ycmd.tests.javascript import PathToTestFile, SharedYcmd
 from ycmd.tests.test_utils import ( BuildRequest, ChunkMatcher,
-                                    CompletionEntryMatcher, LocationMatcher )
+                                    CompletionEntryMatcher,
+                                    LocationMatcher )
 from ycmd.utils import ReadFile
 
 
@@ -90,50 +91,27 @@ def GetCompletions_Basic_test( app ):
             'methodA',
             '(method) Foo.methodA(): void',
             extra_params = {
-              'kind': 'method',
-              'detailed_info': '(method) Foo.methodA(): void\n\n'
-                               'Unicode string: 说话'
+              'kind': 'Method',
+              'detailed_info': 'methodA\n\nUnicode string: 说话'
             }
           ),
           CompletionEntryMatcher(
             'methodB',
             '(method) Foo.methodB(): void',
             extra_params = {
-              'kind': 'method',
-              'detailed_info': '(method) Foo.methodB(): void'
+              'kind': 'Method',
+              'detailed_info': 'methodB\n\n'
             }
           ),
           CompletionEntryMatcher(
             'methodC',
             '(method) Foo.methodC(foo: any, bar: any): void',
             extra_params = {
-              'kind': 'method',
-              'detailed_info': '(method) Foo.methodC(foo: any, bar: any): void'
+              'kind': 'Method',
+              'detailed_info': 'methodC\n\n'
             }
           )
         )
-      } )
-    }
-  } )
-
-
-@SharedYcmd
-def GetCompletions_Keyword_test( app ):
-  RunTest( app, {
-    'description': 'No extra and detailed info when completion is a keyword',
-    'request': {
-      'line_num': 1,
-      'column_num': 5,
-      'filepath': PathToTestFile( 'test.js' ),
-    },
-    'expect': {
-      'response': requests.codes.ok,
-      'data': has_entries( {
-        'completions': has_item( {
-          'insertion_text': 'class',
-          'kind':           'keyword',
-          'extra_data':     {}
-        } )
       } )
     }
   } )
@@ -155,13 +133,14 @@ def GetCompletions_AutoImport_test( app ):
       'data': has_entries( {
         'completions': has_item( has_entries( {
           'insertion_text':  'Bår',
-          'extra_menu_info': 'class Bår',
-          'detailed_info':   'class Bår',
-          'kind':            'class',
+          'menu_text':       'Bår',
+          'extra_menu_info': "Auto import from './unicode'\nclass Bår",
+          'detailed_info':   'Bår\n\n',
+          'kind':            'Class',
           'extra_data': has_entries( {
             'fixits': contains_inanyorder(
               has_entries( {
-                'text': 'Import \'Bår\' from module "./unicode"',
+                'text': '',
                 'chunks': contains(
                   ChunkMatcher(
                     matches_regexp( '^import { Bår } from "./unicode";\r?\n'
@@ -170,38 +149,11 @@ def GetCompletions_AutoImport_test( app ):
                     LocationMatcher( filepath, 1, 1 )
                   )
                 ),
-                'location': LocationMatcher( filepath, 36, 5 )
+                'location': LocationMatcher( filepath, 1, 1 )
               } )
             )
           } )
         } ) )
-      } )
-    }
-  } )
-
-
-@IsolatedYcmd
-def GetCompletions_IgnoreIdentifiers_test( app ):
-  RunTest( app, {
-    'description': 'Identifier "test" is not returned as a suggestion',
-    'request': {
-      'line_num': 5,
-      'column_num': 6,
-      'filepath': PathToTestFile( 'identifier', 'test.js' ),
-    },
-    'expect': {
-      'response': requests.codes.ok,
-      'data': has_entries( {
-        'completions': contains(
-          CompletionEntryMatcher(
-            'foo',
-            '(property) foo: string',
-            extra_params = {
-              'kind': 'property',
-              'detailed_info': '(property) foo: string'
-            }
-          )
-        )
       } )
     }
   } )

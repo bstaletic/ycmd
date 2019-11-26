@@ -27,6 +27,7 @@ from builtins import *  # noqa
 from hamcrest import ( assert_that,
                        contains,
                        contains_inanyorder,
+                       contains_string,
                        has_entries,
                        matches_regexp )
 from nose.tools import eq_
@@ -38,7 +39,9 @@ from ycmd.tests.test_utils import ( BuildRequest,
                                     ChunkMatcher,
                                     CombineRequest,
                                     ErrorMatcher,
+                                    ExpectedFailure,
                                     LocationMatcher,
+                                    RangeMatcher,
                                     MessageMatcher )
 from ycmd.utils import ReadFile
 
@@ -81,7 +84,20 @@ def RunTest( app, test ):
 
   eq_( response.status_code, test[ 'expect' ][ 'response' ] )
 
-  assert_that( response.json, test[ 'expect' ][ 'data' ] )
+  if not test.get( 'resolve_fixits', False ):
+    assert_that( response.json, test[ 'expect' ][ 'data' ] )
+  else:
+    unresolved_fixits = response.json[ 'fixits' ]
+    resolved_fixits = [
+      app.post_json(
+        '/resolve_fixit',
+        CombineRequest( test[ 'request' ], {
+          'contents': contents,
+          'filetype': 'typescript',
+          'fixit': f } )
+      ).json for f in unresolved_fixits ]
+    print( 'resolved fixits: {}'.format( pprint.pformat( resolved_fixits ) ) )
+    assert_that( resolved_fixits, test[ 'expect' ][ 'data' ] )
 
 
 @SharedYcmd
@@ -91,10 +107,12 @@ def Subcommands_DefinedSubcommands_test( app ):
   assert_that(
     app.post_json( '/defined_subcommands', subcommands_data ).json,
     contains_inanyorder(
+      'ExecuteCommand',
       'Format',
       'GoTo',
       'GoToDeclaration',
       'GoToDefinition',
+      'GoToImplementation',
       'GoToType',
       'GetDoc',
       'GetType',
@@ -249,6 +267,8 @@ def Subcommands_Format_WholeFile_Tabs_test( app ):
   } )
 
 
+@ExpectedFailure( 'formatRange not supported in typescript-language-server',
+                  contains_string( '-32601' ) )
 @SharedYcmd
 def Subcommands_Format_Range_Spaces_test( app ):
   filepath = PathToTestFile( 'test.js' )
@@ -274,7 +294,7 @@ def Subcommands_Format_Range_Spaces_test( app ):
       }
     },
     'expect': {
-      'response': requests.codes.ok,
+      'response': requests.codes.server_error,
       'data': has_entries( {
         'fixits': contains( has_entries( {
           'chunks': contains(
@@ -297,6 +317,8 @@ def Subcommands_Format_Range_Spaces_test( app ):
   } )
 
 
+@ExpectedFailure( 'formatRange not supported in typescript-language-server',
+                  contains_string( '-32601' ) )
 @SharedYcmd
 def Subcommands_Format_Range_Tabs_test( app ):
   filepath = PathToTestFile( 'test.js' )
@@ -322,7 +344,7 @@ def Subcommands_Format_Range_Tabs_test( app ):
       }
     },
     'expect': {
-      'response': requests.codes.ok,
+      'response': requests.codes.server_error,
       'data': has_entries( {
         'fixits': contains( has_entries( {
           'chunks': contains(
@@ -491,27 +513,46 @@ def Subcommands_FixIt_test( app ):
       'column_num': 19,
       'filepath': filepath,
     },
+    'resolve_fixits': True,
     'expect': {
       'response': requests.codes.ok,
-      'data': has_entries( {
-        'fixits': contains_inanyorder(
-          has_entries( {
-            'text': "Declare method 'nonExistingMethod'",
-            'chunks': contains(
-              ChunkMatcher(
-                matches_regexp(
-                  '^\r?\n'
-                  '    nonExistingMethod\\(\\) {\r?\n'
-                  '        throw new Error\\("Method not implemented."\\);\r?\n'
-                  '    }$',
-                ),
-                LocationMatcher( filepath, 22, 12 ),
-                LocationMatcher( filepath, 22, 12 ) )
-            ),
-            'location': LocationMatcher( filepath, 32, 19 )
-          } )
-        )
-      } )
+      'data': contains_inanyorder(
+        has_entries( {
+          'fixits': contains( has_entries( {
+            'chunks': contains( has_entries( {
+              'range': RangeMatcher( filepath, ( 22, 12 ), ( 22, 12 ) ),
+              'replacement_text':
+                  "\n    nonExistingMethod() {\n        throw new Error("
+                  "\"Method not implemented.\");\n    }"
+            } ) ),
+            'location': LocationMatcher( filepath, 32, 19 ),
+            'resolve': False,
+            'text': "Declare method 'nonExistingMethod'"
+          } ) )
+        } ),
+        has_entries( {
+          'fixits': contains( has_entries( {
+            'chunks': contains( has_entries( {
+              'range': RangeMatcher( filepath, ( 32, 1 ), ( 32, 1 ) ),
+              'replacement_text': "// @ts-ignore\n"
+            } ) ),
+            'location': LocationMatcher( filepath, 32, 19 ),
+            'resolve': False,
+            'text': "Ignore this error message"
+          } ) )
+        } ),
+        has_entries( {
+          'fixits': contains( has_entries( {
+            'chunks': contains( has_entries( {
+              'range': RangeMatcher( filepath, ( 1, 1 ), ( 1, 1 ) ),
+              'replacement_text': "// @ts-nocheck\n"
+            } ) ),
+            'location': LocationMatcher( filepath, 32, 19 ),
+            'resolve': False,
+            'text': "Disable checking for this file"
+          } ) )
+        } )
+      )
     }
   } )
 
@@ -585,8 +626,7 @@ def Subcommands_RefactorRename_NotPossible_test( app ):
     'expect': {
       'response': requests.codes.internal_server_error,
       'data': ErrorMatcher( RuntimeError,
-                            'Value cannot be renamed: '
-                            'You cannot rename this element.' )
+                            'Cannot rename the symbol under cursor.' )
     }
   } )
 

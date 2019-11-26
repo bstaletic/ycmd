@@ -1043,7 +1043,9 @@ class LanguageServerCompleter( Completer ):
 
       try:
         insertion_text, extra_data, start_codepoint = (
-          _InsertionTextForItem( request_data, item, self.GetServerName() != 'TSServer' ) )
+          _InsertionTextForItem( request_data,
+                                 item,
+                                 self.GetServerName() != 'TSServer' ) )
       except IncompatibleCompletionException:
         LOGGER.exception( 'Ignoring incompatible completion suggestion %s',
                           item )

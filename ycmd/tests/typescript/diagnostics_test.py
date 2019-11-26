@@ -25,13 +25,20 @@ from future import standard_library
 standard_library.install_aliases()
 from builtins import *  # noqa
 
+import json
 from future.utils import iterkeys
 from pprint import pformat
 from hamcrest import ( assert_that, contains, contains_inanyorder, has_entries,
                        has_entry )
 
-from ycmd.tests.typescript import IsolatedYcmd, PathToTestFile, SharedYcmd
-from ycmd.tests.test_utils import BuildRequest, LocationMatcher, RangeMatcher, WithRetry, WaitForDiagnosticsToBeReady, PollForMessagesTimeoutException, PollForMessages
+from ycmd.tests.typescript import PathToTestFile, SharedYcmd
+from ycmd.tests.test_utils import ( BuildRequest,
+                                    LocationMatcher,
+                                    RangeMatcher,
+                                    WithRetry,
+                                    WaitForDiagnosticsToBeReady,
+                                    PollForMessagesTimeoutException,
+                                    PollForMessages )
 from ycmd.utils import ReadFile
 
 MAIN_FILEPATH = PathToTestFile( 'test.ts' )
@@ -47,10 +54,13 @@ DIAG_MATCHERS_PER_FILE = {
     } ),
     has_entries( {
       'kind': 'ERROR',
-      'text': "Property 'nonExistingMethod' does not exist on type 'Bar'. [2339]",
+      'text': "Property 'nonExistingMethod' does not "
+              "exist on type 'Bar'. [2339]",
       'location': LocationMatcher( MAIN_FILEPATH, 35, 5 ),
       'location_extent': RangeMatcher( MAIN_FILEPATH, ( 35, 5 ), ( 35, 22 ) ),
-      'ranges': contains( RangeMatcher( MAIN_FILEPATH, ( 35, 5 ), ( 35, 22 ) ) ),
+      'ranges': contains( RangeMatcher( MAIN_FILEPATH,
+                                        ( 35, 5 ),
+                                        ( 35, 22 ) ) ),
       'fixit_available': False
     } ),
     has_entries( {
@@ -58,7 +68,9 @@ DIAG_MATCHERS_PER_FILE = {
       'text': 'Expected 1-2 arguments, but got 0. [2554]',
       'location': LocationMatcher( MAIN_FILEPATH, 37, 5 ),
       'location_extent': RangeMatcher( MAIN_FILEPATH, ( 37, 5 ), ( 37, 12 ) ),
-      'ranges': contains( RangeMatcher( MAIN_FILEPATH, ( 37, 5 ), ( 37, 12 ) ) ),
+      'ranges': contains( RangeMatcher( MAIN_FILEPATH,
+                                        ( 37, 5 ),
+                                        ( 37, 12 ) ) ),
       'fixit_available': False
     } ),
     has_entries( {
@@ -66,7 +78,9 @@ DIAG_MATCHERS_PER_FILE = {
       'text': "Cannot find name 'Bår'. [2304]",
       'location': LocationMatcher( MAIN_FILEPATH, 39, 1 ),
       'location_extent': RangeMatcher( MAIN_FILEPATH, ( 39, 1 ), ( 39, 5 ) ),
-      'ranges': contains( RangeMatcher( MAIN_FILEPATH, ( 39, 1 ), ( 39, 5 ) ) ),
+      'ranges': contains( RangeMatcher( MAIN_FILEPATH,
+                                        ( 39, 1 ),
+                                        ( 39, 5 ) ) ),
       'fixit_available': False
     } ),
     has_entries( {

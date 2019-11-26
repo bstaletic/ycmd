@@ -26,8 +26,12 @@ from mock import patch
 import functools
 import os
 
-from ycmd.tests.test_utils import ( ClearCompletionsCache, IsolatedApp,
-                                    SetUpApp, StopCompleterServer,
+from ycmd.tests.test_utils import ( BuildRequest,
+                                    ClearCompletionsCache,
+                                    IgnoreExtraConfOutsideTestsFolder,
+                                    IsolatedApp,
+                                    SetUpApp,
+                                    StopCompleterServer,
                                     WaitUntilCompleterServerReady )
 
 shared_app = None
@@ -48,7 +52,17 @@ def setUpPackage():
   with patch( 'ycmd.completers.javascript.hook.'
               'ShouldEnableTernCompleter', return_value = False ):
     shared_app = SetUpApp()
-    WaitUntilCompleterServerReady( shared_app, 'javascript' )
+    with IgnoreExtraConfOutsideTestsFolder():
+      StartJavaScriptCompleterServerInDirectory( shared_app, PathToTestFile() )
+
+
+def StartJavaScriptCompleterServerInDirectory( app, directory ):
+  app.post_json( '/event_notification',
+                 BuildRequest(
+                   filepath = os.path.join( directory, 'file2.ts' ),
+                   event_name = 'FileReadyToParse',
+                   filetype = 'javascript' ) )
+  WaitUntilCompleterServerReady( app, 'javascript' )
 
 
 def tearDownPackage():
@@ -67,7 +81,8 @@ def SharedYcmd( test ):
   @functools.wraps( test )
   def Wrapper( *args, **kwargs ):
     ClearCompletionsCache()
-    return test( shared_app, *args, **kwargs )
+    with IgnoreExtraConfOutsideTestsFolder():
+      return test( shared_app, *args, **kwargs )
   return Wrapper
 
 

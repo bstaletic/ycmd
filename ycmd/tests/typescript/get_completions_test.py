@@ -25,33 +25,32 @@ from __future__ import division
 from builtins import *  # noqa
 
 from hamcrest import ( assert_that,
-                       calling,
                        contains,
                        contains_inanyorder,
                        has_entries,
                        has_item,
-                       matches_regexp,
-                       raises )
+                       matches_regexp )
 from nose.tools import eq_
-from webtest import AppError
 import pprint
 import requests
 
-from ycmd.tests.typescript import IsolatedYcmd, PathToTestFile, SharedYcmd
+from ycmd.tests.typescript import PathToTestFile, SharedYcmd
 from ycmd.tests.test_utils import ( BuildRequest,
                                     ChunkMatcher,
                                     CombineRequest,
                                     CompletionEntryMatcher,
                                     WaitForDiagnosticsToBeReady,
-                                    LocationMatcher,
-                                    StopCompleterServer )
+                                    LocationMatcher )
 from ycmd.utils import ReadFile
 
 
 def RunTest( app, test ):
   contents = ReadFile( test[ 'request' ][ 'filepath' ] )
 
-  WaitForDiagnosticsToBeReady( app, test[ 'request' ][ 'filepath' ], contents, 'typescript' )
+  WaitForDiagnosticsToBeReady( app,
+                               test[ 'request' ][ 'filepath' ],
+                               contents,
+                               'typescript' )
   app.post_json(
     '/event_notification',
     CombineRequest( test[ 'request' ], {
@@ -108,7 +107,8 @@ def GetCompletions_Basic_test( app ):
           ),
           CompletionEntryMatcher(
             'methodC',
-            '(method) Foo.methodC(a: {\n    foo: string;\n    bar: number;\n}): void',
+            '(method) Foo.methodC(a: {\n    foo: string;'
+            '\n    bar: number;\n}): void',
             extra_params = {
               'kind': 'Method',
               'detailed_info': 'methodC\n\n'
@@ -165,7 +165,8 @@ def GetCompletions_AfterRestart_test( app ):
           ),
           CompletionEntryMatcher(
             'methodC',
-            '(method) Foo.methodC(a: {\n    foo: string;\n    bar: number;\n}): void',
+            '(method) Foo.methodC(a: {\n    foo: string;'
+            '\n    bar: number;\n}): void',
             extra_params = {
               'kind': 'Method',
               'detailed_info': 'methodC\n\n'

@@ -26,8 +26,9 @@ import os
 import logging
 
 from ycmd import utils, responses
-from ycmd.completers.language_server import simple_language_server_completer
-from ycmd.completers.language_server import language_server_protocol as lsp
+from ycmd.completers.language_server.simple_language_server_completer import (
+  SimpleLSPCompleter
+)
 from ycmd.utils import LOGGER
 
 LOGFILE_FORMAT = 'tsserver_'
@@ -67,7 +68,7 @@ def _LogLevel():
   return 'verbose' if LOGGER.isEnabledFor( logging.DEBUG ) else 'normal'
 
 
-class TypeScriptCompleter( simple_language_server_completer.SimpleLSPCompleter ):
+class TypeScriptCompleter( SimpleLSPCompleter ):
   def GetServerName( self ):
     return 'TSServer'
 
@@ -104,8 +105,8 @@ class TypeScriptCompleter( simple_language_server_completer.SimpleLSPCompleter )
 
   def GetCustomSubcommands( self ):
     return {
-      'OrganizeImports': ( lambda self, request_data, args:
-                           self._OrganizeImports( request_data )
+      'OrganizeImports': (
+        lambda self, request_data, args: self._OrganizeImports( request_data )
       ),
       'RestartServer': (
         lambda self, request_data, args: self._RestartServer( request_data )

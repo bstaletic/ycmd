@@ -22,10 +22,12 @@ from __future__ import absolute_import
 # Not installing aliases from python-future; it's unreliable and slow.
 from builtins import *  # noqa
 
-from hamcrest import ( any_of, assert_that, contains, has_entries, has_entry,
-                       instance_of )
+from hamcrest import assert_that, contains, has_entries, has_entry, instance_of
 
-from ycmd.tests.typescript import SharedYcmd, IsolatedYcmd, PathToTestFile, StartTypeScriptCompleterServerInDirectory
+from ycmd.tests.typescript import ( SharedYcmd,
+                                    IsolatedYcmd,
+                                    PathToTestFile,
+                                    StartTypeScriptCompleterServerInDirectory )
 from ycmd.tests.test_utils import BuildRequest
 
 
@@ -68,7 +70,8 @@ def DebugInfo_ProjectDirectory_test( app ):
   project_dir = PathToTestFile( 'buffer_unload' )
   StartTypeScriptCompleterServerInDirectory( app, project_dir )
   assert_that(
-    app.post_json( '/debug_info', BuildRequest( filetype = 'typescript' ) ).json,
+    app.post_json( '/debug_info',
+                   BuildRequest( filetype = 'typescript' ) ).json,
     has_entry( 'completer', has_entries( {
       'name': 'TypeScript',
       'servers': contains( has_entries( {

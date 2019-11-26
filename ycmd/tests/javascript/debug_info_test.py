@@ -23,8 +23,12 @@ from __future__ import absolute_import
 from builtins import *  # noqa
 
 from mock import patch
-from hamcrest import ( any_of, assert_that, contains, has_entries, has_entry,
-                       instance_of, none )
+from hamcrest import ( assert_that,
+                       contains,
+                       has_entries,
+                       has_entry,
+                       instance_of,
+                       none )
 
 from ycmd.tests.javascript import IsolatedYcmd, SharedYcmd
 from ycmd.tests.test_utils import BuildRequest
@@ -40,15 +44,25 @@ def DebugInfo_TypeScriptCompleter_test( app ):
       'servers': contains( has_entries( {
         'name': 'TSServer',
         'is_running': True,
-        'executable': instance_of( str ),
+        'executable': instance_of( list ),
         'pid': instance_of( int ),
         'address': None,
         'port': None,
         'logfiles': contains( instance_of( str ) ),
-        'extras': contains( has_entries( {
-          'key': 'version',
-          'value': any_of( None, instance_of( str ) )
-        } ) )
+        'extras': contains(
+          has_entries( {
+            'key': 'Server State',
+            'value': instance_of( str )
+          } ),
+          has_entries( {
+            'key': 'Project Directory',
+            'value': instance_of( str )
+          } ),
+          has_entries( {
+            'key': 'Settings',
+            'value': '{}'
+          } )
+        )
       } ) )
     } ) )
   )
