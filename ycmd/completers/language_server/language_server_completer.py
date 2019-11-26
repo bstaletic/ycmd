@@ -2582,7 +2582,7 @@ def WorkspaceEditToFixIt( request_data, workspace_edit, text='' ):
   """Converts a LSP workspace edit to a ycmd FixIt suitable for passing to
   responses.BuildFixItResponse."""
 
-  if workspace_edit is None:
+  if not workspace_edit:
     return None
 
   if 'changes' in workspace_edit:

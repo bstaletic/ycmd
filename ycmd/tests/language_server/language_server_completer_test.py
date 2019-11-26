@@ -76,6 +76,10 @@ class MockCompleter( lsc.LanguageServerCompleter, DummyCompleter ):
     return self._connection
 
 
+  def GetServerName( self ):
+    return 'MockCompleter'
+
+
   def HandleServerCommand( self, request_data, command ):
     return super( MockCompleter, self ).HandleServerCommand( request_data,
                                                              command )
