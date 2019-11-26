@@ -39,23 +39,23 @@ DIAG_MATCHERS_PER_FILE = {
   MAIN_FILEPATH: contains_inanyorder(
     has_entries( {
       'kind': 'ERROR',
-      'text': "Property 'mA' does not exist on type 'Foo'.",
+      'text': "Property 'mA' does not exist on type 'Foo'. [2339]",
       'location': LocationMatcher( MAIN_FILEPATH, 17, 5 ),
       'location_extent': RangeMatcher( MAIN_FILEPATH, ( 17, 5 ), ( 17, 7 ) ),
       'ranges': contains( RangeMatcher( MAIN_FILEPATH, ( 17, 5 ), ( 17, 7 ) ) ),
-      'fixit_available': True
+      'fixit_available': False
     } ),
     has_entries( {
       'kind': 'ERROR',
-      'text': "Property 'nonExistingMethod' does not exist on type 'Bar'.",
+      'text': "Property 'nonExistingMethod' does not exist on type 'Bar'. [2339]",
       'location': LocationMatcher( MAIN_FILEPATH, 35, 5 ),
       'location_extent': RangeMatcher( MAIN_FILEPATH, ( 35, 5 ), ( 35, 22 ) ),
       'ranges': contains( RangeMatcher( MAIN_FILEPATH, ( 35, 5 ), ( 35, 22 ) ) ),
-      'fixit_available': True
+      'fixit_available': False
     } ),
     has_entries( {
       'kind': 'ERROR',
-      'text': 'Expected 1-2 arguments, but got 0.',
+      'text': 'Expected 1-2 arguments, but got 0. [2554]',
       'location': LocationMatcher( MAIN_FILEPATH, 37, 5 ),
       'location_extent': RangeMatcher( MAIN_FILEPATH, ( 37, 5 ), ( 37, 12 ) ),
       'ranges': contains( RangeMatcher( MAIN_FILEPATH, ( 37, 5 ), ( 37, 12 ) ) ),
@@ -63,11 +63,19 @@ DIAG_MATCHERS_PER_FILE = {
     } ),
     has_entries( {
       'kind': 'ERROR',
-      'text': "Cannot find name 'Bår'.",
+      'text': "Cannot find name 'Bår'. [2304]",
       'location': LocationMatcher( MAIN_FILEPATH, 39, 1 ),
       'location_extent': RangeMatcher( MAIN_FILEPATH, ( 39, 1 ), ( 39, 5 ) ),
       'ranges': contains( RangeMatcher( MAIN_FILEPATH, ( 39, 1 ), ( 39, 5 ) ) ),
-      'fixit_available': True
+      'fixit_available': False
+    } ),
+    has_entries( {
+      'kind': 'HINT',
+      'text': "'a' is declared but its value is never read. [6133]",
+      'location': LocationMatcher( MAIN_FILEPATH, 7, 5 ),
+      'location_extent': RangeMatcher( MAIN_FILEPATH, ( 7, 5 ), ( 7, 6 ) ),
+      'ranges': contains( RangeMatcher( MAIN_FILEPATH, ( 7, 5 ), ( 7, 6 ) ) ),
+      'fixit_available': False
     } ),
   )
 }
@@ -126,6 +134,8 @@ def Diagnostics_Poll_test( app ):
                                       'filetype': 'typescript' } ):
       print( 'Message {}'.format( pformat( message ) ) )
       if 'diagnostics' in message:
+        if message[ 'diagnostics' ] == []:
+          continue
         seen[ message[ 'filepath' ] ] = True
         if message[ 'filepath' ] not in DIAG_MATCHERS_PER_FILE:
           raise AssertionError(
