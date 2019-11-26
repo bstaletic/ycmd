@@ -43,6 +43,7 @@ from ycmd.tests.test_utils import ( BuildRequest,
                                     ExpectedFailure,
                                     ErrorMatcher,
                                     LocationMatcher,
+                                    RangeMatcher,
                                     MessageMatcher,
                                     MockProcessTerminationTimingOut,
                                     WaitForDiagnosticsToBeReady,
@@ -88,7 +89,20 @@ def RunTest( app, test ):
 
   eq_( response.status_code, test[ 'expect' ][ 'response' ] )
 
-  assert_that( response.json, test[ 'expect' ][ 'data' ] )
+  if not test.get( 'resolve_fixits', False ):
+    assert_that( response.json, test[ 'expect' ][ 'data' ] )
+  else:
+    unresolved_fixits = response.json[ 'fixits' ]
+    resolved_fixits = [
+      app.post_json(
+        '/resolve_fixit',
+    CombineRequest( test[ 'request' ], {
+      'contents': contents,
+      'filetype': 'typescript',
+      'fixit': f } )
+      ).json for f in unresolved_fixits ]
+    print( 'resolved fixits: {}'.format( pprint.pformat( resolved_fixits ) ) )
+    assert_that( resolved_fixits, test[ 'expect' ][ 'data' ] )
 
 
 @SharedYcmd
@@ -679,51 +693,47 @@ def Subcommands_FixIt_test( app ):
       'column_num': 12,
       'filepath': filepath,
     },
+    'resolve_fixits': True,
     'expect': {
       'response': requests.codes.ok,
-      'data': has_entries( {
-        'fixits': contains_inanyorder(
-          has_entries( {
-            'text': "Declare method 'nonExistingMethod'",
-            'chunks': contains(
-              ChunkMatcher(
-                matches_regexp(
-                  '^\r?\n'
-                  '    nonExistingMethod\\(\\) {\r?\n'
-                  '        throw new Error\\("Method not implemented."\\);\r?\n'
-                  '    }$',
-                ),
-                LocationMatcher( PathToTestFile( 'test.ts' ), 25, 12 ),
-                LocationMatcher( PathToTestFile( 'test.ts' ), 25, 12 ) )
-            ),
-            'location': LocationMatcher( PathToTestFile( 'test.ts' ), 35, 12 )
-          } ),
-          has_entries( {
-            'text': "Declare property 'nonExistingMethod'",
-            'chunks': contains(
-              ChunkMatcher(
-                matches_regexp( '^\r?\n'
-                                '    nonExistingMethod: any;$' ),
-                LocationMatcher( PathToTestFile( 'test.ts' ), 25, 12 ),
-                LocationMatcher( PathToTestFile( 'test.ts' ), 25, 12 ) )
-            ),
-            'location': LocationMatcher( PathToTestFile( 'test.ts' ), 35, 12 )
-          } ),
-          has_entries( {
-            'text': "Add index signature for property 'nonExistingMethod'",
-            'chunks': contains(
-              ChunkMatcher(
-                matches_regexp( '^\r?\n'
-                                '    \\[x: string\\]: any;$' ),
-                LocationMatcher( PathToTestFile( 'test.ts' ), 25, 12 ),
-                LocationMatcher( PathToTestFile( 'test.ts' ), 25, 12 ) )
-            ),
-            'location': LocationMatcher( PathToTestFile( 'test.ts' ), 35, 12 )
-          } )
-        )
-      } )
+      'data': contains_inanyorder(
+        has_entries( {
+          'fixits': contains( has_entries( {
+            'chunks': contains( has_entries( {
+              'range': RangeMatcher( filepath, ( 25, 12 ), ( 25, 12 ) ),
+              'replacement_text':"\n    nonExistingMethod() {\n        throw new Error(\"Method not implemented.\");\n    }"
+            } ) ),
+            'location': LocationMatcher( filepath, 35, 12 ),
+            'resolve': False,
+            'text': "Declare method 'nonExistingMethod'"
+          } ) )
+        } ),
+        has_entries( {
+          'fixits': contains( has_entries( {
+            'chunks': contains( has_entries( {
+              'range': RangeMatcher( filepath, ( 25, 12 ), ( 25, 12 ) ),
+              'replacement_text':"\n    nonExistingMethod: any;"
+            } ) ),
+            'location': LocationMatcher( filepath, 35, 12 ),
+            'resolve': False,
+            'text': "Declare property 'nonExistingMethod'"
+          } ) )
+        } ),
+        has_entries( {
+          'fixits': contains( has_entries( {
+            'chunks': contains( has_entries( {
+              'range': RangeMatcher( filepath, ( 25, 12 ), ( 25, 12 ) ),
+              'replacement_text':"\n    [x: string]: any;"
+            } ) ),
+            'location': LocationMatcher( filepath, 35, 12 ),
+            'resolve': False,
+            'text': "Add index signature for property 'nonExistingMethod'"
+          } ) )
+        } )
+      )
     }
   } )
+
 
 
 @SharedYcmd
