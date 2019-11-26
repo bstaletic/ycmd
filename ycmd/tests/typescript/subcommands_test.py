@@ -701,9 +701,9 @@ def Subcommands_FixIt_test( app ):
           'fixits': contains( has_entries( {
             'chunks': contains( has_entries( {
               'range': RangeMatcher( filepath, ( 25, 12 ), ( 25, 12 ) ),
-              'replacement_text':
-                    "\n    nonExistingMethod() {\n        throw"
-                    " new Error(\"Method not implemented.\");\n    }"
+              'replacement_text': matches_regexp(
+                    "\r?\n    nonExistingMethod() {\r?\n        throw"
+                    " new Error(\"Method not implemented.\");\r?\n    }" )
             } ) ),
             'location': LocationMatcher( filepath, 35, 12 ),
             'resolve': False,
@@ -714,7 +714,8 @@ def Subcommands_FixIt_test( app ):
           'fixits': contains( has_entries( {
             'chunks': contains( has_entries( {
               'range': RangeMatcher( filepath, ( 25, 12 ), ( 25, 12 ) ),
-              'replacement_text': "\n    nonExistingMethod: any;"
+              'replacement_text': matches_regexp(
+                "\r?\n    nonExistingMethod: any;" )
             } ) ),
             'location': LocationMatcher( filepath, 35, 12 ),
             'resolve': False,
@@ -725,7 +726,7 @@ def Subcommands_FixIt_test( app ):
           'fixits': contains( has_entries( {
             'chunks': contains( has_entries( {
               'range': RangeMatcher( filepath, ( 25, 12 ), ( 25, 12 ) ),
-              'replacement_text': "\n    [x: string]: any;"
+              'replacement_text': matches_regexp( "\r?\n    [x: string]: any;" )
             } ) ),
             'location': LocationMatcher( filepath, 35, 12 ),
             'resolve': False,

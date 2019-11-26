@@ -549,12 +549,6 @@ def WorkspaceEditToFixIt_test():
     contents = contents
   ) )
 
-
-  # We don't support versioned documentChanges
-  assert_that( lsc.WorkspaceEditToFixIt( request_data,
-                                         { 'documentChanges': [] } ),
-               equal_to( None ) )
-
   workspace_edit = {
     'changes': {
       uri: [
