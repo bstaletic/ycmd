@@ -42,6 +42,7 @@ from ycmd.tests.test_utils import ( BuildRequest,
                                     ChunkMatcher,
                                     CombineRequest,
                                     CompletionEntryMatcher,
+                                    WaitForDiagnosticsToBeReady,
                                     LocationMatcher,
                                     StopCompleterServer )
 from ycmd.utils import ReadFile
@@ -50,6 +51,7 @@ from ycmd.utils import ReadFile
 def RunTest( app, test ):
   contents = ReadFile( test[ 'request' ][ 'filepath' ] )
 
+  WaitForDiagnosticsToBeReady( app, test[ 'request' ][ 'filepath' ], contents, 'typescript' )
   app.post_json(
     '/event_notification',
     CombineRequest( test[ 'request' ], {
@@ -121,6 +123,7 @@ def GetCompletions_Basic_test( app ):
 @SharedYcmd
 def GetCompletions_AfterRestart_test( app ):
   filepath = PathToTestFile( 'test.ts' )
+  contents = ReadFile( filepath )
 
   app.post_json( '/run_completer_command',
                 BuildRequest( completer_target = 'filetype_default',
@@ -130,39 +133,44 @@ def GetCompletions_AfterRestart_test( app ):
 
   completion_data = BuildRequest( filepath = filepath,
                                   filetype = 'typescript',
-                                  contents = ReadFile( filepath ),
+                                  contents = contents,
                                   force_semantic = True,
                                   line_num = 17,
                                   column_num = 6 )
-
+  app.post_json( '/event_notification',
+                 BuildRequest(
+                   filepath = filepath,
+                   event_name = 'FileReadyToParse',
+                   filetype = 'typescript' ) )
+  WaitForDiagnosticsToBeReady( app, filepath, contents, 'typescript' )
   assert_that(
     app.post_json( '/completions', completion_data ).json,
     has_entries( {
       'completions': contains_inanyorder(
-        CompletionEntryMatcher(
-          'methodA',
-          '(method) Foo.methodA(): void',
-          extra_params = { 'kind': 'method' }
-        ),
-        CompletionEntryMatcher(
-          'methodB',
-          '(method) Foo.methodB(): void',
-          extra_params = {
-            'kind': 'method',
-            'detailed_info': '(method) Foo.methodB(): void'
-          }
-        ),
-        CompletionEntryMatcher(
-          'methodC',
-          '(method) Foo.methodC(a: { foo: string; bar: number; }): void',
-          extra_params = {
-            'kind': 'method',
-            'detailed_info': '(method) Foo.methodC(a: {\n'
-                             '    foo: string;\n'
-                             '    bar: number;\n'
-                             '}): void'
-          }
-        )
+          CompletionEntryMatcher(
+            'methodA',
+            '(method) Foo.methodA(): void',
+            extra_params = {
+              'kind': 'Method',
+              'detailed_info': 'methodA\n\nUnicode string: 说话'
+            }
+          ),
+          CompletionEntryMatcher(
+            'methodB',
+            '(method) Foo.methodB(): void',
+            extra_params = {
+              'kind': 'Method',
+              'detailed_info': 'methodB\n\n'
+            }
+          ),
+          CompletionEntryMatcher(
+            'methodC',
+            '(method) Foo.methodC(a: {\n    foo: string;\n    bar: number;\n}): void',
+            extra_params = {
+              'kind': 'Method',
+              'detailed_info': 'methodC\n\n'
+            }
+          )
       )
     } )
   )
