@@ -56,7 +56,7 @@ def FindServer( server_name ):
 
 
 def ShouldEnableTypeScriptCompleter():
-  tsserver = FindServer( 'typescript' )
+  tsserver = FindServer( 'tsserver' )
   if not tsserver:
     LOGGER.error( 'Not using TypeScript completer: TSServer not installed '
                   'in %s', TSSERVER_DIR )
