@@ -527,7 +527,7 @@ def Subcommands_FixIt_test( app ):
                   "{}    nonExistingMethod() ".format( line_sep ) +
                   "{{{0}        throw new".format( line_sep ) +
                   " Error(\"Method not implemented." +
-                  "\");{}    }}".format( line_sep ) 
+                  "\");{}    }}".format( line_sep )
             } ) ),
             'location': LocationMatcher( filepath, 32, 19 ),
             'resolve': False,
@@ -538,7 +538,7 @@ def Subcommands_FixIt_test( app ):
           'fixits': contains( has_entries( {
             'chunks': contains( has_entries( {
               'range': RangeMatcher( filepath, ( 32, 1 ), ( 32, 1 ) ),
-              #replacement_text': "// @ts-ignore{}".format( line_sep )
+              'replacement_text': "// @ts-ignore{}".format( line_sep )
             } ) ),
             'location': LocationMatcher( filepath, 32, 19 ),
             'resolve': False,
