@@ -39,6 +39,7 @@ from ycmd.tests.test_utils import ( BuildRequest,
                                     ChunkMatcher,
                                     CompletionEntryMatcher,
                                     LocationMatcher,
+                                    WaitForDiagnosticsToBeReady,
                                     WithRetry )
 from ycmd.utils import ReadFile
 
@@ -123,6 +124,8 @@ def GetCompletions_Basic_test( app ):
 @SharedYcmd
 def GetCompletions_AutoImport_test( app ):
   filepath = PathToTestFile( 'test.js' )
+  contents = ReadFile( filepath )
+  WaitForDiagnosticsToBeReady( app, filepath, contents, 'javascript' )
   RunTest( app, {
     'description': 'Symbol from external module can be completed and '
                    'its completion contains fixits to automatically import it',

@@ -182,6 +182,8 @@ def GetCompletions_AfterRestart_test( app ):
 @SharedYcmd
 def GetCompletions_AutoImport_test( app ):
   filepath = PathToTestFile( 'test.ts' )
+  contents = ReadFile( filepath )
+  WaitForDiagnosticsToBeReady( app, filepath, contents, 'javascript' )
   RunTest( app, {
     'description': 'Symbol from external module can be completed and '
                    'its completion contains fixits to automatically import it',

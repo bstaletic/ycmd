@@ -46,6 +46,8 @@ def FindServer( server_name ):
     server = utils.FindExecutable( executable )
     if server:
       return server
+    else:
+      LOGGER.debug( '%s not found in path %s', server_name, executable )
   return None
 
 
