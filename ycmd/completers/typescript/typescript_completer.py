@@ -48,6 +48,10 @@ def FindServer( server_name ):
       return server
     else:
       LOGGER.debug( '%s not found in path %s', server_name, executable )
+      LOGGER.debug( '%s is executable = %s',
+          executable, os.access( executable, EXECUTABLE_FILE_MASK ) )
+      LOGGER.debug( '%s is file = %s',
+          executable, os.path.isfile( executable ) )
   return None
 
 
