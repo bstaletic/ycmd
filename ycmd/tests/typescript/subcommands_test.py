@@ -703,7 +703,7 @@ def Subcommands_FixIt_test( app ):
           'fixits': contains( has_entries( {
             'chunks': contains( has_entries( {
               'range': RangeMatcher( filepath, ( 25, 12 ), ( 25, 12 ) ),
-              'replacement_text': 
+              'replacement_text':
                     "{0}    nonExistingMethod() ".format( line_sep ) +
                     "{{{0}        throw new".format( line_sep ) +
                     " Error(\"Method not implemented." +
