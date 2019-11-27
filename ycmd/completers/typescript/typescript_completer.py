@@ -49,7 +49,7 @@ def FindServer( server_name ):
     else:
       LOGGER.debug( '%s not found in path %s', server_name, executable )
       LOGGER.debug( '%s is executable = %s',
-          executable, os.access( executable, EXECUTABLE_FILE_MASK ) )
+          executable, os.access( executable, os.F_OK | os.X_OK ) )
       LOGGER.debug( '%s is file = %s',
           executable, os.path.isfile( executable ) )
   return None
