@@ -85,7 +85,7 @@ class TypeScriptCompleter( SimpleLSPCompleter ):
 
   def GetCommandLine( self ):
     return [ FindServer( 'typescript-language-server' ),
-             '--tsserver-path', FindServer( 'typescript' ),
+             '--tsserver-path', FindServer( 'tsserver' ),
              '--tsserver-log-file', self._stderr_file,
              '--tsserver-log-verbosity', _LogLevel(),
              '--stdio' ]
