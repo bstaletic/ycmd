@@ -33,6 +33,7 @@ from hamcrest import ( assert_that,
                        matches_regexp )
 from mock import patch
 from nose.tools import eq_
+import os
 import requests
 import pprint
 
@@ -684,6 +685,7 @@ def Subcommands_GoToType_Fail_test( app ):
 def Subcommands_FixIt_test( app ):
   filepath = PathToTestFile( 'test.ts' )
   contents = ReadFile( filepath )
+  line_sep = os.linesep
   WaitForDiagnosticsToBeReady( app, filepath, contents, 'typescript' )
   RunTest( app, {
     'description': 'FixIt works on a non-existing method',
@@ -701,9 +703,11 @@ def Subcommands_FixIt_test( app ):
           'fixits': contains( has_entries( {
             'chunks': contains( has_entries( {
               'range': RangeMatcher( filepath, ( 25, 12 ), ( 25, 12 ) ),
-              'replacement_text': matches_regexp(
-                    "\r?\n    nonExistingMethod() {\r?\n        throw"
-                    " new Error(\"Method not implemented.\");\r?\n    }" )
+              'replacement_text': 
+                    "{0}    nonExistingMethod() ".format( line_sep ) +
+                    "{{{0}        throw new".format( line_sep ) +
+                    " Error(\"Method not implemented." +
+                    "\");{0}    }}".format( line_sep )
             } ) ),
             'location': LocationMatcher( filepath, 35, 12 ),
             'resolve': False,
@@ -714,8 +718,8 @@ def Subcommands_FixIt_test( app ):
           'fixits': contains( has_entries( {
             'chunks': contains( has_entries( {
               'range': RangeMatcher( filepath, ( 25, 12 ), ( 25, 12 ) ),
-              'replacement_text': matches_regexp(
-                "\r?\n    nonExistingMethod: any;" )
+              'replacement_text':
+                  "{}    nonExistingMethod: any;".format( line_sep )
             } ) ),
             'location': LocationMatcher( filepath, 35, 12 ),
             'resolve': False,
@@ -726,7 +730,7 @@ def Subcommands_FixIt_test( app ):
           'fixits': contains( has_entries( {
             'chunks': contains( has_entries( {
               'range': RangeMatcher( filepath, ( 25, 12 ), ( 25, 12 ) ),
-              'replacement_text': matches_regexp( "\r?\n    [x: string]: any;" )
+              'replacement_text': "{}    [x: string]: any;".format( line_sep )
             } ) ),
             'location': LocationMatcher( filepath, 35, 12 ),
             'resolve': False,

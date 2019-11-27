@@ -57,8 +57,8 @@ def ShouldEnableTypeScriptCompleter():
     return False
   lsp_server = FindServer( 'typescript-language-server' )
   if not lsp_server:
-    LOGGER.error( 'Not using TypeScript completer: TSServer not installed '
-                  'in %s', TSSERVER_DIR )
+    LOGGER.error( 'Not using TypeScript completer: typescript-language-server'
+                  ' not installed in %s', TSSERVER_DIR )
     return False
   LOGGER.info( 'Using TypeScript completer with %s', tsserver )
   return True

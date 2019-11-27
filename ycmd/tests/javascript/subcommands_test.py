@@ -31,6 +31,7 @@ from hamcrest import ( assert_that,
                        has_entries,
                        matches_regexp )
 from nose.tools import eq_
+import os
 import requests
 import pprint
 
@@ -505,6 +506,7 @@ def Subcommands_GoToType_test( app ):
 @SharedYcmd
 def Subcommands_FixIt_test( app ):
   filepath = PathToTestFile( 'test.js' )
+  line_sep = os.linesep
   RunTest( app, {
     'description': 'FixIt works on a non-existing method',
     'request': {
@@ -522,8 +524,10 @@ def Subcommands_FixIt_test( app ):
             'chunks': contains( has_entries( {
               'range': RangeMatcher( filepath, ( 22, 12 ), ( 22, 12 ) ),
               'replacement_text': matches_regexp(
-                  "\r?\n    nonExistingMethod() {\r?\n        throw new Error("
-                  "\"Method not implemented.\");\r?\n    }" )
+                  "{}    nonExistingMethod() ".format( line_sep ) +
+                  "{{{0}        throw new".format( line_sep ) +
+                  " Error(\"Method not implemented." +
+                  "\");{}    }}".format( line_sep ) )
             } ) ),
             'location': LocationMatcher( filepath, 32, 19 ),
             'resolve': False,
@@ -534,7 +538,7 @@ def Subcommands_FixIt_test( app ):
           'fixits': contains( has_entries( {
             'chunks': contains( has_entries( {
               'range': RangeMatcher( filepath, ( 32, 1 ), ( 32, 1 ) ),
-              'replacement_text': matches_regexp( "// @ts-ignore\r?\n" )
+              'replacement_text': "// @ts-ignore{}".format( line_sep )
             } ) ),
             'location': LocationMatcher( filepath, 32, 19 ),
             'resolve': False,
@@ -545,7 +549,7 @@ def Subcommands_FixIt_test( app ):
           'fixits': contains( has_entries( {
             'chunks': contains( has_entries( {
               'range': RangeMatcher( filepath, ( 1, 1 ), ( 1, 1 ) ),
-              'replacement_text': matches_regexp( "// @ts-nocheck\r?\n" )
+              'replacement_text': "// @ts-nocheck{}".format( line_sep )
             } ) ),
             'location': LocationMatcher( filepath, 32, 19 ),
             'resolve': False,

@@ -39,7 +39,7 @@ from ycmd.tests.test_utils import ( BuildRequest,
                                     ChunkMatcher,
                                     CompletionEntryMatcher,
                                     LocationMatcher,
-                                    WithRety )
+                                    WithRetry )
 from ycmd.utils import ReadFile
 
 
@@ -119,7 +119,7 @@ def GetCompletions_Basic_test( app ):
   } )
 
 
-@WithRety
+@WithRetry
 @SharedYcmd
 def GetCompletions_AutoImport_test( app ):
   filepath = PathToTestFile( 'test.js' )

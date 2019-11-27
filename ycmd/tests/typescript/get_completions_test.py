@@ -40,7 +40,7 @@ from ycmd.tests.test_utils import ( BuildRequest,
                                     CombineRequest,
                                     CompletionEntryMatcher,
                                     WaitForDiagnosticsToBeReady,
-                                    WithRety,
+                                    WithRetry,
                                     LocationMatcher )
 from ycmd.utils import ReadFile
 
@@ -178,7 +178,7 @@ def GetCompletions_AfterRestart_test( app ):
   )
 
 
-@WithRety
+@WithRetry
 @SharedYcmd
 def GetCompletions_AutoImport_test( app ):
   filepath = PathToTestFile( 'test.ts' )
