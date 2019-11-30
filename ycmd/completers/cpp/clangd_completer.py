@@ -355,7 +355,7 @@ class ClangdCompleter( language_server_completer.LanguageServerCompleter ):
     'compilationDatabaseChanges' configuration."""
     filepath = request_data[ 'filepath' ]
 
-    with self._server_info_mutex:
+    with self._server_state_mutex:
       # Replicate the logic from flags.py _GetFlagsFromCompilationDatabase:
       #  - if there's a local extra conf, use it
       #  - otherwise if there's no database, try and use a global extra conf

@@ -166,7 +166,7 @@ class RustCompleter( language_server_completer.LanguageServerCompleter ):
       else:
         message += ' done'
 
-      with self._server_info_mutex:
+      with self._server_state_mutex:
         self._server_progress[ progress_id ] = message
 
     super( RustCompleter, self ).HandleNotificationInPollThread( notification )
