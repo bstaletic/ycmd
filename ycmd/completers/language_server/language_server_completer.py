@@ -1232,7 +1232,7 @@ class LanguageServerCompleter( Completer ):
       return responses.BuildDisplayMessageResponse(
           'Diagnostics are not ready yet.' )
 
-    with self._server_info_mutex:
+    with self._server_state_mutex:
       diagnostics = list( self._latest_diagnostics[
           lsp.FilePathToUri( current_file ) ] )
 
@@ -1638,7 +1638,7 @@ class LanguageServerCompleter( Completer ):
 
     This method should be called frequently and in any event before a
     synchronous operation."""
-    with self._server_info_mutex:
+    with self._server_state_mutex:
       self._UpdateDirtyFilesUnderLock( request_data )
       files_to_purge = self._UpdateSavedFilesUnderLock( request_data )
       self._PurgeMissingFilesUnderLock( files_to_purge )
@@ -2041,7 +2041,7 @@ class LanguageServerCompleter( Completer ):
 
         return True
 
-      with self._server_info_mutex:
+      with self._server_state_mutex:
         file_diagnostics = list( self._latest_diagnostics[
             lsp.FilePathToUri( request_data[ 'filepath' ] ) ] )
 
