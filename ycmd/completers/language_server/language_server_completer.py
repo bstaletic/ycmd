@@ -764,6 +764,7 @@ class LanguageServerCompleter( Completer ):
     #     are calling methods on this object from the message pump). We
     #     synchronise on this mutex for that.
     self._server_info_mutex = threading.Lock()
+    self._server_state_mutex = threading.RLock()
     self.ServerReset()
 
     # LSP allows servers to return an incomplete list of completions. The cache
@@ -788,7 +789,6 @@ class LanguageServerCompleter( Completer ):
 
     self._signature_help_disabled = user_options[ 'disable_signature_help' ]
 
-    self._server_state_mutex = threading.RLock()
     self._server_keep_logfiles = user_options[ 'server_keep_logfiles' ]
     self._stderr_file = None
 
@@ -809,7 +809,7 @@ class LanguageServerCompleter( Completer ):
     """Clean up internal state related to the running server instance.
     Implementations are required to call this after disconnection and killing
     the downstream server."""
-    with self._server_info_mutex:
+    with self._server_state_mutex:
       self._server_file_state = lsp.ServerFileStateStore()
       self._latest_diagnostics = collections.defaultdict( list )
       self._sync_type = 'Full'
@@ -950,7 +950,7 @@ class LanguageServerCompleter( Completer ):
     # release them, as there is no chance of getting a response now.
     if ( self._initialize_response is not None and
          not self._initialize_event.is_set() ):
-      with self._server_info_mutex:
+      with self._server_state_mutex:
         self._initialize_response = None
         self._initialize_event.set()
 
