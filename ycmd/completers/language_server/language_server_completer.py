@@ -763,7 +763,7 @@ class LanguageServerCompleter( Completer ):
     #     server file state, and stored data about the server itself) when we
     #     are calling methods on this object from the message pump). We
     #     synchronise on this mutex for that.
-    self._server_info_mutex = threading.Lock()
+    self._server_info_mutex = threading.RLock()
     self._server_state_mutex = threading.RLock()
     self.ServerReset()
 
