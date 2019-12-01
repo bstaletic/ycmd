@@ -1594,7 +1594,7 @@ class LanguageServerCompleter( Completer ):
         LOGGER.exception( 'Ignoring diagnostics for unrecognized URI' )
         return None
 
-      with self._server_info_mutex:
+      with self._server_state_mutex:
         if filepath in self._server_file_state:
           contents = utils.SplitLines(
             self._server_file_state[ filepath ].contents )
