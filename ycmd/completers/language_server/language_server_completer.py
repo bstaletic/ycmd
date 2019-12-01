@@ -1458,7 +1458,7 @@ class LanguageServerCompleter( Completer ):
     filepath = request_data[ 'filepath' ]
     uri = lsp.FilePathToUri( filepath )
     contents = GetFileLines( request_data, filepath )
-    with self._server_info_mutex:
+    with self._server_state_mutex:
       if uri in self._latest_diagnostics:
         diagnostics = [ _BuildDiagnostic( contents, uri, diag )
                         for diag in self._latest_diagnostics[ uri ] ]
@@ -1799,7 +1799,7 @@ class LanguageServerCompleter( Completer ):
     _GetSettingsFromExtraConf, which must be called before calling this method.
     It is called before starting the server in OnFileReadyToParse."""
 
-    with self._server_info_mutex:
+    with self._server_state_mutex:
       assert not self._initialize_response
 
       self._project_directory = self.GetProjectDirectory( request_data,
