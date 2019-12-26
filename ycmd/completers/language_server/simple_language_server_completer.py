@@ -115,15 +115,13 @@ class SimpleLSPCompleter( lsc.LanguageServerCompleter ):
       with utils.OpenForStdHandle( self._stderr_file ) as stderr:
         self._server_handle = utils.SafePopen(
           self.GetCommandLine(),
-          stdin = subprocess.PIPE,
-          stdout = subprocess.PIPE,
+          stdout = stderr,
           stderr = stderr,
           env = self.GetServerEnvironment() )
 
       self._connection = (
-        lsc.StandardIOLanguageServerConnection(
-          self._server_handle.stdin,
-          self._server_handle.stdout,
+        lsc.TCPSingleStreamServer(
+          1111,
           self.GetDefaultNotificationHandler() )
       )
 

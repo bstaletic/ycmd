@@ -26,4 +26,5 @@ from ycmd.completers.python.python_completer import PythonCompleter
 
 
 def GetCompleter( user_options ):
+  return None
   return PythonCompleter( user_options )

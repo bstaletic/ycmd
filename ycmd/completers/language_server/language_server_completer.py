@@ -31,6 +31,7 @@ import json
 import logging
 import os
 import queue
+import socket
 import threading
 
 from ycmd import extra_conf_store, responses, utils
@@ -603,6 +604,108 @@ class LanguageServerConnection( threading.Thread ):
         # isn't testable without a debugger, so coverage will show up red.
         pass # pragma: no cover
 
+
+class TCPSingleStreamServer( LanguageServerConnection, threading.Thread ):
+  def _run_loop( self ):
+    # Wait for the connection to fully establish (this runs in the thread
+    # context, so we block until a connection is received or there is a timeout,
+    # which throws an exception)
+    try:
+      self._TryServerConnectionBlocking()
+
+      self._connection_event.set()
+
+      # Blocking loop which reads whole messages and calls _DespatchMessage
+      self._ReadMessages( )
+    except LanguageServerConnectionStopped:
+      # Abort any outstanding requests
+      with self._responseMutex:
+        for _, response in iteritems( self._responses ):
+          response.Abort()
+        self._responses.clear()
+
+      LOGGER.debug( 'Connection was closed cleanly' )
+
+    self._Close()
+
+  def __init__( self, port, notification_handler = None ):
+    super( TCPSingleStreamServer, self ).__init__( notification_handler )
+
+    self._port = port
+    self._socket = socket.socket( socket.AF_INET, socket.SOCK_STREAM )
+    self._client_socket = None
+
+
+  def run( self ):
+    self._socket.bind( ( 'localhost', self._port ) )
+    self._socket.listen( 0 )
+
+    self._run_loop()
+
+
+  def ReadData(self): return self._Read()
+  def _Close( self ):
+    if self._client_socket:
+      self._client_socket.close()
+
+    if self._socket:
+      self._socket.close()
+
+
+  def _TryServerConnectionBlocking( self ):
+    ( self._client_socket, _ ) = self._socket.accept()
+
+    if self.IsStopped():
+      raise LanguageServerConnectionStopped()
+
+    LOGGER.info( 'language server socket connected' )
+
+    return True
+
+
+  def _Write( self, data ):
+    assert self._connection_event.isSet()
+    assert self._client_socket
+
+    total_sent = 0
+    while total_sent < len( data ):
+      sent = self._client_socket.send( data[ total_sent: ] )
+      if sent == 0:
+        raise RuntimeError( 'write socket failed' )
+
+      total_sent += sent
+
+
+  def _Read( self, size=-1 ):
+    assert self._connection_event.isSet()
+    assert self._client_socket
+
+    if size < 0:
+      data = self._client_socket.recv( 2048 )
+
+      if self.IsStopped():
+        raise LanguageServerConnectionStopped()
+
+      if data == bytes( b'' ):
+        raise RuntimeError( 'read socket failed' )
+
+      return data
+
+    chunks = []
+    bytes_read = 0
+    while bytes_read < size:
+      chunk = self._client_socket.recv( min( size - bytes_read , 2048 ) )
+
+      if self.IsStopped():
+        raise LanguageServerConnectionStopped()
+
+      if chunk == bytes( b'' ):
+        raise RuntimeError( 'read socket failed' )
+
+      chunks.append( chunk )
+      bytes_read += len( chunk )
+
+    return utils.ToBytes( '' ).join( chunks )
 
 class StandardIOLanguageServerConnection( LanguageServerConnection ):
   """Concrete language server connection using stdin/stdout to communicate with
