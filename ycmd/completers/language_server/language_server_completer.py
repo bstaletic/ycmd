@@ -606,28 +606,6 @@ class LanguageServerConnection( threading.Thread ):
 
 
 class TCPSingleStreamServer( LanguageServerConnection, threading.Thread ):
-  def _run_loop( self ):
-    # Wait for the connection to fully establish (this runs in the thread
-    # context, so we block until a connection is received or there is a timeout,
-    # which throws an exception)
-    try:
-      self._TryServerConnectionBlocking()
-
-      self._connection_event.set()
-
-      # Blocking loop which reads whole messages and calls _DespatchMessage
-      self._ReadMessages( )
-    except LanguageServerConnectionStopped:
-      # Abort any outstanding requests
-      with self._responseMutex:
-        for _, response in iteritems( self._responses ):
-          response.Abort()
-        self._responses.clear()
-
-      LOGGER.debug( 'Connection was closed cleanly' )
-
-    self._Close()
-
   def __init__( self, port, notification_handler = None ):
     super( TCPSingleStreamServer, self ).__init__( notification_handler )
 
@@ -639,12 +617,10 @@ class TCPSingleStreamServer( LanguageServerConnection, threading.Thread ):
   def run( self ):
     self._socket.bind( ( 'localhost', self._port ) )
     self._socket.listen( 0 )
+    super().run()
 
-    self._run_loop()
 
-
-  def ReadData(self): return self._Read()
-  def _Close( self ):
+  def Shutdown( self ):
     if self._client_socket:
       self._client_socket.close()
 
@@ -652,7 +628,7 @@ class TCPSingleStreamServer( LanguageServerConnection, threading.Thread ):
       self._socket.close()
 
 
-  def _TryServerConnectionBlocking( self ):
+  def TryServerConnectionBlocking( self ):
     ( self._client_socket, _ ) = self._socket.accept()
 
     if self.IsStopped():
@@ -663,7 +639,7 @@ class TCPSingleStreamServer( LanguageServerConnection, threading.Thread ):
     return True
 
 
-  def _Write( self, data ):
+  def WriteData( self, data ):
     assert self._connection_event.isSet()
     assert self._client_socket
 
@@ -676,7 +652,7 @@ class TCPSingleStreamServer( LanguageServerConnection, threading.Thread ):
       total_sent += sent
 
 
-  def _Read( self, size=-1 ):
+  def ReadData( self, size=-1 ):
     assert self._connection_event.isSet()
     assert self._client_socket
 
