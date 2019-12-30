@@ -25,6 +25,8 @@ if ( COMPILER_IS_CLANG )
     "${CMAKE_CXX_FLAGS} -Wno-long-long -Wno-variadic-macros -Wno-missing-field-initializers -Wno-unused-private-field" )
 elseif( MSVC )
   add_definitions( /W0 )
+else()
+  set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-copy" )
 endif()
 
 
