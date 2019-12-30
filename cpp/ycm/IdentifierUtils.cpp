@@ -18,7 +18,8 @@
 #include "IdentifierUtils.h"
 #include "Utils.h"
 
-#include <regex>
+#include <ctre/ctre.hpp>
+
 #include <filesystem>
 #include <unordered_map>
 
@@ -31,15 +32,17 @@ namespace {
 // For details on the tag format supported, see here for details:
 // http://ctags.sourceforge.net/FORMAT
 // TL;DR: The only supported format is the one Exuberant Ctags emits.
-const char *const TAG_REGEX =
-  "(?:^|\\n|\\r\\n)([^\\t\\n\\r]+)"  // The first field is the identifier
-  "\\t"  // A TAB char is the field separator
-  // The second field is the path to the file that has the identifier; either
-  // absolute or relative to the tags file.
-  "([^\\t\\n\\r]+)"
-  "\\t.*?"  // Non-greedy everything
-  "language:([^\\t\\n\\r]+)"  // We want to capture the language of the file
-  ".*?(?:$|\\n|\\r\\n)";
+static constexpr ctll::fixed_string TAG_REGEX =
+  "(?:^|\\r\\n|\\n)"          // Beginning of stream or a line separator
+  "([^\\t\\n\\r]++)"          // The identifier
+  "\\t"                       // A single tab is a fiel separator
+  "([^\\t\\n\\r]++)"          // The path
+  "\\t"                       // Field separator
+  "[^\r\n]*?"               // Junk until "language:" barring line separators
+  "language:([^\\t\\n\\r]++)" // "language:" followed by language name
+  "[^\r\n]*?"               // Junk until the end of line or end of stream
+			      // barring line separators
+  "(?:$|\\r\\n|\\n)";         // Ending of stream or a line separator
 
 // Only used as the equality comparer for the below unordered_map which stores
 // const char* pointers and not std::string but needs to hash based on string
@@ -176,20 +179,17 @@ FiletypeIdentifierMap ExtractIdentifiersFromTagsFile(
   std::string::const_iterator start = tags_file_contents.begin();
   std::string::const_iterator end   = tags_file_contents.end();
 
-  std::smatch matches;
-  const std::regex expression( TAG_REGEX );
+  while ( auto matches = ctre::search< TAG_REGEX >( start, end ) ) {
+    start = matches.get_end_position();
 
-  while ( std::regex_search( start, end, matches, expression ) ) {
-    start = matches[ 0 ].second;
-
-    std::string language( matches[ 3 ] );
+    std::string language( matches.get< 3 >().to_view() );
     std::string filetype = FindWithDefault( LANG_TO_FILETYPE,
                                             language.c_str(),
                                             Lowercase( language ).c_str() );
 
-    std::string identifier( matches[ 1 ] );
-    fs::path path( matches[ 2 ].str() );
-    path = fs::weakly_canonical( path_to_tag_file.parent_path() / path );
+    std::string identifier( matches.get< 1 >().to_string() );
+    fs::path path = fs::weakly_canonical( path_to_tag_file.parent_path() /
+					  matches.get< 2 >().to_string() );
 
     filetype_identifier_map[ std::move( filetype ) ][ path.string() ]
       .push_back( std::move( identifier ) );

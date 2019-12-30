@@ -68,6 +68,8 @@ flags = [
 '-isystem',
 'cpp/BoostParts',
 '-isystem',
+'cpp/ctre',
+'-isystem',
 get_python_inc(),
 '-isystem',
 'cpp/llvm/include',
