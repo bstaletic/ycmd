@@ -29,8 +29,8 @@ CharacterRepository &CharacterRepository::Instance() {
 }
 
 
-size_t CharacterRepository::NumStoredCharacters() {
-  std::lock_guard< std::mutex > locker( character_holder_mutex_ );
+size_t CharacterRepository::NumStoredCharacters() const {
+  std::shared_lock locker( character_holder_mutex_ );
   return character_holder_.size();
 }
 
@@ -41,7 +41,7 @@ CharacterSequence CharacterRepository::GetCharacters(
   character_objects.reserve( characters.size() );
 
   {
-    std::lock_guard< std::mutex > locker( character_holder_mutex_ );
+    std::lock_guard locker( character_holder_mutex_ );
 
     for ( const std::string & character : characters ) {
       std::unique_ptr< Character > &character_object = GetValueElseInsert(
@@ -50,7 +50,7 @@ CharacterSequence CharacterRepository::GetCharacters(
                                                          nullptr );
 
       if ( !character_object ) {
-        character_object.reset( new Character( character ) );
+	character_object = std::make_unique< Character >( character );
       }
 
       character_objects.push_back( character_object.get() );

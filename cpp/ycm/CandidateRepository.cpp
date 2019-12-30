@@ -19,8 +19,6 @@
 #include "Candidate.h"
 #include "Utils.h"
 
-#include <mutex>
-
 #ifdef USE_CLANG_COMPLETER
 #  include "ClangCompleter/CompletionData.h"
 #endif // USE_CLANG_COMPLETER
@@ -42,8 +40,8 @@ CandidateRepository &CandidateRepository::Instance() {
 }
 
 
-size_t CandidateRepository::NumStoredCandidates() {
-  std::lock_guard< std::mutex > locker( candidate_holder_mutex_ );
+size_t CandidateRepository::NumStoredCandidates() const {
+  std::shared_lock locker( candidate_holder_mutex_ );
   return candidate_holder_.size();
 }
 
@@ -54,7 +52,7 @@ std::vector< const Candidate * > CandidateRepository::GetCandidatesForStrings(
   candidates.reserve( strings.size() );
 
   {
-    std::lock_guard< std::mutex > locker( candidate_holder_mutex_ );
+    std::lock_guard locker( candidate_holder_mutex_ );
 
     for ( auto&& candidate_text : strings ) {
       if ( candidate_text.size() > MAX_CANDIDATE_SIZE ) {
@@ -67,7 +65,8 @@ std::vector< const Candidate * > CandidateRepository::GetCandidatesForStrings(
                                                   nullptr );
 
       if ( !candidate ) {
-        candidate.reset( new Candidate( std::move( candidate_text ) ) );
+	candidate = std::make_unique< Candidate >(
+			std::move( candidate_text ) );
       }
 
       candidates.push_back( candidate.get() );
