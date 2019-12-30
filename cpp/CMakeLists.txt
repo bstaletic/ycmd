@@ -149,14 +149,6 @@ endif()
 
 #############################################################################
 
-# MSVC has snprintf since version 14 which is newer than what we support.
-# *NOT* defining HAVE_SNPRINTF will break compiling the bundled boost libraries.
-if ( MSVC )
-  add_definitions( -DHAVE_SNPRINTF )
-endif()
-
-#############################################################################
-
 # Force release build by default, speed is of the essence
 if ( NOT CMAKE_BUILD_TYPE )
   set( CMAKE_BUILD_TYPE Release )
@@ -164,21 +156,21 @@ endif()
 
 #############################################################################
 
-# Determining the presence of C++11 support in the compiler
-set( CPP11_AVAILABLE false )
+# Determining the presence of C++17 support in the compiler
+set( CPP17_AVAILABLE false )
 if ( CMAKE_COMPILER_IS_GNUCXX )
-  if ( NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.8 )
-    set( CPP11_AVAILABLE true )
+  if ( NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9 )
+    set( CPP17_AVAILABLE true )
   endif()
 elseif( COMPILER_IS_CLANG )
-  if ( NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 3.3 )
-    set( CPP11_AVAILABLE true )
+  if ( NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 8 )
+    set( CPP17_AVAILABLE true )
     set( CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++11" )
     set( CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libc++" )
   endif()
 elseif( MSVC )
   if ( NOT MSVC_VERSION LESS 1900 )
-    set( CPP11_AVAILABLE true )
+    set( CPP17_AVAILABLE true )
   endif()
 endif()
 
@@ -205,12 +197,14 @@ endif()
 
 #############################################################################
 
-if ( CPP11_AVAILABLE )
+if ( CPP17_AVAILABLE )
   # Cygwin needs its hand held a bit; see issue #473
   if ( CYGWIN AND CMAKE_COMPILER_IS_GNUCXX )
-    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11" )
+    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++17" )
   elseif( NOT MSVC )
-    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11" )
+    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17" )
+  else()
+    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17" )
   endif()
 else()
   # Platform-specific advice goes here. In particular, we have plenty of users
@@ -243,11 +237,5 @@ set( Python_ADDITIONAL_VERSIONS 3.9 3.8 3.7 3.6 3.5 )
 find_package( PythonLibs 3.5 REQUIRED )  # 3.5 is ONLY the mininum
 
 #############################################################################
-
-option( USE_SYSTEM_BOOST "Set to ON to use the system boost libraries" OFF )
-
-if (NOT USE_SYSTEM_BOOST)
-  add_subdirectory( BoostParts )
-endif()
 
 add_subdirectory( ycm )
