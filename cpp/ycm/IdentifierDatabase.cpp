@@ -34,7 +34,7 @@ IdentifierDatabase::IdentifierDatabase()
 
 void IdentifierDatabase::AddIdentifiers(
   FiletypeIdentifierMap&& filetype_identifier_map ) {
-  std::lock_guard< std::mutex > locker( filetype_candidate_map_mutex_ );
+  std::lock_guard locker( filetype_candidate_map_mutex_ );
 
   for ( auto&& filetype_and_map : filetype_identifier_map ) {
     for ( auto&& filepath_and_identifiers : filetype_and_map.second ) {
@@ -50,7 +50,7 @@ void IdentifierDatabase::AddIdentifiers(
   std::vector< std::string >&& new_candidates,
   const std::string &filetype,
   const std::string &filepath ) {
-  std::lock_guard< std::mutex > locker( filetype_candidate_map_mutex_ );
+  std::lock_guard locker( filetype_candidate_map_mutex_ );
   AddIdentifiersNoLock( std::move( new_candidates ), filetype, filepath );
 }
 
@@ -58,7 +58,7 @@ void IdentifierDatabase::AddIdentifiers(
 void IdentifierDatabase::ClearCandidatesStoredForFile(
   const std::string &filetype,
   const std::string &filepath ) {
-  std::lock_guard< std::mutex > locker( filetype_candidate_map_mutex_ );
+  std::lock_guard locker( filetype_candidate_map_mutex_ );
   GetCandidateSet( filetype, filepath ).clear();
 }
 
@@ -70,7 +70,7 @@ void IdentifierDatabase::ResultsForQueryAndType(
   const size_t max_results ) const {
   FiletypeCandidateMap::const_iterator it;
   {
-    std::lock_guard< std::mutex > locker( filetype_candidate_map_mutex_ );
+    std::shared_lock locker( filetype_candidate_map_mutex_ );
     it = filetype_candidate_map_.find( filetype );
 
     if ( it == filetype_candidate_map_.end() ) {
@@ -83,7 +83,7 @@ void IdentifierDatabase::ResultsForQueryAndType(
   seen_candidates.reserve( candidate_repository_.NumStoredCandidates() );
 
   {
-    std::lock_guard< std::mutex > locker( filetype_candidate_map_mutex_ );
+    std::shared_lock locker( filetype_candidate_map_mutex_ );
     for ( const auto& path_and_candidates : *it->second ) {
       for ( const Candidate * candidate : *path_and_candidates.second ) {
         if ( ContainsKey( seen_candidates, candidate ) ) {
@@ -118,14 +118,14 @@ std::set< const Candidate * > &IdentifierDatabase::GetCandidateSet(
     filetype_candidate_map_[ filetype ];
 
   if ( !path_to_candidates ) {
-    path_to_candidates.reset( new FilepathToCandidates() );
+    path_to_candidates = std::make_unique< FilepathToCandidates >();
   }
 
   std::shared_ptr< std::set< const Candidate * > > &candidates =
     ( *path_to_candidates )[ filepath ];
 
   if ( !candidates ) {
-    candidates.reset( new std::set< const Candidate * >() );
+    candidates = std::make_shared< std::set< const Candidate * > >();
   }
 
   return *candidates;
