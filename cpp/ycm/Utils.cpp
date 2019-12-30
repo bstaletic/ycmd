@@ -26,19 +26,21 @@ namespace fs = std::filesystem;
 
 namespace YouCompleteMe {
 
+// Based on
+// http://insanecoding.blogspot.fr/2011/11/how-to-read-in-file-in-c.html
 std::string ReadUtf8File( const fs::path &filepath ) {
-  // fs::is_empty() can throw basic_filesystem_error< Path >
-  // in case filepath doesn't exist, or
-  // in case filepath's file_status is "other".
-  // "other" in this case means everything that is not a regular file,
-  // directory or a symlink.
+  std::string contents;
+  // fs::is_empty() can throw basic_filesystem_error< Path > in case filepath
+  // doesn't exist, or in case filepath's file_status is "other". "other" in
+  // this case means everything that is not a regular file, directory or a
+  // symlink.
   if ( !fs::is_empty( filepath ) && fs::is_regular_file( filepath ) ) {
-    std::ifstream file( filepath.string(), std::ios::in | std::ios::binary );
-    std::vector< char > contents( ( std::istreambuf_iterator< char >( file ) ),
-                                  std::istreambuf_iterator< char >() );
-    return std::string( contents.begin(), contents.end() );
+    std::ifstream file( filepath, std::ios::in | std::ios::binary | std::ios::ate );
+    contents.resize( file.tellg() );
+    file.seekg( 0, std::ios::beg );
+    file.read( &contents[ 0 ], contents.size() );
   }
-  return std::string();
+  return contents;
 }
 
 } // namespace YouCompleteMe

@@ -192,6 +192,7 @@ if ( APPLE )
 endif()
 
 set( PYBIND11_INCLUDES_DIR "${CMAKE_SOURCE_DIR}/pybind11" )
+set( CTRE_INCLUDES_DIR "${CMAKE_SOURCE_DIR}/ctre" )
 
 file( GLOB_RECURSE SERVER_SOURCES *.h *.cpp )
 
@@ -226,7 +227,7 @@ endif()
 # including these directories after ours.
 include_directories(
   SYSTEM
-  ${Boost_INCLUDE_DIR}
+  ${CTRE_INCLUDES_DIR}
   ${PYBIND11_INCLUDES_DIR}
   ${PYTHON_INCLUDE_DIRS}
   ${CLANG_INCLUDES_DIR}
