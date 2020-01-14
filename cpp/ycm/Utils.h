@@ -132,7 +132,7 @@ void PartialSort( std::vector< Element > &elements,
   // Remove the unsorted elements. Use erase instead of resize as it doesn't
   // require a default constructor on Element.
   elements.erase( elements.begin() + static_cast< diff >( max_elements ),
-                  elements.end() );
+		  elements.end() );
 }
 
 } // namespace YouCompleteMe

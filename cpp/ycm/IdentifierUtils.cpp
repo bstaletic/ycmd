@@ -47,10 +47,10 @@ static constexpr ctll::fixed_string TAG_REGEX =
 // Only used as the equality comparer for the below unordered_map which stores
 // const char* pointers and not std::string but needs to hash based on string
 // values and not pointer values.
-// When passed a const char* this will create a temporary std::string for
-// comparison, but it's fast enough for our use case.
+// When passed a const char* this will create a temporary std::string_view for
+// comparison.
 struct StringEqualityComparer {
-  bool operator()( const std::string &a, const std::string &b ) const {
+  bool operator()( std::string_view a, std::string_view b ) const {
     return a == b;
   }
 };
@@ -63,7 +63,7 @@ struct StringEqualityComparer {
 // static initialization.
 const std::unordered_map < const char *,
       const char *,
-      std::hash< std::string >,
+      std::hash< std::string_view >,
       StringEqualityComparer > LANG_TO_FILETYPE = {
         { "Ada"                 , "ada"                 },
         { "AnsiblePlaybook"     , "ansibleplaybook"     },
