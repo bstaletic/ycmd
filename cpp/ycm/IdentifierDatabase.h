@@ -18,12 +18,11 @@
 #ifndef IDENTIFIERDATABASE_H_ZESX3CVR
 #define IDENTIFIERDATABASE_H_ZESX3CVR
 
-#include <map>
 #include <memory>
 #include <set>
 #include <shared_mutex>
 #include <string>
-#include <unordered_map>
+#include <robin_hood.h>
 #include <vector>
 
 namespace YouCompleteMe {
@@ -34,11 +33,11 @@ class CandidateRepository;
 
 
 // filepath -> identifiers
-using FilepathToIdentifiers = std::map< std::string,
+using FilepathToIdentifiers = robin_hood::unordered_flat_map< std::string,
                                         std::vector< std::string > >;
 
 // filetype -> (filepath -> identifiers)
-using FiletypeIdentifierMap = std::map< std::string, FilepathToIdentifiers >;
+using FiletypeIdentifierMap = robin_hood::unordered_flat_map< std::string, FilepathToIdentifiers >;
 
 
 // This class stores the database of identifiers the identifier completer has
@@ -84,12 +83,12 @@ private:
 
   // filepath -> *( *candidate )
   using FilepathToCandidates =
-    std::unordered_map < std::string,
+    robin_hood::unordered_flat_map < std::string,
                          std::shared_ptr< std::set< const Candidate * > > >;
 
   // filetype -> *( filepath -> *( *candidate ) )
   using FiletypeCandidateMap =
-    std::unordered_map < std::string, std::shared_ptr< FilepathToCandidates > >;
+    robin_hood::unordered_flat_map < std::string, std::shared_ptr< FilepathToCandidates > >;
 
 
   CandidateRepository &candidate_repository_;
