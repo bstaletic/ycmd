@@ -44,7 +44,7 @@ YCM_EXPORT inline char Lowercase( uint8_t ascii_character ) {
 }
 
 
-YCM_EXPORT inline std::string Lowercase( const std::string &text ) {
+YCM_EXPORT inline std::string Lowercase( std::string_view text ) {
   std::string result;
   for ( auto ascii_character : text ) {
     result.push_back( Lowercase( static_cast< uint8_t >( ascii_character ) ) );
@@ -74,12 +74,12 @@ bool ContainsKey( Container &container, const Key &key ) {
 }
 
 
-template <class Container, class Key>
+template <class Container>
 typename Container::mapped_type
 FindWithDefault( Container &container,
-                 const Key &key,
+                 const typename Container::key_type &key,
                  const typename Container::mapped_type &value ) {
-  typename Container::const_iterator it = container.find( key );
+  auto it = container.find( key );
   return it != container.end() ? it->second : value;
 }
 

@@ -35,36 +35,21 @@ namespace {
 static constexpr ctll::fixed_string TAG_REGEX =
   "(?:^|\\r\\n|\\n)"          // Beginning of stream or a line separator
   "([^\\t\\n\\r]++)"          // The identifier
-  "\\t"                       // A single tab is a fiel separator
+  "\\t"                       // A single tab is a field separator
   "([^\\t\\n\\r]++)"          // The path
   "\\t"                       // Field separator
-  "[^\r\n]*?"               // Junk until "language:" barring line separators
+  "[^\r\n]*?"                 // Junk until "language:" barring line separators
   "language:([^\\t\\n\\r]++)" // "language:" followed by language name
-  "[^\r\n]*?"               // Junk until the end of line or end of stream
+  "[^\r\n]*?"                 // Junk until the end of line or end of stream
 			      // barring line separators
   "(?:$|\\r\\n|\\n)";         // Ending of stream or a line separator
-
-// Only used as the equality comparer for the below unordered_map which stores
-// const char* pointers and not std::string but needs to hash based on string
-// values and not pointer values.
-// When passed a const char* this will create a temporary std::string_view for
-// comparison.
-struct StringEqualityComparer {
-  bool operator()( std::string_view a, std::string_view b ) const {
-    return a == b;
-  }
-};
 
 // List of languages Universal Ctags supports:
 //   ctags --list-languages
 // To map a language name to a filetype, see this file:
 //   :e $VIMRUNTIME/filetype.vim
-// This is a map of const char* and not std::string to prevent issues with
-// static initialization.
-const std::unordered_map < const char *,
-      const char *,
-      std::hash< std::string_view >,
-      StringEqualityComparer > LANG_TO_FILETYPE = {
+const std::unordered_map < std::string_view,
+                           std::string_view > LANG_TO_FILETYPE = {
         { "Ada"                 , "ada"                 },
         { "AnsiblePlaybook"     , "ansibleplaybook"     },
         { "Ant"                 , "ant"                 },
@@ -182,17 +167,17 @@ FiletypeIdentifierMap ExtractIdentifiersFromTagsFile(
   while ( auto matches = ctre::search< TAG_REGEX >( start, end ) ) {
     start = matches.get_end_position();
 
-    std::string language( matches.get< 3 >().to_view() );
-    std::string filetype = FindWithDefault( LANG_TO_FILETYPE,
-                                            language.c_str(),
-                                            Lowercase( language ).c_str() );
+    auto language = matches.get< 3 >().to_view();
 
-    std::string identifier( matches.get< 1 >().to_string() );
+    std::string filetype{ FindWithDefault( LANG_TO_FILETYPE,
+                                           language,
+                                           Lowercase( language ) ) };
+    auto identifier = matches.get< 1 >().to_view();
     fs::path path = fs::weakly_canonical( path_to_tag_file.parent_path() /
 					  matches.get< 2 >().to_string() );
 
     filetype_identifier_map[ std::move( filetype ) ][ path.string() ]
-      .push_back( std::move( identifier ) );
+      .emplace_back( identifier );
   }
 
   return filetype_identifier_map;
