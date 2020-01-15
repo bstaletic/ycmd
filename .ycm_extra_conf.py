@@ -64,7 +64,7 @@ flags = [
 '-isystem',
 'cpp/whereami',
 '-isystem',
-'cpp/BoostParts',
+'cpp/robin_hood',
 '-isystem',
 'cpp/ctre',
 '-isystem',

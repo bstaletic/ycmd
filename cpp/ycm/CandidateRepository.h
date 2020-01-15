@@ -23,12 +23,12 @@
 #include <memory>
 #include <shared_mutex>
 #include <string>
-#include <unordered_map>
+#include <robin_hood.h>
 #include <vector>
 
 namespace YouCompleteMe {
 
-using CandidateHolder = std::unordered_map< std::string,
+using CandidateHolder = robin_hood::unordered_flat_map< std::string,
                                             std::unique_ptr< Candidate > >;
 
 
