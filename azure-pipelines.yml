@@ -51,7 +51,7 @@ jobs:
   pool:
     # List of available software on this image:
     # https://github.com/actions/virtual-environments/tree/master/images/macos
-    vmImage: 'macOS-10.15'
+    vmImage: 'macOS-10.14'
   strategy:
     matrix:
       'Python 3.6':
