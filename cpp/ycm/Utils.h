@@ -19,7 +19,6 @@
 #define UTILS_H_KEPMRPBH
 
 #include <algorithm>
-#include <cmath>
 #include <filesystem>
 #include <limits>
 #include <string>

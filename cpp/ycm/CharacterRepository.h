@@ -21,9 +21,9 @@
 #include "Character.h"
 
 #include <memory>
+#include <robin_hood.h>
 #include <shared_mutex>
 #include <string>
-#include <robin_hood.h>
 #include <vector>
 
 namespace YouCompleteMe {
