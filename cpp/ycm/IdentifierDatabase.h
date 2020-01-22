@@ -18,7 +18,6 @@
 #ifndef IDENTIFIERDATABASE_H_ZESX3CVR
 #define IDENTIFIERDATABASE_H_ZESX3CVR
 
-#include <memory>
 #include <robin_hood.h>
 #include <set>
 #include <shared_mutex>
@@ -94,7 +93,6 @@ private:
   CandidateRepository &candidate_repository_;
 
   FiletypeCandidateMap filetype_candidate_map_;
-  mutable std::shared_mutex filetype_candidate_map_mutex_;
 };
 
 } // namespace YouCompleteMe
