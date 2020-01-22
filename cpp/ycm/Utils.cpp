@@ -19,7 +19,6 @@
 
 #include <filesystem>
 #include <fstream>
-#include <cmath>
 #include <limits>
 
 namespace fs = std::filesystem;
