@@ -230,7 +230,7 @@ else()
     endif()
   endif()
 
-  message( FATAL_ERROR "Your C++ compiler does NOT fully support C++11." )
+  message( FATAL_ERROR "Your C++ compiler does NOT fully support C++17." )
 endif()
 
 set( Python_ADDITIONAL_VERSIONS 3.9 3.8 3.7 3.6 3.5 )
