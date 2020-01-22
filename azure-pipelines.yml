@@ -51,7 +51,7 @@ jobs:
   pool:
     # List of available software on this image:
     # https://github.com/actions/virtual-environments/tree/master/images/macos
-    vmImage: 'macOS-10.14'
+    vmImage: 'macOS-10.15'
   strategy:
     matrix:
       'Python 3.6':
@@ -120,6 +120,7 @@ jobs:
         YCM_PYTHON_INSTALLER_URL: 'https://www.python.org/ftp/python/3.8.1/python-3.8.1-amd64.exe'
         YCM_BENCHMARK: true
         COVERAGE: false
+        YCM_CORES: 1
     maxParallel: 4
   variables:
     MSVC: 16
