@@ -6,6 +6,11 @@ set -e
 #
 
 sudo apt-get install libsqlite3-dev
+sudo apt-add-repository "deb http://ppa.launchpad.net/ubuntu-toolchain-r/ppa/ubuntu xenial main"
+sudo apt-get update
+sudo apt-get install gcc-9 g++-9
+sudo update-alternatives --install /usr/bin/cc cc /usr/bin/gcc-9 100
+sudo update-alternatives --install /usr/bin/c++ c++ /usr/bin/g++-9 100
 if [ "${YCM_COMPILER}" == "clang" ]; then
   wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
   sudo apt-add-repository "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-8 main"
@@ -13,12 +18,6 @@ if [ "${YCM_COMPILER}" == "clang" ]; then
   sudo apt-get install clang-8
   sudo update-alternatives --install /usr/bin/cc cc /usr/bin/clang-8 100
   sudo update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++-8 100
-else
-  sudo apt-add-repository "deb http://ppa.launchpad.net/ubuntu-toolchain-r/ppa/ubuntu xenial main"
-  sudo apt-get update
-  sudo apt-get install gcc-9 g++-9
-  sudo update-alternatives --install /usr/bin/cc cc /usr/bin/gcc-9 100
-  sudo update-alternatives --install /usr/bin/c++ c++ /usr/bin/g++-9 100
 fi
 
 if [ "${YCM_CLANG_TIDY}" ]; then
