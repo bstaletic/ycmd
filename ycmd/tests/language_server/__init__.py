@@ -18,15 +18,51 @@
 import functools
 import os
 
+from ycmd import handlers
 from ycmd.completers.language_server import language_server_completer as lsc
 from ycmd.tests.test_utils import ( IgnoreExtraConfOutsideTestsFolder,
                                     IsolatedApp,
+                                    DummyCompleter,
                                     StopCompleterServer )
 
 
 def PathToTestFile( *args ):
   dir_of_current_script = os.path.dirname( os.path.abspath( __file__ ) )
   return os.path.join( dir_of_current_script, 'testdata', *args )
+
+
+class MockCompleter( lsc.LanguageServerCompleter, DummyCompleter ):
+  def __init__( self, custom_options = {} ):
+    user_options = handlers._server_state._user_options.copy()
+    user_options.update( custom_options )
+    super().__init__( user_options )
+
+    self._connection = MockConnection( self )
+    self._started = False
+
+  def Language( self ):
+    return 'foo'
+
+
+  def StartServer( self, request_data, **kwargs ):
+    self._started = True
+    return True
+
+
+  def GetConnection( self ):
+    return self._connection
+
+
+  def HandleServerCommand( self, request_data, command ):
+    return super().HandleServerCommand( request_data, command )
+
+
+  def ServerIsHealthy( self ):
+    return self._started
+
+
+  def _RestartServer( self, request_data ):
+    pass
 
 
 class MockConnection( lsc.LanguageServerConnection ):

@@ -36,50 +36,16 @@ from ycmd.completers.language_server.language_server_completer import (
     NoHoverInfoException,
     NO_HOVER_INFORMATION )
 from ycmd.completers.language_server import language_server_protocol as lsp
-from ycmd.tests.language_server import MockConnection
 from ycmd.request_wrap import RequestWrap
 from ycmd.tests.test_utils import ( BuildRequest,
                                     ChunkMatcher,
-                                    DummyCompleter,
                                     LocationMatcher,
                                     RangeMatcher )
-from ycmd.tests.language_server import IsolatedYcmd, PathToTestFile
-from ycmd import handlers, utils, responses
+from ycmd.tests.language_server import ( IsolatedYcmd,
+                                         PathToTestFile,
+                                         MockCompleter )
+from ycmd import utils, responses
 import os
-
-
-class MockCompleter( lsc.LanguageServerCompleter, DummyCompleter ):
-  def __init__( self, custom_options = {} ):
-    user_options = handlers._server_state._user_options.copy()
-    user_options.update( custom_options )
-    super().__init__( user_options )
-
-    self._connection = MockConnection()
-    self._started = False
-
-  def Language( self ):
-    return 'foo'
-
-
-  def StartServer( self, request_data, **kwargs ):
-    self._started = True
-    return True
-
-
-  def GetConnection( self ):
-    return self._connection
-
-
-  def HandleServerCommand( self, request_data, command ):
-    return super().HandleServerCommand( request_data, command )
-
-
-  def ServerIsHealthy( self ):
-    return self._started
-
-
-  def _RestartServer( self, request_data ):
-    pass
 
 
 @IsolatedYcmd( { 'global_ycm_extra_conf':

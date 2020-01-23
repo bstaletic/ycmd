@@ -18,13 +18,13 @@
 from mock import patch, MagicMock
 from ycmd.completers.language_server import language_server_completer as lsc
 from hamcrest import assert_that, calling, equal_to, raises
-from ycmd.tests.language_server import MockConnection
+from ycmd.tests.language_server import MockCompleter
 
 import queue
 
 
 def LanguageServerConnection_ReadPartialMessage_test():
-  connection = MockConnection()
+  connection = MockCompleter().GetConnection()
 
   return_values = [
     bytes( b'Content-Length: 10\n\n{"abc":' ),
@@ -39,7 +39,7 @@ def LanguageServerConnection_ReadPartialMessage_test():
 
 
 def LanguageServerConnection_MissingHeader_test():
-  connection = MockConnection()
+  connection = MockCompleter().GetConnection()
 
   return_values = [
     bytes( b'Content-NOTLENGTH: 10\n\n{"abc":' ),
@@ -52,7 +52,7 @@ def LanguageServerConnection_MissingHeader_test():
 
 
 def LanguageServerConnection_RequestAbortCallback_test():
-  connection = MockConnection()
+  connection = MockCompleter().GetConnection()
 
   return_values = [
     lsc.LanguageServerConnectionStopped
@@ -68,7 +68,7 @@ def LanguageServerConnection_RequestAbortCallback_test():
 
 
 def LanguageServerConnection_RequestAbortAwait_test():
-  connection = MockConnection()
+  connection = MockCompleter().GetConnection()
 
   return_values = [
     lsc.LanguageServerConnectionStopped
@@ -83,7 +83,7 @@ def LanguageServerConnection_RequestAbortAwait_test():
 
 
 def LanguageServerConnection_ServerConnectionDies_test():
-  connection = MockConnection()
+  connection = MockCompleter().GetConnection()
 
   return_values = [
     IOError
@@ -98,7 +98,7 @@ def LanguageServerConnection_ServerConnectionDies_test():
         'CONNECTION_TIMEOUT',
         0.5 )
 def LanguageServerConnection_ConnectionTimeout_test():
-  connection = MockConnection()
+  connection = MockCompleter().GetConnection()
   with patch.object( connection,
                      'TryServerConnectionBlocking',
                      side_effect=RuntimeError ):
@@ -110,7 +110,7 @@ def LanguageServerConnection_ConnectionTimeout_test():
 
 
 def LanguageServerConnection_CloseTwice_test():
-  connection = MockConnection()
+  connection = MockCompleter().GetConnection()
   with patch.object( connection,
                      'TryServerConnectionBlocking',
                      side_effect=RuntimeError ):
@@ -120,7 +120,7 @@ def LanguageServerConnection_CloseTwice_test():
 
 @patch.object( lsc, 'MAX_QUEUED_MESSAGES', 2 )
 def LanguageServerConnection_AddNotificationToQueue_RingBuffer_test():
-  connection = MockConnection()
+  connection = MockCompleter().GetConnection()
   notifications = connection._notifications
 
   # Queue empty
@@ -155,7 +155,7 @@ def LanguageServerConnection_AddNotificationToQueue_RingBuffer_test():
 
 
 def LanguageServerConnection_RejectUnsupportedRequest_test():
-  connection = MockConnection()
+  connection = MockCompleter().GetConnection()
 
   return_values = [
     bytes( b'Content-Length: 26\r\n\r\n{"id":"1","method":"test"}' ),
