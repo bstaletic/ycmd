@@ -238,7 +238,13 @@ def Initialize( request_id, project_directory, settings ):
     'rootUri': FilePathToUri( project_directory ),
     'initializationOptions': settings,
     'capabilities': {
-      'workspace': { 'applyEdit': True, 'documentChanges': True },
+      'workspace': {
+        'applyEdit': True,
+        'didChangeWatchedFiles': {
+          'dynamicRegistration': True
+        },
+        'documentChanges': True
+      },
       'textDocument': {
         'codeAction': {
           'codeActionLiteralSupport': {
@@ -298,6 +304,10 @@ def Shutdown( request_id ):
 
 def Exit():
   return BuildNotification( 'exit', None )
+
+
+def Void( request ):
+  return BuildResponse( request, { 'result': None } )
 
 
 def Reject( request, request_error, data = None ):

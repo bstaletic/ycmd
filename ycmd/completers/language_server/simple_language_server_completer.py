@@ -117,6 +117,7 @@ class SimpleLSPCompleter( lsc.LanguageServerCompleter ):
         lsc.StandardIOLanguageServerConnection(
           self._server_handle.stdin,
           self._server_handle.stdout,
+          self,
           self.GetDefaultNotificationHandler() )
       )
 

@@ -283,9 +283,10 @@ class LanguageServerConnection( threading.Thread ):
     pass # pragma: no cover
 
 
-  @abc.abstractmethod
   def Shutdown( self ):
-    pass # pragma: no cover
+    for observer in self._observers:
+      observer.stop()
+      observer.join()
 
 
   @abc.abstractmethod
@@ -298,7 +299,7 @@ class LanguageServerConnection( threading.Thread ):
     pass # pragma: no cover
 
 
-  def __init__( self, notification_handler = None ):
+  def __init__( self, server, notification_handler = None ):
     super().__init__()
 
     self._last_id = 0
@@ -310,7 +311,8 @@ class LanguageServerConnection( threading.Thread ):
     self._stop_event = threading.Event()
     self._notification_handler = notification_handler
 
-    self._collector = RejectCollector()
+    self._collector = RejectCollector( server )
+    self._observers = []
 
 
   @contextlib.contextmanager
@@ -605,8 +607,9 @@ class StandardIOLanguageServerConnection( LanguageServerConnection ):
   def __init__( self,
                 server_stdin,
                 server_stdout,
+                server,
                 notification_handler = None ):
-    super().__init__( notification_handler )
+    super().__init__( server, notification_handler )
 
     self._server_stdin = server_stdin
     self._server_stdout = server_stdout
@@ -627,6 +630,7 @@ class StandardIOLanguageServerConnection( LanguageServerConnection ):
 
 
   def Shutdown( self ):
+    super().Shutdown()
     with self._stdin_lock:
       if not self._server_stdin.closed:
         self._server_stdin.close()
@@ -688,7 +692,6 @@ class LanguageServerCompleter( Completer ):
       - GetProjectRootFiles
       - GetTriggerCharacters
       - GetDefaultNotificationHandler
-      - GetWatchedFiles
       - HandleNotificationInPollThread
       - Language
 
@@ -788,7 +791,6 @@ class LanguageServerCompleter( Completer ):
       lambda self, request_data:
         self._UpdateServerWithFileContents( request_data )
     )
-    self._observer = None
 
     self._signature_help_disabled = user_options[ 'disable_signature_help' ]
 
@@ -836,9 +838,6 @@ class LanguageServerCompleter( Completer ):
     # server by first sending a shutdown request, and on its completion sending
     # and exit notification (which does not receive a response). Some buggy
     # servers exit on receipt of the shutdown request, so we handle that too.
-    if self._observer:
-      self._observer.stop()
-      self._observer.join()
     if self._ServerIsInitialized():
       request_id = self.GetConnection().NextRequestId()
       msg = lsp.Shutdown( request_id )
@@ -1638,12 +1637,6 @@ class LanguageServerCompleter( Completer ):
     del self._server_file_state[ file_state.filename ]
 
 
-  def GetWatchedFiles( self ):
-    """Returns a list of globs that the server should monitor for the
-    DidChangeWatchedFiles notification."""
-    return []
-
-
   def GetProjectRootFiles( self ):
     """Returns a list of files that indicate the root of the project.
     It should be easier to override just this method than the whole
@@ -1694,15 +1687,6 @@ class LanguageServerCompleter( Completer ):
 
       self._project_directory = self.GetProjectDirectory( request_data,
                                                           extra_conf_dir )
-      # FIXME: Figure out why this doesn't work on Mac
-      if not utils.OnMac():
-        watched_files = self.GetWatchedFiles()
-        if watched_files and self._project_directory:
-          self._observer = Observer()
-          self._observer.schedule(
-            WatchdogHandler( self, self.GetWatchedFiles() ),
-            self._project_directory )
-          self._observer.start()
       request_id = self.GetConnection().NextRequestId()
 
       # FIXME: According to the discussion on
@@ -2681,9 +2665,30 @@ class LanguageServerCompletionsCache( CompletionsCache ):
 
 
 class RejectCollector:
+  def __init__( self, server ):
+    self._server = server
+
+
   def HandleServerToClientRequest( self, request, connection ):
-    message = lsp.Reject( request, lsp.Errors.MethodNotFound )
-    connection.SendResponse( message )
+    if request[ 'method' ] == 'client/registerCapability':
+      for reg in request[ 'params' ][ 'registrations' ]:
+        if reg[ 'method' ] == 'workspace/didChangeWatchedFiles':
+          for watcher in reg[ 'registerOptions' ][ 'watchers' ]:
+            patterns = os.path.join(
+                self._server._project_directory,
+                watcher[ 'globPattern' ] )
+            observer = Observer()
+            observer.schedule(
+                WatchdogHandler( self._server, patterns ),
+                self._server._project_directory,
+                recursive = True )
+            observer.start()
+            connection._observers.append( observer )
+      message = lsp.Void( request )
+      connection.SendResponse( message )
+    else:
+      message = lsp.Reject( request, lsp.Errors.MethodNotFound )
+      connection.SendResponse( message )
 
 
 class EditCollector:
@@ -2699,7 +2704,10 @@ class EditCollector:
 
 class WatchdogHandler( PatternMatchingEventHandler ):
   def __init__( self, server, patterns ):
-    super( WatchdogHandler, self ).__init__( patterns )
+    # TODO: Be conservative about types of events reported.
+    if os.path.isdir( patterns ):
+      patterns = os.path.join( patterns, '**' )
+    super().__init__( patterns )
     self._server = server
 
 

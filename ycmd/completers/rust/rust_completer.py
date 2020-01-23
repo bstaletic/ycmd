@@ -178,7 +178,3 @@ class RustCompleter( simple_language_server_completer.SimpleLSPCompleter ):
       raise RuntimeError( 'No documentation available for current context.' )
 
     return responses.BuildDetailedInfoResponse( documentation )
-
-
-  def GetWatchedFiles( self ):
-    return [ '*/Cargo.toml' ]
