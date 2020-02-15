@@ -194,6 +194,8 @@ def FilenameCompleter_Completion( app,
   ] )
 @IsolatedYcmd( { 'max_num_candidates': 0 } )
 def FilenameCompleter_Completion_test( app, contents, env, expected ):
+  if 'HOME' in env:
+    assert env[ 'HOME' ] = DATA_DIR
   FilenameCompleter_Completion( app, contents, env, 'foo', expected )
 
 
