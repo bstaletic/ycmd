@@ -21,6 +21,7 @@ from ycmd.completers.completer import Completer
 from ycmd.utils import ( ExpandVariablesInPath,
                          GetCurrentDirectory,
                          GetModificationTime,
+                         LOGGER,
                          ListDirectory,
                          OnWindows,
                          re,
@@ -201,10 +202,12 @@ class FilenameCompleter( Completer ):
 
   def GetCandidatesForDirectory( self, directory ):
     mtime = GetModificationTime( directory )
-
+    LOGGER.debug( 'dir = %s', directory )
+    LOGGER.debug( 'contents = %s', ListDirectory( directory ) )
     try:
       candidates = self._candidates_for_directory[ directory ]
       if mtime and mtime <= candidates[ 'mtime' ]:
+        LOGGER.debug( 'candidates = %s', candidates[ 'candidates' ] )
         return candidates[ 'candidates' ]
     except KeyError:
       pass
@@ -215,6 +218,7 @@ class FilenameCompleter( Completer ):
         'candidates': candidates,
         'mtime': mtime
       }
+    LOGGER.debug( 'candidates = %s', candidates[ 'candidates' ] )
     return candidates
 
 
