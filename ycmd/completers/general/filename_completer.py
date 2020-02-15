@@ -218,7 +218,7 @@ class FilenameCompleter( Completer ):
         'candidates': candidates,
         'mtime': mtime
       }
-    LOGGER.debug( 'candidates = %s', candidates[ 'candidates' ] )
+    LOGGER.debug( 'candidates = %s', candidates )
     return candidates
 
 
