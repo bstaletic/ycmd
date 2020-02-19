@@ -170,9 +170,6 @@ elseif( COMPILER_IS_CLANG )
   endif()
 elseif( MSVC )
   if ( NOT MSVC_VERSION LESS 1914 )
-    # Make GTest work
-    add_definitions( /DGTEST_HAS_TR1_TUPLE=0 )
-    add_definitions( /DFTEST_HAS_STD_TUPLE_=1 )
     # Makes MSVC behave like a mostly confoming compiler.
     set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /permissive- /Zc:inline" )
     set( CPP17_AVAILABLE true )
