@@ -18,8 +18,6 @@
 #include "IdentifierUtils.h"
 #include "Utils.h"
 
-#include <ctre/ctre.hpp>
-
 #include <filesystem>
 #include <unordered_map>
 
@@ -27,27 +25,14 @@ namespace YouCompleteMe {
 
 namespace fs = std::filesystem;
 
-// For details on the tag format supported, see here for details:
-// http://ctags.sourceforge.net/FORMAT
-// TL;DR: The only supported format is the one Exuberant Ctags emits.
-constexpr ctll::fixed_string TAG_REGEX =
-  "(?:^|\\r\\n|\\n)"          // Beginning of stream or a line separator
-  "([^\\t\\n\\r]++)"          // The identifier
-  "\\t"                       // A single tab is a field separator
-  "([^\\t\\n\\r]++)"          // The path
-  "\\t"                       // Field separator
-  "[^\r\n]*?"                 // Junk until "language:" barring line separators
-  "language:([^\\t\\n\\r]++)" // "language:" followed by language name
-  "[^\r\n]*?"                 // Junk until the end of line or end of stream
-			      // barring line separators
-  "(?:$|\\r\\n|\\n)";         // Ending of stream or a line separator
-
 namespace {
 
 // List of languages Universal Ctags supports:
 //   ctags --list-languages
 // To map a language name to a filetype, see this file:
 //   :e $VIMRUNTIME/filetype.vim
+// This is a map of const char* and not std::string to prevent issues with
+// static initialization.
 const std::unordered_map < std::string_view,
                            std::string_view > LANG_TO_FILETYPE = {
         { "Ada"                 , "ada"                 },
@@ -150,36 +135,56 @@ const std::unordered_map < std::string_view,
 }  // unnamed namespace
 
 
+// For details on the tag format supported, see here for details:
+// http://ctags.sourceforge.net/FORMAT
+// TL;DR: The only supported format is the one Exuberant Ctags emits.
 FiletypeIdentifierMap ExtractIdentifiersFromTagsFile(
   const fs::path &path_to_tag_file ) {
   FiletypeIdentifierMap filetype_identifier_map;
-  std::string tags_file_contents;
+  const auto lines = [ &path_to_tag_file ]{
+    try {
+      return ReadUtf8File( path_to_tag_file );
+    } catch ( ... ) {
+      return std::vector< std::string >{};
+    }
+  }();
 
-  try {
-    tags_file_contents = ReadUtf8File( path_to_tag_file );
-  } catch ( ... ) {
-    return filetype_identifier_map;
-  }
-
-  std::string::const_iterator start = tags_file_contents.begin();
-  std::string::const_iterator end   = tags_file_contents.end();
-
-  while ( auto matches = ctre::search< TAG_REGEX >( start, end ) ) {
-    start = matches.get_end_position();
-
-    auto language = matches.get< 3 >().to_view();
-
-    std::string filetype{ FindWithDefault( LANG_TO_FILETYPE,
-                                           language,
-                                           Lowercase( language ) ) };
-    auto identifier = matches.get< 1 >().to_view();
-    fs::path path = fs::weakly_canonical( path_to_tag_file.parent_path() /
-					  matches.get< 2 >().to_string() );
-
+  for (auto&& line : lines) {
+    // Identifier name is from the start of the line to the first \t.
+    const size_t id_end = line.find( '\t' );
+    if ( id_end == std::string::npos ) {
+      continue;
+    }
+    // File path the identifier is in is the second field.
+    const size_t path_begin = line.find_first_not_of( '\t', id_end + 1 );
+    if ( path_begin == std::string::npos ) {
+      continue;
+    }
+    const size_t path_end = line.find( '\t', path_begin + 1 );
+    if ( path_end == std::string::npos ) {
+      continue;
+    }
+    // IdentifierCompleter depends on the "language:Foo" field.
+    // strlen( "language:" ) == 9
+    const size_t lang_begin = line.find( "language:", path_end + 1 ) + 9;
+    if ( lang_begin == std::string::npos + 9 ) {
+      continue;
+    }
+    const size_t lang_end = [ &line, lang_begin ] {
+      auto end = line.find_first_of( "\r\t", lang_begin + 1 );
+      if (end == std::string::npos) {
+        end = line.back() == '\r' ? line.size() - 1 : line.size();
+      }
+      return end;
+    }();
+    fs::path path( line.begin() + path_begin, line.begin() + path_end );
+    path = fs::weakly_canonical( path_to_tag_file.parent_path() / path );
+    std::string_view language( &line[ lang_begin ], lang_end - lang_begin );
+    std::string filetype = std::string(
+	FindWithDefault( LANG_TO_FILETYPE, language, Lowercase( language ) ) );
     filetype_identifier_map[ std::move( filetype ) ][ path.string() ]
-      .emplace_back( identifier );
+      .emplace_back( line.begin(), line.begin() + id_end );
   }
-
   return filetype_identifier_map;
 }
 
