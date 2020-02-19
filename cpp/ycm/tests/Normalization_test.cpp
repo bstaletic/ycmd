@@ -18899,6 +18899,6 @@ const NormalizationTuple tests[] = {
 };
 
 
-INSTANTIATE_TEST_CASE_P( UnicodeTest, NormalizationTest, ValuesIn( tests ) );
+INSTANTIATE_TEST_SUITE_P( UnicodeTest, NormalizationTest, ValuesIn( tests ) );
 
 } // namespace YouCompleteMe
