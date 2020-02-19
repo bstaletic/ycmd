@@ -27,12 +27,10 @@ namespace YouCompleteMe {
 
 namespace fs = std::filesystem;
 
-namespace {
-
 // For details on the tag format supported, see here for details:
 // http://ctags.sourceforge.net/FORMAT
 // TL;DR: The only supported format is the one Exuberant Ctags emits.
-static constexpr ctll::fixed_string TAG_REGEX =
+constexpr ctll::fixed_string TAG_REGEX =
   "(?:^|\\r\\n|\\n)"          // Beginning of stream or a line separator
   "([^\\t\\n\\r]++)"          // The identifier
   "\\t"                       // A single tab is a field separator
@@ -43,6 +41,8 @@ static constexpr ctll::fixed_string TAG_REGEX =
   "[^\r\n]*?"                 // Junk until the end of line or end of stream
 			      // barring line separators
   "(?:$|\\r\\n|\\n)";         // Ending of stream or a line separator
+
+namespace {
 
 // List of languages Universal Ctags supports:
 //   ctags --list-languages
