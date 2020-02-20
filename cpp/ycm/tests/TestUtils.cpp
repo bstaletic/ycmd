@@ -86,10 +86,41 @@ std::ostream& operator<<( std::ostream& os, const WordTuple &word ) {
 }
 
 
+#ifdef USE_CLANG_COMPLETER
+std::ostream& operator<<( std::ostream& os, const DocumentationData& doc ) {
+  os << "{ " << ::testing::PrintToString( doc.brief_comment ) << ", "
+	     << ::testing::PrintToString( doc.canonical_type ) << ", "
+	     << ::testing::PrintToString( doc.comment_xml ) << ", "
+	     << ::testing::PrintToString( doc.display_name ) << ", "
+	     << ::testing::PrintToString( doc.raw_comment ) << " }";
+  return os;
+}
+
+
+std::ostream& operator<<( std::ostream& os, const DocumentationData* doc ) {
+  os << "*" << *doc;
+  return os;
+}
+
+std::ostream& operator<<( std::ostream& os, const Location& location ) {
+  os << "{ " << ::testing::PrintToString( location.filename_ ) << ", "
+	     << ::testing::PrintToString( location.line_number_ ) << ", "
+	     << ::testing::PrintToString( location.column_number_ ) << " }";
+  return os;
+}
+
+
+std::ostream& operator<<( std::ostream& os, const Location* location ) {
+  os << "*" << *location;
+  return os;
+}
+
+
 std::ostream& operator<<( std::ostream& os, const fs::path *path ) {
   os << *path;
   return os;
 }
+#endif
 
 
 fs::path PathToTestFile( const std::string &filepath ) {

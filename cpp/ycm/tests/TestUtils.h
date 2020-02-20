@@ -21,6 +21,9 @@
 #include "Character.h"
 #include "CodePoint.h"
 #include "Word.h"
+#ifdef USE_CLANG_COMPLETER
+#include "Location.h"
+#include "Documentation.h"
 
 #include <filesystem>
 #include <gmock/gmock.h>
@@ -173,6 +176,12 @@ std::ostream& operator<<( std::ostream& os, const CharacterTuple &character );
 std::ostream& operator<<( std::ostream& os, const Character &character );
 std::ostream& operator<<( std::ostream& os, const Character *character );
 std::ostream& operator<<( std::ostream& os, const WordTuple &word );
+#ifdef USE_CLANG_COMPLETER
+std::ostream& operator<<( std::ostream& os, const Location& location );
+std::ostream& operator<<( std::ostream& os, const Location* location );
+std::ostream& operator<<( std::ostream& os, const DocumentationData& doc );
+std::ostream& operator<<( std::ostream& os, const DocumentationData* doc );
+#endif
 
 
 // These matchers are used to remove the "is equal to" output from gtest.
