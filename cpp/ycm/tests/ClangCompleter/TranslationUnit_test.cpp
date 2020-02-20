@@ -186,41 +186,41 @@ TEST_F( TranslationUnitTest, InvalidTranslationUnitStore ) {
 }
 
 
-//TEST_F( TranslationUnitTest, InvalidTranslationUnit ) {
-//
-//  TranslationUnit unit;
-//
-//  EXPECT_TRUE( unit.IsCurrentlyUpdating() );
-//
-//  std::vector< CompletionData > completion_data_vector =
-//      unit.CandidatesForLocation( "", 1, 1, std::vector< UnsavedFile >() );
-//  EXPECT_TRUE( completion_data_vector.empty() );
-//
-//  EXPECT_EQ( Location(),
-//             unit.GetDeclarationLocation( "",
-//                                          1,
-//                                          1,
-//                                          std::vector< UnsavedFile >() ) );
-//
-//  EXPECT_EQ( Location(),
-//             unit.GetDefinitionLocation( "",
-//                                         1,
-//                                         1,
-//                                         std::vector< UnsavedFile >() ) );
-//
-//  EXPECT_EQ( Location(),
-//             unit.GetDefinitionOrDeclarationLocation(
-//               "",
-//               1,
-//               1,
-//               std::vector< UnsavedFile >() ) );
-//
-//  EXPECT_EQ( std::string( "Internal error: no translation unit" ),
-//             unit.GetTypeAtLocation( "",
-//                                     1,
-//                                     1,
-//                                     std::vector< UnsavedFile >() ) );
-//
+TEST_F( TranslationUnitTest, InvalidTranslationUnit ) {
+
+  TranslationUnit unit;
+
+  EXPECT_TRUE( unit.IsCurrentlyUpdating() );
+
+  std::vector< CompletionData > completion_data_vector =
+      unit.CandidatesForLocation( "", 1, 1, std::vector< UnsavedFile >() );
+  EXPECT_TRUE( completion_data_vector.empty() );
+
+  EXPECT_EQ( Location(),
+             unit.GetDeclarationLocation( "",
+                                          1,
+                                          1,
+                                          std::vector< UnsavedFile >() ) );
+
+  EXPECT_EQ( Location(),
+             unit.GetDefinitionLocation( "",
+                                         1,
+                                         1,
+                                         std::vector< UnsavedFile >() ) );
+
+  EXPECT_EQ( Location(),
+             unit.GetDefinitionOrDeclarationLocation(
+               "",
+               1,
+               1,
+               std::vector< UnsavedFile >() ) );
+
+  EXPECT_EQ( std::string( "Internal error: no translation unit" ),
+             unit.GetTypeAtLocation( "",
+                                     1,
+                                     1,
+                                     std::vector< UnsavedFile >() ) );
+
 //  EXPECT_EQ( std::string( "Internal error: no translation unit" ),
 //             unit.GetEnclosingFunctionAtLocation(
 //               "",
@@ -228,11 +228,11 @@ TEST_F( TranslationUnitTest, InvalidTranslationUnitStore ) {
 //               1,
 //               std::vector< UnsavedFile >() ) );
 //
-//  EXPECT_EQ( DocumentationData(),
-//             unit.GetDocsForLocation( Location(),
-//                                      std::vector< UnsavedFile >(),
-//                                      false ) );
-//}
+  EXPECT_EQ( DocumentationData(),
+             unit.GetDocsForLocation( Location(),
+                                      std::vector< UnsavedFile >(),
+                                      false ) );
+}
 
 
 std::ostream& operator<<( std::ostream& os, const Location& location ) {
