@@ -45,79 +45,79 @@ protected:
 };
 
 
-//TEST_F( TranslationUnitTest, ExceptionThrownOnParseFailure ) {
-//  // Create a translation unit for a C++ file that is not saved on disk.
-//  std::string filename = PathToTestFile( "unsaved_file.cpp" ).string();
-//  UnsavedFile unsaved_file;
-//  unsaved_file.filename_ = filename;
-//
-//  try {
-//    // libclang requires a valid index to parse a file.
-//    TranslationUnit( filename,
-//                     std::vector< UnsavedFile >{ unsaved_file },
-//                     std::vector< std::string >(),
-//                     nullptr );
-//    FAIL() << "Expected ClangParseError exception.";
-//  } catch ( const ClangParseError &error ) {
-//    EXPECT_STREQ( error.what(), "Invalid arguments supplied "
-//                                "when parsing the translation unit." );
-//  } catch ( ... ) {
-//    FAIL() << "Expected ClangParseError exception.";
-//  }
-//}
-//
-//TEST_F( TranslationUnitTest, GoToDefinitionWorks ) {
-//  auto test_file = PathToTestFile( "goto.cpp" ).string();
-//  TranslationUnit unit( test_file,
-//                        std::vector< UnsavedFile >(),
-//                        std::vector< std::string >(),
-//                        clang_index_ );
-//
-//  Location location = unit.GetDefinitionLocation(
-//                        test_file,
-//                        17,
-//                        3,
-//                        std::vector< UnsavedFile >() );
-//
-//  EXPECT_EQ( 1, location.line_number_ );
-//  EXPECT_EQ( 8, location.column_number_ );
-//  EXPECT_TRUE( !location.filename_.empty() );
-//}
-//
-//TEST_F( TranslationUnitTest, GoToDefinitionFails ) {
-//  auto test_file = PathToTestFile( "goto.cpp" ).string();
-//  TranslationUnit unit( test_file,
-//                        std::vector< UnsavedFile >(),
-//                        std::vector< std::string >(),
-//                        clang_index_ );
-//
-//  Location location = unit.GetDefinitionLocation(
-//                        test_file,
-//                        19,
-//                        3,
-//                        std::vector< UnsavedFile >() );
-//
-//  EXPECT_FALSE( location.IsValid() );
-//}
-//
-//TEST_F( TranslationUnitTest, GoToDeclarationWorks ) {
-//  auto test_file = PathToTestFile( "goto.cpp" ).string();
-//  TranslationUnit unit( test_file,
-//                        std::vector< UnsavedFile >(),
-//                        std::vector< std::string >(),
-//                        clang_index_ );
-//
-//  Location location = unit.GetDeclarationLocation(
-//                        test_file,
-//                        19,
-//                        3,
-//                        std::vector< UnsavedFile >() );
-//
-//  EXPECT_EQ( 12, location.line_number_ );
-//  EXPECT_EQ( 8, location.column_number_ );
-//  EXPECT_TRUE( !location.filename_.empty() );
-//}
-//
+TEST_F( TranslationUnitTest, ExceptionThrownOnParseFailure ) {
+  // Create a translation unit for a C++ file that is not saved on disk.
+  std::string filename = PathToTestFile( "unsaved_file.cpp" ).string();
+  UnsavedFile unsaved_file;
+  unsaved_file.filename_ = filename;
+
+  try {
+    // libclang requires a valid index to parse a file.
+    TranslationUnit( filename,
+                     std::vector< UnsavedFile >{ unsaved_file },
+                     std::vector< std::string >(),
+                     nullptr );
+    FAIL() << "Expected ClangParseError exception.";
+  } catch ( const ClangParseError &error ) {
+    EXPECT_STREQ( error.what(), "Invalid arguments supplied "
+                                "when parsing the translation unit." );
+  } catch ( ... ) {
+    FAIL() << "Expected ClangParseError exception.";
+  }
+}
+
+TEST_F( TranslationUnitTest, GoToDefinitionWorks ) {
+  auto test_file = PathToTestFile( "goto.cpp" ).string();
+  TranslationUnit unit( test_file,
+                        std::vector< UnsavedFile >(),
+                        std::vector< std::string >(),
+                        clang_index_ );
+
+  Location location = unit.GetDefinitionLocation(
+                        test_file,
+                        17,
+                        3,
+                        std::vector< UnsavedFile >() );
+
+  EXPECT_EQ( 1, location.line_number_ );
+  EXPECT_EQ( 8, location.column_number_ );
+  EXPECT_TRUE( !location.filename_.empty() );
+}
+
+TEST_F( TranslationUnitTest, GoToDefinitionFails ) {
+  auto test_file = PathToTestFile( "goto.cpp" ).string();
+  TranslationUnit unit( test_file,
+                        std::vector< UnsavedFile >(),
+                        std::vector< std::string >(),
+                        clang_index_ );
+
+  Location location = unit.GetDefinitionLocation(
+                        test_file,
+                        19,
+                        3,
+                        std::vector< UnsavedFile >() );
+
+  EXPECT_FALSE( location.IsValid() );
+}
+
+TEST_F( TranslationUnitTest, GoToDeclarationWorks ) {
+  auto test_file = PathToTestFile( "goto.cpp" ).string();
+  TranslationUnit unit( test_file,
+                        std::vector< UnsavedFile >(),
+                        std::vector< std::string >(),
+                        clang_index_ );
+
+  Location location = unit.GetDeclarationLocation(
+                        test_file,
+                        19,
+                        3,
+                        std::vector< UnsavedFile >() );
+
+  EXPECT_EQ( 12, location.line_number_ );
+  EXPECT_EQ( 8, location.column_number_ );
+  EXPECT_TRUE( !location.filename_.empty() );
+}
+
 TEST_F( TranslationUnitTest, GoToDeclarationWorksOnDefinition ) {
   auto test_file = PathToTestFile( "goto.cpp" ).string();
   TranslationUnit unit( test_file,
