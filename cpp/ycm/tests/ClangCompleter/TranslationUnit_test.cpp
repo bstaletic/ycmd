@@ -27,6 +27,7 @@
 
 using ::testing::ElementsAre;
 using ::testing::WhenSorted;
+using ::testing::PrintToString;
 
 namespace YouCompleteMe {
 
@@ -231,6 +232,20 @@ TEST_F( TranslationUnitTest, InvalidTranslationUnit ) {
              unit.GetDocsForLocation( Location(),
                                       std::vector< UnsavedFile >(),
                                       false ) );
+}
+
+
+std::ostream& operator<<( std::ostream& os, const Location& location ) {
+  os << "{ " << ::testing::PrintToString( location.filename_ ) << ", "
+	     << ::testing::PrintToString( location.line_number_ ) << ", "
+	     << ::testing::PrintToString( location.column_number_ ) << " }";
+  return os;
+}
+
+
+std::ostream& operator<<( std::ostream& os, const Location* location ) {
+  os << "*" << *location;
+  return os;
 }
 
 } // namespace YouCompleteMe
