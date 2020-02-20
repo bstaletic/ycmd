@@ -221,19 +221,34 @@ TEST_F( TranslationUnitTest, InvalidTranslationUnit ) {
                                      1,
                                      std::vector< UnsavedFile >() ) );
 
-//  EXPECT_EQ( std::string( "Internal error: no translation unit" ),
-//             unit.GetEnclosingFunctionAtLocation(
-//               "",
-//               1,
-//               1,
-//               std::vector< UnsavedFile >() ) );
-//
+  EXPECT_EQ( std::string( "Internal error: no translation unit" ),
+             unit.GetEnclosingFunctionAtLocation(
+               "",
+               1,
+               1,
+               std::vector< UnsavedFile >() ) );
+
   EXPECT_EQ( DocumentationData(),
              unit.GetDocsForLocation( Location(),
                                       std::vector< UnsavedFile >(),
                                       false ) );
 }
 
+
+std::ostream& operator<<( std::ostream& os, const DocumentationData& doc ) {
+  os << "{ " << ::testing::PrintToString( doc.brief_comment ) << ", "
+	     << ::testing::PrintToString( doc.canonical_type ) << ", "
+	     << ::testing::PrintToString( doc.comment_xml ) << ", "
+	     << ::testing::PrintToString( doc.display_name ) << ", "
+	     << ::testing::PrintToString( doc.raw_comment ) << " }";
+  return os;
+}
+
+
+std::ostream& operator<<( std::ostream& os, const DocumentationData* doc ) {
+  os << "*" << *doc;
+  return os;
+}
 
 std::ostream& operator<<( std::ostream& os, const Location& location ) {
   os << "{ " << ::testing::PrintToString( location.filename_ ) << ", "
