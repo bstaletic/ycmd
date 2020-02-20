@@ -24,6 +24,7 @@
 #ifdef USE_CLANG_COMPLETER
 #include "Location.h"
 #include "Documentation.h"
+#endif
 
 #include <filesystem>
 #include <gmock/gmock.h>
