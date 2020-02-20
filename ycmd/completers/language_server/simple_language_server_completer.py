@@ -102,8 +102,8 @@ class SimpleLSPCompleter( lsc.LanguageServerCompleter ):
                    self.GetServerName(),
                    self.GetCommandLine() )
 
-      self._stderr_file = utils.CreateLogfile( '{}_stderr'.format(
-        utils.MakeSafeFileNameString( self.GetServerName() ) ) )
+      self._stderr_file = utils.CreateLogfile(
+        f'{utils.MakeSafeFileNameString( self.GetServerName() )}_stderr' )
 
       with utils.OpenForStdHandle( self._stderr_file ) as stderr:
         self._server_handle = utils.SafePopen(

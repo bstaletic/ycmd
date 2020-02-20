@@ -99,8 +99,8 @@ COMPLETERS = {
 # Add in the simple completers
 for completer in SIMPLE_COMPLETERS:
   COMPLETERS[ completer ] = {
-    'build': [ '--{}-completer'.format( completer ) ],
-    'test': [ '--ignore=ycmd/tests/{}'.format( completer ) ],
+    'build': [ f'--{completer}-completer' ],
+    'test': [ f'--ignore=ycmd/tests/{completer}' ],
   }
 
 
@@ -115,8 +115,8 @@ def CompleterType( value ):
       return aliases_to_completer[ value ]
     else:
       raise argparse.ArgumentTypeError(
-        '{0} is not a valid completer - should be one of {1}'.format(
-          value, COMPLETERS.keys() ) )
+        f'{value} is not a valid completer - should be one of '
+        f'{COMPLETERS.keys()}' )
 
 
 def ParseArguments():
@@ -126,12 +126,12 @@ def ParseArguments():
                        help = argparse.SUPPRESS ) # deprecated
   group.add_argument( '--no-completers', nargs ='*', type = CompleterType,
                        help = 'Do not build or test with listed semantic '
-                       'completion engine(s). Valid values: {0}'.format(
-                        COMPLETERS.keys() ) )
+                       'completion engine(s). '
+                       f'Valid values: {COMPLETERS.keys()}' )
   group.add_argument( '--completers', nargs ='*', type = CompleterType,
                        help = 'Only build and test with listed semantic '
-                       'completion engine(s). Valid values: {0}'.format(
-                        COMPLETERS.keys() ) )
+                       'completion engine(s). '
+                       f'Valid values: {COMPLETERS.keys()}' )
   parser.add_argument( '--skip-build', action = 'store_true',
                        help = 'Do not build ycmd before testing.' )
   parser.add_argument( '--msvc', type = int, choices = [ 14, 15, 16 ],

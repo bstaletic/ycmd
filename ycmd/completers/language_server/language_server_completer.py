@@ -199,9 +199,9 @@ class Response:
 
     if 'error' in self._message:
       error = self._message[ 'error' ]
-      raise ResponseFailedException( 'Request failed: {0}: {1}'.format(
-        error.get( 'code' ) or 0,
-        error.get( 'message' ) or 'No message' ) )
+      raise ResponseFailedException(
+        f'Request failed: {error.get( "code" ) or 1}: '
+        f'{error.get( "message" ) or "No message"}' )
 
     return self._message
 
@@ -2459,8 +2459,7 @@ def _GetCompletionItemStartCodepointOrReject( text_edit, request_data ):
   # Conservatively rejecting candidates that breach the protocol
   if edit_range[ 'start' ][ 'line' ] != edit_range[ 'end' ][ 'line' ]:
     raise IncompatibleCompletionException(
-      "The TextEdit '{0}' spans multiple lines".format(
-        text_edit[ 'newText' ] ) )
+      f"The TextEdit '{text_edit[ \'newText\' ]}' spans multiple lines" )
 
   file_contents = GetFileLines( request_data, request_data[ 'filepath' ] )
   line_value = file_contents[ edit_range[ 'start' ][ 'line' ] ]
@@ -2471,8 +2470,8 @@ def _GetCompletionItemStartCodepointOrReject( text_edit, request_data ):
 
   if start_codepoint > request_data[ 'start_codepoint' ]:
     raise IncompatibleCompletionException(
-      "The TextEdit '{0}' starts after the start position".format(
-        text_edit[ 'newText' ] ) )
+      f"The TextEdit '{text_edit[ \'newText\' ]}' "
+      "starts after the start position" )
 
   return start_codepoint
 

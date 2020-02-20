@@ -34,9 +34,8 @@ for folder in os.listdir( DIR_OF_THIRD_PARTY ):
   abs_folder_path = p.join( DIR_OF_THIRD_PARTY, folder )
   if p.isdir( abs_folder_path ) and not os.listdir( abs_folder_path ):
     sys.exit(
-      'ERROR: folder {} in {} is empty; you probably forgot to run:\n'
-      '\tgit submodule update --init --recursive\n'.format( folder,
-                                                            DIR_OF_THIRD_PARTY )
+      f'ERROR: folder {folder} in {DIR_OF_THIRD_PARTY} is empty; '
+      'you probably forgot to run:\n\tgit submodule update --init --recursive\n'
     )
 
 sys.path[ 0:0 ] = [ p.join( DIR_OF_THIRD_PARTY, 'requests_deps', 'requests' ),
@@ -119,8 +118,7 @@ def RemoveDirectory( directory ):
     except OSError:
       try_number += 1
   raise RuntimeError(
-    'Cannot remove directory {} after {} tries.'.format( directory,
-                                                         max_tries ) )
+    f'Cannot remove directory {directory} after {max_tries} tries.' )
 
 
 def MakeCleanDirectory( directory_path ):
@@ -345,18 +343,17 @@ def CustomPythonCmakeArgs( args ):
   # The CMake 'FindPythonLibs' Module does not work properly.
   # So we are forced to do its job for it.
   if not args.quiet:
-    print( 'Searching Python {major}.{minor} libraries...'.format(
-      major = PY_MAJOR, minor = PY_MINOR ) )
+    print( f'Searching Python {PY_MAJOR}.{PY_MINOR} libraries...' )
 
   python_library, python_include = FindPythonLibraries()
 
   if not args.quiet:
-    print( 'Found Python library: {0}'.format( python_library ) )
-    print( 'Found Python headers folder: {0}'.format( python_include ) )
+    print( f'Found Python library: {python_library}' )
+    print( f'Found Python headers folder: {python_include}' )
 
   return [
-    '-DPYTHON_LIBRARY={0}'.format( python_library ),
-    '-DPYTHON_INCLUDE_DIR={0}'.format( python_include )
+    f'-DPYTHON_LIBRARY={python_library}',
+    f'-DPYTHON_INCLUDE_DIR={python_include}'
   ]
 
 
@@ -368,8 +365,7 @@ def GetGenerator( args ):
     # Studio 16 generator.
     if args.msvc == 16:
       return 'Visual Studio 16'
-    return 'Visual Studio {version}{arch}'.format(
-        version = args.msvc, arch = ' Win64' if IS_64BIT else '' )
+    return f'Visual Studio {args.msvc}{" Win64" if IS_64BIT else ""}'
   return 'Unix Makefiles'
 
 
@@ -542,7 +538,7 @@ def RunYcmdTests( args, build_dir ):
 
   tests_cmd = [ p.join( tests_dir, 'ycm_core_tests' ) ]
   if args.core_tests != '*':
-    tests_cmd.append( '--gtest_filter={}'.format( args.core_tests ) )
+    tests_cmd.append( f'--gtest_filter={args.core_tests}' )
   CheckCall( tests_cmd,
              env = new_env,
              quiet = args.quiet,
@@ -630,8 +626,7 @@ def BuildYcmdLib( cmake, cmake_common_args, script_args ):
       CheckCall( build_command,
                  exit_message = BUILD_ERROR_MESSAGE,
                  quiet = script_args.quiet,
-                 status_message = 'Compiling ycmd target: {0}'.format(
-                   target ) )
+                 status_message = f'Compiling ycmd target: {target}'
 
     if script_args.core_tests:
       RunYcmdTests( script_args, build_dir )
@@ -742,10 +737,9 @@ def DownloadCsCompleter( writeStdout, download_data ):
     writeStdout( 'DONE\n' )
 
   if p.exists( package_path ):
-    writeStdout( 'Using cached Omnisharp: {}\n'.format( file_name ) )
+    writeStdout( f'Using cached Omnisharp: {file_name}\n' )
   else:
-    writeStdout( 'Downloading Omnisharp from {}...'.format(
-                    download_url ) )
+    writeStdout( f'Downloading Omnisharp from {download_url}...' )
     DownloadFileTo( download_url, package_path )
     writeStdout( 'DONE\n' )
 
@@ -753,7 +747,7 @@ def DownloadCsCompleter( writeStdout, download_data ):
 
 
 def ExtractCsCompleter( writeStdout, build_dir, package_path ):
-  writeStdout( 'Extracting Omnisharp to {}...'.format( build_dir ) )
+  writeStdout( f'Extracting Omnisharp to {build_dir}...' )
   if OnWindows():
     with ZipFile( package_path, 'r' ) as package_zip:
       package_zip.extractall()
@@ -862,8 +856,7 @@ def EnableRustCompleter( switches ):
 
     if OnWindows():
       rustup_cmd = [ rustup_init ]
-      rustup_url = 'https://win.rustup.rs/{}'.format(
-        'x86_64' if IS_64BIT else 'i686' )
+      rustup_url = f'https://win.rustup.rs/{"x86_64" if IS_64BIT else "i686"}'
     else:
       rustup_cmd = [ 'sh', rustup_init ]
       rustup_url = 'https://sh.rustup.rs'
@@ -975,12 +968,12 @@ def EnableJavaCompleter( switches ):
 
 
   if p.exists( file_name ):
-    Print( 'Using cached jdt.ls: {0}'.format( file_name ) )
+    Print( f'Using cached jdt.ls: {file_name}' )
   else:
-    Print( "Downloading jdt.ls from {0}...".format( url ) )
+    Print( "Downloading jdt.ls from {url}..." )
     DownloadFileTo( url, file_name )
 
-  Print( "Extracting jdt.ls to {0}...".format( REPOSITORY ) )
+  Print( "Extracting jdt.ls to {REPOSITORY}..." )
   with tarfile.open( file_name ) as package_tar:
     package_tar.extractall( REPOSITORY )
 
@@ -994,7 +987,7 @@ def EnableTypeScriptCompleter( args ):
   npm = FindExecutableOrDie( 'npm', 'npm is required to install TSServer.' )
   tsserver_folder = p.join( DIR_OF_THIRD_PARTY, 'tsserver' )
   CheckCall( [ npm, 'install', '-g', '--prefix', tsserver_folder,
-               'typescript@{version}'.format( version = TSSERVER_VERSION ) ],
+               f'typescript@{TSSERVER_VERSION}' ],
              quiet = args.quiet,
              status_message = 'Installing TSServer for JavaScript '
                               'and TypeScript completion' )
@@ -1042,8 +1035,8 @@ def DownloadClangd( printer ):
   target = GetClangdTarget()
   target_name, check_sum = target[ not IS_64BIT ]
   target_name = target_name.format( version = CLANGD_VERSION )
-  file_name = '{}.tar.bz2'.format( target_name )
-  download_url = 'https://dl.bintray.com/ycm-core/clangd/{}'.format( file_name )
+  file_name = f'{target_name}.tar.bz2'
+  download_url = f'https://dl.bintray.com/ycm-core/clangd/{file_name}'
 
   file_name = p.join( CLANGD_CACHE_DIR, file_name )
 
@@ -1056,7 +1049,7 @@ def DownloadClangd( printer ):
     os.remove( file_name )
 
   if p.exists( file_name ):
-    printer( 'Using cached Clangd: {}'.format( file_name ) )
+    printer( f'Using cached Clangd: {file_name}' )
   else:
     printer( "Downloading Clangd from {}...".format( download_url ) )
     DownloadFileTo( download_url, file_name )

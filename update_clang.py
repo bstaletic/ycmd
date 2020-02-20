@@ -227,7 +227,7 @@ def TemporaryDirectory( keep_temp ):
 def DownloadClangLicense( version, destination ):
   print( 'Downloading license...' )
   request = requests.get(
-    'https://releases.llvm.org/{version}/LICENSE.TXT'.format( version=version ),
+    f'https://releases.llvm.org/{version}/LICENSE.TXT',
     stream = True )
   request.raise_for_status()
 
@@ -241,7 +241,7 @@ def DownloadClangLicense( version, destination ):
 
 
 def Download( url ):
-  print( 'Downloading {}'.format( url.rsplit( '/', 1 )[ -1 ] ) )
+  print( f'Downloading {url.rsplit( "/", 1 )[ -1 ]}' )
   request = requests.get( url, stream=True )
   request.raise_for_status()
   content = request.content
@@ -304,7 +304,7 @@ def MakeBundle( files_to_copy,
                 hashes,
                 version ):
   archive_name = os.path.basename( bundle_file_name )
-  print( 'Bundling files to {}'.format( archive_name ) )
+  print( f'Bundling files to {archive_name}' )
   with tarfile.open( name=bundle_file_name, mode='w:bz2' ) as tar_file:
     tar_file.add( license_file_name, arcname='LICENSE.TXT' )
     for item in files_to_copy:
@@ -317,7 +317,7 @@ def MakeBundle( files_to_copy,
 
       name = os.path.join( source_dir, source_file_name )
       if not os.path.exists( name ):
-        raise RuntimeError( 'File {} does not exist.'.format( name ) )
+        raise RuntimeError( f'File {name} does not exist.' )
       tar_file.add( name = name, arcname = target_file_name )
 
   sys.stdout.write( 'Calculating checksum: ' )
@@ -335,11 +335,9 @@ def UploadBundleToBintray( user_name,
   print( 'Uploading to bintray...' )
   repo = bundle_file_name[ : bundle_file_name.find( '-' ) ]
   with open( bundle_file_name, 'rb' ) as bundle:
+    file_path = os.path.basename( bundle_file_name )
     request = requests.put(
-      'https://api.bintray.com/content/{subject}/{repo}/{file_path}'.format(
-        subject = subject,
-        repo = repo,
-        file_path = os.path.basename( bundle_file_name ) ),
+      f'https://api.bintray.com/content/{subject}/{repo}/{file_path}',
       data = bundle,
       auth = ( user_name, api_token ),
       headers = {
@@ -405,7 +403,7 @@ def PrepareBundleBuiltIn( extract_fun,
   package_dir = None
   if cache_dir:
     archive = os.path.join( cache_dir, llvm_package )
-    print( 'Extracting cached {}'.format( llvm_package ) )
+    print( f'Extracting cached {llvm_package}' )
     try:
       with open( archive, 'rb' ) as f:
         package_dir = extract_fun( f.read(), temp_dir )
@@ -423,7 +421,7 @@ def PrepareBundleBuiltIn( extract_fun,
         print( "Unable to write cache file: {}".format( e.message ) )
         pass
 
-    print( 'Extracting {}'.format( llvm_package ) )
+    print( f'Extracting {llvm_package}' )
     package_dir = extract_fun( compressed_data, temp_dir )
 
   return package_dir
@@ -450,7 +448,7 @@ def PrepareBundleNSIS( cache_dir, llvm_package, download_url, temp_dir ):
   if cache_dir:
     archive = os.path.join( cache_dir, llvm_package )
     if os.path.exists( archive ):
-      print( 'Extracting cached {}'.format( llvm_package ) )
+      print( f'Extracting cached {llvm_package}' )
     else:
       archive = None
 
@@ -460,7 +458,7 @@ def PrepareBundleNSIS( cache_dir, llvm_package, download_url, temp_dir ):
     archive = os.path.join( dest_dir, llvm_package )
     with open( archive, 'wb' ) as f:
       f.write( compressed_data )
-    print( 'Extracting {}'.format( llvm_package ) )
+    print( f'Extracting {llvm_package}' )
 
   return Extract7Z( llvm_package, archive, temp_dir )
 
@@ -493,12 +491,12 @@ def BundleAndUpload( args, temp_dir, output_dir, os_name, download_data,
                                        download_url,
                                        temp_dir )
     else:
-      raise AssertionError( 'Format not yet implemented: {}'.format(
-        download_data[ 'format' ] ) )
+      raise AssertionError(
+          f'Format not yet implemented: {download_data[ "format" ]}' )
   except requests.exceptions.HTTPError as error:
     if error.response.status_code != 404:
       raise
-    print( 'Cannot download {}'.format( llvm_package ) )
+    print( f'Cannot download {llvm_package}' )
     return
 
   for binary in [ 'libclang', 'clangd' ]:
@@ -535,13 +533,12 @@ def Overwrite( src, dest ):
 
 
 def UpdateClangHeaders( args, temp_dir ):
-  src_name = 'cfe-{version}.src'.format( version = args.version )
+  src_name = f'cfe-{args.version}.src'
   archive_name = src_name + '.tar.xz'
 
-  compressed_data = Download( 'https://releases.llvm.org/{version}/'
-                              '{archive}'.format( version = args.version,
-                                                  archive = archive_name ) )
-  print( 'Extracting {}'.format( archive_name ) )
+  compressed_data = Download( f'https://releases.llvm.org/{args.version}/'
+                              f'{archive_name}' )
+  print( f'Extracting {archive_name}' )
   src = ExtractLZMA( compressed_data, temp_dir )
 
   print( 'Updating Clang headers...' )
@@ -573,9 +570,7 @@ def Main():
       shutil.rmtree( output_dir )
 
   for bundle_file_name, sha256 in hashes.items():
-    print( 'Checksum for {bundle_file_name}: {sha256}'.format(
-      bundle_file_name = bundle_file_name,
-      sha256 = sha256 ) )
+    print( f'Checksum for {bundle_file_name}: {sha256}' )
 
 
 if __name__ == "__main__":

@@ -436,9 +436,9 @@ class ClangCompleter( Completer ):
 
     database_item = responses.DebugInfoItem(
       key = 'compilation database path',
-      value = '{0}'.format( database_directory ) )
+      value = f'{database_directory}' )
     flags_item = responses.DebugInfoItem(
-      key = 'flags', value = '{0}'.format( list( flags ) ) )
+      key = 'flags', value = f'{list( flags )}' )
     filename_item = responses.DebugInfoItem(
       key = 'translation unit', value = filename )
 
@@ -571,12 +571,11 @@ def _BuildGetDocResponse( doc_data ):
   declaration = root.find( "Declaration" )
 
   return responses.BuildDetailedInfoResponse(
-    '{0}\n{1}\nType: {2}\nName: {3}\n---\n{4}'.format(
-      ToUnicode( declaration.text ) if declaration is not None else "",
-      ToUnicode( doc_data.brief_comment ),
-      ToUnicode( doc_data.canonical_type ),
-      ToUnicode( doc_data.display_name ),
-      ToUnicode( _FormatRawComment( doc_data.raw_comment ) ) ) )
+    f'{ToUnicode( declaration.text )}\n'
+    f'{ToUnicode( doc_data.brief_comment )}\n'
+    f'Type: {ToUnicode( doc_data.canonical_type )}\n'
+    f'Name: {ToUnicode( doc_data.display_name )}\n---\n'
+    f'{ToUnicode( _FormatRawComment( doc_data.raw_comment ) )}' )
 
 
 def _GetAbsolutePath( include_file_name, include_paths ):

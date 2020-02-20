@@ -142,8 +142,7 @@ def _CollectExtensionBundles( extension_path ):
 
   for extension_dir in extension_path:
     if not os.path.isdir( extension_dir ):
-      LOGGER.info( 'extension directory does not exist: {0}'.format(
-        extension_dir ) )
+      LOGGER.info( 'extension directory does not exist: %s', extension_dir )
       continue
 
     for path in os.listdir( extension_dir ):
@@ -151,25 +150,24 @@ def _CollectExtensionBundles( extension_path ):
       manifest_file = os.path.join( path, 'package.json' )
 
       if not os.path.isdir( path ) or not os.path.isfile( manifest_file ):
-        LOGGER.debug( '{0} is not an extension directory'.format( path ) )
+        LOGGER.debug( '%s is not an extension directory', path )
         continue
 
       manifest_json = utils.ReadFile( manifest_file )
       try:
         manifest = json.loads( manifest_json )
       except ValueError:
-        LOGGER.exception( 'Could not load bundle {0}'.format( manifest_file ) )
+        LOGGER.exception( 'Could not load bundle %s', manifest_file )
         continue
 
       if ( 'contributes' not in manifest or
            'javaExtensions' not in manifest[ 'contributes' ] or
            not isinstance( manifest[ 'contributes' ][ 'javaExtensions' ],
                            list ) ):
-        LOGGER.info( 'Bundle {0} is not a java extension'.format(
-          manifest_file ) )
+        LOGGER.info( 'Bundle %s is not a java extension', manifest_file ) )
         continue
 
-      LOGGER.info( 'Found bundle: {0}'.format( manifest_file ) )
+      LOGGER.info( 'Found bundle: %s', manifest_file )
 
       extension_bundles.extend( [
         os.path.join( path, p )
@@ -293,8 +291,7 @@ class JavaCompleter( simple_language_server_completer.SimpleLSPCompleter ):
       self._workspace_root_path = DEFAULT_WORKSPACE_ROOT_PATH
 
     if not isinstance( self._extension_path, list ):
-      raise ValueError( '{0} option must be a list'.format(
-        EXTENSION_PATH_OPTION ) )
+      raise ValueError( f'{EXTENSION_PATH_OPTION} option must be a list' )
 
     if not self._extension_path:
       self._extension_path = [ DEFAULT_EXTENSION_PATH ]
@@ -456,8 +453,7 @@ class JavaCompleter( simple_language_server_completer.SimpleLSPCompleter ):
 
       if not self._use_clean_workspace and wipe_workspace:
         if os.path.isdir( self._workspace_path ):
-          LOGGER.info( 'Wiping out workspace {0}'.format(
-            self._workspace_path ) )
+          LOGGER.info( 'Wiping out workspace %s', self._workspace_path )
           shutil.rmtree( self._workspace_path )
 
       self._launcher_config = _LauncherConfiguration( self._workspace_root_path,
@@ -517,11 +513,11 @@ class JavaCompleter( simple_language_server_completer.SimpleLSPCompleter ):
       if notification[ 'params' ][ 'type' ] == 'Started':
         self._started_message_sent = True
         return responses.BuildDisplayMessageResponse(
-          'Initializing Java completer: {}'.format( message ) )
+          f'Initializing Java completer: {message}' )
 
       if not self._started_message_sent:
         return responses.BuildDisplayMessageResponse(
-          'Initializing Java completer: {}'.format( message ) )
+          f'Initializing Java completer: {message}' )
 
     return super().ConvertNotificationToMessage( request_data, notification )
 

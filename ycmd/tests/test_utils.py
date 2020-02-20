@@ -279,8 +279,8 @@ def WaitUntilCompleterServerReady( app, filetype, timeout = 30 ):
   expiration = time.time() + timeout
   while True:
     if time.time() > expiration:
-      raise RuntimeError( 'Waited for the {0} subserver to be ready for '
-                          '{1} seconds, aborting.'.format( filetype, timeout ) )
+      raise RuntimeError( f'Waited for the {filetype} subserver to be ready for'
+                          f' {timeout} seconds, aborting.' )
 
     if app.get( '/ready', { 'subserver': filetype } ).json:
       return
@@ -290,8 +290,8 @@ def WaitUntilCompleterServerReady( app, filetype, timeout = 30 ):
 
 def MockProcessTerminationTimingOut( handle, timeout = 5 ):
   WaitUntilProcessIsTerminated( handle, timeout )
-  raise RuntimeError( 'Waited process to terminate for {0} seconds, '
-                      'aborting.'.format( timeout ) )
+  raise RuntimeError( f'Waited process to terminate for {timout} seconds, '
+                      'aborting.' )
 
 
 def ClearCompletionsCache():
@@ -364,8 +364,7 @@ def ExpectedFailure( reason, *exception_matchers ):
         # Failed for the right reason
         pytest.skip( reason )
       else:
-        raise AssertionError( 'Test was expected to fail: {0}'.format(
-          reason ) )
+        raise AssertionError( f'Test was expected to fail: {reason}' )
     return Wrapper
 
   return decorator
@@ -401,7 +400,7 @@ def WithRetry( test ):
       except Exception as test_exception:
         if time.time() > expiry:
           raise
-        print( 'Test failed, retrying: {0}'.format( str( test_exception ) ) )
+        print( f'Test failed, retrying: {test_exception}' )
         time.sleep( 0.25 )
   return wrapper
 
@@ -467,8 +466,7 @@ def PollForMessages( app, request_data, timeout = 60 ):
   while True:
     if time.time() > expiration:
       raise PollForMessagesTimeoutException(
-        'Waited for diagnostics to be ready for {0} seconds, aborting.'.format(
-          timeout ) )
+        f'Waited for diagnostics to be ready for {timeout} seconds, aborting.' )
 
     default_args = {
       'line_num'  : 1,
@@ -479,7 +477,7 @@ def PollForMessages( app, request_data, timeout = 60 ):
 
     response = app.post_json( '/receive_messages', BuildRequest( **args ) ).json
 
-    print( 'poll response: {0}'.format( pformat( response ) ) )
+    print( f'poll response: {pformat( response )}' )
 
     if isinstance( response, bool ):
       if not response:
@@ -488,7 +486,7 @@ def PollForMessages( app, request_data, timeout = 60 ):
       for message in response:
         yield message
     else:
-      raise AssertionError( 'Message poll response was wrong type: {0}'.format(
-        type( response ).__name__ ) )
+      raise AssertionError( 'Message poll response was wrong type: '
+                            f'{type( response ).__name__}' )
 
     time.sleep( 0.25 )

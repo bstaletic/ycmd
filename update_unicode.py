@@ -249,7 +249,7 @@ def GetGraphemeBreakProperty():
       total = int( match.group( 'total' ) )
       if nb_code_points != total:
         raise RuntimeError(
-          'Expected {} code points. Got {}.'.format( total, nb_code_points ) )
+          f'Expected {total} code points. Got {nb_code_points}.' )
       nb_code_points = 0
 
     match = GRAPHEME_BREAK_PROPERTY_REGEX.search( line )
@@ -335,7 +335,7 @@ def GetEmojiData():
       total = int( match.group( 'total' ) )
       if nb_code_points != total:
         raise RuntimeError(
-          'Expected {} code points. Got {}.'.format( total, nb_code_points ) )
+          f'Expected {total} code points. Got {nb_code_points}.' )
       nb_code_points = 0
 
     match = EMOJI_PROPERTY_REGEX.search( line )
@@ -464,7 +464,7 @@ def GetCodePoints():
         break_property = 'ExtPict'
       else:
         raise RuntimeError( 'Cannot handle Extended_Pictographic combined with '
-                            '{} property'.format( break_property ) )
+                            f'{break_property} property' )
     break_property = GRAPHEME_BREAK_PROPERTY_MAP[ break_property ]
     combining_class = int( value[ 'ccc' ] )
     # See https://unicode.org/reports/tr44/#General_Category_Values for the
@@ -492,7 +492,7 @@ def GetCodePoints():
 
 
 def CppChar( character ):
-  return '"{}"'.format( character )
+  return f'"{character}"'
 
 
 def CppBool( statement ):

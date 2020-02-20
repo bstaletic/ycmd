@@ -55,7 +55,7 @@ def TemporaryDirectory():
 
 
 def Download( url ):
-  print( 'Downloading {}'.format( url.rsplit( '/', 1 )[ -1 ] ) )
+  print( f'Downloading {url.rsplit( "/", 1 )[ -1 ]}' )
   request = requests.get( url, stream=True )
   request.raise_for_status()
   content = request.content
@@ -93,7 +93,7 @@ def FetchAndHash( download_url, output_dir, file_name ):
   except requests.exceptions.HTTPError as error:
     if error.response.status_code != 404:
       raise
-    print( 'Cannot download {}'.format( file_name ) )
+    print( f'Cannot download {file_name}' )
     return
 
   with open( archive, 'rb' ) as f:

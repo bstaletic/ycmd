@@ -518,10 +518,9 @@ class TernCompleter( Completer ):
                                   request_data[ 'column_codepoint' ],
                                   request_data )
 
-    doc_string = 'Name: {name}\nType: {type}\n\n{doc}'.format(
-        name = response.get( 'name', 'Unknown' ),
-        type = response.get( 'type', 'Unknown' ),
-        doc  = response.get( 'doc', 'No documentation available' ) )
+    doc_string = ( f'Name: {response.get( "name", "Unknown" )}\n'
+                   f'Type: {response.get( "type", "Unknown" )}\n\n'
+                   f'{response.get( "doc", "No documentation available" )}' )
 
     return responses.BuildDetailedInfoResponse( doc_string )
 
