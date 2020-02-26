@@ -228,7 +228,7 @@ class TernCompleter( Completer ):
       pass
 
 
-  def GetSubcommandsMap( self ):
+  def GetSubcommandsMap( self, request_data ):
     return {
       'RestartServer':  ( lambda self, request_data, args:
                                          self._RestartServer( request_data ) ),

@@ -496,7 +496,7 @@ def GetCompletions_ServerNotInitialized_test( app ):
   completer = handlers._server_state.GetFiletypeCompleter( [ 'java' ] )
 
 
-  def MockHandleInitializeInPollThread( self, response ):
+  def MockHandleInitializeInPollThread( self, response, request_data ):
     pass
 
 

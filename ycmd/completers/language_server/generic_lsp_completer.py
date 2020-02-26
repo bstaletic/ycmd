@@ -34,7 +34,7 @@ class GenericLSPCompleter( SimpleLSPCompleter ):
     return self._project_root_files
 
 
-  def Language( self ):
+  def Language( self, request_data ):
     return self._name
 
 

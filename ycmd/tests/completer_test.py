@@ -73,4 +73,4 @@ def FilterAndSortCandidates_Unicode_test():
         return_value = { 'Foo': '', 'StopServer': '' } )
 def DefinedSubcommands_RemoveStopServerSubcommand_test( subcommands_map ):
   completer = DummyCompleter( DefaultOptions() )
-  assert_that( completer.DefinedSubcommands(), contains_exactly( 'Foo' ) )
+  assert_that( completer.DefinedSubcommands( {} ), contains_exactly( 'Foo' ) )

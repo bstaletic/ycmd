@@ -156,7 +156,7 @@ class ClangCompleter( Completer ):
     return [ ConvertCompletionData( x ) for x in results ]
 
 
-  def GetSubcommandsMap( self ):
+  def GetSubcommandsMap( self, request_data ):
     return {
       'GoToDefinition'           : ( lambda self, request_data, args:
          self._GoToDefinition( request_data ) ),

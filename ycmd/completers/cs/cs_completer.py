@@ -162,7 +162,7 @@ class CsharpCompleter( Completer ):
              in solutioncompleter._GetCompletions( request_data ) ]
 
 
-  def GetSubcommandsMap( self ):
+  def GetSubcommandsMap( self, request_data ):
     return {
       'StopServer'                       : ( lambda self, request_data, args:
          self._SolutionSubcommand( request_data,

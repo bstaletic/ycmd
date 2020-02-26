@@ -57,7 +57,7 @@ class MockCompleter( lsc.LanguageServerCompleter, DummyCompleter ):
     self._connection = MockConnection()
     self._started = False
 
-  def Language( self ):
+  def Language( self, request_data ):
     return 'foo'
 
 
@@ -125,7 +125,7 @@ def LanguageServerCompleter_ExtraConf_FileEmpty_test( app ):
       'capabilities': {}
     }
   }
-  completer._HandleInitializeInPollThread( initialize_response )
+  completer._HandleInitializeInPollThread( initialize_response, request_data )
   assert_that( {}, equal_to( completer._settings.get( 'ls', {} ) ) )
   # We shouldn't have used the extra_conf path for the project directory, but
   # that _also_ happens to be the path of the file we opened.
@@ -191,7 +191,7 @@ def LanguageServerCompleter_ExtraConf_NoExtraConf_test( app ):
       'capabilities': {}
     }
   }
-  completer._HandleInitializeInPollThread( initialize_response )
+  completer._HandleInitializeInPollThread( initialize_response, request_data )
   assert_that( {}, equal_to( completer._settings.get( 'ls', {} ) ) )
   # We use the client working directory
   assert_that( PathToTestFile(), equal_to( completer._project_directory ) )
@@ -221,7 +221,7 @@ def LanguageServerCompleter_ExtraConf_NonGlobal_test( app ):
       'capabilities': {}
     }
   }
-  completer._HandleInitializeInPollThread( initialize_response )
+  completer._HandleInitializeInPollThread( initialize_response, request_data )
   assert_that( PathToTestFile( 'project', 'settings_extra_conf' ),
                equal_to( completer._project_directory ) )
 
@@ -637,7 +637,8 @@ def LanguageServerCompleter_DelayedInitialization_test( app ):
           'capabilities': {}
         }
       }
-      completer._HandleInitializeInPollThread( initialize_response )
+      completer._HandleInitializeInPollThread( initialize_response,
+                                               request_data )
 
       update.assert_called_with( request_data )
       purge.assert_called_with( 'Test.ycmtest' )
@@ -1072,7 +1073,7 @@ def LanguageServerCompleter_Diagnostics_MaxDiagnosticsNumberExceeded_test(
         'capabilities': {}
       }
     }
-    completer._HandleInitializeInPollThread( initialize_response )
+    completer._HandleInitializeInPollThread( initialize_response, request_data )
 
     diagnostics = contains_exactly(
       has_entries( {
@@ -1149,7 +1150,7 @@ def LanguageServerCompleter_Diagnostics_NoLimitToNumberOfDiagnostics_test(
         'capabilities': {}
       }
     }
-    completer._HandleInitializeInPollThread( initialize_response )
+    completer._HandleInitializeInPollThread( initialize_response, request_data )
 
     diagnostics = contains_exactly(
       has_entries( {
@@ -1257,7 +1258,7 @@ def LanguageServerCompleter_Diagnostics_Code_test( app ):
         'capabilities': {}
       }
     }
-    completer._HandleInitializeInPollThread( initialize_response )
+    completer._HandleInitializeInPollThread( initialize_response, request_data )
 
     diagnostics = contains_exactly(
       has_entries( {
@@ -1336,7 +1337,7 @@ def LanguageServerCompleter_Diagnostics_PercentEncodeCannonical_test( app ):
         'capabilities': {}
       }
     }
-    completer._HandleInitializeInPollThread( initialize_response )
+    completer._HandleInitializeInPollThread( initialize_response, request_data )
 
     diagnostics = contains_exactly(
       has_entries( {
@@ -1396,7 +1397,7 @@ def LanguageServerCompleter_OnFileReadyToParse_InvalidURI_test( app ):
         'capabilities': {}
       }
     }
-    completer._HandleInitializeInPollThread( initialize_response )
+    completer._HandleInitializeInPollThread( initialize_response, request_data )
 
     diagnostics = contains_exactly(
       has_entries( {

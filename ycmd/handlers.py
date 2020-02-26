@@ -212,9 +212,10 @@ def FiletypeCompletionAvailable():
 @app.post( '/defined_subcommands' )
 def DefinedSubcommands():
   LOGGER.info( 'Received defined subcommands request' )
-  completer = _GetCompleterForRequestData( RequestWrap( request.json ) )
+  request_data = RequestWrap( request.json )
+  completer = _GetCompleterForRequestData( request_data )
 
-  return _JsonResponse( completer.DefinedSubcommands() )
+  return _JsonResponse( completer.DefinedSubcommands( request_data ) )
 
 
 @app.post( '/detailed_diagnostic' )

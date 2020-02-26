@@ -241,7 +241,7 @@ class ClangdCompleter( simple_language_server_completer.SimpleLSPCompleter ):
     return self._clangd_command
 
 
-  def Language( self ):
+  def Language( self, request_data ):
     return 'cfamily'
 
 

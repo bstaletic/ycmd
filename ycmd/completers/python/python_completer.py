@@ -55,6 +55,10 @@ class PythonCompleter( Completer ):
     self._SysPathForFile( request_data, environment )
 
 
+  def Language( self, request_data ):
+    return 'python'
+
+
   def _SettingsForRequest( self, request_data ):
     filepath = request_data[ 'filepath' ]
     client_data = request_data[ 'extra_conf_data' ]
@@ -64,21 +68,18 @@ class PythonCompleter( Completer ):
       pass
 
     module = extra_conf_store.ModuleForSourceFile( filepath )
-    settings = self._GetSettings( module, filepath, client_data )
+    settings = self.GetSettings( module, request_data )
     self._settings_for_file[ filepath, client_data ] = settings
     return settings
 
 
-  def _GetSettings( self, module, filepath, client_data ):
+  def GetSettings( self, module, request_data ):
     # We don't warn the user if no extra conf file is found.
     if module:
-      if hasattr( module, 'Settings' ):
-        settings = module.Settings( language = 'python',
-                                    filename = filepath,
-                                    client_data = client_data )
-        if settings is not None:
-          return settings
-      LOGGER.debug( 'No Settings function defined in %s', module.__file__ )
+      settings = super().GetSettings( module, request_data )
+      if settings:
+        return settings
+
     return {
       # NOTE: this option is only kept for backward compatibility. Setting the
       # Python interpreter path through the extra conf file is preferred.
@@ -263,7 +264,7 @@ class PythonCompleter( Completer ):
     return candidates
 
 
-  def GetSubcommandsMap( self ):
+  def GetSubcommandsMap( self, request_data ):
     return {
       'GoTo'           : ( lambda self, request_data, args:
                            self._GoToDefinition( request_data ) ),

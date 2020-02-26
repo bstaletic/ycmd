@@ -17,6 +17,8 @@
 
 import abc
 import threading
+from ycmd import extra_conf_store
+from ycmd import utils
 from ycmd.completers import completer_utils
 from ycmd.responses import NoDiagnosticSupport, SignatureHelpAvailalability
 
@@ -314,8 +316,8 @@ class Completer( metaclass = abc.ABCMeta ):
     return {}
 
 
-  def DefinedSubcommands( self ):
-    subcommands = sorted( self.GetSubcommandsMap().keys() )
+  def DefinedSubcommands( self, request_data ):
+    subcommands = sorted( self.GetSubcommandsMap( request_data ).keys() )
     try:
       # We don't want expose this subcommand because it is not really needed
       # for the user but it is useful in tests for tearing down the server
@@ -325,7 +327,7 @@ class Completer( metaclass = abc.ABCMeta ):
     return subcommands
 
 
-  def GetSubcommandsMap( self ):
+  def GetSubcommandsMap( self, request_data ):
     """This method should return a dictionary where each key represents the
     completer command name and its value is a lambda function of this form:
 
@@ -346,8 +348,8 @@ class Completer( metaclass = abc.ABCMeta ):
     return { 'fixits': [ request_data[ 'fixit' ] ] }
 
 
-  def UserCommandsHelpMessage( self ):
-    subcommands = self.DefinedSubcommands()
+  def UserCommandsHelpMessage( self, request_data ):
+    subcommands = self.DefinedSubcommands( request_data )
     if subcommands:
       return ( 'Supported commands are:\n' +
                '\n'.join( subcommands ) +
@@ -398,14 +400,14 @@ class Completer( metaclass = abc.ABCMeta ):
 
   def OnUserCommand( self, arguments, request_data ):
     if not arguments:
-      raise ValueError( self.UserCommandsHelpMessage() )
+      raise ValueError( self.UserCommandsHelpMessage( request_data ) )
 
-    command_map = self.GetSubcommandsMap()
+    command_map = self.GetSubcommandsMap( request_data )
 
     try:
       command = command_map[ arguments[ 0 ] ]
     except KeyError:
-      raise ValueError( self.UserCommandsHelpMessage() )
+      raise ValueError( self.UserCommandsHelpMessage( request_data ) )
 
     return command( self, request_data, arguments[ 1: ] )
 
@@ -469,6 +471,36 @@ class Completer( metaclass = abc.ABCMeta ):
     # Protocol. As such, the default implementation just returns False, meaning
     # that unsolicited messages are not supported for this filetype.
     return False
+
+
+  def AdditionalFormattingOptions( self, request_data ):
+    module = extra_conf_store.ModuleForSourceFile( request_data[ 'filepath' ] )
+    try:
+      settings = self.GetSettings( module, request_data )
+      return settings.get( 'formatting_options', {} )
+    except AttributeError:
+      return {}
+
+
+  def Language( self, request_data ):
+    return ""
+
+
+  def GetSettings( self, module, request_data ):
+    if hasattr( module, 'Settings' ):
+      settings = module.Settings(
+        language = self.Language( request_data ),
+        filename = request_data[ 'filepath' ],
+        client_data = request_data[ 'extra_conf_data' ] )
+      if settings is not None:
+        return settings
+
+    utils.LOGGER.debug( 'No Settings function defined in %s', module.__file__ )
+
+    return {}
+
+
+
 
 
 class CompletionsCache:

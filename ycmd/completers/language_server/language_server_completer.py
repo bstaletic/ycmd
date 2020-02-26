@@ -813,7 +813,7 @@ class LanguageServerCompleter( Completer ):
     return self._completer_name
 
 
-  def Language( self ):
+  def Language( self, request_data ):
     """Returns the string used to identify the language in user's
     .ycm_extra_conf.py file. Default to the completer name in lower case."""
     return self._language
@@ -1184,7 +1184,7 @@ class LanguageServerCompleter( Completer ):
     return {}
 
 
-  def GetSubcommandsMap( self ):
+  def GetSubcommandsMap( self, request_data ):
     commands = {}
     commands.update( DEFAULT_SUBCOMMANDS_MAP )
     commands.update( {
@@ -1205,7 +1205,7 @@ class LanguageServerCompleter( Completer ):
       )
     commands.update( self.GetCustomSubcommands() )
 
-    return self._DiscoverSubcommandSupport( commands )
+    return self._DiscoverSubcommandSupport( commands, request_data )
 
 
   def _GetSubcommandProvider( self, provider_list ):
@@ -1224,7 +1224,7 @@ class LanguageServerCompleter( Completer ):
     return None
 
 
-  def _DiscoverSubcommandSupport( self, commands ):
+  def _DiscoverSubcommandSupport( self, commands, request_data ):
     subcommands_map = {}
     for command, handler in commands.items():
       if isinstance( handler, list ):
@@ -1233,37 +1233,23 @@ class LanguageServerCompleter( Completer ):
           LOGGER.info( 'Found %s support for command %s in %s',
                         provider,
                         command,
-                        self.Language() )
+                        self.Language( request_data ) )
 
           subcommands_map[ command ] = PROVIDERS_MAP[ provider ]
         else:
           LOGGER.info( 'No support for %s command in server for %s',
                         command,
-                        self.Language() )
+                        self.Language( request_data ) )
       else:
         LOGGER.info( 'Always supporting %s for %s',
                       command,
-                      self.Language() )
+                      self.Language( request_data ) )
         subcommands_map[ command ] = handler
 
     return subcommands_map
 
 
   def DefaultSettings( self, request_data ):
-    return {}
-
-
-  def GetSettings( self, module, request_data ):
-    if hasattr( module, 'Settings' ):
-      settings = module.Settings(
-        language = self.Language(),
-        filename = request_data[ 'filepath' ],
-        client_data = request_data[ 'extra_conf_data' ] )
-      if settings is not None:
-        return settings
-
-    LOGGER.debug( 'No Settings function defined in %s', module.__file__ )
-
     return {}
 
 
@@ -1727,7 +1713,7 @@ class LanguageServerCompleter( Completer ):
         if message is None:
           return
 
-        self._HandleInitializeInPollThread( message )
+        self._HandleInitializeInPollThread( message, request_data )
 
       self._initialize_response = self.GetConnection().GetResponseAsync(
         request_id,
@@ -1751,7 +1737,7 @@ class LanguageServerCompleter( Completer ):
     return server_trigger_characters
 
 
-  def _HandleInitializeInPollThread( self, response ):
+  def _HandleInitializeInPollThread( self, response, request_data ):
     """Called within the context of the LanguageServerConnection's message pump
     when the initialize request receives a response."""
     with self._server_info_mutex:
@@ -1788,7 +1774,7 @@ class LanguageServerCompleter( Completer ):
                                      .get( 'triggerCharacters' ) or []
         )
         LOGGER.debug( '%s: Server declares trigger characters: %s',
-                      self.Language(),
+                      self.Language( request_data ),
                       server_trigger_characters )
 
         trigger_characters = self.GetTriggerCharacters(
@@ -1796,7 +1782,7 @@ class LanguageServerCompleter( Completer ):
 
         if trigger_characters:
           LOGGER.info( '%s: Using trigger characters for semantic triggers: %s',
-                       self.Language(),
+                       self.Language( request_data ),
                        ','.join( trigger_characters ) )
 
           self.completion_triggers.SetServerSemanticTriggers(
@@ -1808,7 +1794,7 @@ class LanguageServerCompleter( Completer ):
                                      .get( 'triggerCharacters' ) or []
         )
         LOGGER.debug( '%s: Server declares signature trigger characters: %s',
-                      self.Language(),
+                      self.Language( request_data ),
                       server_trigger_characters )
 
         trigger_characters = self.GetSignatureTriggerCharacters(
@@ -1816,7 +1802,7 @@ class LanguageServerCompleter( Completer ):
 
         if trigger_characters:
           LOGGER.info( '%s: Using characters for signature triggers: %s',
-                       self.Language(),
+                       self.Language( request_data ),
                        ','.join( trigger_characters ) )
           self.SetSignatureHelpTriggers( trigger_characters )
 
@@ -2076,19 +2062,6 @@ class LanguageServerCompleter( Completer ):
       raise RuntimeError( 'Cannot rename the symbol under cursor.' )
 
     return responses.BuildFixItResponse( [ fixit ] )
-
-
-  def AdditionalFormattingOptions( self, request_data ):
-    # While we have the settings in self._settings[ 'formatting_options' ], we
-    # actually run Settings again here, which allows users to have different
-    # formatting options for different files etc. if they should decide that's
-    # appropriate.
-    module = extra_conf_store.ModuleForSourceFile( request_data[ 'filepath' ] )
-    try:
-      settings = self.GetSettings( module, request_data )
-      return settings.get( 'formatting_options', {} )
-    except AttributeError:
-      return {}
 
 
   def Format( self, request_data ):

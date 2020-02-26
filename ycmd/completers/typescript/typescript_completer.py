@@ -358,6 +358,10 @@ class TypeScriptCompleter( Completer ):
       return utils.ProcessIsRunning( self._tsserver_handle )
 
 
+  def Language( self, request_data ):
+    return request_data[ 'first_filetype' ]
+
+
   def ServerIsHealthy( self ):
     return self._ServerIsRunning()
 
@@ -422,7 +426,7 @@ class TypeScriptCompleter( Completer ):
     return candidates
 
 
-  def GetSubcommandsMap( self ):
+  def GetSubcommandsMap( self, request_data ):
     return {
       'RestartServer'     : ( lambda self, request_data, args:
                               self._RestartServer( request_data ) ),
@@ -861,19 +865,15 @@ class TypeScriptCompleter( Completer ):
 
     self._Reload( request_data )
 
-    # TODO: support all formatting options. See
-    # https://github.com/Microsoft/TypeScript/blob/72e92a055823f1ade97d03d7526dbab8be405dde/lib/protocol.d.ts#L2060-L2077
-    # for the list of options. While not standard, a way to support these
-    # options, which is already adopted by a number of clients, would be to read
-    # the "formatOptions" field in the tsconfig.json file.
     options = request_data[ 'options' ]
+    options['tabSize'] = options.pop('tab_size')
+    options['indentSize'] = options['tabSize']
+    options['convertTabsToSpaces'] = options.pop('insert_spaces')
+    options.update(
+      self.AdditionalFormattingOptions( request_data ) )
     self._SendRequest( 'configure', {
       'file': filepath,
-      'formatOptions': {
-        'tabSize': options[ 'tab_size' ],
-        'indentSize': options[ 'tab_size' ],
-        'convertTabsToSpaces': options[ 'insert_spaces' ],
-      }
+      'formatOptions': options
     } )
 
     response = self._SendRequest( 'format',
