@@ -231,12 +231,11 @@ class CsharpCompleter( Completer ):
     if ( self.user_options[ 'auto_start_csharp_server' ]
          and not solutioncompleter._ServerIsRunning() ):
       solutioncompleter._StartServer()
-      return
 
     # Bail out if the server is unresponsive. We don't start or restart the
     # server in this case because current one may still be warming up.
-    if not solutioncompleter.ServerIsHealthy():
-      return
+    while not solutioncompleter.ServerIsHealthy():
+      pass
 
     errors = solutioncompleter.CodeCheck( request_data )
 
