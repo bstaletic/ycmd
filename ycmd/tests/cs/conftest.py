@@ -128,7 +128,7 @@ def GetDiagnostics( app, filepath ):
 
 
 @contextmanager
-def WrapOmniSharpServer( app, filepath ):
+def WrapOmniSharpServer( app, filepath, no_wait_for_diags = False ):
   global shared_filepaths
   global shared_log_indexes
 
@@ -136,7 +136,7 @@ def WrapOmniSharpServer( app, filepath ):
     # StartCompleterServer( app, 'cs', filepath )
     GetDiagnostics( app, filepath )
     shared_filepaths.append( filepath )
-    WaitUntilCsCompleterIsReady( app, filepath )
+    WaitUntilCsCompleterIsReady( app, filepath, no_wait_for_diags )
 
   logfiles = []
   response = GetDebugInfo( app, filepath )
@@ -156,10 +156,12 @@ def WrapOmniSharpServer( app, filepath ):
         sys.stdout.write( '\n' )
 
 
-def WaitUntilCsCompleterIsReady( app, filepath ):
+def WaitUntilCsCompleterIsReady( app, filepath, no_wait_for_diags ):
   WaitUntilCompleterServerReady( app, 'cs' )
   # Omnisharp isn't ready when it says it is, so wait until Omnisharp returns
   # at least one diagnostic multiple times.
+  if no_wait_for_diags:
+    return
   success_count = 0
   for reraise_error in [ False ] * 39 + [ True ]:
     if len( GetDiagnostics( app, filepath ) ) != 0:

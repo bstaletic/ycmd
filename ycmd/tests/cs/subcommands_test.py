@@ -34,7 +34,7 @@ from ycmd.tests.test_utils import ( BuildRequest,
                                     RangeMatcher,
                                     WaitUntilCompleterServerReady,
                                     WithRetry )
-from ycmd.utils import ReadFile, LOGGER
+from ycmd.utils import ReadFile, LOGGER, OnWindows
 
 
 @WithRetry
@@ -190,7 +190,7 @@ def Subcommands_RefactorRename_MissingNewName_test( app ):
 @SharedYcmd
 def Subcommands_RefactorRename_Unicode_test( app ):
   unicode_test = PathToTestFile( 'testy', 'Unicode.cs' )
-  with WrapOmniSharpServer( app, unicode_test ):
+  with WrapOmniSharpServer( app, unicode_test, not OnWindows() ):
     contents = ReadFile( unicode_test )
 
     request = BuildRequest( completer_target = 'filetype_default',
@@ -497,7 +497,7 @@ def Subcommands_GetToImplementation_Unicode_test( app ):
 @SharedYcmd
 def Subcommands_GetType_EmptyMessage_test( app ):
   filepath = PathToTestFile( 'testy', 'GetTypeTestCase.cs' )
-  with WrapOmniSharpServer( app, filepath ):
+  with WrapOmniSharpServer( app, filepath, not OnWindows() ):
     contents = ReadFile( filepath )
 
     gettype_data = BuildRequest( completer_target = 'filetype_default',
@@ -573,7 +573,7 @@ def Subcommands_GetType_DocsIgnored_test( app ):
 @SharedYcmd
 def Subcommands_GetDoc_Invalid_test( app ):
   filepath = PathToTestFile( 'testy', 'GetDocTestCase.cs' )
-  with WrapOmniSharpServer( app, filepath ):
+  with WrapOmniSharpServer( app, filepath, not OnWindows() ):
     contents = ReadFile( filepath )
 
     getdoc_data = BuildRequest( completer_target = 'filetype_default',
