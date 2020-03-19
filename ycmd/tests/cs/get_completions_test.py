@@ -23,6 +23,7 @@ from hamcrest import ( assert_that,
                        raises )
 from webtest import AppError
 
+from ycmd.tests.test_utils import WithRetry
 from ycmd.tests.cs import PathToTestFile, SharedYcmd, WrapOmniSharpServer
 from ycmd.tests.test_utils import BuildRequest, CompletionEntryMatcher
 from ycmd.utils import ReadFile
@@ -81,6 +82,7 @@ def GetCompletions_Basic_test( app ):
       } ) )
 
 
+@WithRetry
 @SharedYcmd
 def GetCompletions_Unicode_test( app ):
   filepath = PathToTestFile( 'testy', 'Unicode.cs' )

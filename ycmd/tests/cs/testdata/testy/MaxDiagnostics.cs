@@ -1,6 +1,6 @@
 public class MaxDiagnostics
 {
-    public int test;
-    public int test;
-    public int test;
+    public int a
+    public int b;
+    public int c
 }

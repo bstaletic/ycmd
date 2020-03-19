@@ -158,21 +158,3 @@ def WrapOmniSharpServer( app, filepath ):
 
 def WaitUntilCsCompleterIsReady( app, filepath ):
   WaitUntilCompleterServerReady( app, 'cs' )
-  # Omnisharp isn't ready when it says it is, so wait until Omnisharp returns
-  # at least one diagnostic multiple times.
-  success_count = 0
-  for reraise_error in [ False ] * 39 + [ True ]:
-    try:
-      if len( GetDiagnostics( app, filepath ) ) == 0:
-        raise RuntimeError( "No diagnostic" )
-      success_count += 1
-      if success_count > 2:
-        break
-    except Exception:
-      success_count = 0
-      if reraise_error:
-        raise
-
-    time.sleep( .5 )
-  else:
-    raise RuntimeError( "Never was ready" )

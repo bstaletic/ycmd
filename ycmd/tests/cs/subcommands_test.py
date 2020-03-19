@@ -37,6 +37,7 @@ from ycmd.tests.test_utils import ( BuildRequest,
 from ycmd.utils import ReadFile, LOGGER
 
 
+@WithRetry
 @SharedYcmd
 def Subcommands_FixIt_NoFixitsFound_test( app ):
   fixit_test = PathToTestFile( 'testy', 'FixItTestCase.cs' )
@@ -113,6 +114,13 @@ def Subcommands_FixIt_Range_test( app ):
       'end': { 'line_num': 4, 'column_num': 27 }
     } } )
     response = app.post_json( '/run_completer_command', request ).json
+    request = BuildRequest( line_num = 4,
+                            column_num = 23,
+                            contents = contents,
+                            filetype = 'cs',
+                            filepath = fixit_test,
+                            fixit = response[ 'fixits' ][ 0 ] )
+    response = app.post_json( '/resolve_fixit', request ).json
     assert_that( response, has_entries( {
       'fixits': contains_exactly( has_entries( {
         'location': LocationMatcher( fixit_test, 4, 23 ),
@@ -139,7 +147,13 @@ def Subcommands_FixIt_Single_test( app ):
                             filetype = 'cs',
                             filepath = fixit_test )
     response = app.post_json( '/run_completer_command', request ).json
-    LOGGER.debug( 'r = %s', response )
+    request = BuildRequest( line_num = 4,
+                            column_num = 23,
+                            contents = contents,
+                            filetype = 'cs',
+                            filepath = fixit_test,
+                            fixit = response[ 'fixits' ][ 0 ] )
+    response = app.post_json( '/resolve_fixit', request ).json
     assert_that( response, has_entries( {
       'fixits': contains_exactly( has_entries( {
         'location': LocationMatcher( fixit_test, 4, 23 ),
@@ -221,7 +235,6 @@ def Subcommands_RefactorRename_Basic_test( app ):
         ) } ) ) } ) )
 
 
-@WithRetry
 @IsolatedYcmd()
 def Subcommands_GoTo_Basic_test( app ):
   filepath = PathToTestFile( 'testy', 'GotoTestCase.cs' )
@@ -265,6 +278,7 @@ def Subcommands_GoTo_Unicode_test( app ):
     assert_that( response, LocationMatcher( filepath, 30, 54 ) )
 
 
+@WithRetry
 @SharedYcmd
 def Subcommands_GoToImplementation_Basic_test( app ):
   filepath = PathToTestFile( 'testy', 'GotoTestCase.cs' )
@@ -871,6 +885,12 @@ def Subcommands_RefactorRename_MultiFile_test( app ):
   get_doc_test = PathToTestFile( 'testy', 'GetDocTestCase.cs' )
   unicode_test = PathToTestFile( 'testy', 'Unicode.cs' )
   with WrapOmniSharpServer( app, continuous_test ):
+    for project_file in [ continuous_test, fixit_test, get_type_test, goto_test, import_test, program, get_doc_test, unicode_test ]:
+      print( 'project_file = ', project_file )
+      request = BuildRequest( filepath = project_file,
+                              event_name = 'FileReadyToParse',
+                              filetype = 'cs' )
+      app.post_json( '/event_notification', request )
     contents = ReadFile( continuous_test )
 
     request = BuildRequest( completer_target = 'filetype_default',

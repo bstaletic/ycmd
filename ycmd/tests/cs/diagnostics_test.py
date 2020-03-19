@@ -44,7 +44,7 @@ def Diagnostics_Basic_test( app ):
     diag_data = BuildRequest( filepath = filepath,
                               filetype = 'cs',
                               contents = contents,
-                              line_num = 11,
+                              line_num = 10,
                               column_num = 2 )
 
     results = app.post_json( '/detailed_diagnostic', diag_data ).json
@@ -53,7 +53,7 @@ def Diagnostics_Basic_test( app ):
                  has_entry(
                      'message',
                      contains_string(
-                       "'Console' does not contain a definition for ''" ) ) )
+                       "Identifier expected" ) ) )
 
 
 @SharedYcmd
@@ -75,30 +75,6 @@ def Diagnostics_ZeroBasedLineAndColumn_test( app ):
         'text': contains_string( "Identifier expected" ),
         'location': LocationMatcher( filepath, 10, 12 ),
         'location_extent': RangeMatcher( filepath, ( 10, 12 ), ( 10, 12 ) ),
-      } )
-    ) )
-
-
-@SharedYcmd
-def Diagnostics_WithRange_test( app ):
-  filepath = PathToTestFile( 'testy', 'DiagnosticRange.cs' )
-  with WrapOmniSharpServer( app, filepath ):
-    contents = ReadFile( filepath )
-
-    event_data = BuildRequest( filepath = filepath,
-                               event_name = 'FileReadyToParse',
-                               filetype = 'cs',
-                               contents = contents )
-
-    results = app.post_json( '/event_notification', event_data ).json
-
-    assert_that( results, contains_exactly(
-      has_entries( {
-        'kind': equal_to( 'WARNING' ),
-        'text': contains_string(
-          "The variable '\u4e5d' is assigned but its value is never used" ),
-        'location': LocationMatcher( filepath, 6, 13 ),
-        'location_extent': RangeMatcher( filepath, ( 6, 13 ), ( 6, 16 ) )
       } )
     ) )
 
@@ -137,6 +113,7 @@ def Diagnostics_MultipleSolution_test( app ):
     ) )
 
 
+@WithRetry
 @IsolatedYcmd( { 'max_diagnostics_to_display': 1 } )
 def Diagnostics_MaximumDiagnosticsNumberExceeded_test( app ):
   filepath = PathToTestFile( 'testy', 'MaxDiagnostics.cs' )
@@ -156,14 +133,13 @@ def Diagnostics_MaximumDiagnosticsNumberExceeded_test( app ):
                              contents = contents )
 
   results = app.post_json( '/event_notification', event_data ).json
-
+  print( 'completer response = ', results )
   assert_that( results, contains_exactly(
     has_entries( {
       'kind': equal_to( 'ERROR' ),
-      'text': contains_string( "The type 'MaxDiagnostics' already contains "
-                               "a definition for 'test'" ),
-      'location': LocationMatcher( filepath, 4, 16 ),
-      'location_extent': RangeMatcher( filepath, ( 4, 16 ), ( 4, 20 ) )
+      'text': contains_string( '; expected' ),
+      'location': LocationMatcher( filepath, 3, 17 ),
+      'location_extent': RangeMatcher( filepath, ( 3, 17 ), ( 3, 17 ) )
     } ),
     has_entries( {
       'kind': equal_to( 'ERROR' ),
