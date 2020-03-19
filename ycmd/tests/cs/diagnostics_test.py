@@ -25,7 +25,7 @@ from ycmd.tests.test_utils import ( BuildRequest,
                                     RangeMatcher,
                                     StopCompleterServer,
                                     WithRetry )
-from ycmd.utils import ReadFile
+from ycmd.utils import ReadFile, OnWindows
 
 
 @WithRetry
@@ -94,7 +94,7 @@ def Diagnostics_MultipleSolution_test( app ):
                                contents = contents )
 
     results = app.post_json( '/event_notification', event_data ).json
-    WaitUntilCsCompleterIsReady( app, filepath, False )
+    WaitUntilCsCompleterIsReady( app, filepath, not OnWindows() )
 
     event_data = BuildRequest( filepath = filepath,
                                event_name = 'FileReadyToParse',
@@ -125,7 +125,7 @@ def Diagnostics_MaximumDiagnosticsNumberExceeded_test( app ):
                              contents = contents )
 
   app.post_json( '/event_notification', event_data ).json
-  WaitUntilCsCompleterIsReady( app, filepath, False )
+  WaitUntilCsCompleterIsReady( app, filepath, not OnWindows() )
 
   event_data = BuildRequest( filepath = filepath,
                              event_name = 'FileReadyToParse',

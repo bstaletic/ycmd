@@ -22,7 +22,7 @@ from hamcrest import ( assert_that,
                        has_items )
 from unittest.mock import patch
 from ycmd import handlers
-from ycmd.utils import ReadFile, LOGGER
+from ycmd.utils import ReadFile, LOGGER, OnWindows
 from ycmd.tests.cs import ( PathToTestFile,
                             IsolatedYcmd,
                             SharedYcmd,
@@ -201,7 +201,7 @@ def SignatureHelp_NotAFunction_NoError_test( app ):
 def GetCompletions_Basic_NoSigHelp_test( app ):
   filepath = PathToTestFile( 'testy', 'Program.cs' )
   with WrapOmniSharpServer( app, filepath ):
-    WaitUntilCsCompleterIsReady( app, filepath, False )
+    WaitUntilCsCompleterIsReady( app, filepath, not OnWindows() )
     contents = ReadFile( filepath )
 
     completion_data = BuildRequest( filepath = filepath,
