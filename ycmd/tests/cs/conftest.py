@@ -18,6 +18,7 @@
 import os
 import pytest
 import sys
+import time
 
 from contextlib import contextmanager
 from ycmd.tests.test_utils import ( BuildRequest,
