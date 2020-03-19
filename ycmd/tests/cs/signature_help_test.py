@@ -201,7 +201,7 @@ def SignatureHelp_NotAFunction_NoError_test( app ):
 def GetCompletions_Basic_NoSigHelp_test( app ):
   filepath = PathToTestFile( 'testy', 'Program.cs' )
   with WrapOmniSharpServer( app, filepath ):
-    WaitUntilCsCompleterIsReady( app, filepath )
+    WaitUntilCsCompleterIsReady( app, filepath, False )
     contents = ReadFile( filepath )
 
     completion_data = BuildRequest( filepath = filepath,

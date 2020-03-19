@@ -94,7 +94,7 @@ def Diagnostics_MultipleSolution_test( app ):
                                contents = contents )
 
     results = app.post_json( '/event_notification', event_data ).json
-    WaitUntilCsCompleterIsReady( app, filepath )
+    WaitUntilCsCompleterIsReady( app, filepath, False )
 
     event_data = BuildRequest( filepath = filepath,
                                event_name = 'FileReadyToParse',
@@ -125,7 +125,7 @@ def Diagnostics_MaximumDiagnosticsNumberExceeded_test( app ):
                              contents = contents )
 
   app.post_json( '/event_notification', event_data ).json
-  WaitUntilCsCompleterIsReady( app, filepath )
+  WaitUntilCsCompleterIsReady( app, filepath, False )
 
   event_data = BuildRequest( filepath = filepath,
                              event_name = 'FileReadyToParse',
