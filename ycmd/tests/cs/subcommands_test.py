@@ -246,7 +246,6 @@ def Subcommands_GoTo_Basic_test( app ):
 
   app.post_json( '/event_notification', event_data )
   WaitUntilCompleterServerReady( app, 'cs' )
-  destination = PathToTestFile( 'testy', 'Program.cs' )
 
   goto_data = BuildRequest( completer_target = 'filetype_default',
                             command_arguments = [ 'GoTo' ],
