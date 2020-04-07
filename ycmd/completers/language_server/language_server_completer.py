@@ -1481,6 +1481,16 @@ class LanguageServerCompleter( Completer ):
       self._SendInitialize( request_data )
 
 
+  def OnFileUpdate( self, request_data ):
+    filename = request_data[ 'filepath' ]
+    file_state = self._server_file_state[ filename ]
+    patch = request_data[ 'extra_data' ]
+    update_range = patch[ 'range' ]
+    new_text = patch[ 'text' ]
+    msg = lsp.DidChangeTextDocument( file_state, new_text, update_range )
+    self.GetConnection().SendNotification( msg )
+
+
   def OnFileReadyToParse( self, request_data ):
     if not self.ServerIsHealthy() and not self._server_started:
       # We have to get the settings before starting the server, as this call
@@ -1639,6 +1649,9 @@ class LanguageServerCompleter( Completer ):
     Implementations may override this method to handle custom notifications, but
     must always call the base implementation for unrecognized notifications."""
 
+    if 'sync_type' in notification:
+      return notification
+
     if notification[ 'method' ] == 'window/showMessage':
       return responses.BuildDisplayMessageResponse(
         notification[ 'params' ][ 'message' ] )
@@ -1727,7 +1740,8 @@ class LanguageServerCompleter( Completer ):
                                        file_data[ 'contents' ] )
 
         self.GetConnection().SendNotification( msg )
-      elif action == lsp.ServerFileState.CHANGE_FILE:
+      elif ( action == lsp.ServerFileState.CHANGE_FILE and
+             not self._sync_type == 'Incremental' ):
         # FIXME: DidChangeTextDocument doesn't actually do anything
         # different from DidOpenTextDocument other than send the right
         # message, because we don't actually have a mechanism for generating
@@ -1941,6 +1955,10 @@ class LanguageServerCompleter( Completer ):
         self._sync_type = SYNC_TYPE[ sync ]
         LOGGER.info( 'Language server requires sync type of %s',
                      self._sync_type )
+        if self._sync_type == 'Incremental':
+          self.GetConnection()._AddNotificationToQueue( {
+            'sync_type': self._sync_type,
+            'filetypes': self.SupportedFiletypes() } )
 
       # Update our semantic triggers if they are supplied by the server
       if self.completion_triggers is not None:
