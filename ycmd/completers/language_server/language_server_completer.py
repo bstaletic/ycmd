@@ -1481,6 +1481,16 @@ class LanguageServerCompleter( Completer ):
       self._SendInitialize( request_data )
 
 
+  def OnFileUpdate( self, request_data ):
+    filename = request_data[ 'filepath' ]
+    file_state = self._server_file_state[ filename ]
+    patch = request_data[ 'extra_data' ]
+    update_range = patch[ 'range' ]
+    new_text = patch[ 'text' ]
+    msg = lsp.DidChangeTextDocument( file_state, new_text, update_range )
+    self.GetConnection().SendNotification( msg )
+
+
   def OnFileReadyToParse( self, request_data ):
     if not self.ServerIsHealthy() and not self._server_started:
       # We have to get the settings before starting the server, as this call
@@ -1704,6 +1714,9 @@ class LanguageServerCompleter( Completer ):
 
 
   def _UpdateDirtyFilesUnderLock( self, request_data ):
+    if self._sync_type == 'Incremental':
+      return
+
     for file_name, file_data in request_data[ 'file_data' ].items():
       if not self._AnySupportedFileType( file_data[ 'filetypes' ] ):
         LOGGER.debug( 'Not updating file %s, it is not a supported filetype: '
@@ -1941,6 +1954,10 @@ class LanguageServerCompleter( Completer ):
         self._sync_type = SYNC_TYPE[ sync ]
         LOGGER.info( 'Language server requires sync type of %s',
                      self._sync_type )
+        if self._sync_type == 'Incremental':
+          self.GetConnection()._AddNotificationToQueue( {
+            'sync_type': self._sync_type,
+            'filetypes': self.SupportedFiletypes() } )
 
       # Update our semantic triggers if they are supplied by the server
       if self.completion_triggers is not None:

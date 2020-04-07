@@ -380,6 +380,10 @@ class Completer( metaclass = abc.ABCMeta ):
       candidates, sort_property, query, self._max_candidates )
 
 
+  def OnFileUpdate( self, request_data ):
+    pass # pragma: no cover
+
+
   def OnFileReadyToParse( self, request_data ):
     pass # pragma: no cover
 
