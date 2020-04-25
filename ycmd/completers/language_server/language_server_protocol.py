@@ -289,6 +289,9 @@ def Initialize( request_id, project_directory, settings ):
             ],
           },
         },
+        'synchronization': {
+          'didSave': True
+        },
       },
     },
   } )
@@ -374,6 +377,15 @@ def DidChangeTextDocument( file_state, file_contents ):
     'contentChanges': [
       { 'text': file_contents },
     ] if file_contents is not None else [],
+  } )
+
+
+def DidSaveTextDocument( file_state ):
+  return BuildNotification( 'textDocument/didSave', {
+    'textDocument': {
+      'uri': FilePathToUri( file_state.filename ),
+      'version': file_state.version,
+    },
   } )
 
 

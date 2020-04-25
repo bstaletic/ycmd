@@ -1839,6 +1839,18 @@ class LanguageServerCompleter( Completer ):
       self._PurgeFileFromServer( file_name )
 
 
+  def OnFileSave( self, request_data ):
+    if not self.ServerIsReady():
+      return
+
+    if not self._initialize_event.is_set():
+      return
+
+    file_state = self._server_file_state[ request_data[ 'filepath' ] ]
+    msg = lsp.DidSaveTextDocument( file_state )
+    self.GetConnection().SendNotification( msg )
+
+
   def OnBufferUnload( self, request_data ):
     if not self.ServerIsHealthy():
       return
