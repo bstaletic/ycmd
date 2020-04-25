@@ -2268,6 +2268,9 @@ class LanguageServerCompleter( Completer ):
 
 
   def CodeActionCommandToFixIt( self, request_data, code_action_command ):
+    if code_action_command[ 'command' ][ 'command' ] == 'rust-analyzer.applySourceChange':
+      code_action_command[ 'edit' ] = code_action_command.pop( 'command' )[ 'arguments' ][ 0 ][ 'workspaceEdit' ]
+      return self.CodeActionLiteralToFixIt( request_data, code_action_command )
     command = code_action_command[ 'command' ]
     return self.CommandToFixIt( request_data, command )
 
