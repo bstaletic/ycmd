@@ -380,13 +380,17 @@ def DidChangeTextDocument( file_state, file_contents ):
   } )
 
 
-def DidSaveTextDocument( file_state ):
-  return BuildNotification( 'textDocument/didSave', {
+def DidSaveTextDocument( file_state, file_contents ):
+  params = {
     'textDocument': {
       'uri': FilePathToUri( file_state.filename ),
       'version': file_state.version,
     },
-  } )
+  }
+  if file_contents is not None:
+    params.update( { 'text': file_contents } )
+
+  return BuildNotification( 'textDocument/didSave', params )
 
 
 def DidCloseTextDocument( file_state ):

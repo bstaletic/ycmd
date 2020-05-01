@@ -1843,12 +1843,17 @@ class LanguageServerCompleter( Completer ):
     if not self.ServerIsReady():
       return
 
-    if not self._initialize_event.is_set():
-      return
-
-    file_state = self._server_file_state[ request_data[ 'filepath' ] ]
-    msg = lsp.DidSaveTextDocument( file_state )
-    self.GetConnection().SendNotification( msg )
+    if 'textDocumentSync' in self._server_capabilities:
+      sync = self._server_capabilities[ 'textDocumentSync' ]
+      if isinstance( sync, dict ) and sync.get( 'save' ) not in [ None, False ]:
+        save = sync[ 'save' ]
+        file_name = request_data[ 'filepath' ]
+        contents = None
+        if isinstance( save, dict ) and save.get( 'includeText' ):
+          contents = request_data[ 'file_data' ][ file_name ][ 'contents' ]
+        file_state = self._server_file_state[ file_name ]
+        msg = lsp.DidSaveTextDocument( file_state, contents )
+        self.GetConnection().SendNotification( msg )
 
 
   def OnBufferUnload( self, request_data ):
