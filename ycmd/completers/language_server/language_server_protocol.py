@@ -240,6 +240,7 @@ def Initialize( request_id, project_directory, settings ):
     'capabilities': {
       'workspace': {
         'applyEdit': True,
+        'configuration': True,
         'didChangeWatchedFiles': {
           'dynamicRegistration': True
         },

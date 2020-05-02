@@ -307,10 +307,12 @@ class LanguageServerConnection( threading.Thread ):
   def __init__( self,
                 project_directory,
                 watchdog_factory,
+                server_configuration_handler = None,
                 notification_handler = None ):
     super().__init__()
 
     self._watchdog_factory = watchdog_factory
+    self._server_configuration_handler = server_configuration_handler
     self._project_directory = project_directory
     self._last_id = 0
     self._responses = {}
@@ -586,9 +588,13 @@ class LanguageServerConnection( threading.Thread ):
         if reg[ 'method' ] == 'workspace/didChangeWatchedFiles':
           self._CancelWatchdogThreads()
       self.SendResponse( lsp.Void( request ) )
+    elif ( method == 'workspace/configuration' and
+           self._server_configuration_handler ):
+      self._server_configuration_handler( request )
     else:
       # Reject the request
       self.SendResponse( lsp.Reject( request, lsp.Errors.MethodNotFound ) )
+
 
   def _DispatchMessage( self, message ):
     """Called in the message pump thread context when a complete message was
@@ -649,11 +655,13 @@ class StandardIOLanguageServerConnection( LanguageServerConnection ):
   def __init__( self,
                 project_directory,
                 watchdog_factory,
+                server_configuration_handler,
                 server_stdin,
                 server_stdout,
                 notification_handler = None ):
     super().__init__( project_directory,
                       watchdog_factory,
+                      server_configuration_handler,
                       notification_handler )
 
     self._server_stdin = server_stdin
@@ -923,6 +931,8 @@ class LanguageServerCompleter( Completer ):
       StandardIOLanguageServerConnection(
         self._project_directory,
         lambda globs: WatchdogHandler( self, globs ),
+        lambda request: self.GetConnection().SendResponse( request,
+                                                           self._settings ),
         self._server_handle.stdin,
         self._server_handle.stdout,
         self.GetDefaultNotificationHandler() )
