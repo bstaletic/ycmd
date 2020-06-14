@@ -165,8 +165,10 @@ def WaitUntilCsCompleterIsReady( app, filepath, wait_for_diags = True ):
     try:
       if len( GetDiagnostics( app, filepath ) ) == 0 and wait_for_diags:
         raise RuntimeError( "No diagnostic" )
-      if not wait_for_diags:
+      else:
         time.sleep( 15 )
+        break
+
       success_count += 1
       if success_count > 2:
         break
