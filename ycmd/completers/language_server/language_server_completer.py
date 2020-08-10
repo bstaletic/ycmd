@@ -313,12 +313,12 @@ class LanguageServerConnection( threading.Thread ):
   def __init__( self,
                 project_directory,
                 watchdog_factory,
-                workspace_conf_factory,
+                workspace_conf_handler,
                 notification_handler = None ):
     super().__init__()
 
     self._watchdog_factory = watchdog_factory
-    self._workspace_conf_factory = workspace_conf_factory
+    self._workspace_conf_handler = workspace_conf_handler
     self._project_directory = project_directory
     self._last_id = 0
     self._responses = {}
@@ -592,7 +592,7 @@ class LanguageServerConnection( threading.Thread ):
     if method == 'workspace/applyEdit':
       self._collector.CollectApplyEdit( request, self )
     elif method == 'workspace/configuration':
-      response = self._workspace_conf_factory( request )
+      response = self._workspace_conf_handler( request )
       if response is not None:
         self.SendResponse( lsp.Accept( request, response ) )
       else:
@@ -669,11 +669,11 @@ class StandardIOLanguageServerConnection( LanguageServerConnection ):
                 watchdog_factory,
                 server_stdin,
                 server_stdout,
-                workspace_conf_factory,
+                workspace_conf_handler,
                 notification_handler = None ):
     super().__init__( project_directory,
                       watchdog_factory,
-                      workspace_conf_factory,
+                      workspace_conf_handler,
                       notification_handler )
 
     self._server_stdin = server_stdin
@@ -944,7 +944,7 @@ class LanguageServerCompleter( Completer ):
         lambda globs: WatchdogHandler( self, globs ),
         self._server_handle.stdin,
         self._server_handle.stdout,
-        lambda request: self.WorkspaceConfigurationResponse( request ),
+        lambda request: self.WorkspaceConfigurationHandler( request ),
         self.GetDefaultNotificationHandler() )
     )
 
@@ -1389,7 +1389,7 @@ class LanguageServerCompleter( Completer ):
     pass # pragma: no cover
 
 
-  def WorkspaceConfigurationResponse( self, request ):
+  def WorkspaceConfigurationHandler( self, request ):
     """If the concrete completer wants to respond to workspace/configuration
        requests, it should override this method."""
     return None

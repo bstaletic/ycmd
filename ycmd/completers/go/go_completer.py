@@ -107,6 +107,6 @@ class GoCompleter( language_server_completer.LanguageServerCompleter ):
     }
 
 
-  def WorkspaceConfigurationResponse( self, request ):
+  def WorkspaceConfigurationHandler( self, request ):
     return [ self._settings.get( 'ls', {} )
              for i in request[ 'params' ][ 'items' ] ]

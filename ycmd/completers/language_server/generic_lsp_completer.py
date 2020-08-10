@@ -83,6 +83,6 @@ class GenericLSPCompleter( language_server_completer.LanguageServerCompleter ):
     return self._settings.get( 'ls_capabilities', {} )
 
 
-  def WorkspaceConfigurationResponse( self, request ):
+  def WorkspaceConfigurationHandler( self, request ):
     if self.ExtraCapabilities().get( 'workspace', {} ).get( 'configuration' ):
       return self._settings.get( 'ls_config', lambda x: None )( request )
