@@ -28,9 +28,12 @@ from ycmd.tests.test_utils import ( CombineRequest,
                                     ParameterMatcher,
                                     SignatureMatcher,
                                     SignatureAvailableMatcher )
+from hamcrest.library.collection.isdict_containingentries import IsDictContainingEntries
+from typing import Dict, Union
+from webtest.app import TestApp
 
 
-def RunTest( app, test ):
+def RunTest( app: TestApp, test: Dict[str, Union[str, Dict[str, Union[int, str]], Dict[str, Union[int, IsDictContainingEntries]]]] ) -> None:
   """
   Method to run a simple signature help test and verify the result
 
@@ -65,14 +68,14 @@ def RunTest( app, test ):
 
 
 @SharedYcmd
-def Signature_Help_Available_test( app ):
+def Signature_Help_Available_test( app: TestApp ) -> None:
   response = app.get( '/signature_help_available',
                       { 'subserver': 'python' } ).json
   assert_that( response, SignatureAvailableMatcher( 'YES' ) )
 
 
 @SharedYcmd
-def SignatureHelp_MethodTrigger_test( app ):
+def SignatureHelp_MethodTrigger_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'Trigger after (',
     'request': {
@@ -100,7 +103,7 @@ def SignatureHelp_MethodTrigger_test( app ):
 
 
 @IsolatedYcmd( { 'disable_signature_help': True } )
-def SignatureHelp_MethodTrigger_Disabled_test( app ):
+def SignatureHelp_MethodTrigger_Disabled_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'do not Trigger after (',
     'request': {
@@ -125,7 +128,7 @@ def SignatureHelp_MethodTrigger_Disabled_test( app ):
 
 
 @SharedYcmd
-def SignatureHelp_MultipleParameters_test( app ):
+def SignatureHelp_MultipleParameters_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'Trigger after ,',
     'request': {
@@ -154,7 +157,7 @@ def SignatureHelp_MultipleParameters_test( app ):
 
 
 @SharedYcmd
-def SignatureHelp_CallWithinCall_test( app ):
+def SignatureHelp_CallWithinCall_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'Trigger after , within a call-within-a-call',
     'request': {
@@ -182,7 +185,7 @@ def SignatureHelp_CallWithinCall_test( app ):
 
 
 @SharedYcmd
-def SignatureHelp_Constructor_test( app ):
+def SignatureHelp_Constructor_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'Trigger after , within a call-within-a-call',
     'request': {
@@ -209,7 +212,7 @@ def SignatureHelp_Constructor_test( app ):
 
 
 @SharedYcmd
-def SignatureHelp_MultipleDefinitions_test( app ):
+def SignatureHelp_MultipleDefinitions_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'Jedi returns multiple signatures - both active',
     'request': {
@@ -251,7 +254,7 @@ def SignatureHelp_MultipleDefinitions_test( app ):
 
 
 @SharedYcmd
-def SignatureHelp_MultipleDefinitions_OneActive_test( app ):
+def SignatureHelp_MultipleDefinitions_OneActive_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'Jedi returns multiple signatures - both active',
     'request': {

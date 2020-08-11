@@ -18,9 +18,10 @@
 from hamcrest import raises, assert_that, calling
 from ycmd.request_validation import EnsureRequestValid
 from ycmd.responses import ServerError
+from typing import Dict, List, Union
 
 
-def BasicData():
+def BasicData() -> Dict[str, Union[int, str, Dict[str, Dict[str, Union[str, List[str]]]]]]:
   return {
     'line_num': 1,
     'column_num': 2,
@@ -34,60 +35,60 @@ def BasicData():
   }
 
 
-def EnsureRequestValid_AllOk_test():
+def EnsureRequestValid_AllOk_test() -> None:
   assert_that( EnsureRequestValid( BasicData() ) )
 
 
-def EnsureRequestValid_MissingLineNum_test():
+def EnsureRequestValid_MissingLineNum_test() -> None:
   data = BasicData()
   del data[ 'line_num' ]
   assert_that( calling( EnsureRequestValid ).with_args( data ),
                raises( ServerError, ".*line_num.*" ) )
 
 
-def EnsureRequestValid_MissingColumnNum_test():
+def EnsureRequestValid_MissingColumnNum_test() -> None:
   data = BasicData()
   del data[ 'column_num' ]
   assert_that( calling( EnsureRequestValid ).with_args( data ),
                raises( ServerError, ".*column_num.*" ) )
 
 
-def EnsureRequestValid_MissingFilepath_test():
+def EnsureRequestValid_MissingFilepath_test() -> None:
   data = BasicData()
   del data[ 'filepath' ]
   assert_that( calling( EnsureRequestValid ).with_args( data ),
                raises( ServerError, ".*filepath.*" ) )
 
 
-def EnsureRequestValid_MissingFileData_test():
+def EnsureRequestValid_MissingFileData_test() -> None:
   data = BasicData()
   del data[ 'file_data' ]
   assert_that( calling( EnsureRequestValid ).with_args( data ),
                raises( ServerError, ".*file_data.*" ) )
 
 
-def EnsureRequestValid_MissingFileDataContents_test():
+def EnsureRequestValid_MissingFileDataContents_test() -> None:
   data = BasicData()
   del data[ 'file_data' ][ '/foo' ][ 'contents' ]
   assert_that( calling( EnsureRequestValid ).with_args( data ),
                raises( ServerError, ".*contents.*" ) )
 
 
-def EnsureRequestValid_MissingFileDataFiletypes_test():
+def EnsureRequestValid_MissingFileDataFiletypes_test() -> None:
   data = BasicData()
   del data[ 'file_data' ][ '/foo' ][ 'filetypes' ]
   assert_that( calling( EnsureRequestValid ).with_args( data ),
                raises( ServerError, ".*filetypes.*" ) )
 
 
-def EnsureRequestValid_EmptyFileDataFiletypes_test():
+def EnsureRequestValid_EmptyFileDataFiletypes_test() -> None:
   data = BasicData()
   del data[ 'file_data' ][ '/foo' ][ 'filetypes' ][ 0 ]
   assert_that( calling( EnsureRequestValid ).with_args( data ),
                raises( ServerError, ".*filetypes.*" ) )
 
 
-def EnsureRequestValid_MissingEntryForFileInFileData_test():
+def EnsureRequestValid_MissingEntryForFileInFileData_test() -> None:
   data = BasicData()
   data[ 'filepath' ] = '/bar'
   assert_that( calling( EnsureRequestValid ).with_args( data ),

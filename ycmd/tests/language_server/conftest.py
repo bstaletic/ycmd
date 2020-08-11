@@ -18,10 +18,14 @@
 import pytest
 from ycmd.tests.test_utils import ( IsolatedApp,
                                     StopCompleterServer )
+from _pytest.fixtures import SubRequest
+from _pytest.mark.structures import MarkDecorator
+from typing import Dict, Iterator, List, Union
+from webtest.app import TestApp
 
 
 @pytest.fixture
-def app( request ):
+def app( request: SubRequest ) -> Iterator[TestApp]:
   with IsolatedApp( request.param ) as app:
     try:
       yield app
@@ -29,7 +33,7 @@ def app( request ):
       StopCompleterServer( app, 'foo' )
 
 
-def IsolatedYcmd( custom_options = {} ):
+def IsolatedYcmd( custom_options: Dict[str, Union[List[str], List[Dict[str, Union[str, List[str]]]], Dict[str, List[str]], str]] = {} ) -> MarkDecorator:
   """Defines a decorator to be attached to tests of this package. This decorator
   passes a unique ycmd application as a parameter. It should be used on tests
   that change the server state in a irreversible way (ex: a semantic subserver

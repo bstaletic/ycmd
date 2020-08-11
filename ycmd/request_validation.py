@@ -16,12 +16,13 @@
 # along with ycmd.  If not, see <http://www.gnu.org/licenses/>.
 
 from ycmd.responses import ServerError
+from typing import Any, Dict, List, Set, Union
 
 
 # Throws an exception if request doesn't have all the required fields.
 # TODO: Accept a request_type param so that we can also verify missing
 # command_arguments and completer_target fields if necessary.
-def EnsureRequestValid( request_json ):
+def EnsureRequestValid( request_json: Dict[str, Any] ) -> bool:
   required_fields = { 'line_num', 'column_num', 'filepath', 'file_data' }
   missing = { x for x in required_fields if x not in request_json }
 
@@ -33,20 +34,20 @@ def EnsureRequestValid( request_json ):
   raise ServerError( message )
 
 
-def _FieldMissingMessage( field ):
+def _FieldMissingMessage( field: str ) -> str:
   return f'Request missing required field: { field }'
 
 
-def _FilepathInFileDataSpec( request_json ):
+def _FilepathInFileDataSpec( request_json: Dict[str, Union[int, str, Dict[str, Dict[str, str]], Dict[str, Dict[str, List[str]]], Dict[str, Dict[str, Union[str, List[str]]]]]] ) -> str:
   filepath = request_json[ 'filepath' ]
   return f'file_data[ "{ filepath }" ]'
 
 
-def _SingleFileDataFieldSpec( request_json, field ):
+def _SingleFileDataFieldSpec( request_json: Dict[str, Union[int, str, Dict[str, Dict[str, str]], Dict[str, Dict[str, List[str]]]]], field: str ) -> str:
   return f'{ _FilepathInFileDataSpec( request_json ) }[ "{ field }" ]'
 
 
-def _MissingFieldsForFileData( request_json ):
+def _MissingFieldsForFileData( request_json: Dict[str, Any] ) -> Set[str]:
   missing = set()
   data_for_file = request_json[ 'file_data' ].get( request_json[ 'filepath' ] )
   if data_for_file:

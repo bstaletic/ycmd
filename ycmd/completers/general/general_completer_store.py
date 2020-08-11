@@ -19,6 +19,8 @@ from ycmd.completers.completer import Completer
 from ycmd.completers.all.identifier_completer import IdentifierCompleter
 from ycmd.completers.general.filename_completer import FilenameCompleter
 from ycmd.completers.general.ultisnips_completer import UltiSnipsCompleter
+from typing import Any, Dict, List, Set
+from ycmd.request_wrap import RequestWrap
 
 
 class GeneralCompleterStore( Completer ):
@@ -29,7 +31,7 @@ class GeneralCompleterStore( Completer ):
   GeneralCompleterStore are passed to all general completers.
   """
 
-  def __init__( self, user_options ):
+  def __init__( self, user_options: Dict[str, Any] ) -> None:
     super().__init__( user_options )
     self._identifier_completer = IdentifierCompleter( user_options )
     self._filename_completer = FilenameCompleter( user_options )
@@ -42,7 +44,7 @@ class GeneralCompleterStore( Completer ):
                              self._ultisnips_completer ]
 
 
-  def SupportedFiletypes( self ):
+  def SupportedFiletypes( self ) -> Set[Any]:
     return set()
 
 
@@ -50,7 +52,7 @@ class GeneralCompleterStore( Completer ):
     return self._identifier_completer
 
 
-  def ComputeCandidates( self, request_data ):
+  def ComputeCandidates( self, request_data: RequestWrap ) -> List[Dict[str, str]]:
     candidates = self._filename_completer.ComputeCandidates( request_data )
     if candidates:
       return candidates
@@ -59,27 +61,27 @@ class GeneralCompleterStore( Completer ):
     return candidates
 
 
-  def OnFileReadyToParse( self, request_data ):
+  def OnFileReadyToParse( self, request_data: RequestWrap ) -> None:
     for completer in self._all_completers:
       completer.OnFileReadyToParse( request_data )
 
 
-  def OnBufferVisit( self, request_data ):
+  def OnBufferVisit( self, request_data: RequestWrap ) -> None:
     for completer in self._all_completers:
       completer.OnBufferVisit( request_data )
 
 
-  def OnBufferUnload( self, request_data ):
+  def OnBufferUnload( self, request_data: RequestWrap ) -> None:
     for completer in self._all_completers:
       completer.OnBufferUnload( request_data )
 
 
-  def OnInsertLeave( self, request_data ):
+  def OnInsertLeave( self, request_data: RequestWrap ) -> None:
     for completer in self._all_completers:
       completer.OnInsertLeave( request_data )
 
 
-  def OnCurrentIdentifierFinished( self, request_data ):
+  def OnCurrentIdentifierFinished( self, request_data: RequestWrap ) -> None:
     for completer in self._all_completers:
       completer.OnCurrentIdentifierFinished( request_data )
 

@@ -16,6 +16,11 @@
 # along with ycmd.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
+from _pytest.fixtures import SubRequest
+from _pytest.mark.structures import MarkDecorator
+from typing import Dict, Iterator, List, Optional, Tuple, Union
+from webtest.app import TestApp
+
 import pytest
 import sys
 import time
@@ -36,7 +41,7 @@ shared_log_indexes = {}
 
 
 @pytest.fixture( scope='package', autouse=True )
-def set_up_shared_app():
+def set_up_shared_app() -> Iterator[None]:
   global shared_app, shared_filepaths
   shared_app = SetUpApp()
   yield
@@ -46,7 +51,7 @@ def set_up_shared_app():
 
 
 @pytest.fixture
-def app( request ):
+def app( request: SubRequest ) -> Iterator[TestApp]:
   which = request.param[ 0 ]
   assert which == 'isolated' or which == 'shared'
   if which == 'isolated':
@@ -78,7 +83,7 @@ SharedYcmd = pytest.mark.parametrize(
     indirect = True )
 
 
-def IsolatedYcmd( custom_options = {} ):
+def IsolatedYcmd( custom_options: Dict[str, Union[int, bool]] = {} ) -> MarkDecorator:
   """Defines a decorator to be attached to tests of this package. This decorator
   passes a unique ycmd application as a parameter. It should be used on tests
   that change the server state in a irreversible way (ex: a semantic subserver
@@ -106,20 +111,20 @@ def IsolatedYcmd( custom_options = {} ):
       indirect = True )
 
 
-def GetDebugInfo( app, filepath ):
+def GetDebugInfo( app: TestApp, filepath: str ) -> Dict[str, Dict[str, Optional[Union[str, bool, List[Dict[str, Union[str, bool, int, List[str], List[Dict[str, str]]]]]]]]]:
   """ TODO: refactor here and in clangd test to common util """
   request_data = BuildRequest( filetype = 'cs', filepath = filepath )
   return app.post_json( '/debug_info', request_data ).json
 
 
-def ReadFile( filepath, fileposition ):
+def ReadFile( filepath: str, fileposition: int ) -> Tuple[str, int]:
   with open( filepath, encoding = 'utf8' ) as f:
     if fileposition:
       f.seek( fileposition )
     return f.read(), f.tell()
 
 
-def GetDiagnostics( app, filepath ):
+def GetDiagnostics( app: TestApp, filepath: str ) -> Union[List[Union[Dict[str, Union[Dict[str, Union[int, str]], Dict[str, Dict[str, Union[int, str]]], str, bool]], Dict[str, Union[List[Dict[str, Dict[str, Union[int, str]]]], Dict[str, Union[int, str]], Dict[str, Dict[str, Union[int, str]]], str, bool]]]], List[Dict[str, Union[Dict[str, Union[int, str]], Dict[str, Dict[str, Union[int, str]]], str, bool]]]]:
   contents, _ = ReadFile( filepath, 0 )
 
   event_data = BuildRequest( filepath = filepath,
@@ -131,7 +136,7 @@ def GetDiagnostics( app, filepath ):
 
 
 @contextmanager
-def WrapOmniSharpServer( app, filepath ):
+def WrapOmniSharpServer( app: TestApp, filepath: str ) -> Iterator[None]:
   global shared_filepaths
   global shared_log_indexes
 
@@ -159,7 +164,7 @@ def WrapOmniSharpServer( app, filepath ):
         sys.stdout.write( '\n' )
 
 
-def WaitUntilCsCompleterIsReady( app, filepath ):
+def WaitUntilCsCompleterIsReady( app: TestApp, filepath: str ) -> None:
   WaitUntilCompleterServerReady( app, 'cs' )
   # Omnisharp isn't ready when it says it is, so wait until Omnisharp returns
   # at least one diagnostic multiple times.

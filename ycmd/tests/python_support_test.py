@@ -34,21 +34,21 @@ PATH_TO_COMPILE_COMMANDS = (
 COMPILE_COMMANDS_WORKING_DIR = 'C:\\dir' if OnWindows() else '/dir'
 
 
-def GetUtf8String_Str_test():
+def GetUtf8String_Str_test() -> None:
   assert_that( b'fo\xc3\xb8', equal_to( ycm_core.GetUtf8String( 'foø' ) ) )
 
 
-def GetUtf8String_Bytes_test():
+def GetUtf8String_Bytes_test() -> None:
   assert_that( b'fo\xc3\xb8',
                equal_to( ycm_core.GetUtf8String( bytes( 'foø', 'utf8' ) ) ) )
 
 
-def GetUtf8String_Int_test():
+def GetUtf8String_Int_test() -> None:
   assert_that( b'123', equal_to( ycm_core.GetUtf8String( 123 ) ) )
 
 
 @ClangOnly
-def CompilationDatabase_Py3Bytes_test():
+def CompilationDatabase_Py3Bytes_test() -> None:
   cc_dir = ToBytes( PATH_TO_COMPILE_COMMANDS )
   cc_filename = ToBytes( os.path.join( COMPILE_COMMANDS_WORKING_DIR,
                                        'example.cc' ) )
@@ -68,7 +68,7 @@ def CompilationDatabase_Py3Bytes_test():
 
 
 @ClangOnly
-def CompilationDatabase_NativeString_test():
+def CompilationDatabase_NativeString_test() -> None:
   cc_dir = PATH_TO_COMPILE_COMMANDS
   cc_filename = os.path.join( COMPILE_COMMANDS_WORKING_DIR, 'example.cc' )
 

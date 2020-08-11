@@ -34,7 +34,7 @@ from ycmd.tests.clang import PathToTestFile
 from ycmd.tests.test_utils import TemporaryTestDir
 
 
-def IncludeCache_NotCached_DirInaccessible_test():
+def IncludeCache_NotCached_DirInaccessible_test() -> None:
   include_cache = IncludeCache()
   assert_that( include_cache._cache, equal_to( {} ) )
   includes = include_cache.GetIncludes( PathToTestFile( 'unknown_dir' ) )
@@ -42,7 +42,7 @@ def IncludeCache_NotCached_DirInaccessible_test():
   assert_that( include_cache._cache, equal_to( {} ) )
 
 
-def IncludeCache_NotCached_DirAccessible_test():
+def IncludeCache_NotCached_DirAccessible_test() -> None:
   include_cache = IncludeCache()
   assert_that( include_cache._cache, equal_to( {} ) )
   includes = include_cache.GetIncludes( PathToTestFile( 'cache_test' ) )
@@ -60,7 +60,7 @@ def IncludeCache_NotCached_DirAccessible_test():
                                                   } ) ) } ) ) )
 
 
-def IncludeCache_Cached_NoNewMtime_test():
+def IncludeCache_Cached_NoNewMtime_test() -> None:
   include_cache = IncludeCache()
   assert_that( include_cache._cache, equal_to( {} ) )
   old_includes = include_cache.GetIncludes( PathToTestFile( 'cache_test' ) )
@@ -95,7 +95,7 @@ def IncludeCache_Cached_NoNewMtime_test():
                                                   } ) ) } ) ) )
 
 
-def IncludeCache_Cached_NewMtime_test():
+def IncludeCache_Cached_NewMtime_test() -> None:
   with TemporaryTestDir() as tmp_dir:
     include_cache = IncludeCache()
     assert_that( include_cache._cache, equal_to( {} ) )

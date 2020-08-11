@@ -40,9 +40,12 @@ from ycmd.tests.test_utils import ( CombineRequest,
                                     WithRetry )
 from ycmd.utils import ReadFile
 from unittest.mock import patch
+from hamcrest.library.collection.isdict_containingentries import IsDictContainingEntries
+from typing import Dict, Union
+from webtest.app import TestApp
 
 
-def ProjectPath( *args ):
+def ProjectPath( *args) -> str:
   return PathToTestFile( DEFAULT_PROJECT_DIR,
                          'src',
                          'com',
@@ -51,7 +54,7 @@ def ProjectPath( *args ):
 
 
 @WithRetry
-def RunTest( app, test ):
+def RunTest( app: TestApp, test: Dict[str, Union[str, Dict[str, Union[str, int, bool]], Dict[str, Union[int, IsDictContainingEntries]], Dict[str, Union[int, str]]]] ) -> None:
   """
   Method to run a simple completion test and verify the result
 
@@ -135,7 +138,7 @@ def WithObjectMethods( *args ):
 
 
 @SharedYcmd
-def GetCompletions_NoQuery_test( app ):
+def GetCompletions_NoQuery_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'semantic completion works for builtin types (no query)',
     'request': {
@@ -164,7 +167,7 @@ def GetCompletions_NoQuery_test( app ):
 
 
 @SharedYcmd
-def GetCompletions_WithQuery_test( app ):
+def GetCompletions_WithQuery_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'semantic completion works for builtin types (with query)',
     'request': {
@@ -193,7 +196,7 @@ def GetCompletions_WithQuery_test( app ):
 
 
 @SharedYcmd
-def GetCompletions_DetailFromCache_test( app ):
+def GetCompletions_DetailFromCache_test( app: TestApp ) -> None:
   for i in range( 0, 2 ):
     RunTest( app, {
       'description': 'completion works when the elements come from the cache',
@@ -223,7 +226,7 @@ def GetCompletions_DetailFromCache_test( app ):
 
 
 @SharedYcmd
-def GetCompletions_Package_test( app ):
+def GetCompletions_Package_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'completion works for package statements',
     'request': {
@@ -248,7 +251,7 @@ def GetCompletions_Package_test( app ):
 
 
 @SharedYcmd
-def GetCompletions_Import_Class_test( app ):
+def GetCompletions_Import_Class_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'completion works for import statements with a single class',
     'request': {
@@ -274,7 +277,7 @@ def GetCompletions_Import_Class_test( app ):
 
 
 @SharedYcmd
-def GetCompletions_Import_Classes_test( app ):
+def GetCompletions_Import_Classes_test( app: TestApp ) -> None:
   filepath = ProjectPath( 'TestLauncher.java' )
   RunTest( app, {
     'description': 'completion works for imports with multiple classes',
@@ -313,7 +316,7 @@ def GetCompletions_Import_Classes_test( app ):
 
 
 @SharedYcmd
-def GetCompletions_Import_ModuleAndClass_test( app ):
+def GetCompletions_Import_ModuleAndClass_test( app: TestApp ) -> None:
   filepath = ProjectPath( 'TestLauncher.java' )
   RunTest( app, {
     'description': 'completion works for imports of classes and modules',
@@ -344,7 +347,7 @@ def GetCompletions_Import_ModuleAndClass_test( app ):
 
 
 @SharedYcmd
-def GetCompletions_WithFixIt_test( app ):
+def GetCompletions_WithFixIt_test( app: TestApp ) -> None:
   filepath = ProjectPath( 'TestFactory.java' )
   RunTest( app, {
     'description': 'semantic completion with when additional textEdit',
@@ -385,7 +388,7 @@ def GetCompletions_WithFixIt_test( app ):
 
 
 @SharedYcmd
-def GetCompletions_RejectMultiLineInsertion_test( app ):
+def GetCompletions_RejectMultiLineInsertion_test( app: TestApp ) -> None:
   filepath = ProjectPath( 'TestLauncher.java' )
   RunTest( app, {
     'description': 'completion item discarded when not valid',
@@ -418,7 +421,7 @@ def GetCompletions_RejectMultiLineInsertion_test( app ):
 
 
 @SharedYcmd
-def GetCompletions_UnicodeIdentifier_test( app ):
+def GetCompletions_UnicodeIdentifier_test( app: TestApp ) -> None:
   filepath = PathToTestFile( DEFAULT_PROJECT_DIR,
                              'src',
                              'com',
@@ -459,7 +462,7 @@ def GetCompletions_UnicodeIdentifier_test( app ):
 
 
 @SharedYcmd
-def GetCompletions_ResolveFailed_test( app ):
+def GetCompletions_ResolveFailed_test( app: TestApp ) -> None:
   filepath = PathToTestFile( DEFAULT_PROJECT_DIR,
                              'src',
                              'com',
@@ -509,7 +512,7 @@ def GetCompletions_ResolveFailed_test( app ):
 
 
 @IsolatedYcmd()
-def GetCompletions_ServerNotInitialized_test( app ):
+def GetCompletions_ServerNotInitialized_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'simple_eclipse_project',
                              'src',
                              'com',
@@ -547,7 +550,7 @@ def GetCompletions_ServerNotInitialized_test( app ):
 
 
 @SharedYcmd
-def GetCompletions_MoreThan100FilteredResolve_test( app ):
+def GetCompletions_MoreThan100FilteredResolve_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'More that 100 match, but filtered set is fewer as this '
                    'depends on max_num_candidates',
@@ -574,7 +577,7 @@ def GetCompletions_MoreThan100FilteredResolve_test( app ):
 
 
 @SharedYcmd
-def GetCompletions_MoreThan100ForceSemantic_test( app ):
+def GetCompletions_MoreThan100ForceSemantic_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'When forcing we pass the query, which reduces candidates',
     'request': {
@@ -605,7 +608,7 @@ def GetCompletions_MoreThan100ForceSemantic_test( app ):
 
 
 @SharedYcmd
-def GetCompletions_ForceAtTopLevel_NoImport_test( app ):
+def GetCompletions_ForceAtTopLevel_NoImport_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'When forcing semantic completion, pass the query to server',
     'request': {
@@ -632,7 +635,7 @@ def GetCompletions_ForceAtTopLevel_NoImport_test( app ):
 
 
 @SharedYcmd
-def GetCompletions_NoForceAtTopLevel_NoImport_test( app ):
+def GetCompletions_NoForceAtTopLevel_NoImport_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'When not forcing semantic completion, use no context',
     'request': {
@@ -656,7 +659,7 @@ def GetCompletions_NoForceAtTopLevel_NoImport_test( app ):
 
 
 @SharedYcmd
-def GetCompletions_ForceAtTopLevel_WithImport_test( app ):
+def GetCompletions_ForceAtTopLevel_WithImport_test( app: TestApp ) -> None:
   filepath = ProjectPath( 'TestWidgetImpl.java' )
   RunTest( app, {
     'description': 'Top level completions have import FixIts',
@@ -693,7 +696,7 @@ def GetCompletions_ForceAtTopLevel_WithImport_test( app ):
 
 
 @SharedYcmd
-def GetCompletions_UseServerTriggers_test( app ):
+def GetCompletions_UseServerTriggers_test( app: TestApp ) -> None:
   filepath = ProjectPath( 'TestWidgetImpl.java' )
 
   RunTest( app, {

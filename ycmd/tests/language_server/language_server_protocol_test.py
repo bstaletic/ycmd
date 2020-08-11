@@ -21,7 +21,7 @@ from hamcrest import assert_that, equal_to, calling, is_not, raises
 from ycmd.tests.test_utils import UnixOnly, WindowsOnly
 
 
-def ServerFileStateStore_RetrieveDelete_test():
+def ServerFileStateStore_RetrieveDelete_test() -> None:
   store = lsp.ServerFileStateStore()
 
   # New state object created
@@ -143,7 +143,7 @@ def ServerFileStateStore_RetrieveDelete_test():
 
 
 @UnixOnly
-def UriToFilePath_Unix_test():
+def UriToFilePath_Unix_test() -> None:
   assert_that( calling( lsp.UriToFilePath ).with_args( 'test' ),
                raises( lsp.InvalidUriException ) )
 
@@ -173,7 +173,7 @@ def UriToFilePath_Windows_test():
 
 
 @UnixOnly
-def FilePathToUri_Unix_test():
+def FilePathToUri_Unix_test() -> None:
   assert_that( lsp.FilePathToUri( '/usr/local/test/test.test' ),
                equal_to( 'file:///usr/local/test/test.test' ) )
 
@@ -194,9 +194,9 @@ def FilePathToUri_Windows_test():
       ( 'te😉st', 1, 1 ),
       ( 'te😉st', 2 + len( '😉' ) + 1, 5 ),
   ] )
-def CodepointsToUTF16CodeUnitsAndReverse_test( line_value,
-                                               codepoints,
-                                               code_units ):
+def CodepointsToUTF16CodeUnitsAndReverse_test( line_value: str,
+                                               codepoints: int,
+                                               code_units: int ) -> None:
   assert_that( lsp.CodepointsToUTF16CodeUnits( line_value, codepoints ),
                equal_to( code_units ) )
   assert_that( lsp.UTF16CodeUnitsToCodepoints( line_value, code_units ),

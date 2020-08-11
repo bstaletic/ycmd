@@ -29,6 +29,10 @@ from ycmd.completers.cpp.flags import ( Flags, PrepareFlagsForClang,
 from ycmd.completers.cpp.ephemeral_values_set import EphemeralValuesSet
 from ycmd.completers.cpp.include_cache import IncludeCache, IncludeList
 from ycmd.responses import NoExtraConfDetected, UnknownExtraConf
+from typing import Any, Callable, DefaultDict, Dict, List, Optional, Set, Tuple, Union
+from ycm_core import CompletionData, Diagnostic, DiagnosticVector, DocumentationData, Location, StringVector, UnsavedFileVector
+from ycmd.request_wrap import RequestWrap
+
 ycm_core = ImportCore()
 
 CLANG_FILETYPES = { 'c', 'cpp', 'cuda', 'objc', 'objcpp' }
@@ -44,7 +48,7 @@ INCLUDE_REGEX = re.compile(
 
 
 class ClangCompleter( Completer ):
-  def __init__( self, user_options ):
+  def __init__( self, user_options: Dict[str, Union[int, Dict[str, int], str]] ) -> None:
     super().__init__( user_options )
     self._completer = ycm_core.ClangCompleter()
     self._flags = Flags()
@@ -53,11 +57,11 @@ class ClangCompleter( Completer ):
     self._files_being_compiled = EphemeralValuesSet()
 
 
-  def SupportedFiletypes( self ):
+  def SupportedFiletypes( self ) -> Set[str]:
     return CLANG_FILETYPES
 
 
-  def GetUnsavedFilesVector( self, request_data ):
+  def GetUnsavedFilesVector( self, request_data: RequestWrap ) -> UnsavedFileVector:
     files = ycm_core.UnsavedFileVector()
     for filename, file_data in request_data[ 'file_data' ].items():
       if not ClangAvailableForFiletypes( file_data[ 'filetypes' ] ):
@@ -76,19 +80,19 @@ class ClangCompleter( Completer ):
     return files
 
 
-  def ShouldCompleteIncludeStatement( self, request_data ):
+  def ShouldCompleteIncludeStatement( self, request_data: RequestWrap ) -> None:
     column_codepoint = request_data[ 'column_codepoint' ] - 1
     current_line = request_data[ 'line_value' ]
     return INCLUDE_REGEX.match( current_line[ : column_codepoint ] )
 
 
-  def ShouldUseNowInner( self, request_data ):
+  def ShouldUseNowInner( self, request_data: RequestWrap ) -> bool:
     if self.ShouldCompleteIncludeStatement( request_data ):
       return True
     return super().ShouldUseNowInner( request_data )
 
 
-  def GetIncludePaths( self, request_data ):
+  def GetIncludePaths( self, request_data: RequestWrap ) -> Optional[List[Dict[str, str]]]:
     column_codepoint = request_data[ 'column_codepoint' ] - 1
     current_line = request_data[ 'line_value' ]
     line = current_line[ : column_codepoint ]
@@ -126,7 +130,7 @@ class ClangCompleter( Completer ):
     return includes.GetIncludes()
 
 
-  def ComputeCandidatesInner( self, request_data ):
+  def ComputeCandidatesInner( self, request_data: RequestWrap ) -> Union[List[Union[Dict[str, Union[str, Dict[str, str]]], Dict[str, str]]], List[Dict[str, str]], List[Dict[str, Union[str, Dict[str, List[Dict[str, Union[Dict[str, Union[int, str]], List[Dict[str, Union[str, Dict[str, Dict[str, Union[int, str]]]]]], str, bool]]]]]]]]:
     flags, filename = self._FlagsForRequest( request_data )
     if not flags:
       raise RuntimeError( NO_COMPILE_FLAGS_MESSAGE )
@@ -156,7 +160,7 @@ class ClangCompleter( Completer ):
     return [ ConvertCompletionData( x ) for x in results ]
 
 
-  def GetSubcommandsMap( self ):
+  def GetSubcommandsMap( self ) -> Dict[str, Callable]:
     return {
       'GoToDefinition'           : ( lambda self, request_data, args:
          self._GoToDefinition( request_data ) ),
@@ -194,7 +198,7 @@ class ClangCompleter( Completer ):
     }
 
 
-  def _LocationForGoTo( self, goto_function, request_data, reparse = True ):
+  def _LocationForGoTo( self, goto_function: str, request_data: RequestWrap, reparse: bool = True ) -> Location:
     flags, filename = self._FlagsForRequest( request_data )
     if not flags:
       raise ValueError( NO_COMPILE_FLAGS_MESSAGE )
@@ -215,21 +219,21 @@ class ClangCompleter( Completer ):
         reparse )
 
 
-  def _GoToDefinition( self, request_data ):
+  def _GoToDefinition( self, request_data: RequestWrap ) -> Dict[str, Union[int, str]]:
     location = self._LocationForGoTo( 'GetDefinitionLocation', request_data )
     if not location or not location.IsValid():
       raise RuntimeError( 'Can\'t jump to definition.' )
     return _ResponseForLocation( location )
 
 
-  def _GoToDeclaration( self, request_data ):
+  def _GoToDeclaration( self, request_data: RequestWrap ) -> Dict[str, Union[int, str]]:
     location = self._LocationForGoTo( 'GetDeclarationLocation', request_data )
     if not location or not location.IsValid():
       raise RuntimeError( 'Can\'t jump to declaration.' )
     return _ResponseForLocation( location )
 
 
-  def _GoTo( self, request_data ):
+  def _GoTo( self, request_data: RequestWrap ) -> Dict[str, Union[int, str]]:
     include_response = self._ResponseForInclude( request_data )
     if include_response:
       return include_response
@@ -241,7 +245,7 @@ class ClangCompleter( Completer ):
     return _ResponseForLocation( location )
 
 
-  def _GoToImprecise( self, request_data ):
+  def _GoToImprecise( self, request_data: RequestWrap ) -> Dict[str, Union[int, str]]:
     include_response = self._ResponseForInclude( request_data )
     if include_response:
       return include_response
@@ -254,7 +258,7 @@ class ClangCompleter( Completer ):
     return _ResponseForLocation( location )
 
 
-  def _ResponseForInclude( self, request_data ):
+  def _ResponseForInclude( self, request_data: RequestWrap ) -> Optional[Dict[str, Union[int, str]]]:
     """Returns response for include file location if cursor is on the
     include statement, None otherwise.
     Throws RuntimeError if cursor is on include statement and corresponding
@@ -290,7 +294,7 @@ class ClangCompleter( Completer ):
     raise RuntimeError( 'Include file not found.' )
 
 
-  def _GoToInclude( self, request_data ):
+  def _GoToInclude( self, request_data: RequestWrap ) -> Dict[str, Union[int, str]]:
     include_response = self._ResponseForInclude( request_data )
     if not include_response:
       raise RuntimeError( 'Not an include/import line.' )
@@ -299,10 +303,10 @@ class ClangCompleter( Completer ):
 
   def _GetSemanticInfo(
       self,
-      request_data,
-      func,
-      response_builder = responses.BuildDisplayMessageResponse,
-      reparse = True ):
+      request_data: RequestWrap,
+      func: str,
+      response_builder: Callable = responses.BuildDisplayMessageResponse,
+      reparse: bool = True ) -> Dict[str, str]:
     flags, filename = self._FlagsForRequest( request_data )
     if not flags:
       raise ValueError( NO_COMPILE_FLAGS_MESSAGE )
@@ -333,7 +337,7 @@ class ClangCompleter( Completer ):
     self._flags.Clear()
 
 
-  def _FixIt( self, request_data ):
+  def _FixIt( self, request_data: RequestWrap ) -> Dict[str, Union[List[Any], List[Dict[str, Union[Dict[str, Union[int, str]], List[Dict[str, Union[str, Dict[str, Dict[str, Union[int, str]]]]]], str, bool]]]]]:
     flags, filename = self._FlagsForRequest( request_data )
     if not flags:
       raise ValueError( NO_COMPILE_FLAGS_MESSAGE )
@@ -360,7 +364,7 @@ class ClangCompleter( Completer ):
     return responses.BuildFixItResponse( fixits )
 
 
-  def OnFileReadyToParse( self, request_data ):
+  def OnFileReadyToParse( self, request_data: RequestWrap ) -> Union[List[Union[Dict[str, Union[List[Dict[str, Dict[str, Union[int, str]]]], Dict[str, Union[int, str]], Dict[str, Dict[str, Union[int, str]]], str, bool]], Dict[str, Union[Dict[str, Union[int, str]], Dict[str, Dict[str, Union[int, str]]], str, bool]]]], List[Dict[str, Union[List[Dict[str, Dict[str, Union[int, str]]]], Dict[str, Union[int, str]], Dict[str, Dict[str, Union[int, str]]], str, bool]]], List[Dict[str, Union[Dict[str, Union[int, str]], Dict[str, Dict[str, Union[int, str]]], str, bool]]]]:
     flags, filename = self._FlagsForRequest( request_data )
     if not flags:
       raise ValueError( NO_COMPILE_FLAGS_MESSAGE )
@@ -391,7 +395,7 @@ class ClangCompleter( Completer ):
     self._completer.DeleteCachesForFile( request_data[ 'filepath' ] )
 
 
-  def GetDetailedDiagnostic( self, request_data ):
+  def GetDetailedDiagnostic( self, request_data: RequestWrap ) -> Dict[str, str]:
     current_line = request_data[ 'line_num' ]
     current_column = request_data[ 'column_num' ]
     current_file = request_data[ 'filepath' ]
@@ -419,7 +423,7 @@ class ClangCompleter( Completer ):
       closest_diagnostic.long_formatted_text_ )
 
 
-  def DebugInfo( self, request_data ):
+  def DebugInfo( self, request_data: RequestWrap ) -> Dict[str, Union[str, List[Dict[str, str]]]]:
     try:
       # Note that it only raises NoExtraConfDetected:
       #  - when extra_conf is None and,
@@ -448,7 +452,7 @@ class ClangCompleter( Completer ):
                                                        filename_item ] )
 
 
-  def _FlagsForRequest( self, request_data ):
+  def _FlagsForRequest( self, request_data: RequestWrap ) -> Union[Tuple[List[Any], str], Tuple[StringVector, str]]:
     filename = request_data[ 'filepath' ]
 
     if 'compilation_flags' in request_data:
@@ -462,7 +466,7 @@ class ClangCompleter( Completer ):
     return self._flags.FlagsForFile( filename, client_data = client_data )
 
 
-def BuildExtraData( completion_data ):
+def BuildExtraData( completion_data: CompletionData ) -> Dict[str, Union[str, List[Dict[str, Union[Dict[str, Union[int, str]], List[Dict[str, Union[str, Dict[str, Dict[str, Union[int, str]]]]]], str, bool]]]]]:
   extra_data = {}
   fixit = completion_data.fixit_
   if fixit.chunks:
@@ -472,7 +476,7 @@ def BuildExtraData( completion_data ):
   return extra_data
 
 
-def ConvertCompletionData( completion_data ):
+def ConvertCompletionData( completion_data: CompletionData ) -> Dict[str, Union[str, Dict[str, str], Dict[str, List[Dict[str, Union[Dict[str, Union[int, str]], List[Dict[str, Union[str, Dict[str, Dict[str, Union[int, str]]]]]], str, bool]]]]]]:
   return responses.BuildCompletionData(
     insertion_text = completion_data.TextToInsertInBuffer(),
     menu_text = completion_data.MainCompletionText(),
@@ -482,7 +486,7 @@ def ConvertCompletionData( completion_data ):
     extra_data = BuildExtraData( completion_data ) )
 
 
-def DiagnosticsToDiagStructure( diagnostics ):
+def DiagnosticsToDiagStructure( diagnostics: List[Diagnostic] ) -> DefaultDict[str, DefaultDict[int, List[Diagnostic]]]:
   structure = defaultdict( lambda : defaultdict( list ) )
   for diagnostic in diagnostics:
     structure[ diagnostic.location_.filename_ ][
@@ -490,11 +494,11 @@ def DiagnosticsToDiagStructure( diagnostics ):
   return structure
 
 
-def ClangAvailableForFiletypes( filetypes ):
+def ClangAvailableForFiletypes( filetypes: List[str] ) -> bool:
   return any( filetype in CLANG_FILETYPES for filetype in filetypes )
 
 
-def _FilterDiagnostics( diagnostics ):
+def _FilterDiagnostics( diagnostics: DiagnosticVector ) -> List[Diagnostic]:
   # Clang has an annoying warning that shows up when we try to compile header
   # files if the header has "#pragma once" inside it. The error is not
   # legitimate because it shows up because libclang thinks we are compiling a
@@ -510,7 +514,7 @@ def _FilterDiagnostics( diagnostics ):
            x.text_ != TOO_MANY_ERRORS_DIAG_TEXT_TO_IGNORE ]
 
 
-def _ResponseForLocation( location ):
+def _ResponseForLocation( location: Location ) -> Dict[str, Union[int, str]]:
   return responses.BuildGoToResponse( location.filename_,
                                       location.line_number_,
                                       location.column_number_ )
@@ -541,7 +545,7 @@ STRIP_LEADING_COMMENT = re.compile(
 STRIP_TRAILING_COMMENT = re.compile( '[ \t]*\\*/[ \t]*$|[ \t]*$' )
 
 
-def _FormatRawComment( comment ):
+def _FormatRawComment( comment: str ) -> str:
   """Strips leading indentation and comment markers from the comment string"""
   return textwrap.dedent(
     '\n'.join( [ re.sub( STRIP_TRAILING_COMMENT, '',
@@ -549,7 +553,7 @@ def _FormatRawComment( comment ):
                  for line in ToUnicode( comment ).splitlines() ] ) )
 
 
-def _BuildGetDocResponse( doc_data ):
+def _BuildGetDocResponse( doc_data: DocumentationData ) -> Dict[str, str]:
   """Builds a "DetailedInfoResponse" for a GetDoc request. doc_data is a
   DocumentationData object returned from the ClangCompleter"""
 
@@ -579,7 +583,7 @@ def _BuildGetDocResponse( doc_data ):
       ToUnicode( _FormatRawComment( doc_data.raw_comment ) ) ) )
 
 
-def _GetAbsolutePath( include_file_name, include_paths ):
+def _GetAbsolutePath( include_file_name: str, include_paths: List[str] ) -> Optional[str]:
   for path in include_paths:
     include_file_path = os.path.join( path, include_file_name )
     if os.path.isfile( include_file_path ):
@@ -587,7 +591,7 @@ def _GetAbsolutePath( include_file_name, include_paths ):
   return None
 
 
-def GetIncompleteIncludeValue( line ):
+def GetIncompleteIncludeValue( line: str ) -> Union[Tuple[str, bool, int], Tuple[None, bool, None]]:
   """Returns the tuple |include_value|, |quoted_include|, and |start_codepoint|
   where:
   - |include_value| is the string starting from the opening quote or bracket of
@@ -613,7 +617,7 @@ def GetIncompleteIncludeValue( line ):
 
 
 
-def GetFullIncludeValue( line ):
+def GetFullIncludeValue( line: str ) -> Union[Tuple[None, bool], Tuple[str, bool]]:
   """Returns the tuple |include_value| and |quoted_include| where:
   - |include_value| is the whole string inside the quotes or brackets of the
     include statement in |line|. None if no include statement is found;

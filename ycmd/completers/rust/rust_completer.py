@@ -21,7 +21,10 @@ from subprocess import PIPE
 
 from ycmd import responses, utils
 from ycmd.completers.language_server import language_server_completer
-from ycmd.utils import LOGGER, re
+from ycmd.utils import HashableDict, LOGGER, re
+from typing import Dict, List, Optional, Union
+from ycmd.request_wrap import RequestWrap
+from ycmd.responses import DebugInfoItem
 
 
 LOGFILE_FORMAT = 'ra_'
@@ -35,7 +38,7 @@ RA_EXECUTABLE = utils.FindExecutable( os.path.join(
 RA_VERSION_REGEX = re.compile( r'^rust-analyzer (?P<version>.*)$' )
 
 
-def _GetCommandOutput( command ):
+def _GetCommandOutput( command: List[str] ) -> str:
   return utils.ToUnicode(
     utils.SafePopen( command,
                      stdin_windows = PIPE,
@@ -43,7 +46,7 @@ def _GetCommandOutput( command ):
                      stderr = PIPE ).communicate()[ 0 ].rstrip() )
 
 
-def _GetRAVersion( ra_path ):
+def _GetRAVersion( ra_path: str ) -> Optional[str]:
   ra_version = _GetCommandOutput( [ ra_path, '--version' ] )
   match = RA_VERSION_REGEX.match( ra_version )
   if not match:
@@ -52,7 +55,7 @@ def _GetRAVersion( ra_path ):
   return match.group( 'version' )
 
 
-def ShouldEnableRustCompleter( user_options ):
+def ShouldEnableRustCompleter( user_options: Union[Dict[str, Union[int, Dict[str, int], str]], HashableDict] ) -> bool:
   if ( 'rls_binary_path' in user_options and
        not user_options[ 'rust_toolchain_root' ] ):
     LOGGER.warning( 'rls_binary_path detected. '
@@ -73,7 +76,7 @@ def ShouldEnableRustCompleter( user_options ):
 
 
 class RustCompleter( language_server_completer.LanguageServerCompleter ):
-  def __init__( self, user_options ):
+  def __init__( self, user_options: Union[Dict[str, Union[int, Dict[str, int], str]], HashableDict] ) -> None:
     super().__init__( user_options )
     if user_options[ 'rust_toolchain_root' ]:
       self._rust_root = user_options[ 'rust_toolchain_root' ]
@@ -83,20 +86,20 @@ class RustCompleter( language_server_completer.LanguageServerCompleter ):
         os.path.join( self._rust_root, 'bin', 'rust-analyzer' ) )
 
 
-  def _Reset( self ):
+  def _Reset( self ) -> None:
     self._server_progress = 'Not started'
     super()._Reset()
 
 
-  def GetServerName( self ):
+  def GetServerName( self ) -> str:
     return 'Rust Language Server'
 
 
-  def GetCommandLine( self ):
+  def GetCommandLine( self ) -> List[str]:
     return [ self._ra_path ]
 
 
-  def GetServerEnvironment( self ):
+  def GetServerEnvironment( self ) -> Dict[str, str]:
     env = os.environ.copy()
     old_path = env[ 'PATH' ]
     ra_bin_dir = os.path.join( self._rust_root, 'bin' )
@@ -106,7 +109,7 @@ class RustCompleter( language_server_completer.LanguageServerCompleter ):
     return env
 
 
-  def GetProjectRootFiles( self ):
+  def GetProjectRootFiles( self ) -> List[str]:
     # Without LSP workspaces support, RA relies on the rootUri to detect a
     # project.
     # TODO: add support for LSP workspaces to allow users to change project
@@ -114,12 +117,12 @@ class RustCompleter( language_server_completer.LanguageServerCompleter ):
     return [ 'Cargo.toml' ]
 
 
-  def ServerIsReady( self ):
+  def ServerIsReady( self ) -> bool:
     return ( super().ServerIsReady() and
              self._server_progress in [ 'invalid', 'ready' ] )
 
 
-  def SupportedFiletypes( self ):
+  def SupportedFiletypes( self ) -> List[str]:
     return [ 'rust' ]
 
 
@@ -129,7 +132,7 @@ class RustCompleter( language_server_completer.LanguageServerCompleter ):
     return []
 
 
-  def ExtraDebugItems( self, request_data ):
+  def ExtraDebugItems( self, request_data: RequestWrap ) -> List[DebugInfoItem]:
     return [
       responses.DebugInfoItem( 'Project State', self._server_progress ),
       responses.DebugInfoItem( 'Version', _GetRAVersion( self._ra_path ) ),
@@ -145,7 +148,7 @@ class RustCompleter( language_server_completer.LanguageServerCompleter ):
     super().HandleNotificationInPollThread( notification )
 
 
-  def ConvertNotificationToMessage( self, request_data, notification ):
+  def ConvertNotificationToMessage( self, request_data: RequestWrap, notification: Dict[str, Union[str, Dict[str, Union[List[Dict[str, Union[str, Dict[str, Dict[str, int]], int]]], str]]]] ) -> Dict[str, Union[List[Dict[str, Union[List[Dict[str, Dict[str, Union[int, str]]]], Dict[str, Union[int, str]], Dict[str, Dict[str, Union[int, str]]], str, bool]]], str]]:
     if notification[ 'method' ] == 'rust-analyzer/status':
       message = notification[ 'params' ]
       if message != 'invalid': # RA produces a better message for `invalid`
@@ -154,7 +157,7 @@ class RustCompleter( language_server_completer.LanguageServerCompleter ):
     return super().ConvertNotificationToMessage( request_data, notification )
 
 
-  def GetType( self, request_data ):
+  def GetType( self, request_data: RequestWrap ) -> Dict[str, str]:
     try:
       hover_response = self.GetHoverResponse( request_data )[ 'value' ]
     except language_server_completer.NoHoverInfoException:
@@ -182,7 +185,7 @@ class RustCompleter( language_server_completer.LanguageServerCompleter ):
     return responses.BuildDisplayMessageResponse( hover_response[ start:end ] )
 
 
-  def GetDoc( self, request_data ):
+  def GetDoc( self, request_data: RequestWrap ) -> Dict[str, str]:
     try:
       hover_response = self.GetHoverResponse( request_data )
     except language_server_completer.NoHoverInfoException:

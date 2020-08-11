@@ -37,6 +37,11 @@ if hasattr( os, 'add_dll_directory' ):
 from collections.abc import Mapping
 from urllib.parse import urljoin, urlparse, unquote, quote  # noqa
 from urllib.request import pathname2url, url2pathname  # noqa
+from io import TextIOWrapper
+from subprocess import Popen
+from threading import Thread
+from typing import Callable, Dict, Iterator, List, Optional, Tuple, Union
+from unittest.mock import MagicMock
 
 
 # We replace the re module with regex as it has better support for characters
@@ -81,20 +86,20 @@ CORE_OUTDATED_STATUS    = 7
 # Python 3 complains on the common open(path).read() idiom because the file
 # doesn't get closed. So, a helper func.
 # Also, all files we read are UTF-8.
-def ReadFile( filepath ):
+def ReadFile( filepath: str ) -> str:
   with open( filepath, encoding = 'utf8' ) as f:
     return f.read()
 
 
 # Returns a file object that can be used to replace sys.stdout or sys.stderr
-def OpenForStdHandle( filepath ):
+def OpenForStdHandle( filepath: str ) -> TextIOWrapper:
   # Since this function is used for logging purposes, we don't want the output
   # to be delayed. This means line buffering for text mode.
   # See https://docs.python.org/2/library/io.html#io.open
   return open( filepath, mode = 'w', buffering = 1 )
 
 
-def MakeSafeFileNameString( s ):
+def MakeSafeFileNameString( s: str ) -> str:
   """Return a representation of |s| that is safe for use in a file name.
   Explicitly, returns s converted to lowercase with all non alphanumeric
   characters replaced with '_'."""
@@ -105,14 +110,14 @@ def MakeSafeFileNameString( s ):
                   for c in ToUnicode( s ).lower() )
 
 
-def CreateLogfile( prefix = '' ):
+def CreateLogfile( prefix: str = '' ) -> str:
   with tempfile.NamedTemporaryFile( prefix = prefix,
                                     suffix = '.log',
                                     delete = False ) as logfile:
     return logfile.name
 
 
-def ToUnicode( value ):
+def ToUnicode( value: Optional[Union[str, int, AssertionError, bytes]] ) -> str:
   if not value:
     return ''
   if isinstance( value, str ):
@@ -126,7 +131,7 @@ def ToUnicode( value ):
 # When lines is an iterable of all strings or all bytes, equivalent to
 #   '\n'.join( ToUnicode( lines ) )
 # but faster on large inputs.
-def JoinLinesAsUnicode( lines ):
+def JoinLinesAsUnicode( lines: Union[List[int], List[str], List[bytes]] ) -> str:
   try:
     first = next( iter( lines ) )
   except StopIteration:
@@ -139,7 +144,7 @@ def JoinLinesAsUnicode( lines ):
   raise ValueError( 'lines must contain either strings or bytes.' )
 
 
-def ToBytes( value ):
+def ToBytes( value: Optional[Union[str, int, bytes]] ) -> bytes:
   if not value:
     return b''
 
@@ -153,7 +158,7 @@ def ToBytes( value ):
   return str( value ).encode( 'utf-8' )
 
 
-def ByteOffsetToCodepointOffset( line_value, byte_offset ):
+def ByteOffsetToCodepointOffset( line_value: Union[str, bytes], byte_offset: int ) -> int:
   """The API calls for byte offsets into the UTF-8 encoded version of the
   buffer. However, ycmd internally uses unicode strings. This means that
   when we need to walk 'characters' within the buffer, such as when checking
@@ -167,7 +172,7 @@ def ByteOffsetToCodepointOffset( line_value, byte_offset ):
   return len( ToUnicode( byte_line_value[ : byte_offset - 1 ] ) ) + 1
 
 
-def CodepointOffsetToByteOffset( unicode_line_value, codepoint_offset ):
+def CodepointOffsetToByteOffset( unicode_line_value: Union[str, bytes], codepoint_offset: int ) -> int:
   """The API calls for byte offsets into the UTF-8 encoded version of the
   buffer. However, ycmd internally uses unicode strings. This means that
   when we need to walk 'characters' within the buffer, such as when checking
@@ -183,7 +188,7 @@ def CodepointOffsetToByteOffset( unicode_line_value, codepoint_offset ):
   return len( ToBytes( unicode_line_value[ : codepoint_offset - 1 ] ) ) + 1
 
 
-def GetUnusedLocalhostPort():
+def GetUnusedLocalhostPort() -> int:
   sock = socket.socket()
   # This tells the OS to give us any free port in the range [1024 - 65535]
   sock.bind( ( '', 0 ) )
@@ -192,7 +197,7 @@ def GetUnusedLocalhostPort():
   return port
 
 
-def RemoveDirIfExists( dirname ):
+def RemoveDirIfExists( dirname: str ) -> None:
   try:
     import shutil
     shutil.rmtree( dirname )
@@ -200,14 +205,14 @@ def RemoveDirIfExists( dirname ):
     pass
 
 
-def RemoveIfExists( filename ):
+def RemoveIfExists( filename: str ) -> None:
   try:
     os.remove( filename )
   except OSError:
     pass
 
 
-def PathToFirstExistingExecutable( executable_name_list ):
+def PathToFirstExistingExecutable( executable_name_list: List[str] ) -> Optional[str]:
   for executable_name in executable_name_list:
     path = FindExecutable( executable_name )
     if path:
@@ -234,7 +239,7 @@ def _GetWindowsExecutable( filename ):
 # Check that a given file can be accessed as an executable file, so controlling
 # the access mask on Unix and if has a valid extension on Windows. It returns
 # the path to the executable or None if no executable was found.
-def GetExecutable( filename ):
+def GetExecutable( filename: str ) -> Optional[str]:
   if OnWindows():
     return _GetWindowsExecutable( filename )
 
@@ -246,7 +251,7 @@ def GetExecutable( filename ):
 
 # Adapted from https://github.com/python/cpython/blob/v3.6.0/Lib/shutil.py#L1087
 # to be backward compatible with Python2 and more consistent to our codebase.
-def FindExecutable( executable ):
+def FindExecutable( executable: str ) -> Optional[str]:
   # If we're given a path with a directory part, look it up directly rather
   # than referring to PATH directories. This includes checking relative to the
   # current directory, e.g. ./script
@@ -268,7 +273,7 @@ def FindExecutable( executable ):
   return None
 
 
-def FindExecutableWithFallback( executable_path, fallback ):
+def FindExecutableWithFallback( executable_path: str, fallback: Optional[str] ) -> Optional[str]:
   if executable_path:
     executable_path = FindExecutable( ExpandVariablesInPath( executable_path ) )
     if not executable_path:
@@ -280,29 +285,29 @@ def FindExecutableWithFallback( executable_path, fallback ):
     return fallback
 
 
-def ExecutableName( executable ):
+def ExecutableName( executable: str ) -> str:
   return executable + ( '.exe' if OnWindows() else '' )
 
 
-def ExpandVariablesInPath( path ):
+def ExpandVariablesInPath( path: str ) -> str:
   # Replace '~' with the home directory and expand environment variables in
   # path.
   return os.path.expanduser( os.path.expandvars( path ) )
 
 
-def OnWindows():
+def OnWindows() -> bool:
   return sys.platform == 'win32'
 
 
-def OnMac():
+def OnMac() -> bool:
   return sys.platform == 'darwin'
 
 
-def ProcessIsRunning( handle ):
+def ProcessIsRunning( handle: Optional[Popen] ) -> bool:
   return handle is not None and handle.poll() is None
 
 
-def WaitUntilProcessIsTerminated( handle, timeout = 5 ):
+def WaitUntilProcessIsTerminated( handle: Optional[Popen], timeout: int = 5 ) -> None:
   expiration = time.time() + timeout
   while True:
     if time.time() > expiration:
@@ -313,7 +318,7 @@ def WaitUntilProcessIsTerminated( handle, timeout = 5 ):
     time.sleep( 0.1 )
 
 
-def CloseStandardStreams( handle ):
+def CloseStandardStreams( handle: Optional[Popen] ) -> None:
   if not handle:
     return
   for stream in [ handle.stdin, handle.stdout, handle.stderr ]:
@@ -321,11 +326,11 @@ def CloseStandardStreams( handle ):
       stream.close()
 
 
-def IsRootDirectory( path, parent ):
+def IsRootDirectory( path: str, parent: str ) -> bool:
   return path == parent
 
 
-def PathsToAllParentFolders( path ):
+def PathsToAllParentFolders( path: str ) -> Iterator[str]:
   folder = os.path.normpath( path )
   if os.path.isdir( folder ):
     yield folder
@@ -337,7 +342,7 @@ def PathsToAllParentFolders( path ):
     yield folder
 
 
-def PathLeftSplit( path ):
+def PathLeftSplit( path: str ) -> Tuple[str, str]:
   """Split a path as (head, tail) where head is the part before the first path
   separator and tail is everything after. If the path is absolute, head is the
   root component, tail everything else. If there is no separator, head is the
@@ -357,7 +362,7 @@ def PathLeftSplit( path ):
 
 
 # A wrapper for subprocess.Popen that fixes quirks on Windows.
-def SafePopen( args, **kwargs ):
+def SafePopen( args: Union[str, List[str]], **kwargs) -> Union[Popen, MagicMock]:
   if OnWindows():
     # We need this to start the server otherwise bad things happen.
     # See issue #637.
@@ -377,7 +382,7 @@ def LoadPythonSource( name, pathname ):
   return importlib.machinery.SourceFileLoader( name, pathname ).load_module()
 
 
-def SplitLines( contents ):
+def SplitLines( contents: str ) -> List[str]:
   """Return a list of each of the lines in the unicode string |contents|."""
 
   # We often want to get a list representation of a buffer such that we can
@@ -390,7 +395,7 @@ def SplitLines( contents ):
   return contents.split( '\n' )
 
 
-def GetCurrentDirectory():
+def GetCurrentDirectory() -> str:
   """Returns the current directory as an unicode object. If the current
   directory does not exist anymore, returns the temporary folder instead."""
   try:
@@ -399,7 +404,7 @@ def GetCurrentDirectory():
     return tempfile.gettempdir()
 
 
-def StartThread( func, *args ):
+def StartThread( func: Callable, *args) -> Thread:
   thread = threading.Thread( target = func, args = args )
   thread.daemon = True
   thread.start()
@@ -410,11 +415,11 @@ class HashableDict( Mapping ):
   """An immutable dictionary that can be used in dictionary's keys. The
   dictionary must be JSON-encodable; in particular, all keys must be strings."""
 
-  def __init__( self, *args, **kwargs ):
+  def __init__( self, *args, **kwargs) -> None:
     self._dict = dict( *args, **kwargs )
 
 
-  def __getitem__( self, key ):
+  def __getitem__( self, key: str ) -> Union[int, str, List[str], Dict[str, int]]:
     return copy.deepcopy( self._dict[ key ] )
 
 
@@ -422,15 +427,15 @@ class HashableDict( Mapping ):
     return iter( self._dict )
 
 
-  def __len__( self ):
+  def __len__( self ) -> int:
     return len( self._dict )
 
 
-  def __repr__( self ):
+  def __repr__( self ) -> str:
     return '<HashableDict %s>' % repr( self._dict )
 
 
-  def __hash__( self ):
+  def __hash__( self ) -> int:
     try:
       return self._hash
     except AttributeError:
@@ -440,19 +445,19 @@ class HashableDict( Mapping ):
       return self._hash
 
 
-  def __eq__( self, other ):
+  def __eq__( self, other ) -> bool:
     return isinstance( other, HashableDict ) and self._dict == other._dict
 
 
-  def __ne__( self, other ):
+  def __ne__( self, other ) -> bool:
     return not self == other
 
 
-  def copy( self, **add_or_replace ):
+  def copy( self, **add_or_replace):
     return self.__class__( self, **add_or_replace )
 
 
-def ListDirectory( path ):
+def ListDirectory( path: str ) -> List[str]:
   try:
     # Path must be a Unicode string to get Unicode strings out of listdir.
     return os.listdir( ToUnicode( path ) )
@@ -461,19 +466,19 @@ def ListDirectory( path ):
     return []
 
 
-def GetModificationTime( path ):
+def GetModificationTime( path: str ) -> float:
   try:
     return os.path.getmtime( path )
   except OSError:
     LOGGER.exception( 'Cannot get modification time for path %s', path )
-    return 0
+    return 0.0
 
 
-def ExpectedCoreVersion():
+def ExpectedCoreVersion() -> int:
   return int( ReadFile( os.path.join( ROOT_DIR, 'CORE_VERSION' ) ) )
 
 
-def LoadYcmCoreDependencies():
+def LoadYcmCoreDependencies() -> None:
   for name in ListDirectory( LIBCLANG_DIR ):
     if name.startswith( 'libclang' ):
       libclang_path = os.path.join( LIBCLANG_DIR, name )
@@ -490,7 +495,7 @@ def ImportCore():
   return ycm_core
 
 
-def ImportAndCheckCore():
+def ImportAndCheckCore() -> int:
   """Checks if ycm_core library is compatible and returns with an exit
   status."""
   try:
@@ -517,7 +522,7 @@ def ImportAndCheckCore():
   return CORE_COMPATIBLE_STATUS
 
 
-def GetClangResourceDir():
+def GetClangResourceDir() -> str:
   resource_dir = os.path.join( LIBCLANG_DIR, 'clang' )
   for version in ListDirectory( resource_dir ):
     return os.path.join( resource_dir, version )
@@ -528,7 +533,7 @@ def GetClangResourceDir():
 CLANG_RESOURCE_DIR = GetClangResourceDir()
 
 
-def AbsolutePath( path, relative_to ):
+def AbsolutePath( path: str, relative_to: str ) -> str:
   """Returns a normalised, absolute path to |path|. If |path| is relative, it
   is resolved relative to |relative_to|."""
   if not os.path.isabs( path ):

@@ -32,7 +32,7 @@ def _ExtractPatternsFromFiletypeTriggerDict( triggerDict ):
   return copy
 
 
-def FiletypeTriggerDictFromSpec_Works_test():
+def FiletypeTriggerDictFromSpec_Works_test() -> None:
   assert_that( defaultdict( set, {
                  'foo': { cu._PrepareTrigger( 'zoo' ).pattern,
                           cu._PrepareTrigger( 'bar' ).pattern },
@@ -48,7 +48,7 @@ def FiletypeTriggerDictFromSpec_Works_test():
                  } ) ) ) )
 
 
-def FiletypeDictUnion_Works_test():
+def FiletypeDictUnion_Works_test() -> None:
   assert_that( defaultdict( set, {
                  'foo': { 'zoo', 'bar', 'maa' },
                  'goo': { 'moo' },
@@ -71,7 +71,7 @@ def PrepareTrigger_UnicodeTrigger_Test():
   assert_that( regex.pattern, equal_to( re.escape( u'æ' ) ) )
 
 
-def MatchesSemanticTrigger_Basic_test():
+def MatchesSemanticTrigger_Basic_test() -> None:
   triggers = [ cu._PrepareTrigger( '.' ) ]
 
   assert_that( not cu._MatchesSemanticTrigger( 'foo.bar', 7, 7, triggers ) )
@@ -89,7 +89,7 @@ def MatchesSemanticTrigger_Basic_test():
   assert_that( not cu._MatchesSemanticTrigger( 'foo.bar', 0, 3, triggers ) )
 
 
-def MatchesSemanticTrigger_JustTrigger_test():
+def MatchesSemanticTrigger_JustTrigger_test() -> None:
   triggers = [ cu._PrepareTrigger( '.' ) ]
 
   assert_that( not cu._MatchesSemanticTrigger( '.', 2, 2, triggers ) )
@@ -97,7 +97,7 @@ def MatchesSemanticTrigger_JustTrigger_test():
   assert_that( not cu._MatchesSemanticTrigger( '.', 0, 0, triggers ) )
 
 
-def MatchesSemanticTrigger_TriggerBetweenWords_test():
+def MatchesSemanticTrigger_TriggerBetweenWords_test() -> None:
   triggers = [ cu._PrepareTrigger( '.' ) ]
 
   assert_that( not cu._MatchesSemanticTrigger( 'foo . bar', 6, 9, triggers ) )
@@ -105,7 +105,7 @@ def MatchesSemanticTrigger_TriggerBetweenWords_test():
   assert_that( cu._MatchesSemanticTrigger( 'foo . bar', 4, 9, triggers ) )
 
 
-def MatchesSemanticTrigger_BadInput_test():
+def MatchesSemanticTrigger_BadInput_test() -> None:
   triggers = [ cu._PrepareTrigger( '.' ) ]
 
   assert_that( not cu._MatchesSemanticTrigger( 'foo.bar', 10, 7, triggers ) )
@@ -117,13 +117,13 @@ def MatchesSemanticTrigger_BadInput_test():
   assert_that( not cu._MatchesSemanticTrigger( 'foo.bar', 4, 7, [] ) )
 
 
-def MatchesSemanticTrigger_TriggerIsWrong_test():
+def MatchesSemanticTrigger_TriggerIsWrong_test() -> None:
   triggers = [ cu._PrepareTrigger( ':' ) ]
 
   assert_that( not cu._MatchesSemanticTrigger( 'foo.bar', 4, 7, triggers ) )
 
 
-def MatchesSemanticTrigger_LongerTrigger_test():
+def MatchesSemanticTrigger_LongerTrigger_test() -> None:
   triggers = [ cu._PrepareTrigger( '::' ) ]
 
   assert_that( not cu._MatchesSemanticTrigger( 'foo::bar', 6, 8, triggers ) )
@@ -135,7 +135,7 @@ def MatchesSemanticTrigger_LongerTrigger_test():
   assert_that( not cu._MatchesSemanticTrigger( 'foo::bar', 3, 4, triggers ) )
 
 
-def MatchesSemanticTrigger_OneTriggerMatches_test():
+def MatchesSemanticTrigger_OneTriggerMatches_test() -> None:
   triggers = [ cu._PrepareTrigger( '.' ),
                cu._PrepareTrigger( ';' ),
                cu._PrepareTrigger( '::' ) ]
@@ -143,7 +143,7 @@ def MatchesSemanticTrigger_OneTriggerMatches_test():
   assert_that( cu._MatchesSemanticTrigger( 'foo::bar', 5, 8, triggers ) )
 
 
-def MatchesSemanticTrigger_RegexTrigger_test():
+def MatchesSemanticTrigger_RegexTrigger_test() -> None:
   triggers = [ cu._PrepareTrigger( r're!\w+\.' ) ]
 
   assert_that( cu._MatchesSemanticTrigger( 'foo.bar', 4, 8, triggers ) )
@@ -151,7 +151,7 @@ def MatchesSemanticTrigger_RegexTrigger_test():
   assert_that( not cu._MatchesSemanticTrigger( 'foo . bar', 5, 8, triggers ) )
 
 
-def MatchingSemanticTrigger_Basic_test():
+def MatchingSemanticTrigger_Basic_test() -> None:
   triggers = [ cu._PrepareTrigger( '.' ), cu._PrepareTrigger( ';' ),
                cu._PrepareTrigger( '::' ) ]
 
@@ -164,7 +164,7 @@ def MatchingSemanticTrigger_Basic_test():
                equal_to( re.escape( '::' ) ) )
 
 
-def PreparedTriggers_Basic_test():
+def PreparedTriggers_Basic_test() -> None:
   triggers = cu.PreparedTriggers()
 
   assert_that( triggers.MatchesForFiletype( 'foo.bar', 4, 8, 'c' ) )
@@ -181,7 +181,7 @@ def PreparedTriggers_Basic_test():
                equal_to( re.escape( '->' ) ) )
 
 
-def PreparedTriggers_OnlySomeFiletypesSelected_test():
+def PreparedTriggers_OnlySomeFiletypesSelected_test() -> None:
   triggers = cu.PreparedTriggers( filetype_set = set( 'c' ) )
 
   assert_that( triggers.MatchesForFiletype( 'foo.bar', 4, 7, 'c' ) )
@@ -198,7 +198,7 @@ def PreparedTriggers_OnlySomeFiletypesSelected_test():
                none() )
 
 
-def PreparedTriggers_UserTriggers_test():
+def PreparedTriggers_UserTriggers_test() -> None:
   triggers = cu.PreparedTriggers( user_trigger_map = { 'c': [ '->' ] } )
 
   assert_that( triggers.MatchesForFiletype( 'foo->bar', 5, 8, 'c' ) )
@@ -209,7 +209,7 @@ def PreparedTriggers_UserTriggers_test():
                equal_to( re.escape( '->' ) ) )
 
 
-def PreparedTriggers_ObjectiveC_test():
+def PreparedTriggers_ObjectiveC_test() -> None:
   triggers = cu.PreparedTriggers()
 
   # Bracketed calls

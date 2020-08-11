@@ -42,12 +42,16 @@ from ycmd.tests.test_utils import ( BuildRequest,
                                     ExpectedFailure,
                                     LocationMatcher )
 from ycmd.utils import ReadFile
+from hamcrest.library.collection.isdict_containing import IsDictContaining
+from hamcrest.library.collection.isdict_containingentries import IsDictContainingEntries
+from typing import Any, Dict, List, Tuple, Union
+from webtest.app import TestApp
 
 
 RESPONSE_TIMEOUT = 5
 
 
-def RunTest( app, test, contents = None ):
+def RunTest( app: TestApp, test: Dict[str, Any], contents: None = None ) -> None:
   if not contents:
     contents = ReadFile( test[ 'request' ][ 'filepath' ] )
 
@@ -89,7 +93,7 @@ def RunTest( app, test, contents = None ):
   assert_that( response.json, test[ 'expect' ][ 'data' ] )
 
 
-def RunFixItTest( app, description, filepath, line, col, fixits_for_line ):
+def RunFixItTest( app: TestApp, description: str, filepath: str, line: int, col: int, fixits_for_line: Union[IsDictContainingEntries, IsDictContaining] ) -> None:
   RunTest( app, {
     'description': description,
     'request': {
@@ -106,7 +110,7 @@ def RunFixItTest( app, description, filepath, line, col, fixits_for_line ):
 
 
 @SharedYcmd
-def Subcommands_DefinedSubcommands_test( app ):
+def Subcommands_DefinedSubcommands_test( app: TestApp ) -> None:
   subcommands_data = BuildRequest( completer_target = 'go' )
 
   assert_that( app.post_json( '/defined_subcommands', subcommands_data ).json,
@@ -127,7 +131,7 @@ def Subcommands_DefinedSubcommands_test( app ):
 
 
 @SharedYcmd
-def Subcommands_ServerNotInitialized_test( app ):
+def Subcommands_ServerNotInitialized_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'goto.go' )
 
   completer = handlers._server_state.GetFiletypeCompleter( [ 'go' ] )
@@ -161,7 +165,7 @@ def Subcommands_ServerNotInitialized_test( app ):
 
 
 @SharedYcmd
-def Subcommands_Format_WholeFile_test( app ):
+def Subcommands_Format_WholeFile_test( app: TestApp ) -> None:
   # RLS can't execute textDocument/formatting if any file
   # under the project root has errors, so we need to use
   # a different project just for formatting.
@@ -259,7 +263,7 @@ def Subcommands_Format_Range_test( app ):
 
 
 @SharedYcmd
-def Subcommands_GetDoc_UnknownType_test( app ):
+def Subcommands_GetDoc_UnknownType_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'GetDoc on a unknown type raises an error',
     'request': {
@@ -276,7 +280,7 @@ def Subcommands_GetDoc_UnknownType_test( app ):
 
 
 @SharedYcmd
-def Subcommands_GetDoc_Function_test( app ):
+def Subcommands_GetDoc_Function_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'GetDoc on a function returns its type',
     'request': {
@@ -293,7 +297,7 @@ def Subcommands_GetDoc_Function_test( app ):
 
 
 @SharedYcmd
-def Subcommands_GetType_UnknownType_test( app ):
+def Subcommands_GetType_UnknownType_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'GetType on a unknown type raises an error',
     'request': {
@@ -310,7 +314,7 @@ def Subcommands_GetType_UnknownType_test( app ):
 
 
 @SharedYcmd
-def Subcommands_GetType_Function_test( app ):
+def Subcommands_GetType_Function_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'GetType on a function returns its type',
     'request': {
@@ -326,7 +330,7 @@ def Subcommands_GetType_Function_test( app ):
   } )
 
 
-def RunGoToTest( app, command, test ):
+def RunGoToTest( app: TestApp, command: str, test: Dict[str, Union[Tuple[str, int, int], str, List[Tuple[str, int, int]]]] ) -> None:
   folder = PathToTestFile()
   filepath = PathToTestFile( test[ 'req' ][ 0 ] )
   request = {
@@ -384,7 +388,7 @@ def RunGoToTest( app, command, test ):
     { 'req': ( 'goto.go', 3, 2 ), 'res': 'Cannot jump to location' },
   ] )
 @SharedYcmd
-def Subcommands_GoTo_test( app, command, test ):
+def Subcommands_GoTo_test( app: TestApp, command: str, test: Dict[str, Union[Tuple[str, int, int], str]] ) -> None:
   RunGoToTest( app, command, test )
 
 
@@ -396,7 +400,7 @@ def Subcommands_GoTo_test( app, command, test ):
     { 'req': ( os.path.join( 'unicode', 'unicode.go' ), 11, 7 ),
       'res': 'Cannot jump to location' } ] )
 @SharedYcmd
-def Subcommands_GoToType_test( app, test ):
+def Subcommands_GoToType_test( app: TestApp, test: Dict[str, Union[Tuple[str, int, int], str]] ) -> None:
   RunGoToTest( app, 'GoToType', test )
 
 
@@ -408,12 +412,12 @@ def Subcommands_GoToType_test( app, test ):
     { 'req': ( 'thing.go', 12, 7 ),
       'res': 'Cannot jump to location' } ] )
 @SharedYcmd
-def Subcommands_GoToImplementation_test( app, test ):
+def Subcommands_GoToImplementation_test( app: TestApp, test: Dict[str, Union[Tuple[str, int, int], str]] ) -> None:
   RunGoToTest( app, 'GoToImplementation', test )
 
 
 @SharedYcmd
-def Subcommands_FixIt_NullResponse_test( app ):
+def Subcommands_FixIt_NullResponse_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'td', 'test.go' )
   RunFixItTest( app,
                 'Gopls returned NULL for response[ \'result\' ]',
@@ -421,7 +425,7 @@ def Subcommands_FixIt_NullResponse_test( app ):
 
 
 @SharedYcmd
-def Subcommands_FixIt_Simple_test( app ):
+def Subcommands_FixIt_Simple_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'fixit.go' )
   fixit = has_entries( {
     'fixits': contains_exactly(
@@ -440,7 +444,7 @@ def Subcommands_FixIt_Simple_test( app ):
 
 
 @SharedYcmd
-def Subcommands_RefactorRename_test( app ):
+def Subcommands_RefactorRename_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'unicode', 'unicode.go' )
   RunTest( app, {
     'description': 'RefactorRename on a function renames all its occurences',
@@ -471,7 +475,7 @@ def Subcommands_RefactorRename_test( app ):
 
 
 @SharedYcmd
-def Subcommands_GoToReferences_test( app ):
+def Subcommands_GoToReferences_test( app: TestApp ) -> None:
   filepath = os.path.join( 'unicode', 'unicode.go' )
   test = { 'req': ( filepath, 10, 5 ), 'res': [ ( filepath, 10, 5 ),
                                                 ( filepath, 13, 5 ) ] }

@@ -30,10 +30,11 @@ from ycmd.tests.test_utils import ( BuildRequest,
                                     MacOnly )
 
 import os
+from webtest.app import TestApp
 
 
 @IsolatedYcmd()
-def DebugInfo_NotInitialized_test( app ):
+def DebugInfo_NotInitialized_test( app: TestApp ) -> None:
   request_data = BuildRequest( filepath = PathToTestFile( 'basic.cpp' ),
                                filetype = 'cpp' )
   assert_that(
@@ -69,7 +70,7 @@ def DebugInfo_NotInitialized_test( app ):
 
 
 @SharedYcmd
-def DebugInfo_Initialized_test( app ):
+def DebugInfo_Initialized_test( app: TestApp ) -> None:
   request_data = BuildRequest( filepath = PathToTestFile( 'basic.cpp' ),
                                filetype = 'cpp' )
   test = { 'request': request_data }
@@ -107,7 +108,7 @@ def DebugInfo_Initialized_test( app ):
 
 @IsolatedYcmd( { 'extra_conf_globlist': [
   PathToTestFile( 'extra_conf', '.ycm_extra_conf.py' ) ] } )
-def DebugInfo_ExtraConf_ReturningFlags_test( app ):
+def DebugInfo_ExtraConf_ReturningFlags_test( app: TestApp ) -> None:
   request_data = BuildRequest( filepath = PathToTestFile( 'extra_conf',
                                                           'foo.cpp' ),
                                filetype = 'cpp' )
@@ -146,7 +147,7 @@ def DebugInfo_ExtraConf_ReturningFlags_test( app ):
 
 @IsolatedYcmd( { 'extra_conf_globlist': [
   PathToTestFile( 'extra_conf', '.ycm_extra_conf.py' ) ] } )
-def DebugInfo_ExtraConf_NotReturningFlags_test( app ):
+def DebugInfo_ExtraConf_NotReturningFlags_test( app: TestApp ) -> None:
   request_data = BuildRequest( filepath = PathToTestFile( 'extra_conf',
                                                           'xyz.cpp' ),
                                filetype = 'cpp' )
@@ -188,7 +189,7 @@ def DebugInfo_ExtraConf_NotReturningFlags_test( app ):
   'global_ycm_extra_conf': PathToTestFile( 'extra_conf',
                                            'global_extra_conf.py' ),
 } )
-def DebugInfo_ExtraConf_Global_test( app ):
+def DebugInfo_ExtraConf_Global_test( app: TestApp ) -> None:
   request_data = BuildRequest( filepath = PathToTestFile( 'foo.cpp' ),
                                contents = '',
                                filetype = 'cpp' )
@@ -232,7 +233,7 @@ def DebugInfo_ExtraConf_Global_test( app ):
  'extra_conf_globlist': [ PathToTestFile( 'extra_conf',
                                           '.ycm_extra_conf.py' ) ]
 } )
-def DebugInfo_ExtraConf_LocalOverGlobal_test( app ):
+def DebugInfo_ExtraConf_LocalOverGlobal_test( app: TestApp ) -> None:
   request_data = BuildRequest( filepath = PathToTestFile( 'extra_conf',
                                                           'foo.cpp' ),
                                filetype = 'cpp' )
@@ -270,7 +271,7 @@ def DebugInfo_ExtraConf_LocalOverGlobal_test( app ):
 
 
 @IsolatedYcmd()
-def DebugInfo_ExtraConf_Database_test( app ):
+def DebugInfo_ExtraConf_Database_test( app: TestApp ) -> None:
   with TemporaryTestDir() as tmp_dir:
     database = [
       {
@@ -319,7 +320,7 @@ def DebugInfo_ExtraConf_Database_test( app ):
 
 
 @IsolatedYcmd( { 'confirm_extra_conf': 0 } )
-def DebugInfo_ExtraConf_UseLocalOverDatabase_test( app ):
+def DebugInfo_ExtraConf_UseLocalOverDatabase_test( app: TestApp ) -> None:
   with TemporaryTestDir() as tmp_dir:
     database = [
       {
@@ -381,7 +382,7 @@ def Settings( **kwargs ):
   'global_ycm_extra_conf': PathToTestFile( 'extra_conf',
                                            'global_extra_conf.py' ),
 } )
-def DebugInfo_ExtraConf_UseDatabaseOverGlobal_test( app ):
+def DebugInfo_ExtraConf_UseDatabaseOverGlobal_test( app: TestApp ) -> None:
   with TemporaryTestDir() as tmp_dir:
     database = [
       {

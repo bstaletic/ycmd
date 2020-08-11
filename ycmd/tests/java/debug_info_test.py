@@ -33,10 +33,11 @@ from ycmd.completers.language_server import language_server_completer as lsc
 
 import json
 import threading
+from webtest.app import TestApp
 
 
 @IsolatedYcmd()
-def DebugInfo_HandleNotificationInPollThread_Throw_test( app ):
+def DebugInfo_HandleNotificationInPollThread_Throw_test( app: TestApp ) -> None:
   filepath = PathToTestFile( DEFAULT_PROJECT_DIR,
                              'src',
                              'com',
@@ -73,7 +74,7 @@ def DebugInfo_HandleNotificationInPollThread_Throw_test( app ):
 
 
 @SharedYcmd
-def DebugInfo_test( app ):
+def DebugInfo_test( app: TestApp ) -> None:
   request_data = BuildRequest( filetype = 'java' )
   assert_that(
     app.post_json( '/debug_info', request_data ).json,
@@ -116,7 +117,7 @@ def DebugInfo_test( app ):
 
 
 @IsolatedYcmd( { 'extra_conf_globlist': PathToTestFile( 'extra_confs', '*' ) } )
-def DebugInfo_ExtraConf_SettingsValid_test( app ):
+def DebugInfo_ExtraConf_SettingsValid_test( app: TestApp ) -> None:
   StartJavaCompleterServerInDirectory(
     app,
     PathToTestFile( 'extra_confs', 'simple_extra_conf_project' ) )

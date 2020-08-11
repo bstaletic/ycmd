@@ -34,10 +34,14 @@ from ycmd.tests.test_utils import ( BuildRequest,
                                     LocationMatcher,
                                     MockProcessTerminationTimingOut )
 from ycmd.utils import ReadFile
+from hamcrest.library.collection.isdict_containingentries import IsDictContainingEntries
+from hamcrest.library.collection.issequence_containinginanyorder import IsSequenceContainingInAnyOrder
+from typing import Dict, List, Optional, Union
+from webtest.app import TestApp
 
 
 @SharedYcmd
-def Subcommands_DefinedSubcommands_test( app ):
+def Subcommands_DefinedSubcommands_test( app: TestApp ) -> None:
   subcommands_data = BuildRequest( completer_target = 'javascript' )
 
   assert_that( app.post_json( '/defined_subcommands', subcommands_data ).json,
@@ -51,7 +55,7 @@ def Subcommands_DefinedSubcommands_test( app ):
                  'RestartServer' ) )
 
 
-def RunTest( app, test, contents = None ):
+def RunTest( app: TestApp, test: Dict[str, Union[str, Dict[str, Union[int, str]], Dict[str, Union[int, IsDictContainingEntries]], Dict[str, Union[int, IsSequenceContainingInAnyOrder]], Dict[str, Union[str, int, List[str]]]]], contents: Optional[str] = None ) -> None:
   if not contents:
     contents = ReadFile( test[ 'request' ][ 'filepath' ] )
 
@@ -90,7 +94,7 @@ def RunTest( app, test, contents = None ):
 
 
 @SharedYcmd
-def Subcommands_GoToDefinition_test( app ):
+def Subcommands_GoToDefinition_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'GoToDefinition works within file',
     'request': {
@@ -111,7 +115,7 @@ def Subcommands_GoToDefinition_test( app ):
 
 
 @SharedYcmd
-def Subcommands_GoToDefinition_Unicode_test( app ):
+def Subcommands_GoToDefinition_Unicode_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'GoToDefinition works within file with unicode',
     'request': {
@@ -132,7 +136,7 @@ def Subcommands_GoToDefinition_Unicode_test( app ):
 
 
 @SharedYcmd
-def Subcommands_GoTo_test( app ):
+def Subcommands_GoTo_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'GoTo works the same as GoToDefinition within file',
     'request': {
@@ -153,7 +157,7 @@ def Subcommands_GoTo_test( app ):
 
 
 @IsolatedYcmd
-def Subcommands_GoTo_RelativePath_test( app ):
+def Subcommands_GoTo_RelativePath_test( app: TestApp ) -> None:
   StartJavaScriptCompleterServerInDirectory( app, PathToTestFile() )
   RunTest(
     app,
@@ -178,7 +182,7 @@ def Subcommands_GoTo_RelativePath_test( app ):
 
 
 @SharedYcmd
-def Subcommands_GetDoc_test( app ):
+def Subcommands_GetDoc_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'GetDoc works within file',
     'request': {
@@ -202,7 +206,7 @@ def Subcommands_GetDoc_test( app ):
 
 
 @SharedYcmd
-def Subcommands_GetType_test( app ):
+def Subcommands_GetType_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'GetType works within file',
     'request': {
@@ -221,7 +225,7 @@ def Subcommands_GetType_test( app ):
 
 
 @SharedYcmd
-def Subcommands_GoToReferences_test( app ):
+def Subcommands_GoToReferences_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'GoToReferences works within file',
     'request': {
@@ -249,7 +253,7 @@ def Subcommands_GoToReferences_test( app ):
 
 
 @SharedYcmd
-def Subcommands_GoToReferences_Unicode_test( app ):
+def Subcommands_GoToReferences_Unicode_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'GoToReferences works within file with unicode chars',
     'request': {
@@ -282,7 +286,7 @@ def Subcommands_GoToReferences_Unicode_test( app ):
 
 
 @SharedYcmd
-def Subcommands_GetDocWithNoItendifier_test( app ):
+def Subcommands_GetDocWithNoItendifier_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'GetDoc works when no identifier',
     'request': {
@@ -300,7 +304,7 @@ def Subcommands_GetDocWithNoItendifier_test( app ):
 
 
 @SharedYcmd
-def Subcommands_RefactorRename_Simple_test( app ):
+def Subcommands_RefactorRename_Simple_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'simple_test.js' )
   RunTest( app, {
     'description': 'RefactorRename works within a single scope/file',
@@ -345,7 +349,7 @@ def Subcommands_RefactorRename_Simple_test( app ):
 
 
 @SharedYcmd
-def Subcommands_RefactorRename_MultipleFiles_test( app ):
+def Subcommands_RefactorRename_MultipleFiles_test( app: TestApp ) -> None:
   file1 = PathToTestFile( 'file1.js' )
   file2 = PathToTestFile( 'file2.js' )
   file3 = PathToTestFile( 'file3.js' )
@@ -391,7 +395,7 @@ def Subcommands_RefactorRename_MultipleFiles_test( app ):
 # Needs to be isolated to prevent interfering with other tests (this test loads
 # an extra file into tern's project memory)
 @IsolatedYcmd
-def Subcommands_RefactorRename_MultipleFiles_OnFileReadyToParse_test( app ):
+def Subcommands_RefactorRename_MultipleFiles_OnFileReadyToParse_test( app: TestApp ) -> None:
   StartJavaScriptCompleterServerInDirectory( app, PathToTestFile() )
 
   file1 = PathToTestFile( 'file1.js' )
@@ -456,7 +460,7 @@ def Subcommands_RefactorRename_MultipleFiles_OnFileReadyToParse_test( app ):
 
 
 @SharedYcmd
-def Subcommands_RefactorRename_Missing_New_Name_test( app ):
+def Subcommands_RefactorRename_Missing_New_Name_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'RefactorRename raises an error without new name',
     'request': {
@@ -475,7 +479,7 @@ def Subcommands_RefactorRename_Missing_New_Name_test( app ):
 
 
 @SharedYcmd
-def Subcommands_RefactorRename_Unicode_test( app ):
+def Subcommands_RefactorRename_Unicode_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'unicode.js' )
   RunTest( app, {
     'description': 'RefactorRename works with unicode identifiers',
@@ -511,7 +515,7 @@ def Subcommands_RefactorRename_Unicode_test( app ):
 @IsolatedYcmd
 @patch( 'ycmd.utils.WaitUntilProcessIsTerminated',
         MockProcessTerminationTimingOut )
-def Subcommands_StopServer_Timeout_test( app ):
+def Subcommands_StopServer_Timeout_test( app: TestApp ) -> None:
   StartJavaScriptCompleterServerInDirectory( app, PathToTestFile() )
 
   app.post_json(

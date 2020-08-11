@@ -39,10 +39,11 @@ from ycmd.tests.test_utils import ( BuildRequest,
                                     UnixOnly )
 from ycmd.utils import ReadFile
 from ycmd import handlers
+from webtest.app import TestApp
 
 
 @IsolatedYcmd()
-def Diagnostics_ZeroBasedLineAndColumn_test( app ):
+def Diagnostics_ZeroBasedLineAndColumn_test( app: TestApp ) -> None:
   contents = """
 void foo() {
   double baz = "foo";
@@ -73,7 +74,7 @@ void foo() {
 
 
 @IsolatedYcmd()
-def Diagnostics_SimpleLocationExtent_test( app ):
+def Diagnostics_SimpleLocationExtent_test( app: TestApp ) -> None:
   contents = """
 void foo() {
   baz = 5;
@@ -97,7 +98,7 @@ void foo() {
 
 
 @IsolatedYcmd()
-def Diagnostics_PragmaOnceWarningIgnored_test( app ):
+def Diagnostics_PragmaOnceWarningIgnored_test( app: TestApp ) -> None:
   contents = """
 #pragma once
 
@@ -119,7 +120,7 @@ struct Foo {
 
 
 @IsolatedYcmd()
-def Diagnostics_Works_test( app ):
+def Diagnostics_Works_test( app: TestApp ) -> None:
   contents = """
 struct Foo {
   int x  // semicolon missing here!
@@ -147,7 +148,7 @@ struct Foo {
 
 
 @IsolatedYcmd()
-def Diagnostics_Multiline_test( app ):
+def Diagnostics_Multiline_test( app: TestApp ) -> None:
   contents = """
 struct Foo {
   Foo(int z) {}
@@ -176,7 +177,7 @@ int main() {
 
 
 @IsolatedYcmd()
-def Diagnostics_FixIt_Available_test( app ):
+def Diagnostics_FixIt_Available_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'FixIt_Clang_cpp11.cpp' )
   contents = ReadFile( filepath )
   request = { 'contents': contents,
@@ -201,7 +202,7 @@ def Diagnostics_FixIt_Available_test( app ):
 
 
 @IsolatedYcmd()
-def Diagnostics_MultipleMissingIncludes_test( app ):
+def Diagnostics_MultipleMissingIncludes_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'multiple_missing_includes.cc' )
   contents = ReadFile( filepath )
   request = { 'contents': contents,
@@ -227,7 +228,7 @@ def Diagnostics_MultipleMissingIncludes_test( app ):
 
 
 @IsolatedYcmd()
-def Diagnostics_LocationExtent_MissingSemicolon_test( app ):
+def Diagnostics_LocationExtent_MissingSemicolon_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'location_extent.cc' )
   contents = ReadFile( filepath )
   request = { 'contents': contents,
@@ -276,7 +277,7 @@ def Diagnostics_LocationExtent_MissingSemicolon_test( app ):
 
 
 @IsolatedYcmd()
-def Diagnostics_CUDA_Kernel_test( app ):
+def Diagnostics_CUDA_Kernel_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'cuda', 'kernel_call.cu' )
   contents = ReadFile( filepath )
   request = { 'contents': contents,
@@ -358,7 +359,7 @@ def Diagnostics_CUDA_Kernel_test( app ):
 
 
 @IsolatedYcmd( { 'max_diagnostics_to_display': 1 } )
-def Diagnostics_MaximumDiagnosticsNumberExceeded_test( app ):
+def Diagnostics_MaximumDiagnosticsNumberExceeded_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'max_diagnostics.cc' )
   contents = ReadFile( filepath )
   request = { 'contents': contents,
@@ -395,7 +396,7 @@ def Diagnostics_MaximumDiagnosticsNumberExceeded_test( app ):
 
 
 @IsolatedYcmd( { 'max_diagnostics_to_display': 0 } )
-def Diagnostics_NoLimitToNumberOfDiagnostics_test( app ):
+def Diagnostics_NoLimitToNumberOfDiagnostics_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'max_diagnostics.cc' )
   contents = ReadFile( filepath )
   request = { 'contents': contents,
@@ -432,7 +433,7 @@ def Diagnostics_NoLimitToNumberOfDiagnostics_test( app ):
 
 
 @IsolatedYcmd()
-def Diagnostics_DiagsNotReady_test( app ):
+def Diagnostics_DiagsNotReady_test( app: TestApp ) -> None:
   completer = handlers._server_state.GetFiletypeCompleter( [ 'cpp' ] )
   contents = """
 struct Foo {
@@ -463,7 +464,7 @@ struct Foo {
 
 @UnixOnly
 @IsolatedYcmd()
-def Diagnostics_UpdatedOnBufferVisit_test( app ):
+def Diagnostics_UpdatedOnBufferVisit_test( app: TestApp ) -> None:
   with TemporaryTestDir() as tmp_dir:
     source_file = os.path.join( tmp_dir, 'source.cpp' )
     source_contents = """#include "header.h"

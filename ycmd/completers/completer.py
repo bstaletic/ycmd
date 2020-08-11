@@ -21,6 +21,8 @@ from ycmd import extra_conf_store
 from ycmd.completers import completer_utils
 from ycmd.responses import NoDiagnosticSupport, SignatureHelpAvailalability
 from ycmd.utils import LOGGER
+from typing import Any, Dict, List, Optional, Union
+from ycmd.request_wrap import RequestWrap
 
 NO_USER_COMMANDS = 'This completer does not define any commands.'
 
@@ -178,7 +180,7 @@ class Completer( metaclass = abc.ABCMeta ):
   instead of returning FixIts right away, you should override ResolveFixit.
   """
 
-  def __init__( self, user_options ):
+  def __init__( self, user_options: Any ) -> None:
     self.user_options = user_options
     self.min_num_chars = user_options[ 'min_num_of_chars_for_completion' ]
     self.max_diagnostics_to_display = user_options[
@@ -202,7 +204,7 @@ class Completer( metaclass = abc.ABCMeta ):
 
   # It's highly likely you DON'T want to override this function but the *Inner
   # version of it.
-  def ShouldUseNow( self, request_data ):
+  def ShouldUseNow( self, request_data: RequestWrap ) -> bool:
     if not self.ShouldUseNowInner( request_data ):
       self._completions_cache.Invalidate()
       return False
@@ -221,7 +223,7 @@ class Completer( metaclass = abc.ABCMeta ):
       return previous_results_were_valid
 
 
-  def ShouldUseNowInner( self, request_data ):
+  def ShouldUseNowInner( self, request_data: RequestWrap ) -> bool:
     if not self.completion_triggers:
       return False
 
@@ -236,7 +238,7 @@ class Completer( metaclass = abc.ABCMeta ):
                                                         filetype )
 
 
-  def ShouldUseSignatureHelpNow( self, request_data ):
+  def ShouldUseSignatureHelpNow( self, request_data: RequestWrap ) -> bool:
     if self.user_options[ 'disable_signature_help' ]:
       return False
 
@@ -261,14 +263,14 @@ class Completer( metaclass = abc.ABCMeta ):
                                                         filetype )
 
 
-  def SetSignatureHelpTriggers( self, trigger_characters ):
+  def SetSignatureHelpTriggers( self, trigger_characters: List[str] ) -> None:
     if self._signature_triggers is None:
       return
 
     self._signature_triggers.SetServerSemanticTriggers( trigger_characters )
 
 
-  def QueryLengthAboveMinThreshold( self, request_data ):
+  def QueryLengthAboveMinThreshold( self, request_data: RequestWrap ) -> bool:
     # Note: calculation in 'characters' not bytes.
     query_length = ( request_data[ 'column_codepoint' ] -
                      request_data[ 'start_codepoint' ] )
@@ -278,7 +280,7 @@ class Completer( metaclass = abc.ABCMeta ):
 
   # It's highly likely you DON'T want to override this function but the *Inner
   # version of it.
-  def ComputeCandidates( self, request_data ):
+  def ComputeCandidates( self, request_data: RequestWrap ) -> Union[List[Union[Dict[str, Union[str, Dict[str, str]]], Dict[str, str]]], List[Dict[str, str]], List[Dict[str, Union[str, Dict[str, Dict[str, Union[int, str]]]]]], List[Dict[str, Union[str, Dict[str, List[Dict[str, Union[Dict[str, Union[int, str]], List[Dict[str, Union[str, Dict[str, Dict[str, Union[int, str]]]]]], str, bool]]]]]]]]:
     if ( not request_data[ 'force_semantic' ] and
          not self.ShouldUseNow( request_data ) ):
       return []
@@ -289,7 +291,7 @@ class Completer( metaclass = abc.ABCMeta ):
     return self.DetailCandidates( request_data, candidates )
 
 
-  def _GetCandidatesFromSubclass( self, request_data ):
+  def _GetCandidatesFromSubclass( self, request_data: RequestWrap ) -> Any:
     cache_completions = self._completions_cache.GetCompletionsIfCacheValid(
       request_data )
 
@@ -301,7 +303,7 @@ class Completer( metaclass = abc.ABCMeta ):
     return raw_completions
 
 
-  def DetailCandidates( self, request_data, candidates ):
+  def DetailCandidates( self, request_data: RequestWrap, candidates: Union[List[Union[Dict[str, Union[str, Dict[str, str]]], Dict[str, str]]], List[Dict[str, str]], List[Dict[str, Union[str, Dict[str, List[Dict[str, Union[Dict[str, Union[int, str]], List[Dict[str, Union[str, Dict[str, Dict[str, Union[int, str]]]]]], str, bool]]]]]]]] ) -> Union[List[Union[Dict[str, Union[str, Dict[str, str]]], Dict[str, str]]], List[Dict[str, str]], List[Dict[str, Union[str, Dict[str, List[Dict[str, Union[Dict[str, Union[int, str]], List[Dict[str, Union[str, Dict[str, Dict[str, Union[int, str]]]]]], str, bool]]]]]]]]:
     return candidates
 
 
@@ -309,18 +311,18 @@ class Completer( metaclass = abc.ABCMeta ):
     return [] # pragma: no cover
 
 
-  def ComputeSignatures( self, request_data ):
+  def ComputeSignatures( self, request_data: RequestWrap ) -> Dict[str, Union[List[Dict[str, str]], int, List[Dict[str, Union[str, List[Dict[str, List[int]]]]]], List[Dict[str, Union[Dict[str, str], str, List[Dict[str, List[int]]]]]]]]:
     if not self.ShouldUseSignatureHelpNow( request_data ):
       return {}
 
     return self.ComputeSignaturesInner( request_data )
 
 
-  def ComputeSignaturesInner( self, request_data ):
+  def ComputeSignaturesInner( self, request_data: RequestWrap ) -> Dict[Any, Any]:
     return {}
 
 
-  def DefinedSubcommands( self ):
+  def DefinedSubcommands( self ) -> List[str]:
     subcommands = sorted( self.GetSubcommandsMap().keys() )
     try:
       # We don't want expose this subcommand because it is not really needed
@@ -352,7 +354,7 @@ class Completer( metaclass = abc.ABCMeta ):
     return { 'fixits': [ request_data[ 'fixit' ] ] }
 
 
-  def UserCommandsHelpMessage( self ):
+  def UserCommandsHelpMessage( self ) -> str:
     subcommands = self.DefinedSubcommands()
     if subcommands:
       return ( 'Supported commands are:\n' +
@@ -362,7 +364,7 @@ class Completer( metaclass = abc.ABCMeta ):
       return 'This Completer has no supported subcommands.'
 
 
-  def FilterAndSortCandidates( self, candidates, query ):
+  def FilterAndSortCandidates( self, candidates: Any, query: str ) -> Any:
     if not candidates:
       return []
 
@@ -381,28 +383,28 @@ class Completer( metaclass = abc.ABCMeta ):
     return self.FilterAndSortCandidatesInner( candidates, sort_property, query )
 
 
-  def FilterAndSortCandidatesInner( self, candidates, sort_property, query ):
+  def FilterAndSortCandidatesInner( self, candidates: Any, sort_property: str, query: str ) -> Any:
     return completer_utils.FilterAndSortCandidatesWrap(
       candidates, sort_property, query, self._max_candidates )
 
 
-  def OnFileReadyToParse( self, request_data ):
+  def OnFileReadyToParse( self, request_data: RequestWrap ) -> None:
     pass # pragma: no cover
 
 
-  def OnFileSave( self, request_data ):
+  def OnFileSave( self, request_data: RequestWrap ) -> None:
     pass # pragma: no cover
 
 
-  def OnBufferVisit( self, request_data ):
+  def OnBufferVisit( self, request_data: RequestWrap ) -> None:
     pass # pragma: no cover
 
 
-  def OnBufferUnload( self, request_data ):
+  def OnBufferUnload( self, request_data: RequestWrap ) -> None:
     pass # pragma: no cover
 
 
-  def OnInsertLeave( self, request_data ):
+  def OnInsertLeave( self, request_data: RequestWrap ) -> None:
     pass # pragma: no cover
 
 
@@ -410,7 +412,7 @@ class Completer( metaclass = abc.ABCMeta ):
     pass # pragma: no cover
 
 
-  def OnUserCommand( self, arguments, request_data ):
+  def OnUserCommand( self, arguments: List[str], request_data: RequestWrap ) -> Any:
     if not arguments:
       raise ValueError( self.UserCommandsHelpMessage() )
 
@@ -424,7 +426,7 @@ class Completer( metaclass = abc.ABCMeta ):
     return command( self, request_data, arguments[ 1: ] )
 
 
-  def OnCurrentIdentifierFinished( self, request_data ):
+  def OnCurrentIdentifierFinished( self, request_data: RequestWrap ) -> None:
     pass # pragma: no cover
 
 
@@ -436,7 +438,7 @@ class Completer( metaclass = abc.ABCMeta ):
     raise NoDiagnosticSupport
 
 
-  def _CurrentFiletype( self, filetypes ):
+  def _CurrentFiletype( self, filetypes: List[str] ) -> str:
     supported = self.SupportedFiletypes()
 
     for filetype in filetypes:
@@ -459,25 +461,25 @@ class Completer( metaclass = abc.ABCMeta ):
     pass # pragma: no cover
 
 
-  def ServerIsReady( self ):
+  def ServerIsReady( self ) -> bool:
     return self.ServerIsHealthy()
 
 
-  def SignatureHelpAvailable( self ):
+  def SignatureHelpAvailable( self ) -> str:
     return SignatureHelpAvailalability.NOT_AVAILABLE
 
 
-  def ServerIsHealthy( self ):
+  def ServerIsHealthy( self ) -> bool:
     """Called by the /healthy handler to check if the underlying completion
     server is started and ready to receive requests. Returns bool."""
     return True
 
 
-  def PollForMessages( self, request_data ):
+  def PollForMessages( self, request_data: RequestWrap ) -> Union[List[Union[Dict[str, str], Dict[str, Union[List[Dict[str, Union[List[Dict[str, Dict[str, Union[int, str]]]], Dict[str, Union[int, str]], Dict[str, Dict[str, Union[int, str]]], str, bool]]], str]]]], List[Dict[str, str]], List[Dict[str, Union[List[Dict[str, Union[List[Dict[str, Dict[str, Union[int, str]]]], Dict[str, Union[int, str]], Dict[str, Dict[str, Union[int, str]]], str, bool]]], str]]], bool]:
     return self.PollForMessagesInner( request_data, MESSAGE_POLL_TIMEOUT )
 
 
-  def PollForMessagesInner( self, request_data, timeout ):
+  def PollForMessagesInner( self, request_data: RequestWrap, timeout: int ) -> bool:
     # Most completers don't implement this. It's only required where unsolicited
     # messages or diagnostics are supported, such as in the Language Server
     # Protocol. As such, the default implementation just returns False, meaning
@@ -485,7 +487,7 @@ class Completer( metaclass = abc.ABCMeta ):
     return False
 
 
-  def AdditionalFormattingOptions( self, request_data ):
+  def AdditionalFormattingOptions( self, request_data: RequestWrap ) -> Dict[str, Union[int, bool]]:
     module = extra_conf_store.ModuleForSourceFile( request_data[ 'filepath' ] )
     try:
       settings = self.GetSettings( module, request_data )
@@ -511,37 +513,37 @@ class Completer( metaclass = abc.ABCMeta ):
 class CompletionsCache:
   """Cache of computed completions for a particular request."""
 
-  def __init__( self ):
+  def __init__( self ) -> None:
     self._access_lock = threading.Lock()
     self.Invalidate()
 
 
-  def Invalidate( self ):
+  def Invalidate( self ) -> None:
     with self._access_lock:
       self.InvalidateNoLock()
 
 
-  def InvalidateNoLock( self ):
+  def InvalidateNoLock( self ) -> None:
     self._request_data = None
     self._completions = None
 
 
-  def Update( self, request_data, completions ):
+  def Update( self, request_data: RequestWrap, completions: Any ) -> None:
     with self._access_lock:
       self.UpdateNoLock( request_data, completions )
 
 
-  def UpdateNoLock( self, request_data, completions ):
+  def UpdateNoLock( self, request_data: RequestWrap, completions: Any ) -> None:
     self._request_data = request_data
     self._completions = completions
 
 
-  def GetCompletionsIfCacheValid( self, request_data ):
+  def GetCompletionsIfCacheValid( self, request_data: RequestWrap ) -> Optional[Union[List[Dict[str, str]], List[Dict[str, Union[str, Dict[str, Dict[str, Union[int, str]]]]]]]]:
     with self._access_lock:
       return self.GetCompletionsIfCacheValidNoLock( request_data )
 
 
-  def GetCompletionsIfCacheValidNoLock( self, request_data ):
+  def GetCompletionsIfCacheValidNoLock( self, request_data: RequestWrap ) -> Optional[Union[List[Union[Dict[str, Union[str, Dict[str, Dict[str, Union[str, int, Dict[str, str], Dict[str, Union[Dict[str, Dict[str, int]], str]], bool]]]]], Dict[str, Union[str, Dict[str, Dict[str, Union[str, int, Dict[str, Union[Dict[str, Dict[str, int]], str]], Dict[str, str]]]]]]]], List[Dict[str, str]], List[Dict[str, Union[str, Dict[str, Dict[str, Union[int, str]]]]]]]]:
     if self._request_data and self._request_data == request_data:
       return self._completions
     return None

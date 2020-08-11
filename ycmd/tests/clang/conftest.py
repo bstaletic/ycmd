@@ -16,6 +16,11 @@
 # along with ycmd.  If not, see <http://www.gnu.org/licenses/>.
 
 import pytest
+from _pytest.fixtures import SubRequest
+from _pytest.mark.structures import MarkDecorator
+from typing import Dict, Iterator, Union
+from webtest.app import TestApp
+
 from ycmd.tests.test_utils import ( ClearCompletionsCache,
                                     IsolatedApp,
                                     SetUpApp )
@@ -24,13 +29,13 @@ shared_app = None
 
 
 @pytest.fixture( scope='module', autouse=True )
-def set_up_shared_app():
+def set_up_shared_app() -> None:
   global shared_app
   shared_app = SetUpApp( { 'use_clangd': 0 } )
 
 
 @pytest.fixture
-def app( request ):
+def app( request: SubRequest ) -> Iterator[TestApp]:
   which = request.param[ 0 ]
   assert which == 'isolated' or which == 'shared'
   if which == 'isolated':
@@ -58,7 +63,7 @@ SharedYcmd = pytest.mark.parametrize(
     indirect = True )
 
 
-def IsolatedYcmd( custom_options = {} ):
+def IsolatedYcmd( custom_options: Dict[str, Union[int, str]] = {} ) -> MarkDecorator:
   """Defines a decorator to be attached to tests of this package. This decorator
   passes a unique ycmd application as a parameter. It should be used on tests
   that change the server state in a irreversible way (ex: a semantic subserver

@@ -37,6 +37,11 @@ from ycmd.tests.test_utils import ( BuildRequest,
                                     LocationMatcher,
                                     ErrorMatcher,
                                     ExpectedFailure )
+from hamcrest.library.collection.isdict_containingentries import IsDictContainingEntries
+from hamcrest.library.collection.issequence_containinginanyorder import IsSequenceContainingInAnyOrder
+from hamcrest.library.text.stringmatches import StringMatchesPattern
+from typing import Dict, List, Optional, Tuple, Union
+from webtest.app import TestApp
 
 TYPESHED_PATH = os.path.normpath(
   PathToTestFile( '..', '..', '..', '..', 'third_party', 'jedi_deps', 'jedi',
@@ -44,14 +49,14 @@ TYPESHED_PATH = os.path.normpath(
 
 
 class JediDef:
-  def __init__( self, col = None, line = None, path = None ):
+  def __init__( self, col: Optional[int] = None, line: Optional[int] = None, path: Optional[str] = None ) -> None:
     self.column = col
     self.line = line
     self.module_path = path
     self.description = ''
 
 
-def RunTest( app, test ):
+def RunTest( app: TestApp, test: Dict[str, Union[str, Dict[str, Union[str, List[str], int]], Dict[str, Union[int, IsDictContainingEntries]], Dict[str, Union[int, str]], Dict[str, Union[int, IsSequenceContainingInAnyOrder]]]] ) -> None:
   contents = ReadFile( test[ 'request' ][ 'filepath' ] )
 
   # We ignore errors here and check the response code ourself.
@@ -75,7 +80,7 @@ def RunTest( app, test ):
   assert_that( response.json, test[ 'expect' ][ 'data' ] )
 
 
-def Subcommands_GoTo( app, test, command ):
+def Subcommands_GoTo( app: TestApp, test: Dict[str, Union[Tuple[str, int, int, List[str]], Tuple[str, int, int], str, List[Tuple[str, int, int]]]], command: str ) -> None:
   if isinstance( test[ 'response' ], list ):
     expect = {
       'response': requests.codes.ok,
@@ -167,7 +172,7 @@ def Subcommands_GoTo( app, test, command ):
       'response': ( os.path.join( 'nested_import', 'to_import.py' ), 4, 5 ) },
   ] )
 @SharedYcmd
-def Subcommands_GoTo_test( app, cmd, test ):
+def Subcommands_GoTo_test( app: TestApp, cmd: str, test: Dict[str, Union[Tuple[str, int, int], str]] ) -> None:
   Subcommands_GoTo( app, test, cmd )
 
 
@@ -185,7 +190,7 @@ def Subcommands_GoTo_test( app, cmd, test ):
     'response': 'Symbol not found' }
 ] )
 @SharedYcmd
-def Subcommands_GoToSymbol_test( app, test ):
+def Subcommands_GoToSymbol_test( app: TestApp, test: Dict[str, Union[Tuple[str, int, int, List[str]], Tuple[str, int, int], str, List[Tuple[str, int, int]]]] ) -> None:
   Subcommands_GoTo( app, test, 'GoToSymbol' )
 
 
@@ -198,7 +203,7 @@ def Subcommands_GoToSymbol_test( app, test ):
     'response': 'Can\'t jump to type definition.', 'cmd': 'GoToType' }
 ] )
 @SharedYcmd
-def Subcommands_GoTo_SingleInvalidJediDefinition_test( app, test ):
+def Subcommands_GoTo_SingleInvalidJediDefinition_test( app: TestApp, test: Dict[str, Union[Tuple[str, int, int], str]] ) -> None:
   with patch( 'ycmd.completers.python.python_completer.jedi.Script.infer',
               return_value = [ JediDef() ] ):
     with patch( 'ycmd.completers.python.python_completer.jedi.Script.goto',
@@ -209,7 +214,7 @@ def Subcommands_GoTo_SingleInvalidJediDefinition_test( app, test ):
         Subcommands_GoTo( app, test, test.pop( 'cmd' ) )
 
 
-def Subcommands_GetType( app, position, expected_message ):
+def Subcommands_GetType( app: TestApp, position: Tuple[int, int], expected_message: Union[str, StringMatchesPattern] ) -> None:
   filepath = PathToTestFile( 'GetType.py' )
   contents = ReadFile( filepath )
 
@@ -236,12 +241,12 @@ def Subcommands_GetType( app, position, expected_message ):
                                   'instance int, instance str)$' ) )
   ] )
 @SharedYcmd
-def Subcommands_GetType_test( app, position, expected_message ):
+def Subcommands_GetType_test( app: TestApp, position: Tuple[int, int], expected_message: Union[str, StringMatchesPattern] ) -> None:
   Subcommands_GetType( app, position, expected_message )
 
 
 @SharedYcmd
-def Subcommands_GetType_NoTypeInformation_test( app ):
+def Subcommands_GetType_NoTypeInformation_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'GetType.py' )
   contents = ReadFile( filepath )
 
@@ -261,7 +266,7 @@ def Subcommands_GetType_NoTypeInformation_test( app ):
 
 
 @SharedYcmd
-def Subcommands_GetDoc_Method_test( app ):
+def Subcommands_GetDoc_Method_test( app: TestApp ) -> None:
   # Testcase1
   filepath = PathToTestFile( 'GetDoc.py' )
   contents = ReadFile( filepath )
@@ -282,7 +287,7 @@ def Subcommands_GetDoc_Method_test( app ):
 
 
 @SharedYcmd
-def Subcommands_GetDoc_Class_test( app ):
+def Subcommands_GetDoc_Class_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'GetDoc.py' )
   contents = ReadFile( filepath )
 
@@ -301,7 +306,7 @@ def Subcommands_GetDoc_Class_test( app ):
 
 
 @SharedYcmd
-def Subcommands_GetDoc_WhitespaceOnly_test( app ):
+def Subcommands_GetDoc_WhitespaceOnly_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'GetDoc.py' )
   contents = ReadFile( filepath )
 
@@ -322,7 +327,7 @@ def Subcommands_GetDoc_WhitespaceOnly_test( app ):
 
 
 @SharedYcmd
-def Subcommands_GetDoc_NoDocumentation_test( app ):
+def Subcommands_GetDoc_NoDocumentation_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'GetDoc.py' )
   contents = ReadFile( filepath )
 
@@ -348,12 +353,12 @@ def Subcommands_GetDoc_NoDocumentation_test( app ):
       'response': 'Can\'t jump to type definition.' },
   ] )
 @SharedYcmd
-def Subcommands_GoToType_test( app, test ):
+def Subcommands_GoToType_test( app: TestApp, test: Dict[str, Union[Tuple[str, int, int], str]] ) -> None:
   Subcommands_GoTo( app, test, 'GoToType' )
 
 
 @SharedYcmd
-def Subcommands_GoToReferences_Function_test( app ):
+def Subcommands_GoToReferences_Function_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'goto', 'references.py' )
   contents = ReadFile( filepath )
 
@@ -396,7 +401,7 @@ def Subcommands_GoToReferences_Function_test( app ):
 
 
 @SharedYcmd
-def Subcommands_GoToReferences_Builtin_test( app ):
+def Subcommands_GoToReferences_Builtin_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'goto', 'references.py' )
   contents = ReadFile( filepath )
 
@@ -421,7 +426,7 @@ def Subcommands_GoToReferences_Builtin_test( app ):
 
 
 @SharedYcmd
-def Subcommands_GoToReferences_NoReferences_test( app ):
+def Subcommands_GoToReferences_NoReferences_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'goto', 'references.py' )
   contents = ReadFile( filepath )
 
@@ -441,7 +446,7 @@ def Subcommands_GoToReferences_NoReferences_test( app ):
 
 
 @SharedYcmd
-def Subcommands_GoToReferences_InvalidJediReferences_test( app ):
+def Subcommands_GoToReferences_InvalidJediReferences_test( app: TestApp ) -> None:
   with patch( 'ycmd.completers.python.python_completer.'
               'jedi.Script.get_references',
               return_value = [ JediDef(),
@@ -469,7 +474,7 @@ def Subcommands_GoToReferences_InvalidJediReferences_test( app ):
 
 
 @SharedYcmd
-def Subcommands_RefactorRename_NoNewName_test( app ):
+def Subcommands_RefactorRename_NoNewName_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'basic.py' )
   contents = ReadFile( filepath )
   command_data = BuildRequest( filepath = filepath,
@@ -490,7 +495,7 @@ def Subcommands_RefactorRename_NoNewName_test( app ):
 
 
 @SharedYcmd
-def Subcommands_RefactorRename_Same_test( app ):
+def Subcommands_RefactorRename_Same_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'basic.py' )
   contents = ReadFile( filepath )
 
@@ -523,7 +528,7 @@ def Subcommands_RefactorRename_Same_test( app ):
 
 
 @SharedYcmd
-def Subcommands_RefactorRename_Longer_test( app ):
+def Subcommands_RefactorRename_Longer_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'basic.py' )
   contents = ReadFile( filepath )
 
@@ -556,7 +561,7 @@ def Subcommands_RefactorRename_Longer_test( app ):
 
 
 @SharedYcmd
-def Subcommands_RefactorRename_ShortenDelete_test( app ):
+def Subcommands_RefactorRename_ShortenDelete_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'basic.py' )
   contents = ReadFile( filepath )
 
@@ -589,7 +594,7 @@ def Subcommands_RefactorRename_ShortenDelete_test( app ):
 
 
 @SharedYcmd
-def Subcommands_RefactorRename_Shorten_test( app ):
+def Subcommands_RefactorRename_Shorten_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'basic.py' )
   contents = ReadFile( filepath )
 
@@ -622,7 +627,7 @@ def Subcommands_RefactorRename_Shorten_test( app ):
 
 
 @SharedYcmd
-def Subcommands_RefactorRename_StartOfFile_test( app ):
+def Subcommands_RefactorRename_StartOfFile_test( app: TestApp ) -> None:
   one = PathToTestFile( 'rename', 'one.py' )
   contents = ReadFile( one )
 
@@ -658,7 +663,7 @@ def Subcommands_RefactorRename_StartOfFile_test( app ):
 
 
 @SharedYcmd
-def Subcommands_RefactorRename_MultiFIle_test( app ):
+def Subcommands_RefactorRename_MultiFIle_test( app: TestApp ) -> None:
   one = PathToTestFile( 'rename', 'one.py' )
   two = PathToTestFile( 'rename', 'two.py' )
   contents = ReadFile( one )

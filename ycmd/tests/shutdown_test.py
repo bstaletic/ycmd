@@ -32,7 +32,7 @@ SUBSERVER_SHUTDOWN_TIMEOUT = 120
 class Shutdown_test( Client_test ):
 
   @Client_test.CaptureLogfiles
-  def FromHandlerWithoutSubserver_test( self ):
+  def FromHandlerWithoutSubserver_test( self ) -> None:
     self.Start()
     self.AssertServersAreRunning()
 
@@ -50,7 +50,7 @@ class Shutdown_test( Client_test ):
 
   @pytest.mark.valgrind_skip
   @Client_test.CaptureLogfiles
-  def FromHandlerWithSubservers_test( self ):
+  def FromHandlerWithSubservers_test( self ) -> None:
     self.Start()
 
     filetypes = [ 'cpp',
@@ -76,7 +76,7 @@ class Shutdown_test( Client_test ):
 
 
   @Client_test.CaptureLogfiles
-  def FromWatchdogWithoutSubserver_test( self ):
+  def FromWatchdogWithoutSubserver_test( self ) -> None:
     self.Start( idle_suicide_seconds = 2, check_interval_seconds = 1 )
     self.AssertServersAreRunning()
 
@@ -86,7 +86,7 @@ class Shutdown_test( Client_test ):
 
   @pytest.mark.valgrind_skip
   @Client_test.CaptureLogfiles
-  def FromWatchdogWithSubservers_test( self ):
+  def FromWatchdogWithSubservers_test( self ) -> None:
     all_servers_are_running = Event()
 
     def KeepServerAliveInAnotherThread():

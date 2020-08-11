@@ -36,9 +36,12 @@ from ycmd.tests.test_utils import ( BuildRequest,
                                     LocationMatcher,
                                     StopCompleterServer )
 from ycmd.utils import ReadFile
+from hamcrest.library.collection.isdict_containingentries import IsDictContainingEntries
+from typing import Dict, Union
+from webtest.app import TestApp
 
 
-def RunTest( app, test ):
+def RunTest( app: TestApp, test: Dict[str, Union[str, Dict[str, Union[int, str]], Dict[str, Union[int, IsDictContainingEntries]]]] ) -> None:
   contents = ReadFile( test[ 'request' ][ 'filepath' ] )
   filetype = test[ 'request' ].get( 'filetype', 'typescript' )
   app.post_json(
@@ -68,7 +71,7 @@ def RunTest( app, test ):
 
 
 @SharedYcmd
-def GetCompletions_Basic_test( app ):
+def GetCompletions_Basic_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'Extra and detailed info when completions are methods',
     'request': {
@@ -140,7 +143,7 @@ def GetCompletions_Basic_test( app ):
 
 
 @IsolatedYcmd( { 'disable_signature_help': True } )
-def GetCompletions_Basic_NoSigHelp_test( app ):
+def GetCompletions_Basic_NoSigHelp_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'Extra and detailed info when completions are methods',
     'request': {
@@ -187,7 +190,7 @@ def GetCompletions_Basic_NoSigHelp_test( app ):
 
 
 @SharedYcmd
-def GetCompletions_Keyword_test( app ):
+def GetCompletions_Keyword_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'No extra and detailed info when completion is a keyword',
     'request': {
@@ -209,7 +212,7 @@ def GetCompletions_Keyword_test( app ):
 
 
 @SharedYcmd
-def GetCompletions_AfterRestart_test( app ):
+def GetCompletions_AfterRestart_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'test.ts' )
 
   app.post_json( '/run_completer_command',
@@ -259,7 +262,7 @@ def GetCompletions_AfterRestart_test( app ):
 
 
 @IsolatedYcmd()
-def GetCompletions_ServerIsNotRunning_test( app ):
+def GetCompletions_ServerIsNotRunning_test( app: TestApp ) -> None:
   StopCompleterServer( app, filetype = 'typescript' )
 
   filepath = PathToTestFile( 'test.ts' )
@@ -291,7 +294,7 @@ def GetCompletions_ServerIsNotRunning_test( app ):
 
 
 @SharedYcmd
-def GetCompletions_AutoImport_test( app ):
+def GetCompletions_AutoImport_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'test.ts' )
   RunTest( app, {
     'description': 'Symbol from external module can be completed and '
@@ -331,7 +334,7 @@ def GetCompletions_AutoImport_test( app ):
 
 
 @SharedYcmd
-def GetCompletions_TypeScriptReact_DefaultTriggers_test( app ):
+def GetCompletions_TypeScriptReact_DefaultTriggers_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'test.tsx' )
   RunTest( app, {
     'description': 'No need to force after a semantic trigger',

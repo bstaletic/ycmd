@@ -20,19 +20,19 @@ from ycmd import identifier_utils as iu
 from hamcrest import assert_that, equal_to, has_item
 
 
-def RemoveIdentifierFreeText_CppComments_test():
+def RemoveIdentifierFreeText_CppComments_test() -> None:
   assert_that( "foo \nbar \nqux",
                equal_to( iu.RemoveIdentifierFreeText(
                  "foo \nbar //foo \nqux" ) ) )
 
 
-def RemoveIdentifierFreeText_PythonComments_test():
+def RemoveIdentifierFreeText_PythonComments_test() -> None:
   assert_that( "foo \nbar \nqux",
                equal_to( iu.RemoveIdentifierFreeText(
                  "foo \nbar #foo \nqux" ) ) )
 
 
-def RemoveIdentifierFreeText_CstyleComments_test():
+def RemoveIdentifierFreeText_CstyleComments_test() -> None:
   assert_that( "\n bar",
                equal_to( iu.RemoveIdentifierFreeText(
                  "/* foo\n */ bar" ) ) )
@@ -44,19 +44,19 @@ def RemoveIdentifierFreeText_CstyleComments_test():
                  "foo \nbar /* foo \n foo2 */\nqux" ) ) )
 
 
-def RemoveIdentifierFreeText_SimpleSingleQuoteString_test():
+def RemoveIdentifierFreeText_SimpleSingleQuoteString_test() -> None:
   assert_that( "foo \nbar \nqux",
                equal_to( iu.RemoveIdentifierFreeText(
                  "foo \nbar 'foo'\nqux" ) ) )
 
 
-def RemoveIdentifierFreeText_SimpleDoubleQuoteString_test():
+def RemoveIdentifierFreeText_SimpleDoubleQuoteString_test() -> None:
   assert_that( "foo \nbar \nqux",
                equal_to( iu.RemoveIdentifierFreeText(
                  'foo \nbar "foo"\nqux' ) ) )
 
 
-def RemoveIdentifierFreeText_EscapedQuotes_test():
+def RemoveIdentifierFreeText_EscapedQuotes_test() -> None:
   assert_that( "foo \nbar \nqux",
                equal_to( iu.RemoveIdentifierFreeText(
                  "foo \nbar 'fo\\'oz\\nfoo'\nqux" ) ) )
@@ -65,7 +65,7 @@ def RemoveIdentifierFreeText_EscapedQuotes_test():
                  'foo \nbar "fo\\"oz\\nfoo"\nqux' ) ) )
 
 
-def RemoveIdentifierFreeText_SlashesInStrings_test():
+def RemoveIdentifierFreeText_SlashesInStrings_test() -> None:
   assert_that( "foo \nbar baz\nqux ",
                equal_to( iu.RemoveIdentifierFreeText(
                  'foo \nbar "fo\\\\"baz\nqux "qwe"' ) ) )
@@ -74,7 +74,7 @@ def RemoveIdentifierFreeText_SlashesInStrings_test():
                  "foo '\\\\'\nbar '\\\\'\nqux '\\\\'" ) ) )
 
 
-def RemoveIdentifierFreeText_EscapedQuotesStartStrings_test():
+def RemoveIdentifierFreeText_EscapedQuotesStartStrings_test() -> None:
   assert_that( "\\\"foo\\\" zoo",
                equal_to( iu.RemoveIdentifierFreeText(
                  "\\\"foo\\\"'\"''bar' zoo'test'" ) ) )
@@ -83,7 +83,7 @@ def RemoveIdentifierFreeText_EscapedQuotesStartStrings_test():
                  "\\'foo\\'\"'\"\"bar\" zoo\"test\"" ) ) )
 
 
-def RemoveIdentifierFreeText_NoMultilineString_test():
+def RemoveIdentifierFreeText_NoMultilineString_test() -> None:
   assert_that( "'\nlet x = \nlet y = ",
                equal_to( iu.RemoveIdentifierFreeText(
                  "'\nlet x = 'foo'\nlet y = 'bar'" ) ) )
@@ -92,7 +92,7 @@ def RemoveIdentifierFreeText_NoMultilineString_test():
                  "\"\nlet x = \"foo\"\nlet y = \"bar\"" ) ) )
 
 
-def RemoveIdentifierFreeText_PythonMultilineString_test():
+def RemoveIdentifierFreeText_PythonMultilineString_test() -> None:
   assert_that( "\n\n\nzoo",
                equal_to( iu.RemoveIdentifierFreeText(
                  "\"\"\"\nfoobar\n\"\"\"\nzoo" ) ) )
@@ -101,7 +101,7 @@ def RemoveIdentifierFreeText_PythonMultilineString_test():
                  "'''\nfoobar\n'''\nzoo" ) ) )
 
 
-def RemoveIdentifierFreeText_GoBackQuoteString_test():
+def RemoveIdentifierFreeText_GoBackQuoteString_test() -> None:
   assert_that( "foo \nbar `foo`\nqux",
                equal_to( iu.RemoveIdentifierFreeText(
                  "foo \nbar `foo`\nqux" ) ) )
@@ -110,7 +110,7 @@ def RemoveIdentifierFreeText_GoBackQuoteString_test():
                  "foo \nbar `foo`\nqux", filetype = 'go' ) ) )
 
 
-def ExtractIdentifiersFromText_test():
+def ExtractIdentifiersFromText_test() -> None:
   assert_that( [ "foo", "_bar", "BazGoo", "FOO", "_", "x",
                  "one", "two", "moo", "qqq" ],
                equal_to( iu.ExtractIdentifiersFromText(
@@ -118,30 +118,30 @@ def ExtractIdentifiersFromText_test():
                  "- _ (x) one-two !moo [qqq]" ) ) )
 
 
-def ExtractIdentifiersFromText_Css_test():
+def ExtractIdentifiersFromText_Css_test() -> None:
   assert_that( [ "foo", "-zoo", "font-size", "px", "a99" ],
                equal_to( iu.ExtractIdentifiersFromText(
                  "foo -zoo {font-size: 12px;} a99", "css" ) ) )
 
 
-def ExtractIdentifiersFromText_Html_test():
+def ExtractIdentifiersFromText_Html_test() -> None:
   assert_that( [ "foo", "goo-foo", "zoo", "bar", "aa", "z", "b@g", "fo", "ba" ],
                equal_to( iu.ExtractIdentifiersFromText(
                  '<foo> <goo-foo zoo=bar aa="" z=\'\'/> b@g fo.ba', "html" ) ) )
 
 
-def ExtractIdentifiersFromText_Html_TemplateChars_test():
+def ExtractIdentifiersFromText_Html_TemplateChars_test() -> None:
   assert_that( iu.ExtractIdentifiersFromText( '<foo>{{goo}}</foo>', 'html' ),
                has_item( 'goo' ) )
 
 
-def ExtractIdentifiersFromText_JavaScript_test():
+def ExtractIdentifiersFromText_JavaScript_test() -> None:
   assert_that( [ "var", "foo", "require", "bar" ],
                equal_to( iu.ExtractIdentifiersFromText(
                  "var foo = require('bar');", 'javascript' ) ) )
 
 
-def IsIdentifier_Default_test():
+def IsIdentifier_Default_test() -> None:
   assert_that( iu.IsIdentifier( 'foo' ) )
   assert_that( iu.IsIdentifier( 'foo129' ) )
   assert_that( iu.IsIdentifier( 'f12' ) )
@@ -165,7 +165,7 @@ def IsIdentifier_Default_test():
   assert_that( not iu.IsIdentifier( '' ) )
 
 
-def IsIdentifier_JavaScript_test():
+def IsIdentifier_JavaScript_test() -> None:
   assert_that( iu.IsIdentifier( '_føo1', 'javascript' ) )
   assert_that( iu.IsIdentifier( 'fø_o1', 'javascript' ) )
   assert_that( iu.IsIdentifier( '$føo1', 'javascript' ) )
@@ -174,7 +174,7 @@ def IsIdentifier_JavaScript_test():
   assert_that( not iu.IsIdentifier( '1føo', 'javascript' ) )
 
 
-def IsIdentifier_TypeScript_test():
+def IsIdentifier_TypeScript_test() -> None:
   assert_that( iu.IsIdentifier( '_føo1', 'typescript' ) )
   assert_that( iu.IsIdentifier( 'fø_o1', 'typescript' ) )
   assert_that( iu.IsIdentifier( '$føo1', 'typescript' ) )
@@ -183,7 +183,7 @@ def IsIdentifier_TypeScript_test():
   assert_that( not iu.IsIdentifier( '1føo', 'typescript' ) )
 
 
-def IsIdentifier_Css_test():
+def IsIdentifier_Css_test() -> None:
   assert_that( iu.IsIdentifier( 'foo'      , 'css' ) )
   assert_that( iu.IsIdentifier( 'a'        , 'css' ) )
   assert_that( iu.IsIdentifier( 'a1'       , 'css' ) )
@@ -203,7 +203,7 @@ def IsIdentifier_Css_test():
   assert_that( not iu.IsIdentifier( '€'  , 'css' ) )
 
 
-def IsIdentifier_R_test():
+def IsIdentifier_R_test() -> None:
   assert_that( iu.IsIdentifier( 'a'    , 'r' ) )
   assert_that( iu.IsIdentifier( 'a.b'  , 'r' ) )
   assert_that( iu.IsIdentifier( 'a.b.c', 'r' ) )
@@ -225,7 +225,7 @@ def IsIdentifier_R_test():
   assert_that( not iu.IsIdentifier( ''   , 'r' ) )
 
 
-def IsIdentifier_Clojure_test():
+def IsIdentifier_Clojure_test() -> None:
   assert_that( iu.IsIdentifier( 'foo'  , 'clojure' ) )
   assert_that( iu.IsIdentifier( 'f9'   , 'clojure' ) )
   assert_that( iu.IsIdentifier( 'a.b.c', 'clojure' ) )
@@ -251,7 +251,7 @@ def IsIdentifier_Clojure_test():
   assert_that( not iu.IsIdentifier( ''     , 'clojure' ) )
 
 
-def IsIdentifier_Elisp_test():
+def IsIdentifier_Elisp_test() -> None:
   # elisp is using the clojure regexes, so we're testing this more lightly
   assert_that( iu.IsIdentifier( 'foo'  , 'elisp' ) )
   assert_that( iu.IsIdentifier( 'f9'   , 'elisp' ) )
@@ -265,7 +265,7 @@ def IsIdentifier_Elisp_test():
   assert_that( not iu.IsIdentifier( ''     , 'elisp' ) )
 
 
-def IsIdentifier_Haskell_test():
+def IsIdentifier_Haskell_test() -> None:
   assert_that( iu.IsIdentifier( 'foo' , 'haskell' ) )
   assert_that( iu.IsIdentifier( "foo'", 'haskell' ) )
   assert_that( iu.IsIdentifier( "x'"  , 'haskell' ) )
@@ -279,7 +279,7 @@ def IsIdentifier_Haskell_test():
   assert_that( not iu.IsIdentifier( ''  , 'haskell' ) )
 
 
-def IsIdentifier_Tex_test():
+def IsIdentifier_Tex_test() -> None:
   assert_that( iu.IsIdentifier( 'foo'        , 'tex' ) )
   assert_that( iu.IsIdentifier( 'fig:foo'    , 'tex' ) )
   assert_that( iu.IsIdentifier( 'fig:foo-bar', 'tex' ) )
@@ -294,7 +294,7 @@ def IsIdentifier_Tex_test():
   assert_that( not iu.IsIdentifier( ''        , 'tex' ) )
 
 
-def IsIdentifier_Perl6_test():
+def IsIdentifier_Perl6_test() -> None:
   assert_that( iu.IsIdentifier( 'foo'  , 'perl6' ) )
   assert_that( iu.IsIdentifier( "f-o"  , 'perl6' ) )
   assert_that( iu.IsIdentifier( "x'y"  , 'perl6' ) )
@@ -321,7 +321,7 @@ def IsIdentifier_Perl6_test():
   assert_that( not iu.IsIdentifier( ''    , 'perl6' ) )
 
 
-def IsIdentifier_Scheme_test():
+def IsIdentifier_Scheme_test() -> None:
   assert_that( iu.IsIdentifier( 'λ'         , 'scheme' ) )
   assert_that( iu.IsIdentifier( '_'         , 'scheme' ) )
   assert_that( iu.IsIdentifier( '+'         , 'scheme' ) )
@@ -352,14 +352,14 @@ def IsIdentifier_Scheme_test():
   assert_that( not iu.IsIdentifier( r'aa\x123;cc\x', 'scheme' ) )
 
 
-def StartOfLongestIdentifierEndingAtIndex_Simple_test():
+def StartOfLongestIdentifierEndingAtIndex_Simple_test() -> None:
   assert_that( 0, equal_to(
     iu.StartOfLongestIdentifierEndingAtIndex( 'foo', 3 ) ) )
   assert_that( 0, equal_to(
     iu.StartOfLongestIdentifierEndingAtIndex( 'f12', 3 ) ) )
 
 
-def StartOfLongestIdentifierEndingAtIndex_BadInput_test():
+def StartOfLongestIdentifierEndingAtIndex_BadInput_test() -> None:
   assert_that( 0, equal_to(
     iu.StartOfLongestIdentifierEndingAtIndex( '', 0 ) ) )
   assert_that( 1, equal_to(
@@ -372,7 +372,7 @@ def StartOfLongestIdentifierEndingAtIndex_BadInput_test():
     iu.StartOfLongestIdentifierEndingAtIndex( 'foo', 10 ) ) )
 
 
-def StartOfLongestIdentifierEndingAtIndex_Punctuation_test():
+def StartOfLongestIdentifierEndingAtIndex_Punctuation_test() -> None:
   assert_that( 1, equal_to(
     iu.StartOfLongestIdentifierEndingAtIndex( '(foo', 4 ) ) )
   assert_that( 6, equal_to(
@@ -383,7 +383,7 @@ def StartOfLongestIdentifierEndingAtIndex_Punctuation_test():
     iu.StartOfLongestIdentifierEndingAtIndex( '...', 2 ) ) )
 
 
-def StartOfLongestIdentifierEndingAtIndex_PunctuationWithUnicode_test():
+def StartOfLongestIdentifierEndingAtIndex_PunctuationWithUnicode_test() -> None:
   assert_that( 1, equal_to(
     iu.StartOfLongestIdentifierEndingAtIndex( u'(fäö', 4 ) ) )
   assert_that( 2, equal_to(
@@ -391,7 +391,7 @@ def StartOfLongestIdentifierEndingAtIndex_PunctuationWithUnicode_test():
 
 
 # Not a test, but a test helper function
-def LoopExpectLongestIdentifier( ident, expected, end_index ):
+def LoopExpectLongestIdentifier( ident: str, expected: int, end_index: int ) -> None:
   assert_that( expected, equal_to(
     iu.StartOfLongestIdentifierEndingAtIndex( ident, end_index ) ) )
 
@@ -400,59 +400,59 @@ def LoopExpectLongestIdentifier( ident, expected, end_index ):
     'ident',
     [ 'foobar', 'f12341234', 'f123f1234', 'fäöttccoö', ],
     ids = [ 'Simple', '1stNonNumber', 'Subidentifier', 'Unicode' ] )
-def StartOfLongestIdentifierEndingAtIndex_Entire_test( ident ):
+def StartOfLongestIdentifierEndingAtIndex_Entire_test( ident: str ) -> None:
   for i in range( len( ident ) ):
     LoopExpectLongestIdentifier( ident, 0, i )
 
 
-def StartOfLongestIdentifierEndingAtIndex_Entire_AllBad_test():
+def StartOfLongestIdentifierEndingAtIndex_Entire_AllBad_test() -> None:
   ident = '....'
   for i in range( len( ident ) ):
     LoopExpectLongestIdentifier( ident, i, i )
 
 
 # Not a test, but a test helper function
-def LoopExpectIdentfierAtIndex( ident, index, expected ):
+def LoopExpectIdentfierAtIndex( ident: str, index: int, expected: str ) -> None:
   assert_that( expected, equal_to( iu.IdentifierAtIndex( ident, index ) ) )
 
 
 @pytest.mark.parametrize( 'ident',
                           [ 'foobar', 'fäöttccoö', ],
                           ids = [ 'Simple', 'Unicode' ] )
-def IdentifierAtIndex_Entire_test( ident ):
+def IdentifierAtIndex_Entire_test( ident: str ) -> None:
   for i in range( len( ident ) ):
     LoopExpectIdentfierAtIndex( ident, i, ident )
 
 
-def IdentifierAtIndex_BadInput_test():
+def IdentifierAtIndex_BadInput_test() -> None:
   assert_that( '', equal_to( iu.IdentifierAtIndex( '', 0 ) ) )
   assert_that( '', equal_to( iu.IdentifierAtIndex( '', 5 ) ) )
   assert_that( '', equal_to( iu.IdentifierAtIndex( 'foo', 5 ) ) )
   assert_that( 'foo', equal_to( iu.IdentifierAtIndex( 'foo', -5 ) ) )
 
 
-def IdentifierAtIndex_IndexPastIdent_test():
+def IdentifierAtIndex_IndexPastIdent_test() -> None:
   assert_that( '', equal_to( iu.IdentifierAtIndex( 'foo    ', 5 ) ) )
 
 
-def IdentifierAtIndex_StopsAtNonIdentifier_test():
+def IdentifierAtIndex_StopsAtNonIdentifier_test() -> None:
   assert_that( 'foo', equal_to( iu.IdentifierAtIndex( 'foo(goo)', 0 ) ) )
   assert_that( 'goo', equal_to( iu.IdentifierAtIndex( 'foo(goo)', 5 ) ) )
 
 
-def IdentifierAtIndex_LooksAhead_Success_test():
+def IdentifierAtIndex_LooksAhead_Success_test() -> None:
   assert_that( 'goo', equal_to( iu.IdentifierAtIndex( 'foo(goo)', 3 ) ) )
   assert_that( 'goo', equal_to( iu.IdentifierAtIndex( '   goo', 0 ) ) )
 
 
-def IdentifierAtIndex_LooksAhead_Failure_test():
+def IdentifierAtIndex_LooksAhead_Failure_test() -> None:
   assert_that( '', equal_to( iu.IdentifierAtIndex( 'foo    ()***()', 5 ) ) )
 
 
-def IdentifierAtIndex_SingleCharIdent_test():
+def IdentifierAtIndex_SingleCharIdent_test() -> None:
   assert_that( 'f', equal_to( iu.IdentifierAtIndex( '    f    ', 1 ) ) )
 
 
-def IdentifierAtIndex_Css_test():
+def IdentifierAtIndex_Css_test() -> None:
   assert_that( 'font-face', equal_to(
     iu.IdentifierAtIndex( 'font-face', 0, 'css' ) ) )

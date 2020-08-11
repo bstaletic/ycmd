@@ -33,7 +33,7 @@ ycm_core = ImportCore()
 import os
 
 
-def CppBindings_FilterAndSortCandidates_test():
+def CppBindings_FilterAndSortCandidates_test() -> None:
   candidates = [ 'foo1', 'foo2', 'foo3' ]
   query = 'oo'
   candidate_property = ''
@@ -54,7 +54,7 @@ def CppBindings_FilterAndSortCandidates_test():
   assert_that( result_2, contains_exactly( 'foo1', 'foo2' ) )
 
 
-def CppBindings_IdentifierCompleter_test():
+def CppBindings_IdentifierCompleter_test() -> None:
   identifier_completer = ycm_core.IdentifierCompleter()
   identifiers = ycm_core.StringVector()
   identifiers.append( 'foo' )
@@ -80,7 +80,7 @@ def CppBindings_IdentifierCompleter_test():
 
 
 @ClangOnly
-def CppBindings_UnsavedFile_test():
+def CppBindings_UnsavedFile_test() -> None:
   unsaved_file = ycm_core.UnsavedFile()
   filename = 'foo'
   contents = 'bar\\n'
@@ -99,7 +99,7 @@ def CppBindings_UnsavedFile_test():
 
 
 @ClangOnly
-def CppBindings_DeclarationLocation_test():
+def CppBindings_DeclarationLocation_test() -> None:
   translation_unit = PathToTestFile( 'foo.c' )
   filename = PathToTestFile( 'foo.c' )
   line = 9
@@ -133,7 +133,7 @@ def CppBindings_DeclarationLocation_test():
 
 
 @ClangOnly
-def CppBindings_DefinitionOrDeclarationLocation_test():
+def CppBindings_DefinitionOrDeclarationLocation_test() -> None:
   translation_unit = PathToTestFile( 'foo.c' )
   filename = PathToTestFile( 'foo.c' )
   line = 9
@@ -168,7 +168,7 @@ def CppBindings_DefinitionOrDeclarationLocation_test():
 
 
 @ClangOnly
-def CppBindings_DefinitionLocation_test():
+def CppBindings_DefinitionLocation_test() -> None:
   translation_unit = PathToTestFile( 'foo.c' )
   filename = PathToTestFile( 'foo.c' )
   line = 9
@@ -202,7 +202,7 @@ def CppBindings_DefinitionLocation_test():
 
 
 @ClangOnly
-def CppBindings_Candidates_test():
+def CppBindings_Candidates_test() -> None:
   translation_unit = PathToTestFile( 'foo.c' )
   filename = PathToTestFile( 'foo.c' )
   line = 11
@@ -249,7 +249,7 @@ def CppBindings_Candidates_test():
 
 
 @ClangOnly
-def CppBindings_GetType_test():
+def CppBindings_GetType_test() -> None:
   translation_unit = PathToTestFile( 'foo.c' )
   filename = PathToTestFile( 'foo.c' )
   line = 9
@@ -280,7 +280,7 @@ def CppBindings_GetType_test():
 
 
 @ClangOnly
-def CppBindings_GetParent_test():
+def CppBindings_GetParent_test() -> None:
   translation_unit = PathToTestFile( 'foo.c' )
   filename = PathToTestFile( 'foo.c' )
   line = 9
@@ -313,7 +313,7 @@ def CppBindings_GetParent_test():
 
 
 @ClangOnly
-def CppBindings_FixIt_test():
+def CppBindings_FixIt_test() -> None:
   translation_unit = PathToTestFile( 'foo.c' )
   filename = PathToTestFile( 'foo.c' )
   line = 3
@@ -368,7 +368,7 @@ def CppBindings_FixIt_test():
 
 
 @ClangOnly
-def CppBindings_Docs_test():
+def CppBindings_Docs_test() -> None:
   translation_unit = PathToTestFile( 'foo.c' )
   filename = PathToTestFile( 'foo.c' )
   line = 9
@@ -408,7 +408,7 @@ def CppBindings_Docs_test():
 
 
 @ClangOnly
-def CppBindings_Diags_test():
+def CppBindings_Diags_test() -> None:
   filename = PathToTestFile( 'foo.c' )
   unsaved_file_vector = ycm_core.UnsavedFileVector()
   flags = ycm_core.StringVector()
@@ -454,7 +454,7 @@ def CppBindings_Diags_test():
 
 
 @ClangOnly
-def CppBindings_CompilationDatabase_test():
+def CppBindings_CompilationDatabase_test() -> None:
   with TemporaryTestDir() as tmp_dir:
     compile_commands = [
       {

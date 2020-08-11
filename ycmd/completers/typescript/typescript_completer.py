@@ -31,7 +31,10 @@ from ycmd import responses
 from ycmd import utils
 from ycmd.completers.completer import Completer
 from ycmd.completers.completer_utils import GetFileLines
-from ycmd.utils import LOGGER, re
+from ycmd.utils import HashableDict, LOGGER, re
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from ycmd.request_wrap import RequestWrap
+from ycmd.responses import Diagnostic, FixItChunk, Location
 
 SERVER_NOT_RUNNING_MESSAGE = 'TSServer is not running.'
 NO_DIAGNOSTIC_MESSAGE = 'No diagnostic for current line!'
@@ -50,7 +53,7 @@ class DeferredResponse:
   A deferred that resolves to a response from TSServer.
   """
 
-  def __init__( self, timeout = RESPONSE_TIMEOUT_SECONDS ):
+  def __init__( self, timeout: int = RESPONSE_TIMEOUT_SECONDS ) -> None:
     self._event = threading.Event()
     self._message = None
     self._timeout = timeout
@@ -61,7 +64,7 @@ class DeferredResponse:
     self._event.set()
 
 
-  def result( self ):
+  def result( self ) -> Any:
     self._event.wait( timeout = self._timeout )
     if not self._event.isSet():
       raise RuntimeError( 'Response Timeout' )
@@ -72,7 +75,7 @@ class DeferredResponse:
       return self._message[ 'body' ]
 
 
-def FindTSServer( user_options_path ):
+def FindTSServer( user_options_path: str ) -> Optional[str]:
   tsserver = utils.FindExecutableWithFallback( user_options_path , None )
   if tsserver and os.path.isfile( tsserver ):
     return tsserver
@@ -87,7 +90,7 @@ def FindTSServer( user_options_path ):
   return None
 
 
-def ShouldEnableTypeScriptCompleter( user_options ):
+def ShouldEnableTypeScriptCompleter( user_options: Union[HashableDict, Dict[str, Union[int, Dict[str, int], str, bool]], Dict[str, Union[int, Dict[str, int], str]]] ) -> bool:
   tsserver = FindTSServer( user_options[ 'tsserver_binary_path' ] )
   if not tsserver:
     LOGGER.error( 'Not using TypeScript completer: TSServer not installed '
@@ -97,7 +100,7 @@ def ShouldEnableTypeScriptCompleter( user_options ):
   return True
 
 
-def IsLineInTsDiagnosticRange( line, ts_diagnostic ):
+def IsLineInTsDiagnosticRange( line: int, ts_diagnostic: Dict[str, Union[str, int, Dict[str, int], List[Dict[str, Union[Dict[str, Union[str, Dict[str, int]]], str, int]]]]] ) -> bool:
   ts_start_line = ts_diagnostic[ 'startLocation' ][ 'line' ]
   ts_end_line = ts_diagnostic[ 'endLocation' ][ 'line' ]
 
@@ -105,9 +108,9 @@ def IsLineInTsDiagnosticRange( line, ts_diagnostic ):
 
 
 def GetByteOffsetDistanceFromTsDiagnosticRange(
-      byte_offset,
-      line_value,
-      ts_diagnostic ):
+      byte_offset: int,
+      line_value: str,
+      ts_diagnostic: Dict[str, Union[int, Dict[str, int], str]] ) -> int:
   ts_start_offset = ts_diagnostic[ 'startLocation' ][ 'offset' ]
   ts_end_offset = ts_diagnostic[ 'endLocation' ][ 'offset' ]
 
@@ -134,7 +137,7 @@ class TypeScriptCompleter( Completer ):
   """
 
 
-  def __init__( self, user_options ):
+  def __init__( self, user_options: Dict[str, Union[int, Dict[str, int], str, bool]] ) -> None:
     super().__init__( user_options )
 
     self._logfile = None
@@ -187,12 +190,12 @@ class TypeScriptCompleter( Completer ):
       self._tsserver_version = version
 
 
-  def _StartServer( self ):
+  def _StartServer( self ) -> None:
     with self._tsserver_lock:
       self._StartServerNoLock()
 
 
-  def _StartServerNoLock( self ):
+  def _StartServerNoLock( self ) -> None:
     if self._ServerIsRunning():
       return
 
@@ -283,7 +286,7 @@ class TypeScriptCompleter( Completer ):
     return json.loads( utils.ToUnicode( content ) )
 
 
-  def _BuildRequest( self, command, arguments = None ):
+  def _BuildRequest( self, command: str, arguments: Optional[Any] = None ) -> Dict[str, Any]:
     """Build TSServer request object."""
 
     with self._sequenceid_lock:
@@ -298,7 +301,7 @@ class TypeScriptCompleter( Completer ):
     return request
 
 
-  def _WriteRequest( self, request ):
+  def _WriteRequest( self, request: Dict[str, Any] ) -> None:
     """Write a request to TSServer stdin."""
 
     serialized_request = utils.ToBytes(
@@ -313,7 +316,7 @@ class TypeScriptCompleter( Completer ):
         raise RuntimeError( SERVER_NOT_RUNNING_MESSAGE )
 
 
-  def _SendCommand( self, command, arguments = None ):
+  def _SendCommand( self, command: str, arguments: Optional[Dict[str, str]] = None ) -> None:
     """
     Send a request message to TSServer but don't wait for the response.
     This function is to be used when we don't care about the response
@@ -324,7 +327,7 @@ class TypeScriptCompleter( Completer ):
     self._WriteRequest( request )
 
 
-  def _SendRequest( self, command, arguments = None ):
+  def _SendRequest( self, command: str, arguments: Optional[Dict[str, Any]] = None ) -> Any:
     """
     Send a request message to TSServer and wait
     for the response.
@@ -339,7 +342,7 @@ class TypeScriptCompleter( Completer ):
     return deferred.result()
 
 
-  def _Reload( self, request_data ):
+  def _Reload( self, request_data: RequestWrap ) -> None:
     """
     Synchronize TSServer's view of the file to
     the contents of the unsaved buffer.
@@ -357,27 +360,27 @@ class TypeScriptCompleter( Completer ):
     utils.RemoveIfExists( tmpfile.name )
 
 
-  def _ServerIsRunning( self ):
+  def _ServerIsRunning( self ) -> bool:
     return utils.ProcessIsRunning( self._tsserver_handle )
 
 
-  def Language( self ):
+  def Language( self ) -> str:
     return 'typescript'
 
 
-  def ServerIsHealthy( self ):
+  def ServerIsHealthy( self ) -> bool:
     return self._ServerIsRunning()
 
 
-  def SupportedFiletypes( self ):
+  def SupportedFiletypes( self ) -> List[str]:
     return [ 'javascript', 'typescript', 'typescriptreact', 'javascriptreact' ]
 
 
-  def SignatureHelpAvailable( self ):
+  def SignatureHelpAvailable( self ) -> str:
     return responses.SignatureHelpAvailalability.AVAILABLE
 
 
-  def ComputeCandidatesInner( self, request_data ):
+  def ComputeCandidatesInner( self, request_data: RequestWrap ) -> Union[List[Dict[str, Union[str, Dict[str, str]]]], List[Union[Dict[str, Union[str, Dict[str, str]]], Dict[str, Union[str, Dict[str, Union[bool, str]]]]]]]:
     self._Reload( request_data )
     entries = self._SendRequest( 'completions', {
       'file':                         request_data[ 'filepath' ],
@@ -395,7 +398,7 @@ class TypeScriptCompleter( Completer ):
     ) for entry in entries if entry[ 'kind' ] != 'warning' ]
 
 
-  def DetailCandidates( self, request_data, candidates ):
+  def DetailCandidates( self, request_data: RequestWrap, candidates: Union[List[Dict[str, Union[str, Dict[str, str]]]], List[Dict[str, Union[str, Dict[str, Union[bool, str]]]]], List[Dict[str, str]]] ) -> Union[List[Dict[str, Union[str, Dict[str, List[Dict[str, Union[Dict[str, Union[int, str]], List[Dict[str, Union[str, Dict[str, Dict[str, Union[int, str]]]]]], str, bool]]]]]]], List[Dict[str, str]]]:
     undetailed_entries = []
     map_entries_to_candidates = {}
     for candidate in candidates:
@@ -429,7 +432,7 @@ class TypeScriptCompleter( Completer ):
     return candidates
 
 
-  def GetSubcommandsMap( self ):
+  def GetSubcommandsMap( self ) -> Dict[str, Callable]:
     return {
       'RestartServer'     : ( lambda self, request_data, args:
                               self._RestartServer( request_data ) ),
@@ -464,17 +467,17 @@ class TypeScriptCompleter( Completer ):
     }
 
 
-  def OnBufferVisit( self, request_data ):
+  def OnBufferVisit( self, request_data: RequestWrap ) -> None:
     filename = request_data[ 'filepath' ]
     self._SendCommand( 'open', { 'file': filename } )
 
 
-  def OnBufferUnload( self, request_data ):
+  def OnBufferUnload( self, request_data: RequestWrap ) -> None:
     filename = request_data[ 'filepath' ]
     self._SendCommand( 'close', { 'file': filename } )
 
 
-  def OnFileReadyToParse( self, request_data ):
+  def OnFileReadyToParse( self, request_data: RequestWrap ) -> List[Dict[str, Union[List[Dict[str, Dict[str, Union[int, str]]]], Dict[str, Union[int, str]], Dict[str, Dict[str, Union[int, str]]], str, bool]]]:
     # Only load the extra conf. We don't need it for anything but Format.
     extra_conf_store.ModuleFileForSourceFile( request_data[ 'filepath' ] )
     self._Reload( request_data )
@@ -488,7 +491,7 @@ class TypeScriptCompleter( Completer ):
                                               self.max_diagnostics_to_display )
 
 
-  def GetTsDiagnosticsForCurrentFile( self, request_data ):
+  def GetTsDiagnosticsForCurrentFile( self, request_data: RequestWrap ) -> Union[List[Union[Dict[str, Union[int, Dict[str, int], str]], Dict[str, Union[str, int, Dict[str, int], List[Dict[str, Union[Dict[str, Union[str, Dict[str, int]]], str, int]]]]]]], List[Dict[str, Union[int, Dict[str, int], str]]]]:
     # This returns the data the TypeScript server responded with.
     # Note that its "offset" values represent codepoint offsets,
     # not byte offsets, which are required by the ycmd API.
@@ -502,7 +505,7 @@ class TypeScriptCompleter( Completer ):
     return ts_diagnostics
 
 
-  def _TsDiagnosticToYcmdDiagnostic( self, request_data, ts_diagnostic ):
+  def _TsDiagnosticToYcmdDiagnostic( self, request_data: RequestWrap, ts_diagnostic: Dict[str, Union[str, int, Dict[str, int], List[Dict[str, Union[Dict[str, Union[str, Dict[str, int]]], str, int]]]]] ) -> Diagnostic:
     filepath = request_data[ 'filepath' ]
 
     ts_fixes = self._SendRequest( 'getCodeFixes', {
@@ -559,14 +562,14 @@ class TypeScriptCompleter( Completer ):
                                  fixits = fixits )
 
 
-  def GetDiagnosticsForCurrentFile( self, request_data ):
+  def GetDiagnosticsForCurrentFile( self, request_data: RequestWrap ) -> List[Diagnostic]:
     ts_diagnostics = self.GetTsDiagnosticsForCurrentFile( request_data )
 
     return [ self._TsDiagnosticToYcmdDiagnostic( request_data, x )
              for x in ts_diagnostics ]
 
 
-  def GetDetailedDiagnostic( self, request_data ):
+  def GetDetailedDiagnostic( self, request_data: RequestWrap ) -> Dict[str, str]:
     ts_diagnostics = self.GetTsDiagnosticsForCurrentFile( request_data )
     ts_diagnostics_on_line = list( filter(
       partial( IsLineInTsDiagnosticRange, request_data[ 'line_num' ] ),
@@ -600,7 +603,7 @@ class TypeScriptCompleter( Completer ):
     return responses.BuildDisplayMessageResponse( closest_diagnostic.text_ )
 
 
-  def ComputeSignaturesInner( self, request_data ):
+  def ComputeSignaturesInner( self, request_data: RequestWrap ) -> Dict[str, Union[List[Dict[str, Union[str, List[Dict[str, List[int]]]]]], int]]:
     self._Reload( request_data )
     try:
       items = self._SendRequest( 'signatureHelp', {
@@ -649,21 +652,21 @@ class TypeScriptCompleter( Completer ):
     }
 
 
-  def _GetSemanticDiagnostics( self, filename ):
+  def _GetSemanticDiagnostics( self, filename: str ) -> Union[List[Union[Dict[str, Union[int, Dict[str, int], str]], Dict[str, Union[str, int, Dict[str, int], List[Dict[str, Union[Dict[str, Union[str, Dict[str, int]]], str, int]]]]]]], List[Dict[str, Union[int, Dict[str, int], str]]]]:
     return self._SendRequest( 'semanticDiagnosticsSync', {
       'file': filename,
       'includeLinePosition': True
     } )
 
 
-  def _GetSyntacticDiagnostics( self, filename ):
+  def _GetSyntacticDiagnostics( self, filename: str ) -> List[Dict[str, Union[int, Dict[str, int], str]]]:
     return self._SendRequest( 'syntacticDiagnosticsSync', {
       'file': filename,
       'includeLinePosition': True
     } )
 
 
-  def _GoToDefinition( self, request_data ):
+  def _GoToDefinition( self, request_data: RequestWrap ) -> Dict[str, Union[int, str]]:
     self._Reload( request_data )
     filespans = self._SendRequest( 'definition', {
       'file':   request_data[ 'filepath' ],
@@ -682,7 +685,7 @@ class TypeScriptCompleter( Completer ):
                       span[ 'start' ][ 'offset' ] ) )
 
 
-  def _GoToImplementation( self, request_data ):
+  def _GoToImplementation( self, request_data: RequestWrap ) -> List[Dict[str, Union[int, str]]]:
     self._Reload( request_data )
     try:
       filespans = self._SendRequest( 'implementation', {
@@ -705,7 +708,7 @@ class TypeScriptCompleter( Completer ):
     return results
 
 
-  def _GoToReferences( self, request_data ):
+  def _GoToReferences( self, request_data: RequestWrap ) -> List[Dict[str, Union[int, str]]]:
     self._Reload( request_data )
     response = self._SendRequest( 'references', {
       'file':   request_data[ 'filepath' ],
@@ -723,7 +726,7 @@ class TypeScriptCompleter( Completer ):
     ]
 
 
-  def _GoToType( self, request_data ):
+  def _GoToType( self, request_data: RequestWrap ) -> Dict[str, Union[int, str]]:
     self._Reload( request_data )
     try:
       filespans = self._SendRequest( 'typeDefinition', {
@@ -745,7 +748,7 @@ class TypeScriptCompleter( Completer ):
     )
 
 
-  def _GoToSymbol( self, request_data, args ):
+  def _GoToSymbol( self, request_data: RequestWrap, args: List[str] ) -> Union[List[Dict[str, Union[int, str]]], Dict[str, Union[int, str]]]:
     if len( args ) < 1:
       raise RuntimeError( 'Must specify something to search for' )
     query = args[ 0 ]
@@ -775,7 +778,7 @@ class TypeScriptCompleter( Completer ):
     return results
 
 
-  def _GetType( self, request_data ):
+  def _GetType( self, request_data: RequestWrap ) -> Dict[str, str]:
     self._Reload( request_data )
     info = self._SendRequest( 'quickinfo', {
       'file':   request_data[ 'filepath' ],
@@ -785,7 +788,7 @@ class TypeScriptCompleter( Completer ):
     return responses.BuildDisplayMessageResponse( info[ 'displayString' ] )
 
 
-  def _GetDoc( self, request_data ):
+  def _GetDoc( self, request_data: RequestWrap ) -> Dict[str, str]:
     self._Reload( request_data )
     info = self._SendRequest( 'quickinfo', {
       'file':   request_data[ 'filepath' ],
@@ -797,7 +800,7 @@ class TypeScriptCompleter( Completer ):
     return responses.BuildDetailedInfoResponse( message )
 
 
-  def _FixIt( self, request_data, args ):
+  def _FixIt( self, request_data: RequestWrap, args: List[Any] ) -> Dict[str, List[Dict[str, Union[Dict[str, Union[int, str]], List[Dict[str, Union[str, Dict[str, Dict[str, Union[int, str]]]]]], str, bool]]]]:
     self._Reload( request_data )
 
     filepath = request_data[ 'filepath' ]
@@ -814,7 +817,7 @@ class TypeScriptCompleter( Completer ):
     return responses.BuildFixItResponse( fixits )
 
 
-  def _OrganizeImports( self, request_data ):
+  def _OrganizeImports( self, request_data: RequestWrap ) -> Dict[str, List[Dict[str, Union[Dict[str, Union[int, str]], List[Dict[str, Union[str, Dict[str, Dict[str, Union[int, str]]]]]], str, bool]]]]:
     self._Reload( request_data )
 
     filepath = request_data[ 'filepath' ]
@@ -836,7 +839,7 @@ class TypeScriptCompleter( Completer ):
     ] )
 
 
-  def _RefactorRename( self, request_data, args ):
+  def _RefactorRename( self, request_data: RequestWrap, args: List[str] ) -> Dict[str, List[Dict[str, Union[Dict[str, Union[int, str]], List[Dict[str, Union[str, Dict[str, Dict[str, Union[int, str]]]]]], str, bool]]]]:
     if len( args ) != 1:
       raise ValueError( 'Please specify a new name to rename it to.\n'
                         'Usage: RefactorRename <new name>' )
@@ -896,7 +899,7 @@ class TypeScriptCompleter( Completer ):
     ] )
 
 
-  def _Format( self, request_data ):
+  def _Format( self, request_data: RequestWrap ) -> Dict[str, List[Dict[str, Union[Dict[str, Union[int, str]], List[Dict[str, Union[str, Dict[str, Dict[str, Union[int, str]]]]]], str, bool]]]]:
     filepath = request_data[ 'filepath' ]
 
     self._Reload( request_data )
@@ -934,7 +937,7 @@ class TypeScriptCompleter( Completer ):
     ] )
 
 
-  def _RestartServer( self, request_data ):
+  def _RestartServer( self, request_data: RequestWrap ) -> None:
     with self._tsserver_lock:
       self._StopServerNoLock()
       self._StartServerNoLock()
@@ -947,12 +950,12 @@ class TypeScriptCompleter( Completer ):
       self.OnBufferVisit( request_data )
 
 
-  def _StopServer( self ):
+  def _StopServer( self ) -> None:
     with self._tsserver_lock:
       self._StopServerNoLock()
 
 
-  def _StopServerNoLock( self ):
+  def _StopServerNoLock( self ) -> None:
     if self._ServerIsRunning():
       LOGGER.info( 'Stopping TSServer with PID %s',
                    self._tsserver_handle.pid )
@@ -967,7 +970,7 @@ class TypeScriptCompleter( Completer ):
     self._CleanUp()
 
 
-  def _CleanUp( self ):
+  def _CleanUp( self ) -> None:
     utils.CloseStandardStreams( self._tsserver_handle )
     self._tsserver_handle = None
     self._latest_diagnostics_for_file = defaultdict( list )
@@ -980,7 +983,7 @@ class TypeScriptCompleter( Completer ):
     self._StopServer()
 
 
-  def DebugInfo( self, request_data ):
+  def DebugInfo( self, request_data: RequestWrap ) -> Dict[str, Union[str, List[Dict[str, Optional[Union[str, bool, int, List[str], List[Dict[str, Optional[str]]]]]]], List[Dict[str, Optional[Union[str, bool, List[Dict[str, str]]]]]]]]:
     with self._tsserver_lock:
       item_version = responses.DebugInfoItem( 'version',
                                               self._tsserver_version )
@@ -995,11 +998,11 @@ class TypeScriptCompleter( Completer ):
                                                servers = [ tsserver ] )
 
 
-def _LogLevel():
+def _LogLevel() -> str:
   return 'verbose' if LOGGER.isEnabledFor( logging.DEBUG ) else 'normal'
 
 
-def _BuildCompletionExtraMenuAndDetailedInfo( request_data, entry ):
+def _BuildCompletionExtraMenuAndDetailedInfo( request_data: RequestWrap, entry: Dict[str, Union[str, List[Dict[str, str]], List[Dict[str, Union[str, List[Dict[str, Union[List[Dict[str, Union[str, Dict[str, int]]]], str]]]]]]]] ) -> Union[Tuple[None, str], Tuple[str, str]]:
   signature = _DisplayPartsToString( entry[ 'displayParts' ] )
   if entry[ 'name' ] == signature:
     extra_menu_info = None
@@ -1017,7 +1020,7 @@ def _BuildCompletionExtraMenuAndDetailedInfo( request_data, entry ):
   return extra_menu_info, detailed_info
 
 
-def _BuildCompletionFixIts( request_data, entry ):
+def _BuildCompletionFixIts( request_data: RequestWrap, entry: Dict[str, Union[str, List[Dict[str, str]], List[Dict[str, Union[str, List[Dict[str, Union[List[Dict[str, Union[str, Dict[str, int]]]], str]]]]]]]] ) -> Dict[str, List[Dict[str, Union[Dict[str, Union[int, str]], List[Dict[str, Union[str, Dict[str, Dict[str, Union[int, str]]]]]], str, bool]]]]:
   if 'codeActions' in entry:
     location = responses.Location( request_data[ 'line_num' ],
                                    request_data[ 'column_num' ],
@@ -1032,10 +1035,10 @@ def _BuildCompletionFixIts( request_data, entry ):
   return {}
 
 
-def _BuildFixItChunkForRange( new_name,
-                              file_contents,
-                              file_name,
-                              source_range ):
+def _BuildFixItChunkForRange( new_name: str,
+                              file_contents: List[str],
+                              file_name: str,
+                              source_range: Dict[str, Union[str, Dict[str, int]]] ) -> FixItChunk:
   """Returns list FixItChunk for a tsserver source range."""
   return responses.FixItChunk(
       new_name,
@@ -1050,7 +1053,7 @@ def _BuildFixItChunkForRange( new_name,
                                 source_range[ 'end' ][ 'offset' ] ) ) )
 
 
-def _BuildFixItChunksForFile( request_data, new_name, file_replacement ):
+def _BuildFixItChunksForFile( request_data: RequestWrap, new_name: str, file_replacement: Dict[str, Union[str, List[Dict[str, Dict[str, int]]]]] ) -> List[FixItChunk]:
   """Returns a list of FixItChunk for each replacement range for the supplied
   file."""
   # On Windows, TSServer annoyingly returns file path as C:/blah/blah,
@@ -1062,7 +1065,7 @@ def _BuildFixItChunksForFile( request_data, new_name, file_replacement ):
            for r in file_replacement[ 'locs' ] ]
 
 
-def _BuildFixItForChanges( request_data, changes ):
+def _BuildFixItForChanges( request_data: RequestWrap, changes: List[Dict[str, Union[List[Dict[str, Union[str, Dict[str, int]]]], str]]] ) -> List[FixItChunk]:
   """Returns a list of FixItChunk given a list of TSServer changes."""
   chunks = []
   for change in changes:
@@ -1080,7 +1083,7 @@ def _BuildFixItForChanges( request_data, changes ):
   return chunks
 
 
-def _BuildLocation( file_contents, filename, line, offset ):
+def _BuildLocation( file_contents: List[str], filename: str, line: int, offset: int ) -> Location:
   return responses.Location(
     line = line,
     # TSServer returns codepoint offsets, but we need byte offsets, so we must
@@ -1090,7 +1093,7 @@ def _BuildLocation( file_contents, filename, line, offset ):
     filename = filename )
 
 
-def _BuildTsFormatRange( request_data ):
+def _BuildTsFormatRange( request_data: RequestWrap ) -> Dict[str, Union[int, str]]:
   filepath = request_data[ 'filepath' ]
   lines = GetFileLines( request_data, filepath )
 
@@ -1124,5 +1127,5 @@ def _BuildTsFormatRange( request_data ):
   }
 
 
-def _DisplayPartsToString( parts ):
+def _DisplayPartsToString( parts: List[Dict[str, str]] ) -> str:
   return ''.join( [ p[ 'text' ] for p in parts ] )

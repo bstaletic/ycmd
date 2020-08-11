@@ -17,17 +17,18 @@
 
 from hamcrest import ( assert_that, contains_exactly, has_entries, has_entry,
                        instance_of, none )
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from ycmd.tests.rust import ( IsolatedYcmd,
                               PathToTestFile,
                               SharedYcmd,
                               StartRustCompleterServerInDirectory )
 from ycmd.tests.test_utils import BuildRequest
+from webtest.app import TestApp
 
 
 @SharedYcmd
-def DebugInfo_RlsVersion_test( app ):
+def DebugInfo_RlsVersion_test( app: TestApp ) -> None:
   request_data = BuildRequest( filetype = 'rust' )
   assert_that(
     app.post_json( '/debug_info', request_data ).json,
@@ -75,7 +76,7 @@ def DebugInfo_RlsVersion_test( app ):
 @IsolatedYcmd
 @patch( 'ycmd.completers.rust.rust_completer._GetCommandOutput',
         return_value = '' )
-def DebugInfo_NoRlsVersion_test( get_command_output, app ):
+def DebugInfo_NoRlsVersion_test( get_command_output: MagicMock, app: TestApp ) -> None:
   StartRustCompleterServerInDirectory( app, PathToTestFile( 'common', 'src' ) )
 
   request_data = BuildRequest( filetype = 'rust' )

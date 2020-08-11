@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with ycmd.  If not, see <http://www.gnu.org/licenses/>.
 
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 import psutil
 
 from hamcrest import ( assert_that,
@@ -33,25 +33,27 @@ from ycmd.tests.test_utils import ( BuildRequest,
                                     MockProcessTerminationTimingOut,
                                     StopCompleterServer,
                                     WaitUntilCompleterServerReady )
+from typing import Dict, List, Optional, Union
+from webtest.app import TestApp
 
 
-def GetDebugInfo( app ):
+def GetDebugInfo( app: TestApp ) -> Dict[str, Union[Dict[str, str], Dict[str, Union[str, bool]], Dict[str, Optional[bool]], Dict[str, Union[str, List[Dict[str, Optional[Union[str, bool, List[str], List[Union[Dict[str, str], Dict[str, Optional[str]], Dict[str, Union[str, bool]]]]]]]]]], Dict[str, Union[str, List[Dict[str, Optional[Union[str, bool, List[str], int, List[Union[Dict[str, str], Dict[str, Union[str, bool]]]]]]]]]]]]:
   request_data = BuildRequest( filetype = 'cpp' )
   return app.post_json( '/debug_info', request_data ).json
 
 
-def GetPid( app ):
+def GetPid( app: TestApp ) -> int:
   return GetDebugInfo( app )[ 'completer' ][ 'servers' ][ 0 ][ 'pid' ]
 
 
-def StartClangd( app, filepath = PathToTestFile( 'basic.cpp' ) ):
+def StartClangd( app: TestApp, filepath: str = PathToTestFile( 'basic.cpp' ) ) -> None:
   request_data = BuildRequest( filepath = filepath,
                                filetype = 'cpp' )
   test = { 'request': request_data }
   RunAfterInitialized( app, test )
 
 
-def CheckStopped( app ):
+def CheckStopped( app: TestApp ) -> None:
   assert_that(
     GetDebugInfo( app ),
     has_entry( 'completer', has_entries( {
@@ -67,7 +69,7 @@ def CheckStopped( app ):
 
 
 @IsolatedYcmd()
-def ServerManagement_StopServer_Clean_test( app ):
+def ServerManagement_StopServer_Clean_test( app: TestApp ) -> None:
   StartClangd( app )
   StopCompleterServer( app, 'cpp', '' )
   CheckStopped( app )
@@ -77,14 +79,14 @@ def ServerManagement_StopServer_Clean_test( app ):
 @patch( 'os.remove', side_effect = OSError )
 @patch( 'ycmd.utils.WaitUntilProcessIsTerminated',
         MockProcessTerminationTimingOut )
-def ServerManagement_StopServer_Unclean_test( rm, app ):
+def ServerManagement_StopServer_Unclean_test( rm: MagicMock, app: TestApp ) -> None:
   StartClangd( app )
   StopCompleterServer( app, 'cpp', '' )
   CheckStopped( app )
 
 
 @IsolatedYcmd()
-def ServerManagement_StopServer_Twice_test( app ):
+def ServerManagement_StopServer_Twice_test( app: TestApp ) -> None:
   StartClangd( app )
   StopCompleterServer( app, 'cpp', '' )
   CheckStopped( app )
@@ -93,7 +95,7 @@ def ServerManagement_StopServer_Twice_test( app ):
 
 
 @IsolatedYcmd()
-def ServerManagement_StopServer_Killed_test( app ):
+def ServerManagement_StopServer_Killed_test( app: TestApp ) -> None:
   StartClangd( app )
   process = psutil.Process( GetPid( app ) )
   process.terminate()
@@ -103,7 +105,7 @@ def ServerManagement_StopServer_Killed_test( app ):
 
 
 @IsolatedYcmd()
-def ServerManagement_ServerDiesWhileShuttingDown_test( app ):
+def ServerManagement_ServerDiesWhileShuttingDown_test( app: TestApp ) -> None:
   StartClangd( app )
   process = psutil.Process( GetPid( app ) )
   completer = handlers._server_state.GetFiletypeCompleter( [ 'cpp' ] )
@@ -120,7 +122,7 @@ def ServerManagement_ServerDiesWhileShuttingDown_test( app ):
 
 
 @IsolatedYcmd()
-def ServerManagement_ConnectionRaisesWhileShuttingDown_test( app ):
+def ServerManagement_ConnectionRaisesWhileShuttingDown_test( app: TestApp ) -> None:
   StartClangd( app )
   process = psutil.Process( GetPid( app ) )
   completer = handlers._server_state.GetFiletypeCompleter( [ 'cpp' ] )
@@ -139,7 +141,7 @@ def ServerManagement_ConnectionRaisesWhileShuttingDown_test( app ):
 
 
 @IsolatedYcmd()
-def ServerManagement_RestartServer_test( app ):
+def ServerManagement_RestartServer_test( app: TestApp ) -> None:
   StartClangd( app, PathToTestFile( 'basic.cpp' ) )
 
   assert_that(

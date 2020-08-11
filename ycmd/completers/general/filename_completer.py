@@ -26,6 +26,8 @@ from ycmd.utils import ( ExpandVariablesInPath,
                          re,
                          ToUnicode )
 from ycmd import responses
+from typing import Any, Dict, List, Tuple, Union
+from ycmd.request_wrap import RequestWrap
 
 FILE = 1
 DIR = 2
@@ -65,7 +67,7 @@ class FilenameCompleter( Completer ):
   General completer that provides filename and filepath completions.
   """
 
-  def __init__( self, user_options ):
+  def __init__( self, user_options: Dict[str, Any] ) -> None:
     super().__init__( user_options )
 
     if OnWindows():
@@ -80,14 +82,14 @@ class FilenameCompleter( Completer ):
     self._candidates_for_directory = {}
 
 
-  def CurrentFiletypeCompletionDisabled( self, request_data ):
+  def CurrentFiletypeCompletionDisabled( self, request_data: RequestWrap ) -> bool:
     disabled_filetypes = self.user_options[ 'filepath_blacklist' ]
     filetypes = request_data[ 'filetypes' ]
     return ( '*' in disabled_filetypes or
              any( x in disabled_filetypes for x in filetypes ) )
 
 
-  def GetWorkingDirectory( self, request_data ):
+  def GetWorkingDirectory( self, request_data: RequestWrap ) -> str:
     if self.user_options[ 'filepath_completion_use_working_dir' ]:
       # Return paths relative to the working directory of the client, if
       # supplied, otherwise relative to the current working directory of this
@@ -121,7 +123,7 @@ class FilenameCompleter( Completer ):
     return head_regex
 
 
-  def SearchPath( self, request_data ):
+  def SearchPath( self, request_data: RequestWrap ) -> Union[Tuple[str, int], Tuple[None, None]]:
     """Return the tuple (|path|, |start_column|) where |path| is a path that
     could be completed on the current line before the cursor and |start_column|
     is the column where the completion should start. (None, None) is returned if
@@ -188,18 +190,18 @@ class FilenameCompleter( Completer ):
     return None, None
 
 
-  def ShouldUseNow( self, request_data ):
+  def ShouldUseNow( self, request_data: RequestWrap ) -> bool:
     if self.CurrentFiletypeCompletionDisabled( request_data ):
       return False
 
     return bool( self.SearchPath( request_data )[ 0 ] )
 
 
-  def SupportedFiletypes( self ):
+  def SupportedFiletypes( self ) -> List[Any]:
     return []
 
 
-  def GetCandidatesForDirectory( self, directory ):
+  def GetCandidatesForDirectory( self, directory: str ) -> List[Dict[str, str]]:
     mtime = GetModificationTime( directory )
 
     try:
@@ -218,7 +220,7 @@ class FilenameCompleter( Completer ):
     return candidates
 
 
-  def ComputeCandidates( self, request_data ):
+  def ComputeCandidates( self, request_data: RequestWrap ) -> List[Dict[str, str]]:
     if not self.ShouldUseNow( request_data ):
       return []
 
@@ -241,7 +243,7 @@ class FilenameCompleter( Completer ):
     return candidates
 
 
-def _GeneratePathCompletionCandidates( path_dir ):
+def _GeneratePathCompletionCandidates( path_dir: str ) -> List[Dict[str, str]]:
   completions = []
 
   unicode_path = ToUnicode( path_dir )
@@ -255,7 +257,7 @@ def _GeneratePathCompletionCandidates( path_dir ):
   return completions
 
 
-def GetPathType( path, is_framework = False ):
+def GetPathType( path: str, is_framework: bool = False ) -> int:
   if is_framework:
     return FRAMEWORK
   if os.path.isdir( path ):
@@ -263,5 +265,5 @@ def GetPathType( path, is_framework = False ):
   return FILE
 
 
-def GetPathTypeName( path_type ):
+def GetPathTypeName( path_type: int ) -> str:
   return EXTRA_INFO_MAP[ path_type ]

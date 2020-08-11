@@ -17,6 +17,8 @@
 
 import os
 from ycmd.utils import ProcessIsRunning
+from subprocess import Popen
+from typing import Any, Dict, List, Optional, Union
 
 
 YCM_EXTRA_CONF_FILENAME = '.ycm_extra_conf.py'
@@ -45,191 +47,31 @@ class SignatureHelpAvailalability:
 
 
 class ServerError( Exception ):
-  def __init__( self, message ):
+  def __init__( self, message: str ) -> None:
     super().__init__( message )
 
 
 class UnknownExtraConf( ServerError ):
-  def __init__( self, extra_conf_file ):
+  def __init__( self, extra_conf_file: str ) -> None:
     message = CONFIRM_CONF_FILE_MESSAGE.format( extra_conf_file )
     super().__init__( message )
     self.extra_conf_file = extra_conf_file
 
 
 class NoExtraConfDetected( ServerError ):
-  def __init__( self ):
+  def __init__( self ) -> None:
     super().__init__( NO_EXTRA_CONF_FILENAME_MESSAGE )
 
 
 class NoDiagnosticSupport( ServerError ):
-  def __init__( self ):
+  def __init__( self ) -> None:
     super().__init__( NO_DIAGNOSTIC_SUPPORT_MESSAGE )
-
-
-# column_num is a byte offset
-def BuildGoToResponse( filepath, line_num, column_num, description = None ):
-  return BuildGoToResponseFromLocation(
-    Location( line = line_num,
-              column = column_num,
-              filename = filepath ),
-    description )
-
-
-def BuildGoToResponseFromLocation( location, description = None ):
-  """Build a GoTo response from a responses.Location object."""
-  response = BuildLocationData( location )
-  if description:
-    response[ 'description' ] = description
-  return response
-
-
-def BuildDescriptionOnlyGoToResponse( text ):
-  return {
-    'description': text,
-  }
-
-
-def BuildDisplayMessageResponse( text ):
-  return {
-    'message': text
-  }
-
-
-def BuildDetailedInfoResponse( text ):
-  """ Returns the response object for displaying detailed information about types
-  and usage, such as within a preview window"""
-  return {
-    'detailed_info': text
-  }
-
-
-def BuildCompletionData( insertion_text,
-                         extra_menu_info = None,
-                         detailed_info = None,
-                         menu_text = None,
-                         kind = None,
-                         extra_data = None ):
-  completion_data = {
-    'insertion_text': insertion_text
-  }
-
-  if extra_menu_info:
-    completion_data[ 'extra_menu_info' ] = extra_menu_info
-  if menu_text:
-    completion_data[ 'menu_text' ] = menu_text
-  if detailed_info:
-    completion_data[ 'detailed_info' ] = detailed_info
-  if kind:
-    completion_data[ 'kind' ] = kind
-  if extra_data:
-    completion_data[ 'extra_data' ] = extra_data
-  return completion_data
-
-
-# start_column is a byte offset
-def BuildCompletionResponse( completions,
-                             start_column,
-                             errors=None ):
-  return {
-    'completions': completions,
-    'completion_start_column': start_column,
-    'errors': errors if errors else [],
-  }
-
-
-def BuildSignatureHelpResponse( signature_info, errors = None ):
-  return {
-    'signature_help':
-      signature_info if signature_info else EMPTY_SIGNATURE_INFO,
-    'errors': errors if errors else [],
-  }
-
-
-# location.column_number_ is a byte offset
-def BuildLocationData( location ):
-  return {
-    'line_num': location.line_number_,
-    'column_num': location.column_number_,
-    'filepath': ( os.path.normpath( location.filename_ )
-                  if location.filename_ else '' ),
-  }
-
-
-def BuildRangeData( source_range ):
-  return {
-    'start': BuildLocationData( source_range.start_ ),
-    'end': BuildLocationData( source_range.end_ ),
-  }
-
-
-class Diagnostic:
-  def __init__( self,
-                ranges,
-                location,
-                location_extent,
-                text,
-                kind,
-                fixits = [] ):
-    self.ranges_ = ranges
-    self.location_ = location
-    self.location_extent_ = location_extent
-    self.text_ = text
-    self.kind_ = kind
-    self.fixits_ = fixits
-
-
-class UnresolvedFixIt:
-  def __init__( self, command, text, kind = None ):
-    self.command = command
-    self.text = text
-    self.resolve = True
-    self.kind = kind
-
-
-class FixIt:
-  """A set of replacements (of type FixItChunk) to be applied to fix a single
-  diagnostic. This can be used for any type of refactoring command, not just
-  quick fixes. The individual chunks may span multiple files.
-
-  NOTE: All offsets supplied in both |location| and (the members of) |chunks|
-  must be byte offsets into the UTF-8 encoded version of the appropriate
-  buffer.
-  """
-  class Kind:
-    """These are LSP kinds that we use outside of LSP completers."""
-    REFACTOR = 'refactor'
-
-
-  def __init__( self, location, chunks, text = '', kind = None ):
-    """location of type Location, chunks of type list<FixItChunk>"""
-    self.location = location
-    self.chunks = chunks
-    self.text = text
-    self.kind = kind
-
-
-class FixItChunk:
-  """An individual replacement within a FixIt (aka Refactor)"""
-
-  def __init__( self, replacement_text, range ):
-    """replacement_text of type string, range of type Range"""
-    self.replacement_text = replacement_text
-    self.range = range
-
-
-class Range:
-  """Source code range relating to a diagnostic or FixIt (aka Refactor)."""
-
-  def __init__( self, start, end ):
-    "start of type Location, end of type Location"""
-    self.start_ = start
-    self.end_ = end
 
 
 class Location:
   """Source code location for a diagnostic or FixIt (aka Refactor)."""
 
-  def __init__( self, line, column, filename ):
+  def __init__( self, line: int, column: int, filename: str ) -> None:
     """Line is 1-based line, column is 1-based column byte offset, filename is
     absolute path of the file"""
     self.line_number_ = line
@@ -249,7 +91,167 @@ class Location:
       self.filename_ = filename
 
 
-def BuildDiagnosticData( diagnostic ):
+class Range:
+  """Source code range relating to a diagnostic or FixIt (aka Refactor)."""
+
+  def __init__( self, start: Location, end: Location ) -> None:
+    "start of type Location, end of type Location"""
+    self.start_ = start
+    self.end_ = end
+
+
+# column_num is a byte offset
+def BuildGoToResponse( filepath: str, line_num: int, column_num: int, description: Optional[str] = None ) -> Dict[str, Union[int, str]]:
+  return BuildGoToResponseFromLocation(
+    Location( line = line_num,
+              column = column_num,
+              filename = filepath ),
+    description )
+
+
+def BuildGoToResponseFromLocation( location: Location, description: Optional[str] = None ) -> Dict[str, Union[int, str]]:
+  """Build a GoTo response from a responses.Location object."""
+  response = BuildLocationData( location )
+  if description:
+    response[ 'description' ] = description
+  return response
+
+
+def BuildDescriptionOnlyGoToResponse( text ):
+  return {
+    'description': text,
+  }
+
+
+def BuildDisplayMessageResponse( text: str ) -> Dict[str, str]:
+  return {
+    'message': text
+  }
+
+
+def BuildDetailedInfoResponse( text: str ) -> Dict[str, str]:
+  """ Returns the response object for displaying detailed information about types
+  and usage, such as within a preview window"""
+  return {
+    'detailed_info': text
+  }
+
+
+def BuildCompletionData( insertion_text: str,
+                         extra_menu_info: Optional[str] = None,
+                         detailed_info: Optional[str] = None,
+                         menu_text: Optional[str] = None,
+                         kind: Optional[str] = None,
+                         extra_data: Optional[Any] = None ) -> Dict[str, Any]:
+  completion_data = {
+    'insertion_text': insertion_text
+  }
+
+  if extra_menu_info:
+    completion_data[ 'extra_menu_info' ] = extra_menu_info
+  if menu_text:
+    completion_data[ 'menu_text' ] = menu_text
+  if detailed_info:
+    completion_data[ 'detailed_info' ] = detailed_info
+  if kind:
+    completion_data[ 'kind' ] = kind
+  if extra_data:
+    completion_data[ 'extra_data' ] = extra_data
+  return completion_data
+
+
+# start_column is a byte offset
+def BuildCompletionResponse( completions: Union[List[Dict[str, Union[str, Dict[str, Dict[str, Union[int, str]]]]]], List[Dict[str, Union[str, Dict[str, List[Dict[str, Union[Dict[str, Union[int, str]], List[Dict[str, Union[str, Dict[str, Dict[str, Union[int, str]]]]]], str, bool]]]]]]], List[Dict[str, str]], List[Union[Dict[str, Union[str, Dict[str, str]]], Dict[str, str]]]],
+                             start_column: int,
+                             errors: Optional[Union[List[Dict[str, Union[RuntimeError, str]]], List[Dict[str, Union[ValueError, str]]]]] = None ) -> Dict[str, Any]:
+  return {
+    'completions': completions,
+    'completion_start_column': start_column,
+    'errors': errors if errors else [],
+  }
+
+
+def BuildSignatureHelpResponse( signature_info: Optional[Union[Dict[str, int], Dict[str, Union[int, List[Dict[str, Union[Dict[str, str], str, List[Dict[str, List[int]]]]]]]], Dict[str, Union[List[Dict[str, str]], int]], Dict[str, Union[List[Dict[str, Union[str, List[Dict[str, List[int]]]]]], int]]]], errors: Optional[List[Dict[str, Union[RuntimeError, str]]]] = None ) -> Dict[str, Union[Dict[str, Union[List[Dict[str, str]], int]], Dict[str, int], List[Dict[str, Union[RuntimeError, str]]], Dict[str, Union[int, List[Dict[str, Union[Dict[str, str], str, List[Dict[str, List[int]]]]]]]], Dict[str, Union[List[Dict[str, Union[str, List[Dict[str, List[int]]]]]], int]]]]:
+  return {
+    'signature_help':
+      signature_info if signature_info else EMPTY_SIGNATURE_INFO,
+    'errors': errors if errors else [],
+  }
+
+
+# location.column_number_ is a byte offset
+def BuildLocationData( location: Union[Location, Location] ) -> Dict[str, Union[int, str]]:
+  return {
+    'line_num': location.line_number_,
+    'column_num': location.column_number_,
+    'filepath': ( os.path.normpath( location.filename_ )
+                  if location.filename_ else '' ),
+  }
+
+
+def BuildRangeData( source_range: Union[Range, Range] ) -> Dict[str, Dict[str, Union[int, str]]]:
+  return {
+    'start': BuildLocationData( source_range.start_ ),
+    'end': BuildLocationData( source_range.end_ ),
+  }
+
+
+class FixItChunk:
+  """An individual replacement within a FixIt (aka Refactor)"""
+
+  def __init__( self, replacement_text: str, range: Range ) -> None:
+    """replacement_text of type string, range of type Range"""
+    self.replacement_text = replacement_text
+    self.range = range
+
+
+class FixIt:
+  """A set of replacements (of type FixItChunk) to be applied to fix a single
+  diagnostic. This can be used for any type of refactoring command, not just
+  quick fixes. The individual chunks may span multiple files.
+
+  NOTE: All offsets supplied in both |location| and (the members of) |chunks|
+  must be byte offsets into the UTF-8 encoded version of the appropriate
+  buffer.
+  """
+  class Kind:
+    """These are LSP kinds that we use outside of LSP completers."""
+    REFACTOR = 'refactor'
+
+
+  def __init__( self, location: Location, chunks: List[FixItChunk], text: Optional[str] = '', kind: Optional[str] = None ) -> None:
+    """location of type Location, chunks of type list<FixItChunk>"""
+    self.location = location
+    self.chunks = chunks
+    self.text = text
+    self.kind = kind
+
+
+class Diagnostic:
+  def __init__( self,
+                ranges: List[Range],
+                location: Location,
+                location_extent: Range,
+                text: str,
+                kind: str,
+                fixits: List[FixIt] = [] ) -> None:
+    self.ranges_ = ranges
+    self.location_ = location
+    self.location_extent_ = location_extent
+    self.text_ = text
+    self.kind_ = kind
+    self.fixits_ = fixits
+
+
+class UnresolvedFixIt:
+  def __init__( self, command: Dict[str, Union[int, List[Dict[str, Union[Dict[str, Dict[str, int]], str]]], str]], text: str, kind: Optional[str] = None ) -> None:
+    self.command = command
+    self.text = text
+    self.resolve = True
+    self.kind = kind
+
+
+def BuildDiagnosticData( diagnostic: Union[Diagnostic, Diagnostic] ) -> Dict[str, Union[List[Dict[str, Dict[str, Union[int, str]]]], Dict[str, Union[int, str]], Dict[str, Dict[str, Union[int, str]]], str, bool]]:
   kind = ( diagnostic.kind_.name if hasattr( diagnostic.kind_, 'name' )
            else diagnostic.kind_ )
 
@@ -263,9 +265,9 @@ def BuildDiagnosticData( diagnostic ):
   }
 
 
-def BuildDiagnosticResponse( diagnostics,
-                             filename,
-                             max_diagnostics_to_display ):
+def BuildDiagnosticResponse( diagnostics: Union[List[Diagnostic], List[Diagnostic]],
+                             filename: str,
+                             max_diagnostics_to_display: int ) -> Union[List[Dict[str, Union[List[Dict[str, Dict[str, Union[int, str]]]], Dict[str, Union[int, str]], Dict[str, Dict[str, Union[int, str]]], str, bool]]], List[Dict[str, Union[Dict[str, Union[int, str]], Dict[str, Dict[str, Union[int, str]]], str, bool]]], List[Union[Dict[str, Union[List[Dict[str, Dict[str, Union[int, str]]]], Dict[str, Union[int, str]], Dict[str, Dict[str, Union[int, str]]], str, bool]], Dict[str, Union[Dict[str, Union[int, str]], Dict[str, Dict[str, Union[int, str]]], str, bool]]]]]:
   if ( max_diagnostics_to_display and
        len( diagnostics ) > max_diagnostics_to_display ):
     diagnostics = diagnostics[ : max_diagnostics_to_display ]
@@ -281,7 +283,7 @@ def BuildDiagnosticResponse( diagnostics,
   return [ BuildDiagnosticData( diagnostic ) for diagnostic in diagnostics ]
 
 
-def BuildFixItResponse( fixits ):
+def BuildFixItResponse( fixits: Union[List[FixIt], List[UnresolvedFixIt], List[FixIt], List[Union[FixIt, UnresolvedFixIt]]] ) -> Dict[str, Any]:
   """Build a response from a list of FixIt (aka Refactor) objects. This response
   can be used to apply arbitrary changes to arbitrary files and is suitable for
   both quick fix and refactor operations"""
@@ -319,12 +321,19 @@ def BuildFixItResponse( fixits ):
   }
 
 
-def BuildExceptionResponse( exception, traceback ):
+def BuildExceptionResponse( exception: Any, traceback: Optional[str] ) -> Dict[str, Any]:
   return {
     'exception': exception,
     'message': str( exception ),
     'traceback': traceback
   }
+
+
+class DebugInfoItem:
+
+  def __init__( self, key: str, value: Optional[Union[List[str], str, bool]] ) -> None:
+    self.key = key
+    self.value = value
 
 
 class DebugInfoServer:
@@ -343,13 +352,13 @@ class DebugInfoServer:
     server."""
 
   def __init__( self,
-                name,
-                handle,
-                executable,
-                address = None,
-                port = None,
-                logfiles = [],
-                extras = [] ):
+                name: str,
+                handle: Optional[Popen],
+                executable: Union[str, List[Optional[str]], List[str]],
+                address: Optional[str] = None,
+                port: Optional[int] = None,
+                logfiles: Union[List[None], List[str]] = [],
+                extras: List[DebugInfoItem] = [] ) -> None:
     self.name = name
     self.is_running = ProcessIsRunning( handle )
     self.executable = executable
@@ -361,14 +370,7 @@ class DebugInfoServer:
     self.extras = extras
 
 
-class DebugInfoItem:
-
-  def __init__( self, key, value ):
-    self.key = key
-    self.value = value
-
-
-def BuildDebugInfoResponse( name, servers = [], items = [] ):
+def BuildDebugInfoResponse( name: str, servers: List[DebugInfoServer] = [], items: List[DebugInfoItem] = [] ) -> Dict[str, Any]:
   """Build a response containing debugging information on a semantic completer:
   - name: the completer name;
   - servers: a list of DebugInfoServer objects representing the servers used by
@@ -403,5 +405,5 @@ def BuildDebugInfoResponse( name, servers = [], items = [] ):
   }
 
 
-def BuildSignatureHelpAvailableResponse( value ):
+def BuildSignatureHelpAvailableResponse( value: str ) -> Dict[str, str]:
   return { 'available': value }

@@ -33,6 +33,9 @@ from ycmd.utils import ( CLANG_RESOURCE_DIR,
                          OnMac,
                          PathsToAllParentFolders,
                          re )
+from typing import Callable, Dict, List, Optional, Tuple, Union
+from ycmd.request_wrap import RequestWrap
+from ycmd.responses import DebugInfoItem
 
 MIN_SUPPORTED_VERSION = ( 10, 0, 0 )
 INCLUDE_REGEX = re.compile(
@@ -51,7 +54,7 @@ PRE_BUILT_CLANGD_DIR = os.path.abspath( os.path.join(
 PRE_BUILT_CLANDG_PATH = os.path.join( PRE_BUILT_CLANGD_DIR, 'clangd' )
 
 
-def ParseClangdVersion( version_str ):
+def ParseClangdVersion( version_str: str ) -> Optional[Tuple[int, int, int]]:
   version_regexp = r'(\d+)\.(\d+)\.(\d+)'
   m = re.search( version_regexp, version_str )
   try:
@@ -62,20 +65,20 @@ def ParseClangdVersion( version_str ):
   return version
 
 
-def GetVersion( clangd_path ):
+def GetVersion( clangd_path: str ) -> Optional[Tuple[int, int, int]]:
   args = [ clangd_path, '--version' ]
   stdout, _ = subprocess.Popen( args, stdout=subprocess.PIPE ).communicate()
   return ParseClangdVersion( stdout.decode() )
 
 
-def CheckClangdVersion( clangd_path ):
+def CheckClangdVersion( clangd_path: str ) -> bool:
   version = GetVersion( clangd_path )
   if version and version < MIN_SUPPORTED_VERSION:
     return False
   return True
 
 
-def GetThirdPartyClangd():
+def GetThirdPartyClangd() -> Optional[str]:
   pre_built_clangd = GetExecutable( PRE_BUILT_CLANDG_PATH )
   if not pre_built_clangd:
     LOGGER.info( 'No Clangd executable found in %s', PRE_BUILT_CLANGD_DIR )
@@ -88,7 +91,7 @@ def GetThirdPartyClangd():
   return pre_built_clangd
 
 
-def GetClangdExecutableAndResourceDir( user_options ):
+def GetClangdExecutableAndResourceDir( user_options: Dict[str, Union[int, Dict[str, int], List[str], str]] ) -> Union[Tuple[str, None], Tuple[None, None], Tuple[str, str]]:
   """Return the Clangd binary from the path specified in the
   'clangd_binary_path' option. Let the binary find its resource directory in
   that case. If no binary is found or if it's out-of-date, return nothing. If
@@ -122,7 +125,7 @@ def GetClangdExecutableAndResourceDir( user_options ):
   return clangd, resource_dir
 
 
-def GetClangdCommand( user_options ):
+def GetClangdCommand( user_options: Dict[str, Union[int, Dict[str, int], List[str], str]] ) -> Optional[List[str]]:
   global CLANGD_COMMAND
   # None stands for we tried to fetch command and failed, therefore it is not
   # the default.
@@ -161,7 +164,7 @@ def GetClangdCommand( user_options ):
   return CLANGD_COMMAND
 
 
-def ShouldEnableClangdCompleter( user_options ):
+def ShouldEnableClangdCompleter( user_options: Dict[str, Union[int, Dict[str, int], List[str], str]] ) -> bool:
   """Checks whether clangd should be enabled or not.
 
   - Returns True if an up-to-date binary exists either in `clangd_binary_path`
@@ -178,7 +181,7 @@ def ShouldEnableClangdCompleter( user_options ):
   return True
 
 
-def PrependCompilerToFlags( flags, enable_windows_style_flags ):
+def PrependCompilerToFlags( flags: List[str], enable_windows_style_flags: bool ) -> List[str]:
   """Removes everything before the first flag and returns the remaining flags
   prepended with clang-tool."""
   for index, flag in enumerate( flags ):
@@ -191,7 +194,7 @@ def PrependCompilerToFlags( flags, enable_windows_style_flags ):
   return [ 'clang-tool' ] + flags
 
 
-def BuildCompilationCommand( flags, filepath ):
+def BuildCompilationCommand( flags: List[str], filepath: str ) -> List[str]:
   """Returns a compilation command from a list of flags and a file."""
   enable_windows_style_flags = ShouldAllowWinStyleFlags( flags )
   flags = PrependCompilerToFlags( flags, enable_windows_style_flags )
@@ -210,7 +213,7 @@ class ClangdCompleter( language_server_completer.LanguageServerCompleter ):
     * Go to definition
   """
 
-  def __init__( self, user_options ):
+  def __init__( self, user_options: Dict[str, Union[int, Dict[str, int], List[str], str]] ) -> None:
     super().__init__( user_options )
 
     self._clangd_command = GetClangdCommand( user_options )
@@ -222,32 +225,32 @@ class ClangdCompleter( language_server_completer.LanguageServerCompleter ):
     )
 
 
-  def _Reset( self ):
+  def _Reset( self ) -> None:
     super()._Reset()
     self._compilation_commands = {}
 
 
-  def GetCompleterName( self ):
+  def GetCompleterName( self ) -> str:
     return 'C-family'
 
 
-  def GetServerName( self ):
+  def GetServerName( self ) -> str:
     return 'Clangd'
 
 
-  def GetCommandLine( self ):
+  def GetCommandLine( self ) -> List[str]:
     return self._clangd_command
 
 
-  def Language( self ):
+  def Language( self ) -> str:
     return 'cfamily'
 
 
-  def SupportedFiletypes( self ):
+  def SupportedFiletypes( self ) -> Tuple[str, str, str, str, str]:
     return ( 'c', 'cpp', 'objc', 'objcpp', 'cuda' )
 
 
-  def GetType( self, request_data ):
+  def GetType( self, request_data: RequestWrap ) -> Dict[str, str]:
     try:
       hover_value = self.GetHoverResponse( request_data )[ 'value' ]
       # Last "paragraph" contains the signature/declaration - i.e. type info.
@@ -263,7 +266,7 @@ class ClangdCompleter( language_server_completer.LanguageServerCompleter ):
       raise RuntimeError( 'Unknown type.' )
 
 
-  def GetDoc( self, request_data ):
+  def GetDoc( self, request_data: RequestWrap ) -> Dict[str, str]:
     try:
       # Just pull `value` out of the textDocument/hover response
       return responses.BuildDetailedInfoResponse(
@@ -279,7 +282,7 @@ class ClangdCompleter( language_server_completer.LanguageServerCompleter ):
     return []
 
 
-  def GetCustomSubcommands( self ):
+  def GetCustomSubcommands( self ) -> Dict[str, Callable]:
     return {
       'GetTypeImprecise': (
         lambda self, request_data, args: self.GetType( request_data )
@@ -305,19 +308,19 @@ class ClangdCompleter( language_server_completer.LanguageServerCompleter ):
     }
 
 
-  def ShouldCompleteIncludeStatement( self, request_data ):
+  def ShouldCompleteIncludeStatement( self, request_data: RequestWrap ) -> bool:
     column_codepoint = request_data[ 'column_codepoint' ] - 1
     current_line = request_data[ 'line_value' ]
     return bool( INCLUDE_REGEX.match( current_line[ : column_codepoint ] ) )
 
 
-  def ShouldUseNowInner( self, request_data ):
+  def ShouldUseNowInner( self, request_data: RequestWrap ) -> bool:
     return ( self.ServerIsReady() and
              ( super().ShouldUseNowInner( request_data ) or
                self.ShouldCompleteIncludeStatement( request_data ) ) )
 
 
-  def ShouldUseNow( self, request_data ):
+  def ShouldUseNow( self, request_data: RequestWrap ) -> bool:
     """Overridden to use Clangd filtering and sorting when ycmd caching is
     disabled."""
     # Clangd should be able to provide completions in any context.
@@ -328,7 +331,7 @@ class ClangdCompleter( language_server_completer.LanguageServerCompleter ):
              super().ShouldUseNowInner( request_data ) )
 
 
-  def ComputeCandidates( self, request_data ):
+  def ComputeCandidates( self, request_data: RequestWrap ) -> List[Dict[str, str]]:
     """Overridden to bypass ycmd cache if disabled."""
     # Caching results means resorting them, and ycmd has fewer signals.
     if self._use_ycmd_caching:
@@ -339,7 +342,7 @@ class ClangdCompleter( language_server_completer.LanguageServerCompleter ):
     return candidates
 
 
-  def _SendFlagsFromExtraConf( self, request_data ):
+  def _SendFlagsFromExtraConf( self, request_data: RequestWrap ) -> None:
     """Reads the flags from the extra conf of the given request and sends them
     to Clangd as an entry of a compilation database using the
     'compilationDatabaseChanges' configuration."""
@@ -388,7 +391,7 @@ class ClangdCompleter( language_server_completer.LanguageServerCompleter ):
       self._compilation_commands[ filepath ] = flags
 
 
-  def ExtraDebugItems( self, request_data ):
+  def ExtraDebugItems( self, request_data: RequestWrap ) -> List[DebugInfoItem]:
     return [
       responses.DebugInfoItem(
         'Compilation Command',
@@ -396,7 +399,7 @@ class ClangdCompleter( language_server_completer.LanguageServerCompleter ):
     ]
 
 
-  def OnBufferVisit( self, request_data ):
+  def OnBufferVisit( self, request_data: RequestWrap ) -> None:
     # In case a header has been changed, we need to make clangd reparse the TU.
     file_state = self._server_file_state[ request_data[ 'filepath' ] ]
     if file_state.state == lsp.ServerFileState.OPEN:

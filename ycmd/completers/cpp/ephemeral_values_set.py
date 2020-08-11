@@ -33,11 +33,11 @@ ALREADY_PARSING_MESSAGE = 'File already being parsed.'
 #    with path as paths.GetExclusive('/foo'):
 #       ...
 class EphemeralValuesSet:
-  def __init__( self ):
+  def __init__( self ) -> None:
     self._values = set()
     self._values_lock = threading.Lock()
 
-  def GetExclusive( self, value ):
+  def GetExclusive( self, value: str ):
     return EphemeralValue( value, self._values, self._values_lock )
 
 
@@ -48,7 +48,7 @@ class EphemeralValue:
     self._parent_set = parent_set
     self._parent_lock = parent_lock
 
-  def __enter__( self ):
+  def __enter__( self ) -> str:
     with self._parent_lock:
       if self._value in self._parent_set:
         # This also prevents execution of __exit__
@@ -57,7 +57,7 @@ class EphemeralValue:
     return self._value
 
 
-  def __exit__( self, *unused_args ):
+  def __exit__( self, *unused_args) -> bool:
     with self._parent_lock:
       self._parent_set.remove( self._value )
     return False

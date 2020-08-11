@@ -25,6 +25,9 @@ from ycmd import utils, responses
 from ycmd.completers.completer import Completer
 from ycmd.completers.completer_utils import GetFileLines
 from ycmd.utils import LOGGER
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from ycmd.request_wrap import RequestWrap
+from ycmd.responses import Location
 
 PATH_TO_TERN_BINARY = os.path.abspath(
   os.path.join(
@@ -50,7 +53,7 @@ SERVER_HOST = '127.0.0.1'
 LOGFILE_FORMAT = 'tern_{port}_{std}_'
 
 
-def ShouldEnableTernCompleter():
+def ShouldEnableTernCompleter() -> bool:
   """Returns whether or not the tern completer is 'installed'. That is whether
   or not the tern submodule has a 'node_modules' directory. This is pretty much
   the only way we can know if the user added '--js-completer' on
@@ -79,7 +82,7 @@ def GlobalConfigExists( tern_config ):
   return os.path.exists( tern_config )
 
 
-def FindTernProjectFile( starting_directory ):
+def FindTernProjectFile( starting_directory: str ) -> Union[Tuple[None, bool], Tuple[str, bool]]:
   """Finds the path to either a Tern project file or the user's global Tern
   configuration file. If found, a tuple is returned containing the path and a
   boolean indicating if the path is to a .tern-project file. If not found,
@@ -107,7 +110,7 @@ class TernCompleter( Completer ):
 
   The protocol is defined here: http://ternjs.net/doc/manual.html#protocol"""
 
-  def __init__( self, user_options ):
+  def __init__( self, user_options: Dict[str, Union[int, Dict[str, int], str]] ) -> None:
     super().__init__( user_options )
 
     self._server_keep_logfiles = user_options[ 'server_keep_logfiles' ]
@@ -127,7 +130,7 @@ class TernCompleter( Completer ):
     self._server_project_file = None
 
 
-  def _WarnIfMissingTernProject( self, request_data ):
+  def _WarnIfMissingTernProject( self, request_data: RequestWrap ) -> None:
     # The Tern server will operate without a .tern-project file. However, it
     # does not operate optimally, and will likely lead to issues reported that
     # JavaScript completion is not working properly. So we raise a warning if we
@@ -152,11 +155,11 @@ class TernCompleter( Completer ):
                           'details.' )
 
 
-  def _GetServerAddress( self ):
+  def _GetServerAddress( self ) -> str:
     return 'http://' + SERVER_HOST + ':' + str( self._server_port )
 
 
-  def ComputeCandidatesInner( self, request_data ):
+  def ComputeCandidatesInner( self, request_data: RequestWrap ) -> List[Dict[str, str]]:
     query = {
       'type': 'completions',
       'types': True,
@@ -212,7 +215,7 @@ class TernCompleter( Completer ):
              for completion in completions ]
 
 
-  def OnFileReadyToParse( self, request_data ):
+  def OnFileReadyToParse( self, request_data: RequestWrap ) -> None:
     self._StartServer( request_data )
 
     self._WarnIfMissingTernProject( request_data )
@@ -228,7 +231,7 @@ class TernCompleter( Completer ):
       pass
 
 
-  def GetSubcommandsMap( self ):
+  def GetSubcommandsMap( self ) -> Dict[str, Callable]:
     return {
       'RestartServer':  ( lambda self, request_data, args:
                                          self._RestartServer( request_data ) ),
@@ -249,11 +252,11 @@ class TernCompleter( Completer ):
     }
 
 
-  def SupportedFiletypes( self ):
+  def SupportedFiletypes( self ) -> List[str]:
     return [ 'javascript' ]
 
 
-  def DebugInfo( self, request_data ):
+  def DebugInfo( self, request_data: RequestWrap ) -> Dict[str, Union[str, List[Dict[str, Union[str, bool, int, List[str], List[Dict[str, str]]]]], List[Dict[str, Union[str, bool, int, List[str], List[Union[Dict[str, Optional[str]], Dict[str, str]]]]]], List[Dict[str, Optional[Union[str, bool, List[Dict[str, Optional[str]]]]]]]]]:
     with self._server_state_mutex:
       extras = [
         responses.DebugInfoItem( key = 'configuration file',
@@ -280,7 +283,7 @@ class TernCompleter( Completer ):
     self._StopServer()
 
 
-  def ServerIsHealthy( self ):
+  def ServerIsHealthy( self ) -> bool:
     if not self._ServerIsRunning():
       return False
 
@@ -292,7 +295,7 @@ class TernCompleter( Completer ):
       return False
 
 
-  def _PostRequest( self, request, request_data ):
+  def _PostRequest( self, request: Dict[str, Dict[str, Union[str, Dict[str, int], bool]]], request_data: RequestWrap ) -> Dict[str, Any]:
     """Send a raw request with the supplied request block, and
     return the server's response. If the server is not running, it is started.
 
@@ -330,7 +333,7 @@ class TernCompleter( Completer ):
     return response.json()
 
 
-  def _GetResponse( self, query, codepoint, request_data ):
+  def _GetResponse( self, query: Dict[str, Union[bool, str]], codepoint: int, request_data: RequestWrap ) -> Dict[str, Any]:
     """Send a standard file/line request with the supplied query block, and
     return the server's response. If the server is not running, it is started.
 
@@ -360,7 +363,7 @@ class TernCompleter( Completer ):
     return self._PostRequest( { 'query': full_query }, request_data )
 
 
-  def _ServerPathToAbsolute( self, path ):
+  def _ServerPathToAbsolute( self, path: str ) -> str:
     """Given a path returned from the tern server, return it as an absolute
     path. In particular, if the path is a relative path, return an absolute path
     assuming that it is relative to the working directory of the Tern server
@@ -371,7 +374,7 @@ class TernCompleter( Completer ):
     return os.path.join( self._server_working_dir, path )
 
 
-  def _SetServerProjectFileAndWorkingDirectory( self, request_data ):
+  def _SetServerProjectFileAndWorkingDirectory( self, request_data: RequestWrap ) -> None:
     filepath = request_data[ 'filepath' ]
     self._server_project_file, is_project = FindTernProjectFile( filepath )
     working_dir = request_data.get( 'working_dir',
@@ -388,12 +391,12 @@ class TernCompleter( Completer ):
     LOGGER.info( 'Tern paths are relative to: %s', self._server_working_dir )
 
 
-  def _StartServer( self, request_data ):
+  def _StartServer( self, request_data: RequestWrap ) -> None:
     with self._server_state_mutex:
       return self._StartServerNoLock( request_data )
 
 
-  def _StartServerNoLock( self, request_data ):
+  def _StartServerNoLock( self, request_data: RequestWrap ) -> None:
     if self._server_started:
       return
 
@@ -449,18 +452,18 @@ class TernCompleter( Completer ):
       LOGGER.warning( 'Tern server did not start successfully' )
 
 
-  def _RestartServer( self, request_data ):
+  def _RestartServer( self, request_data: RequestWrap ) -> None:
     with self._server_state_mutex:
       self._StopServerNoLock()
       self._StartServerNoLock( request_data )
 
 
-  def _StopServer( self ):
+  def _StopServer( self ) -> None:
     with self._server_state_mutex:
       return self._StopServerNoLock()
 
 
-  def _StopServerNoLock( self ):
+  def _StopServerNoLock( self ) -> None:
     if self._ServerIsRunning():
       LOGGER.info( 'Stopping Tern server with PID %s',
                    self._server_handle.pid )
@@ -475,7 +478,7 @@ class TernCompleter( Completer ):
     self._CleanUp()
 
 
-  def _CleanUp( self ):
+  def _CleanUp( self ) -> None:
     utils.CloseStandardStreams( self._server_handle )
 
     self._do_tern_project_check = False
@@ -495,11 +498,11 @@ class TernCompleter( Completer ):
     self._server_project_file = None
 
 
-  def _ServerIsRunning( self ):
+  def _ServerIsRunning( self ) -> bool:
     return utils.ProcessIsRunning( self._server_handle )
 
 
-  def _GetType( self, request_data ):
+  def _GetType( self, request_data: RequestWrap ) -> Dict[str, str]:
     query = {
       'type': 'type',
     }
@@ -511,7 +514,7 @@ class TernCompleter( Completer ):
     return responses.BuildDisplayMessageResponse( response[ 'type' ] )
 
 
-  def _GetDoc( self, request_data ):
+  def _GetDoc( self, request_data: RequestWrap ) -> Dict[str, str]:
     # Note: we use the 'type' request because this is the best
     # way to get the name, type and doc string. The 'documentation' request
     # doesn't return the 'name' (strangely), whereas the 'type' request returns
@@ -534,7 +537,7 @@ class TernCompleter( Completer ):
     return responses.BuildDetailedInfoResponse( doc_string )
 
 
-  def _GoToDefinition( self, request_data ):
+  def _GoToDefinition( self, request_data: RequestWrap ) -> Dict[str, Union[int, str]]:
     query = {
       'type': 'definition',
     }
@@ -552,7 +555,7 @@ class TernCompleter( Completer ):
         response[ 'start' ][ 'ch' ] ) )
 
 
-  def _GoToReferences( self, request_data ):
+  def _GoToReferences( self, request_data: RequestWrap ) -> List[Dict[str, Union[int, str]]]:
     query = {
       'type': 'refs',
     }
@@ -572,7 +575,7 @@ class TernCompleter( Completer ):
     return [ BuildRefResponse( ref ) for ref in response[ 'refs' ] ]
 
 
-  def _Rename( self, request_data, args ):
+  def _Rename( self, request_data: RequestWrap, args: List[str] ) -> Dict[str, List[Dict[str, Union[Dict[str, Union[int, str]], List[Dict[str, Union[str, Dict[str, Dict[str, Union[int, str]]]]]], str, bool]]]]:
     if len( args ) != 1:
       raise ValueError( 'Please specify a new name to rename it to.\n'
                         'Usage: RefactorRename <new name>' )
@@ -667,7 +670,7 @@ class TernCompleter( Completer ):
         [ BuildFixItChunk( x ) for x in response[ 'changes' ] ] ) ] )
 
 
-def _BuildLocation( file_contents, filename, line, ch ):
+def _BuildLocation( file_contents: List[str], filename: str, line: int, ch: int ) -> Location:
   # tern returns codepoint offsets, but we need byte offsets, so we must
   # convert
   return responses.Location(

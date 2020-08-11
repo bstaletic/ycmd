@@ -16,6 +16,7 @@
 # along with ycmd.  If not, see <http://www.gnu.org/licenses/>.
 
 from ycmd.utils import re, SplitLines
+from typing import List, Optional
 
 C_STYLE_COMMENT = '/\\*(?:\n|.)*?\\*/'
 CPP_STYLE_COMMENT = '//.*?$'
@@ -173,16 +174,16 @@ def ReplaceWithEmptyLines( regex_match ):
   return '\n' * ( len( SplitLines( regex_match.group( 0 ) ) ) - 1 )
 
 
-def RemoveIdentifierFreeText( text, filetype = None ):
+def RemoveIdentifierFreeText( text: str, filetype: Optional[str] = None ) -> str:
   return CommentAndStringRegexForFiletype( filetype ).sub(
     ReplaceWithEmptyLines, text )
 
 
-def ExtractIdentifiersFromText( text, filetype = None ):
+def ExtractIdentifiersFromText( text: str, filetype: Optional[str] = None ) -> List[str]:
   return re.findall( IdentifierRegexForFiletype( filetype ), text )
 
 
-def IsIdentifier( text, filetype = None ):
+def IsIdentifier( text: Optional[str], filetype: Optional[str] = None ) -> Optional[bool]:
   if not text:
     return False
   regex = IdentifierRegexForFiletype( filetype )
@@ -193,7 +194,7 @@ def IsIdentifier( text, filetype = None ):
 # index is 0-based and EXCLUSIVE, so ("foo.", 3) -> 0
 # Works with both unicode and str objects.
 # Returns the index on bad input.
-def StartOfLongestIdentifierEndingAtIndex( text, index, filetype = None ):
+def StartOfLongestIdentifierEndingAtIndex( text: Optional[str], index: int, filetype: Optional[str] = None ) -> int:
   if not text or index < 1 or index > len( text ):
     return index
 
@@ -205,7 +206,7 @@ def StartOfLongestIdentifierEndingAtIndex( text, index, filetype = None ):
 
 # If the index is not on a valid identifier, it searches forward until a valid
 # identifier is found. Returns the identifier.
-def IdentifierAtIndex( text, index, filetype = None ):
+def IdentifierAtIndex( text: str, index: int, filetype: Optional[str] = None ) -> str:
   if index > len( text ):
     return ''
 

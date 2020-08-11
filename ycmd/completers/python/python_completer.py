@@ -17,7 +17,7 @@
 
 from ycmd import extra_conf_store, responses
 from ycmd.completers.completer import Completer, SignatureHelpAvailalability
-from ycmd.utils import ( CodepointOffsetToByteOffset,
+from ycmd.utils import ( HashableDict, CodepointOffsetToByteOffset,
                          ExpandVariablesInPath,
                          FindExecutable,
                          LOGGER )
@@ -28,6 +28,15 @@ import jedi
 import os
 import parso
 from threading import Lock
+from jedi.api import Script
+from jedi.api.classes import Completion, Name
+from jedi.api.environment import Environment, SameEnvironment
+from jedi.api.project import Project
+from jedi.api.refactoring import Refactoring
+from typing import Any, Callable, Dict, List, Optional, Union
+from ycmd.request_wrap import RequestWrap
+from ycmd.responses import FixIt, Location
+from ycmd.tests.python.subcommands_test import JediDef
 
 
 class PythonCompleter( Completer ):
@@ -36,7 +45,7 @@ class PythonCompleter( Completer ):
   https://jedi.readthedocs.org/en/latest/
   """
 
-  def __init__( self, user_options ):
+  def __init__( self, user_options: Dict[str, Union[int, Dict[str, int], str, bool]] ) -> None:
     super().__init__( user_options )
     self._jedi_lock = Lock()
     self._settings_for_file = {}
@@ -46,18 +55,18 @@ class PythonCompleter( Completer ):
     self.SetSignatureHelpTriggers( [ '(', ',' ] )
 
 
-  def SupportedFiletypes( self ):
+  def SupportedFiletypes( self ) -> List[str]:
     return [ 'python' ]
 
 
-  def OnFileReadyToParse( self, request_data ):
+  def OnFileReadyToParse( self, request_data: RequestWrap ) -> None:
     # This is implicitly loading the extra conf file and caching the Jedi
     # environment and Python path.
     environment = self._EnvironmentForRequest( request_data )
     self._JediProjectForFile( request_data, environment )
 
 
-  def _SettingsForRequest( self, request_data ):
+  def _SettingsForRequest( self, request_data: RequestWrap ) -> Dict[str, Union[str, List[str], List[Any]]]:
     filepath = request_data[ 'filepath' ]
     client_data = request_data[ 'extra_conf_data' ]
     try:
@@ -71,7 +80,7 @@ class PythonCompleter( Completer ):
     return settings
 
 
-  def _GetSettings( self, module, filepath, client_data ):
+  def _GetSettings( self, module: None, filepath: str, client_data: HashableDict ) -> Dict[str, str]:
     # We don't warn the user if no extra conf file is found.
     if module:
       if hasattr( module, 'Settings' ):
@@ -88,7 +97,7 @@ class PythonCompleter( Completer ):
     }
 
 
-  def _EnvironmentForInterpreterPath( self, interpreter_path ):
+  def _EnvironmentForInterpreterPath( self, interpreter_path: Optional[str] ) -> Union[SameEnvironment, Environment]:
     if interpreter_path:
       resolved_interpreter_path = FindExecutable(
         ExpandVariablesInPath( interpreter_path ) )
@@ -109,7 +118,7 @@ class PythonCompleter( Completer ):
     return environment
 
 
-  def _EnvironmentForRequest( self, request_data ):
+  def _EnvironmentForRequest( self, request_data: RequestWrap ) -> Union[SameEnvironment, Environment]:
     filepath = request_data[ 'filepath' ]
     client_data = request_data[ 'extra_conf_data' ]
     try:
@@ -124,7 +133,7 @@ class PythonCompleter( Completer ):
     return environment
 
 
-  def _GetJediProject( self, request_data, environment ):
+  def _GetJediProject( self, request_data: RequestWrap, environment: Union[SameEnvironment, Environment] ) -> Project:
     settings = {
       'sys_path': []
     }
@@ -150,7 +159,7 @@ class PythonCompleter( Completer ):
                          environment_path = settings[ 'interpreter_path' ] )
 
 
-  def _JediProjectForFile( self, request_data, environment ):
+  def _JediProjectForFile( self, request_data: RequestWrap, environment: Union[SameEnvironment, Environment] ) -> Project:
     filepath = request_data[ 'filepath' ]
     client_data = request_data[ 'extra_conf_data' ]
     try:
@@ -163,7 +172,7 @@ class PythonCompleter( Completer ):
     return jedi_project
 
 
-  def _GetJediScript( self, request_data ):
+  def _GetJediScript( self, request_data: RequestWrap ) -> Script:
     path = request_data[ 'filepath' ]
     source = request_data[ 'file_data' ][ path ][ 'contents' ]
     environment = self._EnvironmentForRequest( request_data )
@@ -175,7 +184,7 @@ class PythonCompleter( Completer ):
 
 
   # This method must be called under Jedi's lock.
-  def _GetExtraData( self, completion ):
+  def _GetExtraData( self, completion: Completion ) -> Dict[str, Dict[str, Union[int, str]]]:
     if completion.module_path and completion.line and completion.column:
       return {
         'location': {
@@ -187,7 +196,7 @@ class PythonCompleter( Completer ):
     return {}
 
 
-  def ComputeCandidatesInner( self, request_data ):
+  def ComputeCandidatesInner( self, request_data: RequestWrap ) -> List[Dict[str, Union[str, Completion]]]:
     with self._jedi_lock:
       line = request_data[ 'line_num' ]
       # Jedi expects columns to start at 0, not 1, and for them to be Unicode
@@ -202,11 +211,11 @@ class PythonCompleter( Completer ):
       ) for completion in completions ]
 
 
-  def SignatureHelpAvailable( self ):
+  def SignatureHelpAvailable( self ) -> str:
     return SignatureHelpAvailalability.AVAILABLE
 
 
-  def ComputeSignaturesInner( self, request_data ):
+  def ComputeSignaturesInner( self, request_data: RequestWrap ) -> Dict[str, Union[List[Dict[str, Union[str, List[Dict[str, List[int]]]]]], int]]:
     with self._jedi_lock:
       line = request_data[ 'line_num' ]
       # Jedi expects columns to start at 0, not 1, and for them to be Unicode
@@ -259,7 +268,7 @@ class PythonCompleter( Completer ):
       }
 
 
-  def DetailCandidates( self, request_data, candidates ):
+  def DetailCandidates( self, request_data: RequestWrap, candidates: Union[List[Dict[str, Union[str, Dict[str, Dict[str, Union[int, str]]]]]], List[Dict[str, Union[str, Completion]]]] ) -> Union[List[Dict[str, Union[str, Dict[str, Dict[str, Union[int, str]]]]]], List[Dict[str, str]]]:
     with self._jedi_lock:
       for candidate in candidates:
         if isinstance( candidate[ 'extra_data' ], dict ):
@@ -273,7 +282,7 @@ class PythonCompleter( Completer ):
     return candidates
 
 
-  def GetSubcommandsMap( self ):
+  def GetSubcommandsMap( self ) -> Dict[str, Callable]:
     return {
       'GoTo'           : ( lambda self, request_data, args:
                            self._GoToDefinition( request_data ) ),
@@ -296,7 +305,7 @@ class PythonCompleter( Completer ):
     }
 
 
-  def _BuildGoToResponse( self, definitions, request_data ):
+  def _BuildGoToResponse( self, definitions: Union[List[Completion], List[JediDef], List[Name]], request_data: RequestWrap ) -> Optional[Union[List[Dict[str, Union[int, str]]], Dict[str, Union[int, str]]]]:
     if len( definitions ) == 1:
       definition = definitions[ 0 ]
       column = 1
@@ -328,7 +337,7 @@ class PythonCompleter( Completer ):
     return gotos
 
 
-  def _GoToType( self, request_data ):
+  def _GoToType( self, request_data: RequestWrap ) -> Dict[str, Union[int, str]]:
     with self._jedi_lock:
       line = request_data[ 'line_num' ]
       # Jedi expects columns to start at 0, not 1, and for them to be Unicode
@@ -344,7 +353,7 @@ class PythonCompleter( Completer ):
     raise RuntimeError( 'Can\'t jump to type definition.' )
 
 
-  def _GoToDefinition( self, request_data ):
+  def _GoToDefinition( self, request_data: RequestWrap ) -> Dict[str, Union[int, str]]:
     with self._jedi_lock:
       line = request_data[ 'line_num' ]
       # Jedi expects columns to start at 0, not 1, and for them to be Unicode
@@ -360,7 +369,7 @@ class PythonCompleter( Completer ):
     raise RuntimeError( 'Can\'t jump to definition.' )
 
 
-  def _GoToReferences( self, request_data ):
+  def _GoToReferences( self, request_data: RequestWrap ) -> List[Dict[str, Union[int, str]]]:
     with self._jedi_lock:
       line = request_data[ 'line_num' ]
       # Jedi expects columns to start at 0, not 1, and for them to be Unicode
@@ -375,7 +384,7 @@ class PythonCompleter( Completer ):
     raise RuntimeError( 'Can\'t find references.' )
 
 
-  def _GoToSymbol( self, request_data, args ):
+  def _GoToSymbol( self, request_data: RequestWrap, args: List[str] ) -> Union[List[Dict[str, Union[int, str]]], Dict[str, Union[int, str]]]:
     if len( args ) < 1:
       raise RuntimeError( 'Must specify something to search for' )
 
@@ -403,7 +412,7 @@ class PythonCompleter( Completer ):
 
 
   # This method must be called under Jedi's lock.
-  def _BuildTypeInfo( self, definition ):
+  def _BuildTypeInfo( self, definition: Union[Name, Completion] ) -> str:
     type_info = definition.description
     # Jedi doesn't return the signature in the description. Build the signature
     # from the params field.
@@ -417,7 +426,7 @@ class PythonCompleter( Completer ):
     return type_info
 
 
-  def _GetType( self, request_data ):
+  def _GetType( self, request_data: RequestWrap ) -> Dict[str, str]:
     with self._jedi_lock:
       line = request_data[ 'line_num' ]
       # Jedi expects columns to start at 0, not 1, and for them to be Unicode
@@ -432,7 +441,7 @@ class PythonCompleter( Completer ):
     raise RuntimeError( 'No type information available.' )
 
 
-  def _GetDoc( self, request_data ):
+  def _GetDoc( self, request_data: RequestWrap ) -> Dict[str, str]:
     with self._jedi_lock:
       line = request_data[ 'line_num' ]
       # Jedi expects columns to start at 0, not 1, and for them to be Unicode
@@ -447,7 +456,7 @@ class PythonCompleter( Completer ):
     raise RuntimeError( 'No documentation available.' )
 
 
-  def _RefactorRename( self, request_data, args ):
+  def _RefactorRename( self, request_data: RequestWrap, args: List[str] ) -> Dict[str, List[Dict[str, Union[Dict[str, Union[int, str]], List[Dict[str, Union[str, Dict[str, Dict[str, Union[int, str]]]]]], str, bool]]]]:
     if len( args ) < 1:
       raise RuntimeError( 'Must specify a new name' )
 
@@ -473,7 +482,7 @@ class PythonCompleter( Completer ):
   # Refactor Inline ... but that would be inconsistent.
 
 
-  def DebugInfo( self, request_data ):
+  def DebugInfo( self, request_data: RequestWrap ) -> Dict[str, Union[str, List[Dict[str, str]]]]:
     environment = self._EnvironmentForRequest( request_data )
 
     python_interpreter = responses.DebugInfoItem(
@@ -511,7 +520,7 @@ class PythonCompleter( Completer ):
                                                        parso_version ] )
 
 
-def _RefactoringToFixIt( refactoring ):
+def _RefactoringToFixIt( refactoring: Refactoring ) -> FixIt:
   """Converts a Jedi Refactoring instance to a single responses.FixIt."""
 
   # FIXME: refactorings can rename files (apparently). ycmd API doesn't have any
@@ -571,7 +580,7 @@ def _RefactoringToFixIt( refactoring ):
                           kind = responses.FixIt.Kind.REFACTOR )
 
 
-def _OffsetToPosition( offset, filename, text, newlines ):
+def _OffsetToPosition( offset: int, filename: str, text: str, newlines: List[int] ) -> Location:
   """Convert the 0-based codepoint offset |offset| to a position (line/col) in
   |text|. |filename| is the full path of the file containing |text| and
   |newlines| is a cache of the 0-based character offsets of all the \n

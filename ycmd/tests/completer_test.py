@@ -17,17 +17,18 @@
 
 from ycmd.tests.test_utils import DummyCompleter
 from ycmd.user_options_store import DefaultOptions
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 from hamcrest import assert_that, contains_exactly, equal_to
+from typing import Dict, List, Union
 
 
-def _FilterAndSortCandidates_Match( candidates, query, expected_matches ):
+def _FilterAndSortCandidates_Match( candidates: Union[List[Dict[str, str]], List[str], Dict[str, List[str]], Dict[str, List[Dict[str, str]]]], query: str, expected_matches: Union[List[Dict[str, str]], List[str]] ) -> None:
   completer = DummyCompleter( DefaultOptions() )
   matches = completer.FilterAndSortCandidates( candidates, query )
   assert_that( expected_matches, equal_to( matches ) )
 
 
-def FilterAndSortCandidates_OmniCompleter_List_test():
+def FilterAndSortCandidates_OmniCompleter_List_test() -> None:
   _FilterAndSortCandidates_Match( [ 'password' ],
                                   'p',
                                   [ 'password' ] )
@@ -36,7 +37,7 @@ def FilterAndSortCandidates_OmniCompleter_List_test():
                                   [ 'words' ] )
 
 
-def FilterAndSortCandidates_OmniCompleter_Dictionary_test():
+def FilterAndSortCandidates_OmniCompleter_Dictionary_test() -> None:
   _FilterAndSortCandidates_Match( { 'words': [ 'password' ] },
                                   'p',
                                   [ 'password' ] )
@@ -45,25 +46,25 @@ def FilterAndSortCandidates_OmniCompleter_Dictionary_test():
                                   [ { 'word': 'password' } ] )
 
 
-def FilterAndSortCandidates_ServerCompleter_test():
+def FilterAndSortCandidates_ServerCompleter_test() -> None:
   _FilterAndSortCandidates_Match( [ { 'insertion_text': 'password' } ],
                                   'p',
                                   [ { 'insertion_text': 'password' } ] )
 
 
-def FilterAndSortCandidates_SortOnEmptyQuery_test():
+def FilterAndSortCandidates_SortOnEmptyQuery_test() -> None:
   _FilterAndSortCandidates_Match( [ 'foo', 'bar' ],
                                   '',
                                   [ 'bar', 'foo' ] )
 
 
-def FilterAndSortCandidates_IgnoreEmptyCandidate_test():
+def FilterAndSortCandidates_IgnoreEmptyCandidate_test() -> None:
   _FilterAndSortCandidates_Match( [ '' ],
                                   '',
                                   [] )
 
 
-def FilterAndSortCandidates_Unicode_test():
+def FilterAndSortCandidates_Unicode_test() -> None:
   _FilterAndSortCandidates_Match( [ { 'insertion_text': 'ø' } ],
                                   'ø',
                                   [ { 'insertion_text': 'ø' } ] )
@@ -71,6 +72,6 @@ def FilterAndSortCandidates_Unicode_test():
 
 @patch( 'ycmd.tests.test_utils.DummyCompleter.GetSubcommandsMap',
         return_value = { 'Foo': '', 'StopServer': '' } )
-def DefinedSubcommands_RemoveStopServerSubcommand_test( subcommands_map ):
+def DefinedSubcommands_RemoveStopServerSubcommand_test( subcommands_map: MagicMock ) -> None:
   completer = DummyCompleter( DefaultOptions() )
   assert_that( completer.DefinedSubcommands(), contains_exactly( 'Foo' ) )

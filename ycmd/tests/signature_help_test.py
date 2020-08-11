@@ -20,10 +20,11 @@ from hamcrest import ( assert_that, empty, has_entries )
 from ycmd.tests import SharedYcmd, IsolatedYcmd
 from ycmd.tests.test_utils import ( EMPTY_SIGNATURE_HELP,
                                     BuildRequest )
+from webtest.app import TestApp
 
 
 @SharedYcmd
-def SignatureHelp_IdentifierCompleter_test( app ):
+def SignatureHelp_IdentifierCompleter_test( app: TestApp ) -> None:
   event_data = BuildRequest( contents = 'foo foogoo ba',
                              event_name = 'FileReadyToParse' )
 
@@ -41,7 +42,7 @@ def SignatureHelp_IdentifierCompleter_test( app ):
 
 
 @IsolatedYcmd( { 'disable_signature_help': 1 } )
-def SignatureHelp_IdentifierCompleter_disabled_test( app ):
+def SignatureHelp_IdentifierCompleter_disabled_test( app: TestApp ) -> None:
   event_data = BuildRequest( contents = 'foo foogoo ba',
                              event_name = 'FileReadyToParse' )
 

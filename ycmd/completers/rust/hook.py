@@ -17,9 +17,11 @@
 
 from ycmd.completers.rust.rust_completer import ( ShouldEnableRustCompleter,
                                                   RustCompleter )
+from typing import Dict, Optional, Union
+from ycmd.utils import HashableDict
 
 
-def GetCompleter( user_options ):
+def GetCompleter( user_options: Union[Dict[str, Union[int, Dict[str, int], str]], HashableDict] ) -> Optional[RustCompleter]:
   if not ShouldEnableRustCompleter( user_options ):
     return None
   return RustCompleter( user_options )

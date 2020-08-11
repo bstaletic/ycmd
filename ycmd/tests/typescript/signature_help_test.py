@@ -25,9 +25,12 @@ from ycmd.tests.test_utils import ( CombineRequest,
                                     SignatureAvailableMatcher,
                                     WaitUntilCompleterServerReady )
 from ycmd.utils import ReadFile
+from hamcrest.library.collection.isdict_containingentries import IsDictContainingEntries
+from typing import Dict, Union
+from webtest.app import TestApp
 
 
-def RunTest( app, test ):
+def RunTest( app: TestApp, test: Dict[str, Union[str, Dict[str, Union[int, str]], Dict[str, Union[int, IsDictContainingEntries]]]] ) -> None:
   """
   Method to run a simple signature help test and verify the result
 
@@ -66,7 +69,7 @@ def RunTest( app, test ):
 
 
 @SharedYcmd
-def Signature_Help_Available_test( app ):
+def Signature_Help_Available_test( app: TestApp ) -> None:
   response = app.get( '/signature_help_available',
                       { 'subserver': 'typescript' } ).json
   assert_that( response, SignatureAvailableMatcher( 'YES' ) )
@@ -74,7 +77,7 @@ def Signature_Help_Available_test( app ):
 
 # Triggering on '(', ',' and '<'
 @SharedYcmd
-def Signature_Help_Trigger_Paren_test( app ):
+def Signature_Help_Trigger_Paren_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'Trigger after (',
     'request': {
@@ -101,7 +104,7 @@ def Signature_Help_Trigger_Paren_test( app ):
 
 
 @IsolatedYcmd( { 'disable_signature_help': True } )
-def Signature_Help_Trigger_Paren_Disabled_test( app ):
+def Signature_Help_Trigger_Paren_Disabled_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'Trigger after (',
     'request': {
@@ -125,7 +128,7 @@ def Signature_Help_Trigger_Paren_Disabled_test( app ):
 
 
 @SharedYcmd
-def Signature_Help_Trigger_Comma_test( app ):
+def Signature_Help_Trigger_Comma_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'Trigger after ,',
     'request': {
@@ -154,7 +157,7 @@ def Signature_Help_Trigger_Comma_test( app ):
 
 
 @SharedYcmd
-def Signature_Help_Trigger_AngleBracket_test( app ):
+def Signature_Help_Trigger_AngleBracket_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'Trigger after <',
     'request': {
@@ -182,7 +185,7 @@ def Signature_Help_Trigger_AngleBracket_test( app ):
 
 
 @SharedYcmd
-def Signature_Help_Multiple_Signatures_test( app ):
+def Signature_Help_Multiple_Signatures_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'Test overloaded methods',
     'request': {
@@ -212,7 +215,7 @@ def Signature_Help_Multiple_Signatures_test( app ):
 
 
 @SharedYcmd
-def Signature_Help_NoSignatures_test( app ):
+def Signature_Help_NoSignatures_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'Test overloaded methods',
     'request': {
@@ -236,7 +239,7 @@ def Signature_Help_NoSignatures_test( app ):
 
 
 @SharedYcmd
-def Signature_Help_NoErrorWhenNoSignatureInfo_test( app ):
+def Signature_Help_NoErrorWhenNoSignatureInfo_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'Test dodgy (',
     'request': {

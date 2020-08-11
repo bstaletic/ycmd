@@ -36,9 +36,11 @@ from ycmd.tests.test_utils import ( BuildRequest,
                                     WindowsOnly,
                                     WithRetry )
 from ycmd.utils import ReadFile
+from typing import Any, Dict
+from webtest.app import TestApp
 
 
-def RunTest( app, test ):
+def RunTest( app: TestApp, test: Dict[str, Any] ) -> None:
   """
   Method to run a simple completion test and verify the result
 
@@ -99,7 +101,7 @@ def RunTest( app, test ):
 
 
 @IsolatedYcmd( { 'clangd_uses_ycmd_caching': 0 } )
-def GetCompletions_ForcedWithNoTrigger_NoYcmdCaching_test( app ):
+def GetCompletions_ForcedWithNoTrigger_NoYcmdCaching_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'semantic completion with force query=DO_SO',
     'request': {
@@ -125,7 +127,7 @@ def GetCompletions_ForcedWithNoTrigger_NoYcmdCaching_test( app ):
 
 
 @IsolatedYcmd( { 'clangd_uses_ycmd_caching': 0 } )
-def GetCompletions_NotForced_NoYcmdCaching_test( app ):
+def GetCompletions_NotForced_NoYcmdCaching_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'semantic completion with force query=DO_SO',
     'request': {
@@ -153,7 +155,7 @@ def GetCompletions_NotForced_NoYcmdCaching_test( app ):
 
 @WithRetry
 @SharedYcmd
-def GetCompletions_ForcedWithNoTrigger_test( app ):
+def GetCompletions_ForcedWithNoTrigger_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'semantic completion with force query=DO_SO',
     'request': {
@@ -180,7 +182,7 @@ def GetCompletions_ForcedWithNoTrigger_test( app ):
 # This test is isolated to make sure we trigger c hook for clangd, instead of
 # fetching completer from cache.
 @IsolatedYcmd()
-def GetCompletions_Fallback_NoSuggestions_test( app ):
+def GetCompletions_Fallback_NoSuggestions_test( app: TestApp ) -> None:
   # TESTCASE1 (general_fallback/lang_c.c)
   RunTest( app, {
     'description': 'Triggered, fallback but no query so no completions',
@@ -203,7 +205,7 @@ def GetCompletions_Fallback_NoSuggestions_test( app ):
 
 @WithRetry
 @SharedYcmd
-def GetCompletions_Fallback_NoSuggestions_MinimumCharaceters_test( app ):
+def GetCompletions_Fallback_NoSuggestions_MinimumCharaceters_test( app: TestApp ) -> None:
   # TESTCASE1 (general_fallback/lang_cpp.cc)
   RunTest( app, {
     'description': 'fallback general completion obeys min chars setting '
@@ -228,7 +230,7 @@ def GetCompletions_Fallback_NoSuggestions_MinimumCharaceters_test( app ):
 
 @WithRetry
 @SharedYcmd
-def GetCompletions_Fallback_Suggestions_test( app ):
+def GetCompletions_Fallback_Suggestions_test( app: TestApp ) -> None:
   # TESTCASE1 (general_fallback/lang_c.c)
   RunTest( app, {
     'description': '. after macro with some query text (.a_)',
@@ -252,7 +254,7 @@ def GetCompletions_Fallback_Suggestions_test( app ):
 
 @WithRetry
 @SharedYcmd
-def GetCompletions_Fallback_Exception_test( app ):
+def GetCompletions_Fallback_Exception_test( app: TestApp ) -> None:
   # TESTCASE4 (general_fallback/lang_c.c)
   # extra conf throws exception
   RunTest( app, {
@@ -279,7 +281,7 @@ def GetCompletions_Fallback_Exception_test( app ):
 
 @WithRetry
 @SharedYcmd
-def GetCompletions_Forced_NoFallback_test( app ):
+def GetCompletions_Forced_NoFallback_test( app: TestApp ) -> None:
   # TESTCASE2 (general_fallback/lang_c.c)
   RunTest( app, {
     'description': '-> after macro with forced semantic',
@@ -299,7 +301,7 @@ def GetCompletions_Forced_NoFallback_test( app ):
 
 @WithRetry
 @SharedYcmd
-def GetCompletions_FilteredNoResults_Fallback_test( app ):
+def GetCompletions_FilteredNoResults_Fallback_test( app: TestApp ) -> None:
   # no errors because the semantic completer returned results, but they
   # were filtered out by the query, so this is considered working OK
   # (whereas no completions from the semantic engine is considered an
@@ -334,7 +336,7 @@ def GetCompletions_FilteredNoResults_Fallback_test( app ):
 
 
 @IsolatedYcmd( { 'auto_trigger': 0 } )
-def GetCompletions_NoCompletionsWhenAutoTriggerOff_test( app ):
+def GetCompletions_NoCompletionsWhenAutoTriggerOff_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'no completions on . when auto trigger is off',
     'request': {
@@ -368,7 +370,7 @@ int main()
 
 @WithRetry
 @SharedYcmd
-def GetCompletions_ForceSemantic_YcmdCache_test( app ):
+def GetCompletions_ForceSemantic_YcmdCache_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'completions are returned when using ycmd filtering',
     'request': {
@@ -401,7 +403,7 @@ int main()
 
 
 @IsolatedYcmd( { 'clangd_uses_ycmd_caching': 0 } )
-def GetCompletions_ForceSemantic_NoYcmdCache_test( app ):
+def GetCompletions_ForceSemantic_NoYcmdCache_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'no completions are returned when using Clangd filtering',
     'request': {
@@ -550,7 +552,7 @@ def GetCompletions_ClangCLDriverExec_IncludeStatementCandidate_test( app ):
 
 @WithRetry
 @SharedYcmd
-def GetCompletions_UnicodeInLine_test( app ):
+def GetCompletions_UnicodeInLine_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'member completion with a unicode identifier',
     'request': {
@@ -574,7 +576,7 @@ def GetCompletions_UnicodeInLine_test( app ):
 
 @WithRetry
 @SharedYcmd
-def GetCompletions_UnicodeInLineFilter_test( app ):
+def GetCompletions_UnicodeInLineFilter_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'member completion with a unicode identifier',
     'request': {
@@ -598,7 +600,7 @@ def GetCompletions_UnicodeInLineFilter_test( app ):
 
 @WithRetry
 @SharedYcmd
-def GetCompletions_QuotedInclude_test( app ):
+def GetCompletions_QuotedInclude_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'completion of #include "',
     'request': {
@@ -627,7 +629,7 @@ def GetCompletions_QuotedInclude_test( app ):
 
 @WithRetry
 @SharedYcmd
-def GetCompletions_QuotedInclude_AfterDirectorySeparator_test( app ):
+def GetCompletions_QuotedInclude_AfterDirectorySeparator_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'completion of #include "quote/',
     'request': {
@@ -651,7 +653,7 @@ def GetCompletions_QuotedInclude_AfterDirectorySeparator_test( app ):
 
 @WithRetry
 @SharedYcmd
-def GetCompletions_QuotedInclude_AfterDot_test( app ):
+def GetCompletions_QuotedInclude_AfterDot_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'completion of #include "quote/b.',
     'request': {
@@ -676,7 +678,7 @@ def GetCompletions_QuotedInclude_AfterDot_test( app ):
 
 @WithRetry
 @SharedYcmd
-def GetCompletions_QuotedInclude_AfterSpace_test( app ):
+def GetCompletions_QuotedInclude_AfterSpace_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'completion of #include "dir with ',
     'request': {
@@ -700,7 +702,7 @@ def GetCompletions_QuotedInclude_AfterSpace_test( app ):
 
 @WithRetry
 @SharedYcmd
-def GetCompletions_QuotedInclude_Invalid_test( app ):
+def GetCompletions_QuotedInclude_Invalid_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'completion of an invalid include statement',
     'request': {
@@ -722,7 +724,7 @@ def GetCompletions_QuotedInclude_Invalid_test( app ):
 
 @WithRetry
 @SharedYcmd
-def GetCompletions_BracketInclude_test( app ):
+def GetCompletions_BracketInclude_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'completion of #include <',
     'request': {
@@ -747,7 +749,7 @@ def GetCompletions_BracketInclude_test( app ):
 
 @WithRetry
 @SharedYcmd
-def GetCompletions_BracketInclude_AtDirectorySeparator_test( app ):
+def GetCompletions_BracketInclude_AtDirectorySeparator_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'completion of #include <system/',
     'request': {
@@ -773,7 +775,7 @@ def GetCompletions_BracketInclude_AtDirectorySeparator_test( app ):
 
 @WithRetry
 @IsolatedYcmd()
-def GetCompletions_cuda_test( app ):
+def GetCompletions_cuda_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'Completion of CUDA files',
     'request': {
@@ -798,7 +800,7 @@ def GetCompletions_cuda_test( app ):
 
 
 @IsolatedYcmd( { 'clangd_args': [ '-header-insertion-decorators=1' ] } )
-def GetCompletions_WithHeaderInsertionDecorators_test( app ):
+def GetCompletions_WithHeaderInsertionDecorators_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'Completion of CUDA files',
     'request': {
@@ -824,7 +826,7 @@ def GetCompletions_WithHeaderInsertionDecorators_test( app ):
 
 @WithRetry
 @SharedYcmd
-def GetCompletions_ServerTriggers_Ignored_test( app ):
+def GetCompletions_ServerTriggers_Ignored_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': "We don't trigger completion on things like map< int >|",
     'request': {
@@ -846,7 +848,7 @@ def GetCompletions_ServerTriggers_Ignored_test( app ):
 
 @IsolatedYcmd( { 'extra_conf_globlist': [
   PathToTestFile( 'extra_conf', '.ycm_extra_conf.py' ) ] } )
-def GetCompletions_SupportExtraConf_test( app ):
+def GetCompletions_SupportExtraConf_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'Flags for foo.cpp from extra conf file are used',
     'request': {

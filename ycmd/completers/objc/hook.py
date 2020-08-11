@@ -19,10 +19,11 @@ from ycmd.completers.cpp.clang_completer import ClangCompleter
 from ycmd.completers.cpp.clangd_completer import ( ShouldEnableClangdCompleter,
                                                    ClangdCompleter )
 from ycmd.utils import ImportCore
+from typing import Dict, List, Union, Optional
 ycm_core = ImportCore()
 
 
-def GetCompleter( user_options ):
+def GetCompleter( user_options: Dict[str, Union[int, Dict[str, int], List[str], str]] ) -> Optional[Union[ClangCompleter, ClangdCompleter]]:
   if ShouldEnableClangdCompleter( user_options ):
     return ClangdCompleter( user_options )
   if ycm_core.HasClangSupport():

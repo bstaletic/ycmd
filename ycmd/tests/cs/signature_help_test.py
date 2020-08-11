@@ -32,17 +32,18 @@ from ycmd.tests.test_utils import ( BuildRequest,
                                     SignatureMatcher,
                                     SignatureAvailableMatcher,
                                     CompletionEntryMatcher )
+from webtest.app import TestApp
 
 
 @SharedYcmd
-def Signature_Help_Available_test( app ):
+def Signature_Help_Available_test( app: TestApp ) -> None:
   response = app.get( '/signature_help_available',
                       { 'subserver': 'cs' } ).json
   assert_that( response, SignatureAvailableMatcher( 'YES' ) )
 
 
 @SharedYcmd
-def Signature_Help_Available_Server_Not_Ready_test( app ):
+def Signature_Help_Available_Server_Not_Ready_test( app: TestApp ) -> None:
   completer = handlers._server_state.GetFiletypeCompleter( [ 'cs' ] )
   with patch.object( completer, 'ServerIsHealthy', return_value = False ):
     response = app.get( '/signature_help_available',
@@ -51,7 +52,7 @@ def Signature_Help_Available_Server_Not_Ready_test( app ):
 
 
 @SharedYcmd
-def SignatureHelp_TriggerComma_test( app ):
+def SignatureHelp_TriggerComma_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'testy', 'ContinuousTest.cs' )
   contents = ReadFile( filepath )
   request = BuildRequest(
@@ -78,7 +79,7 @@ def SignatureHelp_TriggerComma_test( app ):
 
 
 @SharedYcmd
-def SignatureHelp_TriggerParen_test( app ):
+def SignatureHelp_TriggerParen_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'testy', 'ContinuousTest.cs' )
   contents = ReadFile( filepath )
   request = BuildRequest(
@@ -104,7 +105,7 @@ def SignatureHelp_TriggerParen_test( app ):
 
 
 @IsolatedYcmd( { 'disable_signature_help': True } )
-def SignatureHelp_TriggerParen_Disabled_test( app ):
+def SignatureHelp_TriggerParen_Disabled_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'testy', 'ContinuousTest.cs' )
   contents = ReadFile( filepath )
   request = BuildRequest(
@@ -127,7 +128,7 @@ def SignatureHelp_TriggerParen_Disabled_test( app ):
 
 
 @SharedYcmd
-def SignatureHelp_MultipleSignatures_test( app ):
+def SignatureHelp_MultipleSignatures_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'testy', 'ContinuousTest.cs' )
   contents = ReadFile( filepath )
   request = BuildRequest(
@@ -174,7 +175,7 @@ def SignatureHelp_MultipleSignatures_test( app ):
 
 
 @SharedYcmd
-def SignatureHelp_NotAFunction_NoError_test( app ):
+def SignatureHelp_NotAFunction_NoError_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'testy', 'ContinuousTest.cs' )
   contents = ReadFile( filepath )
   request = BuildRequest(
@@ -197,7 +198,7 @@ def SignatureHelp_NotAFunction_NoError_test( app ):
 
 
 @IsolatedYcmd( { 'disable_signature_help': True } )
-def GetCompletions_Basic_NoSigHelp_test( app ):
+def GetCompletions_Basic_NoSigHelp_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'testy', 'Program.cs' )
   with WrapOmniSharpServer( app, filepath ):
     contents = ReadFile( filepath )

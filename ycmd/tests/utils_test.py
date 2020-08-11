@@ -28,7 +28,7 @@ from hamcrest import ( assert_that,
                        has_property,
                        instance_of,
                        raises )
-from unittest.mock import patch, call
+from unittest.mock import MagicMock, NonCallableMagicMock, patch, call
 from types import ModuleType
 from ycmd import utils
 from ycmd.tests.test_utils import ( WindowsOnly, UnixOnly,
@@ -36,85 +36,86 @@ from ycmd.tests.test_utils import ( WindowsOnly, UnixOnly,
                                     TemporaryExecutable )
 from ycmd.tests import PathToTestFile
 from ycmd.utils import ImportAndCheckCore
+from typing import Dict, List, Tuple, Union
 
 # NOTE: isinstance() vs type() is carefully used in this test file. Before
 # changing things here, read the comments in utils.ToBytes.
 
 
-def ToBytes_Bytes_test():
+def ToBytes_Bytes_test() -> None:
   value = utils.ToBytes( bytes( b'abc' ) )
   assert_that( value, equal_to( bytes( b'abc' ) ) )
   assert_that( type( value ), equal_to( bytes ) )
 
 
-def ToBytes_Str_test():
+def ToBytes_Str_test() -> None:
   value = utils.ToBytes( u'abc' )
   assert_that( value, equal_to( bytes( b'abc' ) ) )
   assert_that( type( value ), equal_to( bytes ) )
 
 
-def ToBytes_Int_test():
+def ToBytes_Int_test() -> None:
   value = utils.ToBytes( 123 )
   assert_that( value, equal_to( bytes( b'123' ) ) )
   assert_that( type( value ), equal_to( bytes ) )
 
 
-def ToBytes_None_test():
+def ToBytes_None_test() -> None:
   value = utils.ToBytes( None )
   assert_that( value, equal_to( bytes( b'' ) ) )
   assert_that( type( value ), equal_to( bytes ) )
 
 
-def ToUnicode_Bytes_test():
+def ToUnicode_Bytes_test() -> None:
   value = utils.ToUnicode( bytes( b'abc' ) )
   assert_that( value, equal_to( u'abc' ) )
   assert_that( isinstance( value, str ) )
 
 
-def ToUnicode_Str_test():
+def ToUnicode_Str_test() -> None:
   value = utils.ToUnicode( u'abc' )
   assert_that( value, equal_to( u'abc' ) )
   assert_that( isinstance( value, str ) )
 
 
-def ToUnicode_Int_test():
+def ToUnicode_Int_test() -> None:
   value = utils.ToUnicode( 123 )
   assert_that( value, equal_to( u'123' ) )
   assert_that( isinstance( value, str ) )
 
 
-def ToUnicode_None_test():
+def ToUnicode_None_test() -> None:
   value = utils.ToUnicode( None )
   assert_that( value, equal_to( u'' ) )
   assert_that( isinstance( value, str ) )
 
 
-def JoinLinesAsUnicode_Bytes_test():
+def JoinLinesAsUnicode_Bytes_test() -> None:
   value = utils.JoinLinesAsUnicode( [ bytes( b'abc' ), bytes( b'xyz' ) ] )
   assert_that( value, equal_to( u'abc\nxyz' ) )
   assert_that( isinstance( value, str ) )
 
 
-def JoinLinesAsUnicode_Str_test():
+def JoinLinesAsUnicode_Str_test() -> None:
   value = utils.JoinLinesAsUnicode( [ u'abc', u'xyz' ] )
   assert_that( value, equal_to( u'abc\nxyz' ) )
   assert_that( isinstance( value, str ) )
 
 
-def JoinLinesAsUnicode_EmptyList_test():
+def JoinLinesAsUnicode_EmptyList_test() -> None:
   value = utils.JoinLinesAsUnicode( [] )
   assert_that( value, equal_to( u'' ) )
   assert_that( isinstance( value, str ) )
 
 
-def JoinLinesAsUnicode_BadInput_test():
+def JoinLinesAsUnicode_BadInput_test() -> None:
   assert_that(
     calling( utils.JoinLinesAsUnicode ).with_args( [ 42 ] ),
     raises( ValueError, 'lines must contain either strings or bytes' )
   )
 
 
-def RemoveIfExists_Exists_test():
+def RemoveIfExists_Exists_test() -> None:
   tempfile = PathToTestFile( 'remove-if-exists' )
   open( tempfile, 'a' ).close()
   assert_that( os.path.exists( tempfile ) )
@@ -122,27 +123,27 @@ def RemoveIfExists_Exists_test():
   assert_that( not os.path.exists( tempfile ) )
 
 
-def RemoveIfExists_DoesntExist_test():
+def RemoveIfExists_DoesntExist_test() -> None:
   tempfile = PathToTestFile( 'remove-if-exists' )
   assert_that( not os.path.exists( tempfile ) )
   utils.RemoveIfExists( tempfile )
   assert_that( not os.path.exists( tempfile ) )
 
 
-def PathToFirstExistingExecutable_Basic_test():
+def PathToFirstExistingExecutable_Basic_test() -> None:
   if utils.OnWindows():
     assert_that( utils.PathToFirstExistingExecutable( [ 'notepad.exe' ] ) )
   else:
     assert_that( utils.PathToFirstExistingExecutable( [ 'cat' ] ) )
 
 
-def PathToFirstExistingExecutable_Failure_test():
+def PathToFirstExistingExecutable_Failure_test() -> None:
   assert_that( not utils.PathToFirstExistingExecutable( [ 'ycmd-foobar' ] ) )
 
 
 @UnixOnly
 @patch( 'subprocess.Popen' )
-def SafePopen_RemoveStdinWindows_test( *args ):
+def SafePopen_RemoveStdinWindows_test( *args) -> None:
   utils.SafePopen( [ 'foo' ], stdin_windows = 'bar' )
   assert_that( subprocess.Popen.call_args, equal_to( call( [ 'foo' ] ) ) )
 
@@ -173,7 +174,7 @@ def SafePopen_WindowsPath_test( *args ):
     os.remove( tempfile )
 
 
-def PathsToAllParentFolders_Basic_test():
+def PathsToAllParentFolders_Basic_test() -> None:
   assert_that( utils.PathsToAllParentFolders( '/home/user/projects/test.c' ),
     contains_exactly(
       os.path.normpath( '/home/user/projects' ),
@@ -186,7 +187,7 @@ def PathsToAllParentFolders_Basic_test():
 
 
 @patch( 'os.path.isdir', return_value = True )
-def PathsToAllParentFolders_IsDirectory_test( *args ):
+def PathsToAllParentFolders_IsDirectory_test( *args) -> None:
   assert_that( utils.PathsToAllParentFolders( '/home/user/projects' ),
     contains_exactly(
       os.path.normpath( '/home/user/projects' ),
@@ -197,7 +198,7 @@ def PathsToAllParentFolders_IsDirectory_test( *args ):
   )
 
 
-def PathsToAllParentFolders_FileAtRoot_test():
+def PathsToAllParentFolders_FileAtRoot_test() -> None:
   assert_that( utils.PathsToAllParentFolders( '/test.c' ),
                contains_exactly( os.path.normpath( '/' ) ) )
 
@@ -226,7 +227,7 @@ def PathsToAllParentFolders_WindowsPath_test():
     ( '/foo/bar/xyz',  ( '/', 'foo/bar/xyz' ) ),
     ( '/foo/bar/xyz/', ( '/', 'foo/bar/xyz' ) )
   ] )
-def PathLeftSplit_test( path, expected ):
+def PathLeftSplit_test( path: str, expected: Tuple[str, str] ) -> None:
   assert_that( utils.PathLeftSplit( path ), equal_to( expected ) )
 
 
@@ -245,7 +246,7 @@ def PathLeftSplit_Windows_test( path, expected ):
   assert_that( utils.PathLeftSplit( path ), equal_to( expected ) )
 
 
-def OpenForStdHandle_PrintDoesntThrowException_test():
+def OpenForStdHandle_PrintDoesntThrowException_test() -> None:
   try:
     temp = PathToTestFile( 'open-for-std-handle' )
     with utils.OpenForStdHandle( temp ) as f:
@@ -284,7 +285,7 @@ def OpenForStdHandle_PrintDoesntThrowException_test():
     # Converts bytes to Unicode.
     ( ( utils.ToBytes( '†est' ), 2 ), 4 )
   ] )
-def CodepointOffsetToByteOffset_test( test, expected ):
+def CodepointOffsetToByteOffset_test( test: Union[Tuple[bytes, int], Tuple[str, int]], expected: int ) -> None:
   assert_that( utils.CodepointOffsetToByteOffset( *test ),
                equal_to( expected ) )
 
@@ -316,7 +317,7 @@ def CodepointOffsetToByteOffset_test( test, expected ):
     ( ( 'tes†ing', 9 ), 7 ),
     ( ( 'tes†ing', 10 ), 8 ),
   ] )
-def ByteOffsetToCodepointOffset_test( test, expected ):
+def ByteOffsetToCodepointOffset_test( test: Tuple[str, int], expected: int ) -> None:
   assert_that( utils.ByteOffsetToCodepointOffset( *test ),
                equal_to( expected ) )
 
@@ -340,16 +341,16 @@ def ByteOffsetToCodepointOffset_test( test, expected ):
     # Do not split lines on \f and \v characters.
     ( '\f\n\v', [ '\f', '\v' ] )
   ] )
-def SplitLines_test( lines, expected ):
+def SplitLines_test( lines: str, expected: List[str] ) -> None:
   assert_that( utils.SplitLines( lines ), expected )
 
 
-def FindExecutable_AbsolutePath_test():
+def FindExecutable_AbsolutePath_test() -> None:
   with TemporaryExecutable() as executable:
     assert_that( executable, equal_to( utils.FindExecutable( executable ) ) )
 
 
-def FindExecutable_RelativePath_test():
+def FindExecutable_RelativePath_test() -> None:
   with TemporaryExecutable() as executable:
     dirname, exename = os.path.split( executable )
     relative_executable = os.path.join( '.', exename )
@@ -359,13 +360,13 @@ def FindExecutable_RelativePath_test():
 
 
 @patch.dict( 'os.environ', { 'PATH': tempfile.gettempdir() } )
-def FindExecutable_ExecutableNameInPath_test():
+def FindExecutable_ExecutableNameInPath_test() -> None:
   with TemporaryExecutable() as executable:
     dirname, exename = os.path.split( executable )
     assert_that( executable, equal_to( utils.FindExecutable( exename ) ) )
 
 
-def FindExecutable_ReturnNoneIfFileIsNotExecutable_test():
+def FindExecutable_ReturnNoneIfFileIsNotExecutable_test() -> None:
   with tempfile.NamedTemporaryFile() as non_executable:
     assert_that( None, equal_to( utils.FindExecutable( non_executable.name ) ) )
 
@@ -385,21 +386,21 @@ def FindExecutable_AdditionalPathExt_test():
     assert_that( executable, equal_to( utils.FindExecutable( executable ) ) )
 
 
-def FindExecutableWithFallback_Empty_test():
+def FindExecutableWithFallback_Empty_test() -> None:
   with TemporaryExecutable() as fallback:
     assert_that( utils.FindExecutableWithFallback( '', fallback ),
                  equal_to( fallback ) )
 
 
 @patch( 'ycmd.utils.FindExecutable', return_value = None )
-def FindExecutableWithFallback_UserProvided_Invalid_test( find_executable ):
+def FindExecutableWithFallback_UserProvided_Invalid_test( find_executable: MagicMock ) -> None:
   with TemporaryExecutable() as executable:
     with TemporaryExecutable() as fallback:
       assert_that( utils.FindExecutableWithFallback( executable, fallback ),
                    equal_to( None ) )
 
 
-def FindExecutableWithFallback_UserProvided_test():
+def FindExecutableWithFallback_UserProvided_test() -> None:
   with TemporaryExecutable() as executable:
     with TemporaryExecutable() as fallback:
       assert_that( utils.FindExecutableWithFallback( executable, fallback ),
@@ -407,7 +408,7 @@ def FindExecutableWithFallback_UserProvided_test():
 
 
 @patch( 'ycmd.utils.ProcessIsRunning', return_value = True )
-def WaitUntilProcessIsTerminated_TimedOut_test( *args ):
+def WaitUntilProcessIsTerminated_TimedOut_test( *args) -> None:
   assert_that(
     calling( utils.WaitUntilProcessIsTerminated ).with_args( None,
                                                              timeout = 0 ),
@@ -416,7 +417,7 @@ def WaitUntilProcessIsTerminated_TimedOut_test( *args ):
   )
 
 
-def LoadPythonSource_UnicodePath_test():
+def LoadPythonSource_UnicodePath_test() -> None:
   filename = PathToTestFile( u'uni¢od€.py' )
   module = utils.LoadPythonSource( 'module_name', filename )
   assert_that( module, instance_of( ModuleType ) )
@@ -426,13 +427,13 @@ def LoadPythonSource_UnicodePath_test():
   assert_that( module.SomeMethod(), equal_to( True ) )
 
 
-def GetCurrentDirectory_Py3NoCurrentDirectory_test():
+def GetCurrentDirectory_Py3NoCurrentDirectory_test() -> None:
   with patch( 'os.getcwd', side_effect = FileNotFoundError ): # noqa
     assert_that( utils.GetCurrentDirectory(),
                  equal_to( tempfile.gettempdir() ) )
 
 
-def HashableDict_Equality_test():
+def HashableDict_Equality_test() -> None:
   dict1 = { 'key': 'value' }
   dict2 = { 'key': 'another_value' }
   assert_that( utils.HashableDict( dict1 ) == utils.HashableDict( dict1 ) )
@@ -444,7 +445,7 @@ def HashableDict_Equality_test():
 
 
 @patch( 'ycmd.utils.LOGGER', autospec = True )
-def RunImportAndCheckCoreException( test, logger ):
+def RunImportAndCheckCoreException( test: Dict[str, Union[int, str]], logger: NonCallableMagicMock ) -> None:
   with patch( 'ycmd.utils.ImportCore',
               side_effect = ImportError( test[ 'exception_message' ] ) ):
     assert_that( ImportAndCheckCore(), equal_to( test[ 'exit_status' ] ) )
@@ -454,12 +455,12 @@ def RunImportAndCheckCoreException( test, logger ):
 
 
 @patch( 'ycmd.utils.LOGGER', autospec = True )
-def ImportAndCheckCore_Compatible_test( logger ):
+def ImportAndCheckCore_Compatible_test( logger: NonCallableMagicMock ) -> None:
   assert_that( ImportAndCheckCore(), equal_to( 0 ) )
   assert_that( logger.method_calls, empty() )
 
 
-def ImportAndCheckCore_Unexpected_test():
+def ImportAndCheckCore_Unexpected_test() -> None:
   RunImportAndCheckCoreException( {
     'exception_message': 'unexpected import exception',
     'exit_status': 3,
@@ -467,7 +468,7 @@ def ImportAndCheckCore_Unexpected_test():
   } )
 
 
-def ImportAndCheckCore_Missing_test():
+def ImportAndCheckCore_Missing_test() -> None:
   RunImportAndCheckCoreException( {
     'exception_message': "No module named 'ycm_core'",
     'exit_status': 4,
@@ -479,8 +480,8 @@ def ImportAndCheckCore_Missing_test():
 
 @patch( 'ycm_core.YcmCoreVersion', side_effect = AttributeError() )
 @patch( 'ycmd.utils.LOGGER', autospec = True )
-def ImportAndCheckCore_Outdated_NoYcmCoreVersionMethod_test( logger,
-                                                                    *args ):
+def ImportAndCheckCore_Outdated_NoYcmCoreVersionMethod_test( logger: NonCallableMagicMock,
+                                                                    *args) -> None:
   assert_that( ImportAndCheckCore(), equal_to( 7 ) )
   assert_that( logger.method_calls, has_length( 1 ) )
   logger.exception.assert_called_with(
@@ -491,7 +492,7 @@ def ImportAndCheckCore_Outdated_NoYcmCoreVersionMethod_test( logger,
 @patch( 'ycm_core.YcmCoreVersion', return_value = 10 )
 @patch( 'ycmd.utils.ExpectedCoreVersion', return_value = 11 )
 @patch( 'ycmd.utils.LOGGER', autospec = True )
-def ImportAndCheckCore_Outdated_NoVersionMatch_test( logger, *args ):
+def ImportAndCheckCore_Outdated_NoVersionMatch_test( logger: NonCallableMagicMock, *args) -> None:
   assert_that( ImportAndCheckCore(), equal_to( 7 ) )
   assert_that( logger.method_calls, has_length( 1 ) )
   logger.error.assert_called_with(
@@ -500,14 +501,14 @@ def ImportAndCheckCore_Outdated_NoVersionMatch_test( logger, *args ):
 
 
 @patch( 'ycmd.utils.ListDirectory', return_value = [] )
-def GetClangResourceDir_NotFound_test( *args ):
+def GetClangResourceDir_NotFound_test( *args) -> None:
   assert_that(
     calling( utils.GetClangResourceDir ),
     raises( RuntimeError, 'Cannot find Clang resource directory' )
   )
 
 
-def MakeSafeFileNameString_test():
+def MakeSafeFileNameString_test() -> None:
   tests = (
     ( 'this is a test 0123 -x', 'this_is_a_test_0123__x' ),
     ( 'This Is A Test 0123 -x', 'this_is_a_test_0123__x' ),

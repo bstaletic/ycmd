@@ -21,14 +21,15 @@ from hamcrest import ( assert_that, calling, contains_exactly, empty, equal_to,
 
 from ycmd.utils import ToBytes
 from ycmd.request_wrap import RequestWrap
+from typing import Dict, List, Optional, Union
 
 
-def PrepareJson( contents = '',
-                 line_num = 1,
-                 column_num = 1,
-                 filetype = '',
-                 force_semantic = None,
-                 extra_conf_data = None ):
+def PrepareJson( contents: str = '',
+                 line_num: int = 1,
+                 column_num: int = 1,
+                 filetype: str = '',
+                 force_semantic: Optional[Union[str, int, bool]] = None,
+                 extra_conf_data: Optional[Dict[str, List[str]]] = None ) -> Dict[str, Union[int, str, Dict[str, Dict[str, Union[str, List[str]]]], bool, Dict[str, List[str]]]]:
   message = {
     'line_num': line_num,
     'column_num': column_num,
@@ -57,7 +58,7 @@ def PrepareJson( contents = '',
     ( 'abc.', 4, '' ),
     ( '', 1, '' ),
   ] )
-def Prefix_test( line, col, prefix ):
+def Prefix_test( line: str, col: int, prefix: str ) -> None:
   assert_that( prefix,
                equal_to( RequestWrap(
                  PrepareJson( line_num = 1,
@@ -65,28 +66,28 @@ def Prefix_test( line, col, prefix ):
                               column_num = col ) )[ 'prefix' ] ) )
 
 
-def LineValue_OneLine_test():
+def LineValue_OneLine_test() -> None:
   assert_that( 'zoo',
                equal_to( RequestWrap(
                  PrepareJson( line_num = 1,
                               contents = 'zoo' ) )[ 'line_value' ] ) )
 
 
-def LineValue_LastLine_test():
+def LineValue_LastLine_test() -> None:
   assert_that( 'zoo',
                equal_to( RequestWrap(
                  PrepareJson( line_num = 3,
                               contents = 'goo\nbar\nzoo' ) )[ 'line_value' ] ) )
 
 
-def LineValue_MiddleLine_test():
+def LineValue_MiddleLine_test() -> None:
   assert_that( 'zoo',
                equal_to( RequestWrap(
                  PrepareJson( line_num = 2,
                               contents = 'goo\nzoo\nbar' ) )[ 'line_value' ] ) )
 
 
-def LineValue_WindowsLines_test():
+def LineValue_WindowsLines_test() -> None:
   assert_that( 'zoo',
                equal_to( RequestWrap(
                  PrepareJson(
@@ -94,7 +95,7 @@ def LineValue_WindowsLines_test():
                    contents = 'goo\r\nbar\r\nzoo' ) )[ 'line_value' ] ) )
 
 
-def LineValue_MixedFormatLines_test():
+def LineValue_MixedFormatLines_test() -> None:
   assert_that( 'zoo',
                equal_to( RequestWrap(
                  PrepareJson(
@@ -102,35 +103,35 @@ def LineValue_MixedFormatLines_test():
                    contents = 'goo\nbar\r\nzoo' ) )[ 'line_value' ] ) )
 
 
-def LineValue_EmptyContents_test():
+def LineValue_EmptyContents_test() -> None:
   assert_that( '',
                equal_to( RequestWrap(
                  PrepareJson( line_num = 1,
                               contents = '' ) )[ 'line_value' ] ) )
 
 
-def StartColumn_RightAfterDot_test():
+def StartColumn_RightAfterDot_test() -> None:
   assert_that( 5,
                equal_to( RequestWrap(
                  PrepareJson( column_num = 5,
                               contents = 'foo.' ) )[ 'start_column' ] ) )
 
 
-def StartColumn_Dot_test():
+def StartColumn_Dot_test() -> None:
   assert_that( 5,
                equal_to( RequestWrap(
                  PrepareJson( column_num = 8,
                               contents = 'foo.bar' ) )[ 'start_column' ] ) )
 
 
-def StartColumn_DotWithUnicode_test():
+def StartColumn_DotWithUnicode_test() -> None:
   assert_that( 7,
                equal_to( RequestWrap(
                  PrepareJson( column_num = 11,
                               contents = 'fäö.bär' ) )[ 'start_column' ] ) )
 
 
-def StartColumn_UnicodeNotIdentifier_test():
+def StartColumn_UnicodeNotIdentifier_test() -> None:
   contents = "var x = '†es†ing'."
 
   # † not considered an identifier character
@@ -155,7 +156,7 @@ def StartColumn_UnicodeNotIdentifier_test():
                                 contents = contents ) )[ 'start_column' ] ) )
 
 
-def StartColumn_QueryIsUnicode_test():
+def StartColumn_QueryIsUnicode_test() -> None:
   contents = "var x = ålpha.alphå"
   assert_that( 16,
                equal_to( RequestWrap(
@@ -167,7 +168,7 @@ def StartColumn_QueryIsUnicode_test():
                               contents = contents ) )[ 'start_column' ] ) )
 
 
-def StartColumn_QueryStartsWithUnicode_test():
+def StartColumn_QueryStartsWithUnicode_test() -> None:
   contents = "var x = ålpha.ålpha"
   assert_that( 16,
                equal_to( RequestWrap(
@@ -179,7 +180,7 @@ def StartColumn_QueryStartsWithUnicode_test():
                               contents = contents ) )[ 'start_column' ] ) )
 
 
-def StartColumn_ThreeByteUnicode_test():
+def StartColumn_ThreeByteUnicode_test() -> None:
   contents = "var x = '†'."
   assert_that( 15,
                equal_to( RequestWrap(
@@ -187,88 +188,88 @@ def StartColumn_ThreeByteUnicode_test():
                               contents = contents ) )[ 'start_column' ] ) )
 
 
-def StartColumn_Paren_test():
+def StartColumn_Paren_test() -> None:
   assert_that( 5,
                equal_to( RequestWrap(
                  PrepareJson( column_num = 8,
                               contents = 'foo(bar' ) )[ 'start_column' ] ) )
 
 
-def StartColumn_AfterWholeWord_test():
+def StartColumn_AfterWholeWord_test() -> None:
   assert_that( 1,
                equal_to( RequestWrap(
                  PrepareJson( column_num = 7,
                               contents = 'foobar' ) )[ 'start_column' ] ) )
 
 
-def StartColumn_AfterWholeWord_Html_test():
+def StartColumn_AfterWholeWord_Html_test() -> None:
   assert_that( 1,
                equal_to( RequestWrap(
                  PrepareJson( column_num = 7, filetype = 'html',
                               contents = 'fo-bar' ) )[ 'start_column' ] ) )
 
 
-def StartColumn_AfterWholeUnicodeWord_test():
+def StartColumn_AfterWholeUnicodeWord_test() -> None:
   assert_that( 1, equal_to( RequestWrap(
                    PrepareJson( column_num = 6,
                                 contents = u'fäö' ) )[ 'start_column' ] ) )
 
 
-def StartColumn_InMiddleOfWholeWord_test():
+def StartColumn_InMiddleOfWholeWord_test() -> None:
   assert_that( 1, equal_to( RequestWrap(
                    PrepareJson( column_num = 4,
                                 contents = 'foobar' ) )[ 'start_column' ] ) )
 
 
-def StartColumn_ColumnOne_test():
+def StartColumn_ColumnOne_test() -> None:
   assert_that( 1, equal_to( RequestWrap(
                      PrepareJson( column_num = 1,
                                   contents = 'foobar' ) )[ 'start_column' ] ) )
 
 
-def Query_AtWordEnd_test():
+def Query_AtWordEnd_test() -> None:
   assert_that( 'foo', equal_to( RequestWrap(
                         PrepareJson( column_num = 4,
                                      contents = 'foo' ) )[ 'query' ] ) )
 
 
-def Query_InWordMiddle_test():
+def Query_InWordMiddle_test() -> None:
   assert_that( 'foo', equal_to( RequestWrap(
                         PrepareJson( column_num = 4,
                                      contents = 'foobar' ) )[ 'query' ] ) )
 
 
-def Query_StartOfLine_test():
+def Query_StartOfLine_test() -> None:
   assert_that( '', equal_to( RequestWrap(
                      PrepareJson( column_num = 1,
                                    contents = 'foobar' ) )[ 'query' ] ) )
 
 
-def Query_StopsAtParen_test():
+def Query_StopsAtParen_test() -> None:
   assert_that( 'bar', equal_to( RequestWrap(
                         PrepareJson( column_num = 8,
                                      contents = 'foo(bar' ) )[ 'query' ] ) )
 
 
-def Query_InWhiteSpace_test():
+def Query_InWhiteSpace_test() -> None:
   assert_that( '', equal_to( RequestWrap(
                      PrepareJson( column_num = 8,
                                    contents = 'foo       ' ) )[ 'query' ] ) )
 
 
-def Query_UnicodeSinglecharInclusive_test():
+def Query_UnicodeSinglecharInclusive_test() -> None:
   assert_that( 'ø', equal_to( RequestWrap(
                       PrepareJson( column_num = 7,
                                    contents = 'abc.ø' ) )[ 'query' ] ) )
 
 
-def Query_UnicodeSinglecharExclusive_test():
+def Query_UnicodeSinglecharExclusive_test() -> None:
   assert_that( '', equal_to( RequestWrap(
                      PrepareJson( column_num = 5,
                                   contents = 'abc.ø' ) )[ 'query' ] ) )
 
 
-def StartColumn_Set_test():
+def StartColumn_Set_test() -> None:
   wrap = RequestWrap( PrepareJson( column_num = 11,
                                    contents = 'this \'test',
                                    filetype = 'javascript' ) )
@@ -284,7 +285,7 @@ def StartColumn_Set_test():
   assert_that( wrap[ 'prefix' ], equal_to( "this " ) )
 
 
-def StartColumn_SetUnicode_test():
+def StartColumn_SetUnicode_test() -> None:
   wrap = RequestWrap( PrepareJson( column_num = 14,
                                    contents = '†eß† \'test',
                                    filetype = 'javascript' ) )
@@ -300,7 +301,7 @@ def StartColumn_SetUnicode_test():
   assert_that( wrap[ 'prefix' ], equal_to( "†eß† " ) )
 
 
-def StartCodepoint_Set_test():
+def StartCodepoint_Set_test() -> None:
   wrap = RequestWrap( PrepareJson( column_num = 11,
                                    contents = 'this \'test',
                                    filetype = 'javascript' ) )
@@ -316,7 +317,7 @@ def StartCodepoint_Set_test():
   assert_that( wrap[ 'prefix' ], equal_to( "this " ) )
 
 
-def StartCodepoint_SetUnicode_test():
+def StartCodepoint_SetUnicode_test() -> None:
   wrap = RequestWrap( PrepareJson( column_num = 14,
                                    contents = '†eß† \'test',
                                    filetype = 'javascript' ) )
@@ -332,14 +333,14 @@ def StartCodepoint_SetUnicode_test():
   assert_that( wrap[ 'prefix' ], equal_to( "†eß† " ) )
 
 
-def Calculated_SetMethod_test():
+def Calculated_SetMethod_test() -> None:
   assert_that(
     calling( RequestWrap( PrepareJson() ).__setitem__ ).with_args(
       'line_value', '' ),
     raises( ValueError, 'Key "line_value" is read-only' ) )
 
 
-def Calculated_SetOperator_test():
+def Calculated_SetOperator_test() -> None:
   # Differs from the above in that it use [] operator rather than __setitem__
   # directly. And it uses a different property for extra credit.
   wrap = RequestWrap( PrepareJson() )
@@ -352,7 +353,7 @@ def Calculated_SetOperator_test():
     raise AssertionError( 'Expected setting "query" to fail' )
 
 
-def NonCalculated_Set_test():
+def NonCalculated_Set_test() -> None:
   # Differs from the above in that it use [] operator rather than __setitem__
   # directly. And it uses a different property for extra credit.
   wrap = RequestWrap( PrepareJson() )
@@ -365,7 +366,7 @@ def NonCalculated_Set_test():
     raise AssertionError( 'Expected setting "column_num" to fail' )
 
 
-def ForceSemanticCompletion_test():
+def ForceSemanticCompletion_test() -> None:
   wrap = RequestWrap( PrepareJson() )
   assert_that( wrap[ 'force_semantic' ], equal_to( False ) )
 
@@ -382,7 +383,7 @@ def ForceSemanticCompletion_test():
   assert_that( wrap[ 'force_semantic' ], equal_to( True ) )
 
 
-def ExtraConfData_test():
+def ExtraConfData_test() -> None:
   wrap = RequestWrap( PrepareJson() )
   assert_that( wrap[ 'extra_conf_data' ], empty() )
 

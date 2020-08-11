@@ -24,7 +24,7 @@ READONLY_MESSAGE = 'can\'t set attribute'
 
 
 @ClangOnly
-def CppBindings_ReadOnly_test():
+def CppBindings_ReadOnly_test() -> None:
   assert_that( calling( ycm_core.CompletionData().__setattr__ )
                  .with_args( 'kind_', ycm_core.CompletionData().kind_ ),
                raises( AttributeError, READONLY_MESSAGE ) )
@@ -117,7 +117,7 @@ def CppBindings_ReadOnly_test():
 
 
 @ClangOnly
-def CppBindings_CompilationInfo_NoInit_test():
+def CppBindings_CompilationInfo_NoInit_test() -> None:
   assert_that( calling( ycm_core.CompilationInfoForFile ),
       raises( TypeError, 'ycm_core.CompilationInfoForFile:'
                          ' No constructor defined!' ) )

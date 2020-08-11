@@ -27,14 +27,17 @@ from hamcrest import ( assert_that,
                        contains_string,
                        has_entries,
                        has_properties )
+from pybind11_builtins import pybind11_object
+from typing import Any
+
 ycm_core = ImportCore()
 
 
-def EmplaceBack( vector, element ):
+def EmplaceBack( vector: pybind11_object, element: Any ) -> None:
   vector.append( element )
 
 
-def CppBindings_StringVector_test():
+def CppBindings_StringVector_test() -> None:
   str1 = 'foo'
   str2 = 'bar'
   str3 = 'baz'
@@ -49,7 +52,7 @@ def CppBindings_StringVector_test():
 
 
 @ClangOnly
-def CppBindings_UnsavedFileVector_test():
+def CppBindings_UnsavedFileVector_test() -> None:
   unsaved_file_vector = ycm_core.UnsavedFileVector()
   unsaved_file = ycm_core.UnsavedFile()
   unsaved_file.filename_ = 'foo'
@@ -74,7 +77,7 @@ def CppBindings_UnsavedFileVector_test():
 
 
 @ClangOnly
-def CppBindings_FixItVector_test():
+def CppBindings_FixItVector_test() -> None:
   flags = ycm_core.StringVector()
   flags.append( '-xc++' )
   clang_completer = ycm_core.ClangCompleter()
@@ -145,7 +148,7 @@ def CppBindings_FixItVector_test():
 
 
 @ClangOnly
-def CppBindings_FixItChunkVector_test():
+def CppBindings_FixItChunkVector_test() -> None:
   flags = ycm_core.StringVector()
   flags.append( '-xc++' )
   clang_completer = ycm_core.ClangCompleter()
@@ -197,7 +200,7 @@ def CppBindings_FixItChunkVector_test():
 
 
 @ClangOnly
-def CppBindings_RangeVector_test():
+def CppBindings_RangeVector_test() -> None:
   flags = ycm_core.StringVector()
   flags.append( '-xc++' )
   clang_completer = ycm_core.ClangCompleter()
@@ -247,7 +250,7 @@ def CppBindings_RangeVector_test():
 
 
 @ClangOnly
-def CppBindings_DiagnosticVector_test():
+def CppBindings_DiagnosticVector_test() -> None:
   filename = PathToTestFile( 'foo.c' )
   unsaved_file_vector = ycm_core.UnsavedFileVector()
   flags = ycm_core.StringVector()
@@ -315,7 +318,7 @@ def CppBindings_DiagnosticVector_test():
 
 
 @ClangOnly
-def CppBindings_CompletionDataVector_test():
+def CppBindings_CompletionDataVector_test() -> None:
   translation_unit = PathToTestFile( 'foo.c' )
   filename = PathToTestFile( 'foo.c' )
   line = 11

@@ -25,11 +25,12 @@ from ycmd.tests.test_utils import ( BuildRequest,
                                     RangeMatcher,
                                     WithRetry )
 from ycmd.utils import ReadFile
+from webtest.app import TestApp
 
 
 @WithRetry
 @SharedYcmd
-def Diagnostics_Basic_test( app ):
+def Diagnostics_Basic_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'testy', 'Program.cs' )
   with WrapOmniSharpServer( app, filepath ):
     contents = ReadFile( filepath )
@@ -55,7 +56,7 @@ def Diagnostics_Basic_test( app ):
 
 
 @SharedYcmd
-def Diagnostics_ZeroBasedLineAndColumn_test( app ):
+def Diagnostics_ZeroBasedLineAndColumn_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'testy', 'Program.cs' )
   with WrapOmniSharpServer( app, filepath ):
     contents = ReadFile( filepath )
@@ -79,7 +80,7 @@ def Diagnostics_ZeroBasedLineAndColumn_test( app ):
 
 @WithRetry
 @SharedYcmd
-def Diagnostics_WithRange_test( app ):
+def Diagnostics_WithRange_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'testy', 'DiagnosticRange.cs' )
   with WrapOmniSharpServer( app, filepath ):
     contents = ReadFile( filepath )
@@ -103,7 +104,7 @@ def Diagnostics_WithRange_test( app ):
 
 
 @IsolatedYcmd()
-def Diagnostics_MultipleSolution_test( app ):
+def Diagnostics_MultipleSolution_test( app: TestApp ) -> None:
   filepaths = [ PathToTestFile( 'testy', 'Program.cs' ),
                 PathToTestFile( 'testy-multiple-solutions',
                                 'solution-named-like-folder',
@@ -129,7 +130,7 @@ def Diagnostics_MultipleSolution_test( app ):
 
 
 @IsolatedYcmd( { 'max_diagnostics_to_display': 1 } )
-def Diagnostics_MaximumDiagnosticsNumberExceeded_test( app ):
+def Diagnostics_MaximumDiagnosticsNumberExceeded_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'testy', 'MaxDiagnostics.cs' )
   with WrapOmniSharpServer( app, filepath ):
     contents = ReadFile( filepath )

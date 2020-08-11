@@ -18,6 +18,8 @@
 # along with ycmd.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
+from typing import Dict, List, Optional
+
 import threading
 
 from collections import defaultdict, namedtuple
@@ -42,16 +44,16 @@ class IncludeList:
   IncludeEntry `name`s and values are IncludeEntry `entry_type`s.
   """
 
-  def __init__( self ):
+  def __init__( self ) -> None:
     self._includes = defaultdict( int )
 
 
-  def AddIncludes( self, includes ):
+  def AddIncludes( self, includes: List[IncludeEntry] ) -> None:
     for include in includes:
       self._includes[ include.name ] |= include.entry_type
 
 
-  def GetIncludes( self ):
+  def GetIncludes( self ) -> List[Dict[str, str]]:
     includes = []
     for name, include_type in self._includes.items():
       includes.append( responses.BuildCompletionData(
@@ -68,12 +70,12 @@ class IncludeCache:
   object is an IncludeList.
   """
 
-  def __init__( self ):
+  def __init__( self ) -> None:
     self._cache = {}
     self._cache_lock = threading.Lock()
 
 
-  def GetIncludes( self, path, is_framework = False ):
+  def GetIncludes( self, path: str, is_framework: bool = False ) -> List[IncludeEntry]:
     includes = self._GetCached( path, is_framework )
 
     if includes is None:
@@ -83,7 +85,7 @@ class IncludeCache:
     return includes
 
 
-  def _AddToCache( self, path, includes, mtime = None ):
+  def _AddToCache( self, path: str, includes: List[IncludeEntry], mtime: Optional[float] = None ) -> None:
     if not mtime:
       mtime = GetModificationTime( path )
     # mtime of 0 is "a magic value" to represent inaccessible directory mtime.
@@ -92,7 +94,7 @@ class IncludeCache:
         self._cache[ path ] = { 'mtime': mtime, 'includes': includes }
 
 
-  def _GetCached( self, path, is_framework ):
+  def _GetCached( self, path: str, is_framework: bool ) -> Optional[List[IncludeEntry]]:
     includes = None
     with self._cache_lock:
       cache_entry = self._cache.get( path )
@@ -107,7 +109,7 @@ class IncludeCache:
     return includes
 
 
-  def _ListIncludes( self, path, is_framework ):
+  def _ListIncludes( self, path: str, is_framework: bool ) -> List[IncludeEntry]:
     includes = []
     for name in ListDirectory( path ):
       if is_framework:

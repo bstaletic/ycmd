@@ -19,13 +19,15 @@
 # We don't want ycm_core inside Vim.
 from collections import defaultdict
 from ycmd.utils import LOGGER, ToUnicode, re, ReadFile, SplitLines
+from typing import Any, DefaultDict, Dict, List, Optional, Set
+from ycmd.request_wrap import RequestWrap
 
 
 class PreparedTriggers:
   def __init__( self,
-                user_trigger_map = None,
-                filetype_set = None,
-                default_triggers = None ):
+                user_trigger_map: Optional[Dict[str, List[str]]] = None,
+                filetype_set: Optional[Set[str]] = None,
+                default_triggers: None = None ) -> None:
     self._user_trigger_map = user_trigger_map
     self._server_trigger_map = None
     self._filetype_set = filetype_set
@@ -37,7 +39,7 @@ class PreparedTriggers:
     self._CombineTriggers()
 
 
-  def _CombineTriggers( self ):
+  def _CombineTriggers( self ) -> None:
     user_prepared_triggers = ( _FiletypeTriggerDictFromSpec(
       dict( self._user_trigger_map ) ) if self._user_trigger_map else
       defaultdict( set ) )
@@ -57,7 +59,7 @@ class PreparedTriggers:
     self._filetype_to_prepared_triggers = final_triggers
 
 
-  def SetServerSemanticTriggers( self, server_trigger_characters ):
+  def SetServerSemanticTriggers( self, server_trigger_characters: List[str] ) -> None:
     self._server_trigger_map = {
       ','.join( self._filetype_set ): server_trigger_characters
     }
@@ -65,10 +67,10 @@ class PreparedTriggers:
 
 
   def MatchingTriggerForFiletype( self,
-                                  current_line,
-                                  start_codepoint,
-                                  column_codepoint,
-                                  filetype ):
+                                  current_line: str,
+                                  start_codepoint: int,
+                                  column_codepoint: int,
+                                  filetype: str ) -> None:
     try:
       triggers = self._filetype_to_prepared_triggers[ filetype ]
     except KeyError:
@@ -80,10 +82,10 @@ class PreparedTriggers:
 
 
   def MatchesForFiletype( self,
-                          current_line,
-                          start_codepoint,
-                          column_codepoint,
-                          filetype ):
+                          current_line: str,
+                          start_codepoint: int,
+                          column_codepoint: int,
+                          filetype: str ) -> bool:
     return self.MatchingTriggerForFiletype( current_line,
                                             start_codepoint,
                                             column_codepoint,
@@ -103,7 +105,7 @@ def _FiletypeTriggerDictFromSpec( trigger_dict_spec ):
   return triggers_for_filetype
 
 
-def _FiletypeDictUnion( *args ):
+def _FiletypeDictUnion( *args) -> DefaultDict[str, Set[str]]:
   """Returns a new filetype dict that's a union of the provided two dicts.
   Dict params are supposed to be type defaultdict(set)."""
   def UpdateDict( first, second ):
@@ -137,8 +139,8 @@ def _RegexTriggerMatches( trigger,
 
 # start_codepoint and column_codepoint are 0-based and are codepoint offsets
 # into the unicode string line_value.
-def _MatchingSemanticTrigger( line_value, start_codepoint, column_codepoint,
-                              trigger_list ):
+def _MatchingSemanticTrigger( line_value: str, start_codepoint: int, column_codepoint: int,
+                              trigger_list: List[Any] ) -> None:
   if start_codepoint < 0 or column_codepoint < 0:
     return None
 
@@ -158,8 +160,8 @@ def _MatchingSemanticTrigger( line_value, start_codepoint, column_codepoint,
   return None
 
 
-def _MatchesSemanticTrigger( line_value, start_codepoint, column_codepoint,
-                             trigger_list ):
+def _MatchesSemanticTrigger( line_value: str, start_codepoint: int, column_codepoint: int,
+                             trigger_list: List[Any] ) -> bool:
   return _MatchingSemanticTrigger( line_value,
                                    start_codepoint,
                                    column_codepoint,
@@ -173,8 +175,8 @@ def _PrepareTrigger( trigger ):
   return re.compile( re.escape( trigger ), re.UNICODE )
 
 
-def FilterAndSortCandidatesWrap( candidates, sort_property, query,
-                                 max_candidates ):
+def FilterAndSortCandidatesWrap( candidates: Any, sort_property: str, query: str,
+                                 max_candidates: int ) -> Any:
   from ycm_core import FilterAndSortCandidates
 
   return FilterAndSortCandidates( candidates,
@@ -221,7 +223,7 @@ PREPARED_DEFAULT_FILETYPE_TRIGGERS = _FiletypeTriggerDictFromSpec(
     DEFAULT_FILETYPE_TRIGGERS )
 
 
-def GetFileContents( request_data, filename ):
+def GetFileContents( request_data: RequestWrap, filename: str ) -> str:
   """Returns the contents of the absolute path |filename| as a unicode
   string. If the file contents exist in |request_data| (i.e. it is open and
   potentially modified/dirty in the user's editor), then it is returned,
@@ -238,7 +240,7 @@ def GetFileContents( request_data, filename ):
     return ''
 
 
-def GetFileLines( request_data, filename ):
+def GetFileLines( request_data: RequestWrap, filename: str ) -> List[str]:
   """Like GetFileContents but return the contents as a list of lines. Avoid
   splitting the lines if they have already been split for the current file."""
   if filename == request_data[ 'filepath' ]:

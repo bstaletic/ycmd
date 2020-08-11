@@ -37,10 +37,13 @@ from ycmd.tests.test_utils import ( BuildRequest,
                                     LocationMatcher,
                                     LineColMatcher )
 from ycmd.utils import ReadFile
+from hamcrest.library.text.stringmatches import StringMatchesPattern
+from typing import Any, Callable, Dict, List, Union
+from webtest.app import TestApp
 
 
 @SharedYcmd
-def Subcommands_DefinedSubcommands_test( app ):
+def Subcommands_DefinedSubcommands_test( app: TestApp ) -> None:
   subcommands_data = BuildRequest( completer_target = 'cpp' )
   assert_that( app.post_json( '/defined_subcommands', subcommands_data ).json,
                contains_inanyorder(
@@ -59,7 +62,7 @@ def Subcommands_DefinedSubcommands_test( app ):
 
 
 @SharedYcmd
-def Subcommands_GoTo_ZeroBasedLineAndColumn_test( app ):
+def Subcommands_GoTo_ZeroBasedLineAndColumn_test( app: TestApp ) -> None:
   contents = ReadFile( PathToTestFile(
     'GoTo_Clang_ZeroBasedLineAndColumn_test.cc' ) )
 
@@ -76,7 +79,7 @@ def Subcommands_GoTo_ZeroBasedLineAndColumn_test( app ):
 
 
 @SharedYcmd
-def Subcommands_GoTo_CUDA_test( app ):
+def Subcommands_GoTo_CUDA_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'cuda', 'basic.cu' )
   contents = ReadFile( filepath )
 
@@ -93,7 +96,7 @@ def Subcommands_GoTo_CUDA_test( app ):
                LocationMatcher( filepath, 4, 17 ) )
 
 
-def RunGoToTest_all( app, filename, command, test ):
+def RunGoToTest_all( app: TestApp, filename: str, command: List[str], test: Dict[str, Union[List[int], List[Union[int, str]], List[str]]] ) -> None:
   contents = ReadFile( PathToTestFile( filename ) )
   common_request = {
     'completer_target' : 'filetype_default',
@@ -138,7 +141,7 @@ def RunGoToTest_all( app, filename, command, test ):
 
 
 @SharedYcmd
-def Subcommands_GoTo_all_test( app ):
+def Subcommands_GoTo_all_test( app: TestApp ) -> None:
   # GoToDeclaration
   tests = [
     # Local::x -> definition/declaration of x
@@ -250,7 +253,7 @@ def Subcommands_GoTo_all_test( app ):
 
 
 @SharedYcmd
-def Subcommands_GoTo_all_Fail_test( app ):
+def Subcommands_GoTo_all_Fail_test( app: TestApp ) -> None:
   cursor_on_nothing = { 'request': [ 13, 1 ], 'response': [ 1, 1 ] }
   cursor_on_another_unicode = { 'request': [ 36, 17 ], 'response': [ 1, 1 ] }
   cursor_on_keyword = { 'request': [ 16, 6 ], 'response': [ 1, 1 ] }
@@ -312,7 +315,7 @@ def Subcommands_GoTo_all_Fail_test( app ):
     raises( AppError, r'Can\\\'t jump to definition or declaration.' ) )
 
 
-def RunGoToIncludeTest( app, command, test ):
+def RunGoToIncludeTest( app: TestApp, command: str, test: Dict[str, Union[List[int], str]] ) -> None:
   app.post_json(
     '/load_extra_conf_file',
     { 'filepath': PathToTestFile( 'test-include',
@@ -354,12 +357,12 @@ def RunGoToIncludeTest( app, command, test ):
                                                      'gl.h' ) },
   ] )
 @SharedYcmd
-def Subcommands_GoToInclude_test( app, cmd, test ):
+def Subcommands_GoToInclude_test( app: TestApp, cmd: str, test: Dict[str, Union[List[int], str]] ) -> None:
   RunGoToIncludeTest( app, cmd, test )
 
 
 @SharedYcmd
-def Subcommands_GoToInclude_Fail_test( app ):
+def Subcommands_GoToInclude_Fail_test( app: TestApp ) -> None:
   test = { 'request': [ 4, 1 ], 'response': '' }
   assert_that(
     calling( RunGoToIncludeTest ).with_args( app,
@@ -405,7 +408,7 @@ def Subcommands_GoToInclude_Fail_test( app ):
 
 
 @SharedYcmd
-def Subcommands_GoTo_Unity_test( app ):
+def Subcommands_GoTo_Unity_test( app: TestApp ) -> None:
   RunGoToTest_all( app, 'unitya.cc', [ 'GoToDeclaration' ], {
     'request': [ 8, 21 ],
     'response': [ 1, 8, 'unity.cc' ],
@@ -418,7 +421,7 @@ def Subcommands_GoTo_Unity_test( app ):
   } )
 
 
-def RunGetSemanticTest( app, filepath, filetype, test, command ):
+def RunGetSemanticTest( app: TestApp, filepath: str, filetype: str, test: Union[List[Union[Dict[str, Union[int, List[str]]], str]], List[Union[Dict[str, int], StringMatchesPattern]], List[Union[Dict[str, int], str]]], command: List[str] ) -> None:
   contents = ReadFile( filepath )
   language = { 'cpp': 'c++', 'cuda': 'cuda' }
 
@@ -544,7 +547,7 @@ def RunGetSemanticTest( app, filepath, filetype, test, command ):
   ] )
 @pytest.mark.parametrize( 'cmd', [ 'GetType', 'GoToImprecise' ] )
 @SharedYcmd
-def Subcommands_GetType_test( app, cmd, test ):
+def Subcommands_GetType_test( app: TestApp, cmd: str, test: Union[List[Union[Dict[str, int], StringMatchesPattern]], List[Union[Dict[str, int], str]]] ) -> None:
   RunGetSemanticTest( app,
                       PathToTestFile( 'GetType_Clang_test.cc' ),
                       'cpp',
@@ -553,7 +556,7 @@ def Subcommands_GetType_test( app, cmd, test ):
 
 
 @SharedYcmd
-def SubCommands_GetType_CUDA_test( app ):
+def SubCommands_GetType_CUDA_test( app: TestApp ) -> None:
   test = [ { 'line_num': 8, 'column_num': 3, }, 'void ()' ]
   RunGetSemanticTest( app,
                       PathToTestFile( 'cuda', 'basic.cu' ),
@@ -563,7 +566,7 @@ def SubCommands_GetType_CUDA_test( app ):
 
 
 @SharedYcmd
-def SubCommands_GetType_Unity_test( app ):
+def SubCommands_GetType_Unity_test( app: TestApp ) -> None:
   test = [
     {
       'line_num': 10,
@@ -609,7 +612,7 @@ def SubCommands_GetType_Unity_test( app ):
     [ { 'line_num': 51,  'column_num': 16 }, 'main()' ],
   ] )
 @SharedYcmd
-def Subcommands_GetParent_test( app, test ):
+def Subcommands_GetParent_test( app: TestApp, test: List[Union[Dict[str, int], str]] ) -> None:
   RunGetSemanticTest( app,
                       PathToTestFile( 'GetParent_Clang_test.cc' ),
                       'cpp',
@@ -617,7 +620,7 @@ def Subcommands_GetParent_test( app, test ):
                       [ 'GetParent' ] )
 
 
-def RunFixItTest( app, line, column, lang, file_path, check ):
+def RunFixItTest( app: TestApp, line: int, column: int, lang: str, file_path: str, check: Callable ) -> None:
   contents = ReadFile( file_path )
 
   language_options = {
@@ -669,7 +672,7 @@ def RunFixItTest( app, line, column, lang, file_path, check ):
   check( results )
 
 
-def FixIt_Check_cpp11_Ins( results ):
+def FixIt_Check_cpp11_Ins( results: Dict[str, List[Dict[str, Union[Dict[str, Union[int, str]], List[Dict[str, Union[str, Dict[str, Dict[str, Union[int, str]]]]]], str, bool]]]] ) -> None:
   # First fixit
   #   switch(A()) { // expected-error{{explicit conversion to}}
   assert_that( results, has_entries( {
@@ -695,7 +698,7 @@ def FixIt_Check_cpp11_Ins( results ):
   } ) )
 
 
-def FixIt_Check_cpp11_InsMultiLine( results ):
+def FixIt_Check_cpp11_InsMultiLine( results: Dict[str, List[Dict[str, Union[Dict[str, Union[int, str]], List[Dict[str, Union[str, Dict[str, Dict[str, Union[int, str]]]]]], str, bool]]]] ) -> None:
   # Similar to FixIt_Check_cpp11_1 but inserts split across lines
   #
   assert_that( results, has_entries( {
@@ -721,7 +724,7 @@ def FixIt_Check_cpp11_InsMultiLine( results ):
   } ) )
 
 
-def FixIt_Check_cpp11_Del( results ):
+def FixIt_Check_cpp11_Del( results: Dict[str, List[Dict[str, Union[Dict[str, Union[int, str]], List[Dict[str, Union[str, Dict[str, Dict[str, Union[int, str]]]]]], str, bool]]]] ) -> None:
   # Removal of ::
   assert_that( results, has_entries( {
     'fixits': contains_exactly( has_entries( {
@@ -739,7 +742,7 @@ def FixIt_Check_cpp11_Del( results ):
   } ) )
 
 
-def FixIt_Check_cpp11_Repl( results ):
+def FixIt_Check_cpp11_Repl( results: Dict[str, List[Dict[str, Union[Dict[str, Union[int, str]], List[Dict[str, Union[str, Dict[str, Dict[str, Union[int, str]]]]]], str, bool]]]] ) -> None:
   assert_that( results, has_entries( {
     'fixits': contains_exactly( has_entries( {
       'chunks': contains_exactly(
@@ -756,7 +759,7 @@ def FixIt_Check_cpp11_Repl( results ):
   } ) )
 
 
-def FixIt_Check_cpp11_DelAdd( results ):
+def FixIt_Check_cpp11_DelAdd( results: Dict[str, List[Dict[str, Union[Dict[str, Union[int, str]], List[Dict[str, Union[str, Dict[str, Dict[str, Union[int, str]]]]]], str, bool]]]] ) -> None:
   assert_that( results, has_entries( {
     'fixits': contains_exactly( has_entries( {
       'chunks': contains_exactly(
@@ -780,7 +783,7 @@ def FixIt_Check_cpp11_DelAdd( results ):
   } ) )
 
 
-def FixIt_Check_objc( results ):
+def FixIt_Check_objc( results: Dict[str, List[Dict[str, Union[Dict[str, Union[int, str]], List[Dict[str, Union[str, Dict[str, Dict[str, Union[int, str]]]]]], str, bool]]]] ) -> None:
   assert_that( results, has_entries( {
     'fixits': contains_exactly( has_entries( {
       'chunks': contains_exactly(
@@ -797,12 +800,12 @@ def FixIt_Check_objc( results ):
   } ) )
 
 
-def FixIt_Check_objc_NoFixIt( results ):
+def FixIt_Check_objc_NoFixIt( results: Dict[str, List[Any]] ) -> None:
   # and finally, a warning with no fixits
   assert_that( results, equal_to( { 'fixits': [] } ) )
 
 
-def FixIt_Check_cpp11_MultiFirst( results ):
+def FixIt_Check_cpp11_MultiFirst( results: Dict[str, List[Dict[str, Union[Dict[str, Union[int, str]], List[Dict[str, Union[str, Dict[str, Dict[str, Union[int, str]]]]]], str, bool]]]] ) -> None:
   assert_that( results, has_entries( {
     'fixits': contains_exactly(
       # first fix-it at 54,16
@@ -842,7 +845,7 @@ def FixIt_Check_cpp11_MultiFirst( results ):
   } ) )
 
 
-def FixIt_Check_cpp11_MultiSecond( results ):
+def FixIt_Check_cpp11_MultiSecond( results: Dict[str, List[Dict[str, Union[Dict[str, Union[int, str]], List[Dict[str, Union[str, Dict[str, Dict[str, Union[int, str]]]]]], str, bool]]]] ) -> None:
   assert_that( results, has_entries( {
     'fixits': contains_exactly(
       # second fix-it at 54,52
@@ -882,7 +885,7 @@ def FixIt_Check_cpp11_MultiSecond( results ):
   } ) )
 
 
-def FixIt_Check_unicode_Ins( results ):
+def FixIt_Check_unicode_Ins( results: Dict[str, List[Dict[str, Union[Dict[str, Union[int, str]], List[Dict[str, Union[str, Dict[str, Dict[str, Union[int, str]]]]]], str, bool]]]] ) -> None:
   assert_that( results, has_entries( {
     'fixits': contains_exactly( has_entries( {
       'chunks': contains_exactly(
@@ -899,7 +902,7 @@ def FixIt_Check_unicode_Ins( results ):
   } ) )
 
 
-def FixIt_Check_cpp11_Note( results ):
+def FixIt_Check_cpp11_Note( results: Dict[str, List[Dict[str, Union[Dict[str, Union[int, str]], List[Dict[str, Union[str, Dict[str, Dict[str, Union[int, str]]]]]], str, bool]]]] ) -> None:
   assert_that( results, has_entries( {
     'fixits': contains_exactly(
       # First note: put parens around it
@@ -930,7 +933,7 @@ def FixIt_Check_cpp11_Note( results ):
   } ) )
 
 
-def FixIt_Check_cpp11_SpellCheck( results ):
+def FixIt_Check_cpp11_SpellCheck( results: Dict[str, List[Dict[str, Union[Dict[str, Union[int, str]], List[Dict[str, Union[str, Dict[str, Dict[str, Union[int, str]]]]]], str, bool]]]] ) -> None:
   assert_that( results, has_entries( {
     'fixits': contains_exactly(
       # Change to SpellingIsNotMyStrongPoint
@@ -946,7 +949,7 @@ def FixIt_Check_cpp11_SpellCheck( results ):
   } ) )
 
 
-def FixIt_Check_cuda( results ):
+def FixIt_Check_cuda( results: Dict[str, List[Dict[str, Union[Dict[str, Union[int, str]], List[Dict[str, Union[str, Dict[str, Dict[str, Union[int, str]]]]]], str, bool]]]] ) -> None:
   assert_that( results, has_entries( {
     'fixits': contains_exactly(
       has_entries( {
@@ -1025,12 +1028,12 @@ def FixIt_Check_cuda( results ):
       FixIt_Check_cpp11_SpellCheck ],
   ] )
 @SharedYcmd
-def Subcommands_FixIt_all_test( app, test ):
+def Subcommands_FixIt_all_test( app: TestApp, test: List[Union[int, str, Callable]] ) -> None:
   RunFixItTest( app, test[ 0 ], test[ 1 ], test[ 2 ], test[ 3 ], test[ 4 ] )
 
 
 @SharedYcmd
-def Subcommands_FixIt_Unity_test( app ):
+def Subcommands_FixIt_Unity_test( app: TestApp ) -> None:
   file_path = PathToTestFile( 'unitya.cc' )
   args = {
     'filetype'         : 'cpp',
@@ -1065,7 +1068,7 @@ def Subcommands_FixIt_Unity_test( app ):
 
 
 @SharedYcmd
-def Subcommands_FixIt_UnityDifferentFile_test( app ):
+def Subcommands_FixIt_UnityDifferentFile_test( app: TestApp ) -> None:
   # This checks that we only return FixIt for the requested file, not a fixit on
   # the same line in a different file
   file_path = PathToTestFile( 'unity.cc' )
@@ -1094,7 +1097,7 @@ def Subcommands_FixIt_UnityDifferentFile_test( app ):
 
 
 @SharedYcmd
-def Subcommands_FixIt_NonExistingFile_test( app ):
+def Subcommands_FixIt_NonExistingFile_test( app: TestApp ) -> None:
   # This checks that FixIt is working for a non-existing file and that the path
   # is properly normalized ('.' and '..' are removed from the path).
   file_path = PathToTestFile( 'non_existing_dir', '..', '.', 'non_existing.cc' )
@@ -1132,7 +1135,7 @@ def Subcommands_FixIt_NonExistingFile_test( app ):
 
 
 @SharedYcmd
-def Subcommands_GetDoc_Variable_test( app ):
+def Subcommands_GetDoc_Variable_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'GetDoc_Clang.cc' )
   contents = ReadFile( filepath )
 
@@ -1161,7 +1164,7 @@ The first line of comment is the brief.""" ) )
 
 
 @SharedYcmd
-def Subcommands_GetDoc_Method_test( app ):
+def Subcommands_GetDoc_Method_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'GetDoc_Clang.cc' )
   contents = ReadFile( filepath )
 
@@ -1194,7 +1197,7 @@ This is more information
 
 
 @SharedYcmd
-def Subcommands_GetDoc_Namespace_test( app ):
+def Subcommands_GetDoc_Namespace_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'GetDoc_Clang.cc' )
   contents = ReadFile( filepath )
 
@@ -1221,7 +1224,7 @@ This is a test namespace""" ) ) # noqa
 
 
 @SharedYcmd
-def Subcommands_GetDoc_Undocumented_test( app ):
+def Subcommands_GetDoc_Undocumented_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'GetDoc_Clang.cc' )
   contents = ReadFile( filepath )
 
@@ -1245,7 +1248,7 @@ def Subcommands_GetDoc_Undocumented_test( app ):
 
 
 @SharedYcmd
-def Subcommands_GetDoc_NoCursor_test( app ):
+def Subcommands_GetDoc_NoCursor_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'GetDoc_Clang.cc' )
   contents = ReadFile( filepath )
 
@@ -1269,7 +1272,7 @@ def Subcommands_GetDoc_NoCursor_test( app ):
 
 
 @SharedYcmd
-def Subcommands_GetDoc_SystemHeaders_test( app ):
+def Subcommands_GetDoc_SystemHeaders_test( app: TestApp ) -> None:
   app.post_json( '/load_extra_conf_file', {
     'filepath': PathToTestFile( 'get_doc', '.ycm_extra_conf.py' ) } )
 
@@ -1301,7 +1304,7 @@ This function is defined in a system header.
 
 # Following tests repeat the tests above, but without re-parsing the file
 @SharedYcmd
-def Subcommands_GetDocImprecise_Variable_test( app ):
+def Subcommands_GetDocImprecise_Variable_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'GetDoc_Clang.cc' )
   contents = ReadFile( filepath )
 
@@ -1337,7 +1340,7 @@ The first line of comment is the brief.""" ) )
 
 
 @SharedYcmd
-def Subcommands_GetDocImprecise_Method_test( app ):
+def Subcommands_GetDocImprecise_Method_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'GetDoc_Clang.cc' )
   contents = ReadFile( filepath )
 
@@ -1379,7 +1382,7 @@ This is more information
 
 
 @SharedYcmd
-def Subcommands_GetDocImprecise_Namespace_test( app ):
+def Subcommands_GetDocImprecise_Namespace_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'GetDoc_Clang.cc' )
   contents = ReadFile( filepath )
 
@@ -1415,7 +1418,7 @@ This is a test namespace""" ) ) # noqa
 
 
 @SharedYcmd
-def Subcommands_GetDocImprecise_Undocumented_test( app ):
+def Subcommands_GetDocImprecise_Undocumented_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'GetDoc_Clang.cc' )
   contents = ReadFile( filepath )
 
@@ -1448,7 +1451,7 @@ def Subcommands_GetDocImprecise_Undocumented_test( app ):
 
 
 @SharedYcmd
-def Subcommands_GetDocImprecise_NoCursor_test( app ):
+def Subcommands_GetDocImprecise_NoCursor_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'GetDoc_Clang.cc' )
   contents = ReadFile( filepath )
 
@@ -1481,7 +1484,7 @@ def Subcommands_GetDocImprecise_NoCursor_test( app ):
 
 
 @SharedYcmd
-def Subcommands_GetDocImprecise_NoReadyToParse_test( app ):
+def Subcommands_GetDocImprecise_NoReadyToParse_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'GetDoc_Clang.cc' )
   contents = ReadFile( filepath )
 
@@ -1507,7 +1510,7 @@ This is a method which is only pretend global
 
 
 @SharedYcmd
-def Subcommands_GetDocImprecise_SystemHeaders_test( app ):
+def Subcommands_GetDocImprecise_SystemHeaders_test( app: TestApp ) -> None:
   app.post_json( '/load_extra_conf_file', {
     'filepath': PathToTestFile( 'get_doc', '.ycm_extra_conf.py' ) } )
 
@@ -1538,7 +1541,7 @@ This function is defined in a system header.
 
 
 @SharedYcmd
-def Subcommands_GetDoc_Unicode_test( app ):
+def Subcommands_GetDoc_Unicode_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'unicode.cc' )
   contents = ReadFile( filepath )
 
@@ -1568,7 +1571,7 @@ This method has unicøde in it
 
 
 @SharedYcmd
-def Subcommands_GetDoc_CUDA_test( app ):
+def Subcommands_GetDoc_CUDA_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'cuda', 'basic.cu' )
   contents = ReadFile( filepath )
 
@@ -1595,7 +1598,7 @@ Name: kernel
 This is a test kernel""" ) )
 
 
-def Subcommands_StillParsingError( app, command ):
+def Subcommands_StillParsingError( app: TestApp, command: str ) -> None:
   filepath = PathToTestFile( 'test.cpp' )
 
   data = BuildRequest( command_arguments = [ command ],
@@ -1620,7 +1623,7 @@ def Subcommands_StillParsingError( app, command ):
 
 
 @SharedYcmd
-def Subcommands_StillParsingError_test( app ):
+def Subcommands_StillParsingError_test( app: TestApp ) -> None:
   completer = handlers._server_state.GetFiletypeCompleter( [ 'cpp' ] )
   with patch.object( completer, '_completer', MockCoreClangCompleter() ):
     Subcommands_StillParsingError( app, 'FixIt' )

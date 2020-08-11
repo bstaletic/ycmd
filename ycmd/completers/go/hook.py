@@ -16,9 +16,11 @@
 # along with ycmd.  If not, see <http://www.gnu.org/licenses/>.
 
 from ycmd.completers.go.go_completer import GoCompleter, ShouldEnableGoCompleter
+from typing import Dict, Optional, Union
+from ycmd.utils import HashableDict
 
 
-def GetCompleter( user_options ):
+def GetCompleter( user_options: Union[Dict[str, Union[int, Dict[str, int], str]], HashableDict] ) -> Optional[GoCompleter]:
   if not ShouldEnableGoCompleter( user_options ):
     return None
 

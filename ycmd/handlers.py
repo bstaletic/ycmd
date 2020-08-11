@@ -21,7 +21,7 @@ import platform
 import sys
 import time
 import traceback
-from bottle import request
+from bottle import HTTPError, request
 
 
 from ycmd import extra_conf_store, hmac_plugin, server_state, user_options_store
@@ -34,6 +34,9 @@ from ycmd.responses import ( BuildExceptionResponse,
 from ycmd.request_wrap import RequestWrap
 from ycmd.completers.completer_utils import FilterAndSortCandidatesWrap
 from ycmd.utils import LOGGER, StartThread, ImportCore
+from typing import Any, Dict
+from ycmd.completers.completer import Completer
+
 ycm_core = ImportCore()
 
 
@@ -48,7 +51,7 @@ wsgi_server = None
 
 
 @app.post( '/event_notification' )
-def EventNotification():
+def EventNotification() -> str:
   LOGGER.info( 'Received event notification' )
   request_data = RequestWrap( request.json )
   event_name = request_data[ 'event_name' ]
@@ -69,7 +72,7 @@ def EventNotification():
 
 
 @app.get( '/signature_help_available' )
-def GetSignatureHelpAvailable():
+def GetSignatureHelpAvailable() -> str:
   LOGGER.info( 'Received signature help available request' )
   if request.query.subserver:
     filetype = request.query.subserver
@@ -85,7 +88,7 @@ def GetSignatureHelpAvailable():
 
 
 @app.post( '/run_completer_command' )
-def RunCompleterCommand():
+def RunCompleterCommand() -> str:
   LOGGER.info( 'Received command request' )
   request_data = RequestWrap( request.json )
   completer = _GetCompleterForRequestData( request_data )
@@ -96,7 +99,7 @@ def RunCompleterCommand():
 
 
 @app.post( '/resolve_fixit' )
-def ResolveFixit():
+def ResolveFixit() -> str:
   LOGGER.info( 'Received resolve_fixit request' )
   request_data = RequestWrap( request.json )
   completer = _GetCompleterForRequestData( request_data )
@@ -105,7 +108,7 @@ def ResolveFixit():
 
 
 @app.post( '/completions' )
-def GetCompletions():
+def GetCompletions() -> str:
   LOGGER.info( 'Received completion request' )
   request_data = RequestWrap( request.json )
   do_filetype_completion = _server_state.ShouldUseFiletypeCompleter(
@@ -143,7 +146,7 @@ def GetCompletions():
 
 
 @app.post( '/signature_help' )
-def GetSignatureHelp():
+def GetSignatureHelp() -> str:
   LOGGER.info( 'Received signature help request' )
   request_data = RequestWrap( request.json )
 
@@ -169,7 +172,7 @@ def GetSignatureHelp():
 
 
 @app.post( '/filter_and_sort_candidates' )
-def FilterAndSortCandidates():
+def FilterAndSortCandidates() -> str:
   LOGGER.info( 'Received filter & sort request' )
   # Not using RequestWrap because no need and the requests coming in aren't like
   # the usual requests we handle.
@@ -183,7 +186,7 @@ def FilterAndSortCandidates():
 
 
 @app.get( '/healthy' )
-def GetHealthy():
+def GetHealthy() -> str:
   LOGGER.info( 'Received health request' )
   if request.query.subserver:
     filetype = request.query.subserver
@@ -193,7 +196,7 @@ def GetHealthy():
 
 
 @app.get( '/ready' )
-def GetReady():
+def GetReady() -> str:
   LOGGER.info( 'Received ready request' )
   if request.query.subserver:
     filetype = request.query.subserver
@@ -203,14 +206,14 @@ def GetReady():
 
 
 @app.post( '/semantic_completion_available' )
-def FiletypeCompletionAvailable():
+def FiletypeCompletionAvailable() -> str:
   LOGGER.info( 'Received filetype completion available request' )
   return _JsonResponse( _server_state.FiletypeCompletionAvailable(
       RequestWrap( request.json )[ 'filetypes' ] ) )
 
 
 @app.post( '/defined_subcommands' )
-def DefinedSubcommands():
+def DefinedSubcommands() -> str:
   LOGGER.info( 'Received defined subcommands request' )
   completer = _GetCompleterForRequestData( RequestWrap( request.json ) )
 
@@ -218,7 +221,7 @@ def DefinedSubcommands():
 
 
 @app.post( '/detailed_diagnostic' )
-def GetDetailedDiagnostic():
+def GetDetailedDiagnostic() -> str:
   LOGGER.info( 'Received detailed diagnostic request' )
   request_data = RequestWrap( request.json )
   completer = _GetCompleterForRequestData( request_data )
@@ -227,7 +230,7 @@ def GetDetailedDiagnostic():
 
 
 @app.post( '/load_extra_conf_file' )
-def LoadExtraConfFile():
+def LoadExtraConfFile() -> str:
   LOGGER.info( 'Received extra conf load request' )
   request_data = RequestWrap( request.json, validate = False )
   extra_conf_store.Load( request_data[ 'filepath' ], force = True )
@@ -236,7 +239,7 @@ def LoadExtraConfFile():
 
 
 @app.post( '/ignore_extra_conf_file' )
-def IgnoreExtraConfFile():
+def IgnoreExtraConfFile() -> str:
   LOGGER.info( 'Received extra conf ignore request' )
   request_data = RequestWrap( request.json, validate = False )
   extra_conf_store.Disable( request_data[ 'filepath' ] )
@@ -245,7 +248,7 @@ def IgnoreExtraConfFile():
 
 
 @app.post( '/debug_info' )
-def DebugInfo():
+def DebugInfo() -> str:
   LOGGER.info( 'Received debug info request' )
   request_data = RequestWrap( request.json )
 
@@ -294,7 +297,7 @@ def Shutdown():
 
 
 @app.post( '/receive_messages' )
-def ReceiveMessages():
+def ReceiveMessages() -> str:
   # Receive messages is a "long-poll" handler.
   # The client makes the request with a long timeout (1 hour).
   # When we have data to send, we send it and close the socket.
@@ -311,7 +314,7 @@ def ReceiveMessages():
 
 
 # The type of the param is Bottle.HTTPError
-def ErrorHandler( httperror ):
+def ErrorHandler( httperror: HTTPError ) -> str:
   body = _JsonResponse( BuildExceptionResponse( httperror.exception,
                                                 httperror.traceback ) )
   hmac_plugin.SetHmacHeader( body, _hmac_secret )
@@ -322,14 +325,14 @@ def ErrorHandler( httperror ):
 app.default_error_handler = ErrorHandler
 
 
-def _JsonResponse( data ):
+def _JsonResponse( data: Any ) -> str:
   bottle.response.set_header( 'Content-Type', 'application/json' )
   return json.dumps( data,
                      separators = ( ',', ':' ),
                      default = _UniversalSerialize )
 
 
-def _UniversalSerialize( obj ):
+def _UniversalSerialize( obj: Exception ) -> Dict[str, str]:
   try:
     serialized = obj.__dict__.copy()
     serialized[ 'TYPE' ] = type( obj ).__name__
@@ -338,7 +341,7 @@ def _UniversalSerialize( obj ):
     return str( obj )
 
 
-def _GetCompleterForRequestData( request_data ):
+def _GetCompleterForRequestData( request_data: RequestWrap ) -> Completer:
   completer_target = request_data.get( 'completer_target', None )
 
   if completer_target == 'identifier':
@@ -370,7 +373,7 @@ def SetHmacSecret( hmac_secret ):
   _hmac_secret = hmac_secret
 
 
-def UpdateUserOptions( options ):
+def UpdateUserOptions( options: Dict[str, Any] ) -> None:
   global _server_state
 
   if not options:

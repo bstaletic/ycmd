@@ -19,9 +19,10 @@ from builtins import bytes
 
 import hmac
 import hashlib
+from typing import Union
 
 
-def CreateHmac( content, hmac_secret ):
+def CreateHmac( content: Union[str, bytes], hmac_secret: Union[str, bytes] ) -> bytes:
   if not isinstance( content, bytes ):
     raise TypeError( 'content was not of bytes type; you have a bug!' )
   if not isinstance( hmac_secret, bytes ):
@@ -32,7 +33,7 @@ def CreateHmac( content, hmac_secret ):
                           digestmod = hashlib.sha256 ).digest() )
 
 
-def CreateRequestHmac( method, path, body, hmac_secret ):
+def CreateRequestHmac( method: Union[str, bytes], path: Union[str, bytes], body: Union[str, bytes], hmac_secret: Union[str, bytes] ) -> bytes:
   if not isinstance( body, bytes ):
     raise TypeError( 'body was not of bytes type; you have a bug!' )
   if not isinstance( hmac_secret, bytes ):

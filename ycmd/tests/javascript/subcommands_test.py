@@ -34,9 +34,11 @@ from ycmd.tests.test_utils import ( BuildRequest,
                                     MessageMatcher,
                                     WaitUntilCompleterServerReady )
 from ycmd.utils import ReadFile
+from typing import Any, Dict, List, Tuple, Union
+from webtest.app import TestApp
 
 
-def RunTest( app, test ):
+def RunTest( app: TestApp, test: Dict[str, Any] ) -> None:
   contents = ReadFile( test[ 'request' ][ 'filepath' ] )
 
   app.post_json(
@@ -79,7 +81,7 @@ def RunTest( app, test ):
 
 
 @IsolatedYcmd()
-def Subcommands_DefinedSubcommands_test( app ):
+def Subcommands_DefinedSubcommands_test( app: TestApp ) -> None:
   subcommands_data = BuildRequest( completer_target = 'javascript' )
 
   assert_that(
@@ -104,7 +106,7 @@ def Subcommands_DefinedSubcommands_test( app ):
 
 
 @SharedYcmd
-def Subcommands_Format_WholeFile_Spaces_test( app ):
+def Subcommands_Format_WholeFile_Spaces_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'test.js' )
   RunTest( app, {
     'description': 'Formatting is applied on the whole file '
@@ -175,7 +177,7 @@ def Subcommands_Format_WholeFile_Spaces_test( app ):
 
 
 @SharedYcmd
-def Subcommands_Format_WholeFile_Tabs_test( app ):
+def Subcommands_Format_WholeFile_Tabs_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'test.js' )
   RunTest( app, {
     'description': 'Formatting is applied on the whole file '
@@ -246,7 +248,7 @@ def Subcommands_Format_WholeFile_Tabs_test( app ):
 
 
 @SharedYcmd
-def Subcommands_Format_Range_Spaces_test( app ):
+def Subcommands_Format_Range_Spaces_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'test.js' )
   RunTest( app, {
     'description': 'Formatting is applied on some part of the file '
@@ -294,7 +296,7 @@ def Subcommands_Format_Range_Spaces_test( app ):
 
 
 @IsolatedYcmd()
-def Subcommands_Format_Range_Tabs_test( app ):
+def Subcommands_Format_Range_Tabs_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'test.js' )
   RunTest( app, {
     'description': 'Formatting is applied on some part of the file '
@@ -343,7 +345,7 @@ def Subcommands_Format_Range_Tabs_test( app ):
 
 @IsolatedYcmd( { 'global_ycm_extra_conf':
                  PathToTestFile( 'extra_confs', 'brace_on_same_line.py' ) } )
-def Subcommands_Format_ExtraConf_BraceOnSameLine_test( app ):
+def Subcommands_Format_ExtraConf_BraceOnSameLine_test( app: TestApp ) -> None:
   WaitUntilCompleterServerReady( app, 'javascript' )
   filepath = PathToTestFile( 'extra_confs', 'func.js' )
   RunTest( app, {
@@ -373,7 +375,7 @@ def Subcommands_Format_ExtraConf_BraceOnSameLine_test( app ):
 
 @IsolatedYcmd( { 'global_ycm_extra_conf':
                  PathToTestFile( 'extra_confs', 'brace_on_new_line.py' ) } )
-def Subcommands_Format_ExtraConf_BraceOnNewLine_test( app ):
+def Subcommands_Format_ExtraConf_BraceOnNewLine_test( app: TestApp ) -> None:
   WaitUntilCompleterServerReady( app, 'javascript' )
   filepath = PathToTestFile( 'extra_confs', 'func.js' )
   RunTest( app, {
@@ -405,7 +407,7 @@ def Subcommands_Format_ExtraConf_BraceOnNewLine_test( app ):
 
 
 @SharedYcmd
-def Subcommands_GetType_test( app ):
+def Subcommands_GetType_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'GetType works',
     'request': {
@@ -422,7 +424,7 @@ def Subcommands_GetType_test( app ):
 
 
 @SharedYcmd
-def Subcommands_GetDoc_Method_test( app ):
+def Subcommands_GetDoc_Method_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'GetDoc on a method returns its docstring',
     'request': {
@@ -442,7 +444,7 @@ def Subcommands_GetDoc_Method_test( app ):
 
 
 @SharedYcmd
-def Subcommands_GetDoc_Class_test( app ):
+def Subcommands_GetDoc_Class_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'GetDoc on a class returns its docstring',
     'request': {
@@ -463,7 +465,7 @@ def Subcommands_GetDoc_Class_test( app ):
 
 
 @SharedYcmd
-def Subcommands_GoToReferences_test( app ):
+def Subcommands_GoToReferences_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'GoToReferences works',
     'request': {
@@ -511,7 +513,7 @@ def Subcommands_GoToReferences_test( app ):
   ( ( 'file3.js', 1, 1, 'nothinghere' ), 'Symbol not found' )
 ] )
 @SharedYcmd
-def Subcommands_GoToSymbol_test( app, req, rep ):
+def Subcommands_GoToSymbol_test( app: TestApp, req: Tuple[str, int, int, str], rep: Union[str, Tuple[str, int, int, str], List[Tuple[str, int, int, str]]] ) -> None:
   if isinstance( rep, tuple ):
     expect = {
       'response': requests.codes.ok,
@@ -544,7 +546,7 @@ def Subcommands_GoToSymbol_test( app, req, rep ):
 
 
 
-def Subcommands_GoTo( app, goto_command ):
+def Subcommands_GoTo( app: TestApp, goto_command: str ) -> None:
   RunTest( app, {
     'description': goto_command + ' works within file',
     'request': {
@@ -564,12 +566,12 @@ def Subcommands_GoTo( app, goto_command ):
                                        'GoToDefinition',
                                        'GoToDeclaration' ] )
 @SharedYcmd
-def Subcommands_GoTo_test( app, command ):
+def Subcommands_GoTo_test( app: TestApp, command: str ) -> None:
   Subcommands_GoTo( app, command )
 
 
 @SharedYcmd
-def Subcommands_GoToType_test( app ):
+def Subcommands_GoToType_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'GoToType works',
     'request': {
@@ -586,7 +588,7 @@ def Subcommands_GoToType_test( app ):
 
 
 @SharedYcmd
-def Subcommands_FixIt_test( app ):
+def Subcommands_FixIt_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'test.js' )
   RunTest( app, {
     'description': 'FixIt works on a non-existing method',
@@ -622,7 +624,7 @@ def Subcommands_FixIt_test( app ):
 
 
 @SharedYcmd
-def Subcommands_OrganizeImports_test( app ):
+def Subcommands_OrganizeImports_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'imports.js' )
   RunTest( app, {
     'description': 'OrganizeImports removes unused imports, '
@@ -658,7 +660,7 @@ def Subcommands_OrganizeImports_test( app ):
 
 
 @SharedYcmd
-def Subcommands_RefactorRename_Missing_test( app ):
+def Subcommands_RefactorRename_Missing_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'RefactorRename requires a parameter',
     'request': {
@@ -677,7 +679,7 @@ def Subcommands_RefactorRename_Missing_test( app ):
 
 
 @SharedYcmd
-def Subcommands_RefactorRename_NotPossible_test( app ):
+def Subcommands_RefactorRename_NotPossible_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'RefactorRename cannot rename a non-existing method',
     'request': {
@@ -697,7 +699,7 @@ def Subcommands_RefactorRename_NotPossible_test( app ):
 
 
 @SharedYcmd
-def Subcommands_RefactorRename_Simple_test( app ):
+def Subcommands_RefactorRename_Simple_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'RefactorRename works on a class name',
     'request': {
@@ -729,7 +731,7 @@ def Subcommands_RefactorRename_Simple_test( app ):
 
 
 @SharedYcmd
-def Subcommands_RefactorRename_MultipleFiles_test( app ):
+def Subcommands_RefactorRename_MultipleFiles_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'RefactorRename works across files',
     'request': {

@@ -21,24 +21,28 @@ from ycmd.completers.general_completer import GeneralCompleter
 from ycmd import identifier_utils
 from ycmd.utils import ImportCore, LOGGER, SplitLines
 from ycmd import responses
+from typing import Any, Dict, Iterator, List, Union
+from ycm_core import StringVector
+from ycmd.request_wrap import RequestWrap
+
 ycm_core = ImportCore()
 
 SYNTAX_FILENAME = 'YCM_PLACEHOLDER_FOR_SYNTAX'
 
 
 class IdentifierCompleter( GeneralCompleter ):
-  def __init__( self, user_options ):
+  def __init__( self, user_options: Dict[str, Any] ) -> None:
     super().__init__( user_options )
     self._completer = ycm_core.IdentifierCompleter()
     self._tags_file_last_mtime = defaultdict( int )
     self._max_candidates = user_options[ 'max_num_identifier_candidates' ]
 
 
-  def ShouldUseNow( self, request_data ):
+  def ShouldUseNow( self, request_data: RequestWrap ) -> bool:
     return self.QueryLengthAboveMinThreshold( request_data )
 
 
-  def ComputeCandidates( self, request_data ):
+  def ComputeCandidates( self, request_data: RequestWrap ) -> List[Dict[str, str]]:
     if not self.ShouldUseNow( request_data ):
       return []
 
@@ -58,7 +62,7 @@ class IdentifierCompleter( GeneralCompleter ):
     return [ ConvertCompletionData( x ) for x in completions ]
 
 
-  def _AddIdentifier( self, identifier, request_data ):
+  def _AddIdentifier( self, identifier: str, request_data: RequestWrap ) -> None:
     filetype = request_data[ 'first_filetype' ]
     filepath = request_data[ 'filepath' ]
 
@@ -74,7 +78,7 @@ class IdentifierCompleter( GeneralCompleter ):
       filepath )
 
 
-  def _AddPreviousIdentifier( self, request_data ):
+  def _AddPreviousIdentifier( self, request_data: RequestWrap ) -> None:
     self._AddIdentifier(
       _PreviousIdentifier(
         self.user_options[ 'min_num_of_chars_for_completion' ],
@@ -83,7 +87,7 @@ class IdentifierCompleter( GeneralCompleter ):
       request_data )
 
 
-  def _AddIdentifierUnderCursor( self, request_data ):
+  def _AddIdentifierUnderCursor( self, request_data: RequestWrap ) -> None:
     self._AddIdentifier(
       _GetCursorIdentifier(
         self.user_options[ 'collect_identifiers_from_comments_and_strings' ],
@@ -91,7 +95,7 @@ class IdentifierCompleter( GeneralCompleter ):
       request_data )
 
 
-  def _AddBufferIdentifiers( self, request_data ):
+  def _AddBufferIdentifiers( self, request_data: RequestWrap ) -> None:
     filetype = request_data[ 'first_filetype' ]
     filepath = request_data[ 'filepath' ]
 
@@ -110,7 +114,7 @@ class IdentifierCompleter( GeneralCompleter ):
         filepath )
 
 
-  def _FilterUnchangedTagFiles( self, tag_files ):
+  def _FilterUnchangedTagFiles( self, tag_files: List[str] ) -> Iterator[str]:
     for tag_file in tag_files:
       try:
         current_mtime = os.path.getmtime( tag_file )
@@ -129,7 +133,7 @@ class IdentifierCompleter( GeneralCompleter ):
       yield tag_file
 
 
-  def _AddIdentifiersFromTagFiles( self, tag_files ):
+  def _AddIdentifiersFromTagFiles( self, tag_files: List[str] ) -> None:
     absolute_paths_to_tag_files = ycm_core.StringVector()
     for tag_file in self._FilterUnchangedTagFiles( tag_files ):
       absolute_paths_to_tag_files.append( tag_file )
@@ -141,7 +145,7 @@ class IdentifierCompleter( GeneralCompleter ):
       absolute_paths_to_tag_files )
 
 
-  def _AddIdentifiersFromSyntax( self, keyword_list, filetype ):
+  def _AddIdentifiersFromSyntax( self, keyword_list: List[str], filetype: str ) -> None:
     keyword_vector = ycm_core.StringVector()
     for keyword in keyword_list:
       keyword_vector.append( keyword )
@@ -153,7 +157,7 @@ class IdentifierCompleter( GeneralCompleter ):
       filepath )
 
 
-  def OnFileReadyToParse( self, request_data ):
+  def OnFileReadyToParse( self, request_data: RequestWrap ) -> None:
     self._AddBufferIdentifiers( request_data )
     if 'tag_files' in request_data:
       self._AddIdentifiersFromTagFiles( request_data[ 'tag_files' ] )
@@ -162,19 +166,19 @@ class IdentifierCompleter( GeneralCompleter ):
                                      request_data[ 'first_filetype' ] )
 
 
-  def OnInsertLeave( self, request_data ):
+  def OnInsertLeave( self, request_data: RequestWrap ) -> None:
     self._AddIdentifierUnderCursor( request_data )
 
 
-  def OnCurrentIdentifierFinished( self, request_data ):
+  def OnCurrentIdentifierFinished( self, request_data: RequestWrap ) -> None:
     self._AddPreviousIdentifier( request_data )
 
 
 # This looks for the previous identifier and returns it; this might mean looking
 # at last identifier on the previous line if a new line has just been created.
-def _PreviousIdentifier( min_num_candidate_size_chars,
-                         collect_from_comments_and_strings,
-                         request_data ):
+def _PreviousIdentifier( min_num_candidate_size_chars: int,
+                         collect_from_comments_and_strings: Union[int, bool],
+                         request_data: RequestWrap ) -> str:
   def PreviousIdentifierOnLine( line, column, filetype ):
     nearest_ident = ''
     for match in identifier_utils.IdentifierRegexForFiletype(
@@ -213,15 +217,15 @@ def _PreviousIdentifier( min_num_candidate_size_chars,
   return ident
 
 
-def _RemoveSmallCandidates( candidates, min_num_candidate_size_chars ):
+def _RemoveSmallCandidates( candidates: StringVector, min_num_candidate_size_chars: int ) -> Union[List[str], StringVector]:
   if min_num_candidate_size_chars == 0:
     return candidates
 
   return [ x for x in candidates if len( x ) >= min_num_candidate_size_chars ]
 
 
-def _GetCursorIdentifier( collect_from_comments_and_strings,
-                          request_data ):
+def _GetCursorIdentifier( collect_from_comments_and_strings: Union[int, bool],
+                          request_data: RequestWrap ) -> str:
   filepath = request_data[ 'filepath' ]
   contents = request_data[ 'file_data' ][ filepath ][ 'contents' ]
   filetype = request_data[ 'first_filetype' ]
@@ -235,9 +239,9 @@ def _GetCursorIdentifier( collect_from_comments_and_strings,
       filetype )
 
 
-def _IdentifiersFromBuffer( text,
-                            filetype,
-                            collect_from_comments_and_strings ):
+def _IdentifiersFromBuffer( text: str,
+                            filetype: str,
+                            collect_from_comments_and_strings: bool ) -> StringVector:
   if not collect_from_comments_and_strings:
     text = identifier_utils.RemoveIdentifierFreeText( text, filetype )
   idents = identifier_utils.ExtractIdentifiersFromText( text, filetype )
@@ -247,5 +251,5 @@ def _IdentifiersFromBuffer( text,
   return vector
 
 
-def _SanitizeQuery( query ):
+def _SanitizeQuery( query: str ) -> str:
   return query.strip()

@@ -22,11 +22,12 @@ from ycmd.tests.test_utils import ( BuildRequest,
                                     CompletionEntryMatcher,
                                     WithRetry )
 from ycmd.utils import ReadFile
+from webtest.app import TestApp
 
 
 @WithRetry
 @SharedYcmd
-def GetCompletions_Basic_test( app ):
+def GetCompletions_Basic_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'td', 'test.go' )
   completion_data = BuildRequest( filepath = filepath,
                                   filetype = 'go',

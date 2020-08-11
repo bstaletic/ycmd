@@ -17,9 +17,10 @@
 
 from ycmd.completers.java.java_completer import (
   ShouldEnableJavaCompleter, JavaCompleter )
+from typing import Dict, Optional, Union
 
 
-def GetCompleter( user_options ):
+def GetCompleter( user_options: Dict[str, Union[int, Dict[str, int], str]] ) -> Optional[JavaCompleter]:
   if not ShouldEnableJavaCompleter( user_options ):
     return None
 

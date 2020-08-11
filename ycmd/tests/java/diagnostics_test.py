@@ -47,10 +47,12 @@ from pprint import pformat
 from unittest.mock import patch
 from ycmd.completers.language_server import language_server_protocol as lsp
 from ycmd import handlers
+from typing import Any, Callable, Dict, Iterator, List, Union
+from webtest.app import TestApp
 
 
 
-def ProjectPath( *args ):
+def ProjectPath( *args) -> str:
   return PathToTestFile( DEFAULT_PROJECT_DIR,
                          'src',
                          'com',
@@ -214,12 +216,12 @@ DIAG_MATCHERS_PER_FILE = {
 }
 
 
-def _WaitForDiagnosticsForFile( app,
-                                filepath,
-                                contents,
-                                diags_filepath,
-                                diags_are_ready = lambda d: True,
-                                **kwargs ):
+def _WaitForDiagnosticsForFile( app: TestApp,
+                                filepath: str,
+                                contents: str,
+                                diags_filepath: str,
+                                diags_are_ready: Callable = lambda d: True,
+                                **kwargs ) -> List[Dict[str, Union[List[Dict[str, Dict[str, Union[int, str]]]], Dict[str, Union[int, str]], Dict[str, Dict[str, Union[int, str]]], str, bool]]]:
   diags = None
   try:
     for message in PollForMessages( app,
@@ -246,7 +248,7 @@ def _WaitForDiagnosticsForFile( app,
 
 @WithRetry
 @SharedYcmd
-def Diagnostics_DetailedDiags_test( app ):
+def Diagnostics_DetailedDiags_test( app: TestApp ) -> None:
   filepath = TestFactory
   contents = ReadFile( filepath )
   WaitForDiagnosticsToBeReady( app, filepath, contents, 'java' )
@@ -264,7 +266,7 @@ def Diagnostics_DetailedDiags_test( app ):
 
 @WithRetry
 @SharedYcmd
-def FileReadyToParse_Diagnostics_Simple_test( app ):
+def FileReadyToParse_Diagnostics_Simple_test( app: TestApp ) -> None:
   filepath = ProjectPath( 'TestFactory.java' )
   contents = ReadFile( filepath )
 
@@ -276,7 +278,7 @@ def FileReadyToParse_Diagnostics_Simple_test( app ):
 
 
 @IsolatedYcmd()
-def FileReadyToParse_Diagnostics_FileNotOnDisk_test( app ):
+def FileReadyToParse_Diagnostics_FileNotOnDisk_test( app: TestApp ) -> None:
   StartJavaCompleterServerInDirectory( app,
                                        PathToTestFile( DEFAULT_PROJECT_DIR ) )
 
@@ -337,7 +339,7 @@ def FileReadyToParse_Diagnostics_FileNotOnDisk_test( app ):
 
 @WithRetry
 @IsolatedYcmd()
-def Poll_Diagnostics_ProjectWide_Eclipse_test( app ):
+def Poll_Diagnostics_ProjectWide_Eclipse_test( app: TestApp ) -> None:
   StartJavaCompleterServerInDirectory( app,
                                        PathToTestFile( DEFAULT_PROJECT_DIR ) )
 
@@ -383,10 +385,10 @@ def Poll_Diagnostics_ProjectWide_Eclipse_test( app ):
 
 
 @contextlib.contextmanager
-def PollingThread( app,
-                   messages_for_filepath,
-                   filepath,
-                   contents ):
+def PollingThread( app: TestApp,
+                   messages_for_filepath: List[Any],
+                   filepath: str,
+                   contents: str ) -> Iterator[None]:
 
   done = False
 
@@ -415,7 +417,7 @@ def PollingThread( app,
 
 @WithRetry
 @IsolatedYcmd()
-def Poll_Diagnostics_ChangeFileContents_test( app ):
+def Poll_Diagnostics_ChangeFileContents_test( app: TestApp ) -> None:
   StartJavaCompleterServerInDirectory( app,
                                        PathToTestFile( DEFAULT_PROJECT_DIR ) )
 
@@ -490,7 +492,7 @@ public class Test {
 
 
 @IsolatedYcmd()
-def FileReadyToParse_ServerNotReady_test( app ):
+def FileReadyToParse_ServerNotReady_test( app: TestApp ) -> None:
   filepath = TestFactory
   contents = ReadFile( filepath )
 
@@ -527,7 +529,7 @@ def FileReadyToParse_ServerNotReady_test( app ):
 
 
 @IsolatedYcmd()
-def FileReadyToParse_ChangeFileContents_test( app ):
+def FileReadyToParse_ChangeFileContents_test( app: TestApp ) -> None:
   filepath = TestFactory
   contents = ReadFile( filepath )
 
@@ -600,7 +602,7 @@ def FileReadyToParse_ChangeFileContents_test( app ):
 
 
 @IsolatedYcmd()
-def FileReadyToParse_ChangeFileContentsFileData_test( app ):
+def FileReadyToParse_ChangeFileContentsFileData_test( app: TestApp ) -> None:
   filepath = TestFactory
   contents = ReadFile( filepath )
   unsaved_buffer_path = TestLauncher
@@ -661,7 +663,7 @@ def FileReadyToParse_ChangeFileContentsFileData_test( app ):
 
 @WithRetry
 @SharedYcmd
-def OnBufferUnload_ServerNotRunning_test( app ):
+def OnBufferUnload_ServerNotRunning_test( app: TestApp ) -> None:
   filepath = TestFactory
   contents = ReadFile( filepath )
   completer = handlers._server_state.GetFiletypeCompleter( [ 'java' ] )
@@ -676,7 +678,7 @@ def OnBufferUnload_ServerNotRunning_test( app ):
 
 
 @IsolatedYcmd()
-def PollForMessages_InvalidUri_test( app, *args ):
+def PollForMessages_InvalidUri_test( app: TestApp, *args) -> None:
   StartJavaCompleterServerInDirectory(
     app,
     PathToTestFile( 'simple_eclipse_project' ) )
@@ -709,7 +711,7 @@ def PollForMessages_InvalidUri_test( app, *args ):
 
 @IsolatedYcmd()
 @patch.object( completer, 'MESSAGE_POLL_TIMEOUT', 2 )
-def PollForMessages_ServerNotRunning_test( app ):
+def PollForMessages_ServerNotRunning_test( app: TestApp ) -> None:
   StartJavaCompleterServerInDirectory(
     app,
     PathToTestFile( 'simple_eclipse_project' ) )
@@ -734,7 +736,7 @@ def PollForMessages_ServerNotRunning_test( app ):
 
 
 @IsolatedYcmd()
-def PollForMessages_AbortedWhenServerDies_test( app ):
+def PollForMessages_AbortedWhenServerDies_test( app: TestApp ) -> None:
   StartJavaCompleterServerInDirectory(
     app,
     PathToTestFile( 'simple_eclipse_project' ) )

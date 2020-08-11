@@ -37,10 +37,14 @@ from ycmd.tests.test_utils import ( BuildRequest,
                                     WaitUntilCompleterServerReady,
                                     WithRetry )
 from ycmd.utils import ReadFile
+from hamcrest.library.collection.isdict_containingentries import IsDictContainingEntries
+from hamcrest.library.collection.issequence_containing import IsSequenceContainingEvery
+from typing import Union
+from webtest.app import TestApp
 
 
 @SharedYcmd
-def Subcommands_FixIt_NoFixitsFound_test( app ):
+def Subcommands_FixIt_NoFixitsFound_test( app: TestApp ) -> None:
   fixit_test = PathToTestFile( 'testy', 'FixItTestCase.cs' )
   with WrapOmniSharpServer( app, fixit_test ):
     contents = ReadFile( fixit_test )
@@ -57,7 +61,7 @@ def Subcommands_FixIt_NoFixitsFound_test( app ):
 
 
 @SharedYcmd
-def Subcommands_FixIt_Multi_test( app ):
+def Subcommands_FixIt_Multi_test( app: TestApp ) -> None:
   fixit_test = PathToTestFile( 'testy', 'FixItTestCase.cs' )
   with WrapOmniSharpServer( app, fixit_test ):
     contents = ReadFile( fixit_test )
@@ -97,7 +101,7 @@ def Subcommands_FixIt_Multi_test( app ):
 
 
 @SharedYcmd
-def Subcommands_FixIt_Range_test( app ):
+def Subcommands_FixIt_Range_test( app: TestApp ) -> None:
   fixit_test = PathToTestFile( 'testy', 'FixItTestCase.cs' )
   with WrapOmniSharpServer( app, fixit_test ):
     contents = ReadFile( fixit_test )
@@ -129,7 +133,7 @@ def Subcommands_FixIt_Range_test( app ):
 
 
 @SharedYcmd
-def Subcommands_FixIt_Single_test( app ):
+def Subcommands_FixIt_Single_test( app: TestApp ) -> None:
   fixit_test = PathToTestFile( 'testy', 'FixItTestCase.cs' )
   with WrapOmniSharpServer( app, fixit_test ):
     contents = ReadFile( fixit_test )
@@ -153,7 +157,7 @@ def Subcommands_FixIt_Single_test( app ):
 
 
 @SharedYcmd
-def Subcommands_RefactorRename_MissingNewName_test( app ):
+def Subcommands_RefactorRename_MissingNewName_test( app: TestApp ) -> None:
   continuous_test = PathToTestFile( 'testy', 'ContinuousTest.cs' )
   with WrapOmniSharpServer( app, continuous_test ):
     contents = ReadFile( continuous_test )
@@ -174,7 +178,7 @@ def Subcommands_RefactorRename_MissingNewName_test( app ):
 
 
 @SharedYcmd
-def Subcommands_RefactorRename_Unicode_test( app ):
+def Subcommands_RefactorRename_Unicode_test( app: TestApp ) -> None:
   unicode_test = PathToTestFile( 'testy', 'Unicode.cs' )
   with WrapOmniSharpServer( app, unicode_test ):
     contents = ReadFile( unicode_test )
@@ -198,7 +202,7 @@ def Subcommands_RefactorRename_Unicode_test( app ):
 
 
 @SharedYcmd
-def Subcommands_RefactorRename_Basic_test( app ):
+def Subcommands_RefactorRename_Basic_test( app: TestApp ) -> None:
   continuous_test = PathToTestFile( 'testy', 'ContinuousTest.cs' )
   with WrapOmniSharpServer( app, continuous_test ):
     contents = ReadFile( continuous_test )
@@ -223,7 +227,7 @@ def Subcommands_RefactorRename_Basic_test( app ):
 
 @WithRetry
 @SharedYcmd
-def Subcommands_GoTo_Basic_test( app ):
+def Subcommands_GoTo_Basic_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'testy', 'GotoTestCase.cs' )
   contents = ReadFile( filepath )
   event_data = BuildRequest( filepath = filepath,
@@ -262,7 +266,7 @@ def Subcommands_GoTo_Basic_test( app ):
                                        'GotoTestCase.cs' ), 49, 15 ) ) ),
   ( 'asd', ErrorMatcher( RuntimeError, 'No symbols found' ) )
 ] )
-def Subcommands_GoToSymbol_test( app, identifier, expected ):
+def Subcommands_GoToSymbol_test( app: TestApp, identifier: str, expected: Union[IsSequenceContainingEvery, IsDictContainingEntries] ) -> None:
   filepath = PathToTestFile( 'testy', 'GotoTestCase.cs' )
   with WrapOmniSharpServer( app, filepath ):
     contents = ReadFile( filepath )
@@ -280,7 +284,7 @@ def Subcommands_GoToSymbol_test( app, identifier, expected ):
 
 
 @SharedYcmd
-def Subcommands_GoTo_Unicode_test( app ):
+def Subcommands_GoTo_Unicode_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'testy', 'Unicode.cs' )
   with WrapOmniSharpServer( app, filepath ):
     contents = ReadFile( filepath )
@@ -298,7 +302,7 @@ def Subcommands_GoTo_Unicode_test( app ):
 
 
 @SharedYcmd
-def Subcommands_GoToImplementation_Basic_test( app ):
+def Subcommands_GoToImplementation_Basic_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'testy', 'GotoTestCase.cs' )
   with WrapOmniSharpServer( app, filepath ):
     contents = ReadFile( filepath )
@@ -318,7 +322,7 @@ def Subcommands_GoToImplementation_Basic_test( app ):
 
 
 @SharedYcmd
-def Subcommands_GoToImplementation_NoImplementation_test( app ):
+def Subcommands_GoToImplementation_NoImplementation_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'testy', 'GotoTestCase.cs' )
   with WrapOmniSharpServer( app, filepath ):
     contents = ReadFile( filepath )
@@ -341,7 +345,7 @@ def Subcommands_GoToImplementation_NoImplementation_test( app ):
 
 
 @SharedYcmd
-def Subcommands_CsCompleter_InvalidLocation_test( app ):
+def Subcommands_CsCompleter_InvalidLocation_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'testy', 'GotoTestCase.cs' )
   with WrapOmniSharpServer( app, filepath ):
     contents = ReadFile( filepath )
@@ -364,7 +368,7 @@ def Subcommands_CsCompleter_InvalidLocation_test( app ):
 
 
 @SharedYcmd
-def Subcommands_GoToImplementationElseDeclaration_NoImplementation_test( app ):
+def Subcommands_GoToImplementationElseDeclaration_NoImplementation_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'testy', 'GotoTestCase.cs' )
   with WrapOmniSharpServer( app, filepath ):
     contents = ReadFile( filepath )
@@ -385,7 +389,7 @@ def Subcommands_GoToImplementationElseDeclaration_NoImplementation_test( app ):
 
 @SharedYcmd
 def Subcommands_GoToImplementationElseDeclaration_SingleImplementation_test(
-  app ):
+  app: TestApp ) -> None:
   filepath = PathToTestFile( 'testy', 'GotoTestCase.cs' )
   with WrapOmniSharpServer( app, filepath ):
     contents = ReadFile( filepath )
@@ -406,7 +410,7 @@ def Subcommands_GoToImplementationElseDeclaration_SingleImplementation_test(
 
 @SharedYcmd
 def Subcommands_GoToImplementationElseDeclaration_MultipleImplementations_test(
-  app ):
+  app: TestApp ) -> None:
   filepath = PathToTestFile( 'testy', 'GotoTestCase.cs' )
   with WrapOmniSharpServer( app, filepath ):
     contents = ReadFile( filepath )
@@ -428,7 +432,7 @@ def Subcommands_GoToImplementationElseDeclaration_MultipleImplementations_test(
 
 
 @SharedYcmd
-def Subcommands_GoToReferences_InvalidLocation_test( app ):
+def Subcommands_GoToReferences_InvalidLocation_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'testy', 'GotoTestCase.cs' )
   with WrapOmniSharpServer( app, filepath ):
     contents = ReadFile( filepath )
@@ -450,7 +454,7 @@ def Subcommands_GoToReferences_InvalidLocation_test( app ):
 
 
 @SharedYcmd
-def Subcommands_GoToReferences_MultipleReferences_test( app ):
+def Subcommands_GoToReferences_MultipleReferences_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'testy', 'GotoTestCase.cs' )
   with WrapOmniSharpServer( app, filepath ):
     contents = ReadFile( filepath )
@@ -472,7 +476,7 @@ def Subcommands_GoToReferences_MultipleReferences_test( app ):
 
 
 @SharedYcmd
-def Subcommands_GoToReferences_Basic_test( app ):
+def Subcommands_GoToReferences_Basic_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'testy', 'GotoTestCase.cs' )
   with WrapOmniSharpServer( app, filepath ):
     contents = ReadFile( filepath )
@@ -492,7 +496,7 @@ def Subcommands_GoToReferences_Basic_test( app ):
 
 
 @SharedYcmd
-def Subcommands_GetToImplementation_Unicode_test( app ):
+def Subcommands_GetToImplementation_Unicode_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'testy', 'Unicode.cs' )
   with WrapOmniSharpServer( app, filepath ):
     contents = ReadFile( filepath )
@@ -514,7 +518,7 @@ def Subcommands_GetToImplementation_Unicode_test( app ):
 
 
 @SharedYcmd
-def Subcommands_GetType_EmptyMessage_test( app ):
+def Subcommands_GetType_EmptyMessage_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'testy', 'GetTypeTestCase.cs' )
   with WrapOmniSharpServer( app, filepath ):
     contents = ReadFile( filepath )
@@ -535,7 +539,7 @@ def Subcommands_GetType_EmptyMessage_test( app ):
 
 
 @SharedYcmd
-def Subcommands_GetType_VariableDeclaration_test( app ):
+def Subcommands_GetType_VariableDeclaration_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'testy', 'GetTypeTestCase.cs' )
   with WrapOmniSharpServer( app, filepath ):
     contents = ReadFile( filepath )
@@ -553,7 +557,7 @@ def Subcommands_GetType_VariableDeclaration_test( app ):
 
 
 @SharedYcmd
-def Subcommands_GetType_VariableUsage_test( app ):
+def Subcommands_GetType_VariableUsage_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'testy', 'GetTypeTestCase.cs' )
   with WrapOmniSharpServer( app, filepath ):
     contents = ReadFile( filepath )
@@ -571,7 +575,7 @@ def Subcommands_GetType_VariableUsage_test( app ):
 
 
 @SharedYcmd
-def Subcommands_GetType_DocsIgnored_test( app ):
+def Subcommands_GetType_DocsIgnored_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'testy', 'GetTypeTestCase.cs' )
   with WrapOmniSharpServer( app, filepath ):
     contents = ReadFile( filepath )
@@ -590,7 +594,7 @@ def Subcommands_GetType_DocsIgnored_test( app ):
 
 
 @SharedYcmd
-def Subcommands_GetDoc_Invalid_test( app ):
+def Subcommands_GetDoc_Invalid_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'testy', 'GetDocTestCase.cs' )
   with WrapOmniSharpServer( app, filepath ):
     contents = ReadFile( filepath )
@@ -611,7 +615,7 @@ def Subcommands_GetDoc_Invalid_test( app ):
 
 
 @SharedYcmd
-def Subcommands_GetDoc_Variable_test( app ):
+def Subcommands_GetDoc_Variable_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'testy', 'GetDocTestCase.cs' )
   with WrapOmniSharpServer( app, filepath ):
     contents = ReadFile( filepath )
@@ -632,7 +636,7 @@ def Subcommands_GetDoc_Variable_test( app ):
 
 
 @SharedYcmd
-def Subcommands_GetDoc_Function_test( app ):
+def Subcommands_GetDoc_Function_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'testy', 'GetDocTestCase.cs' )
   with WrapOmniSharpServer( app, filepath ):
     contents = ReadFile( filepath )
@@ -653,7 +657,7 @@ def Subcommands_GetDoc_Function_test( app ):
 
 
 @IsolatedYcmd()
-def Subcommands_StopServer_NoErrorIfNotStarted_test( app ):
+def Subcommands_StopServer_NoErrorIfNotStarted_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'testy', 'GotoTestCase.cs' )
   # Don't wrap the server - we don't want to start it!
   app.post_json(
@@ -675,7 +679,7 @@ def Subcommands_StopServer_NoErrorIfNotStarted_test( app ):
                ) )
 
 
-def StopServer_KeepLogFiles( app ):
+def StopServer_KeepLogFiles( app: TestApp ) -> None:
   filepath = PathToTestFile( 'testy', 'GotoTestCase.cs' )
   with WrapOmniSharpServer( app, filepath ):
     event_data = BuildRequest( filetype = 'cs', filepath = filepath )
@@ -711,17 +715,17 @@ def StopServer_KeepLogFiles( app ):
 
 
 @IsolatedYcmd( { 'server_keep_logfiles': 1 } )
-def Subcommands_StopServer_KeepLogFiles_test( app ):
+def Subcommands_StopServer_KeepLogFiles_test( app: TestApp ) -> None:
   StopServer_KeepLogFiles( app )
 
 
 @IsolatedYcmd( { 'server_keep_logfiles': 0 } )
-def Subcommands_StopServer_DoNotKeepLogFiles_test( app ):
+def Subcommands_StopServer_DoNotKeepLogFiles_test( app: TestApp ) -> None:
   StopServer_KeepLogFiles( app )
 
 
 @IsolatedYcmd()
-def Subcommands_RestartServer_PidChanges_test( app ):
+def Subcommands_RestartServer_PidChanges_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'testy', 'GotoTestCase.cs' )
   with WrapOmniSharpServer( app, filepath ):
 
@@ -750,7 +754,7 @@ def Subcommands_RestartServer_PidChanges_test( app ):
 @IsolatedYcmd()
 @patch( 'ycmd.utils.WaitUntilProcessIsTerminated',
         MockProcessTerminationTimingOut )
-def Subcommands_StopServer_Timeout_test( app ):
+def Subcommands_StopServer_Timeout_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'testy', 'GotoTestCase.cs' )
   contents = ReadFile( filepath )
   event_data = BuildRequest( filepath = filepath,
@@ -781,7 +785,7 @@ def Subcommands_StopServer_Timeout_test( app ):
 
 
 @SharedYcmd
-def Subcommands_Format_Works_test( app ):
+def Subcommands_Format_Works_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'testy', 'Program.cs' )
   with WrapOmniSharpServer( app, filepath ):
     contents = ReadFile( filepath )
@@ -828,7 +832,7 @@ def Subcommands_Format_Works_test( app ):
 
 
 @SharedYcmd
-def Subcommands_RangeFormat_Works_test( app ):
+def Subcommands_RangeFormat_Works_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'testy', 'Program.cs' )
   with WrapOmniSharpServer( app, filepath ):
     contents = ReadFile( filepath )

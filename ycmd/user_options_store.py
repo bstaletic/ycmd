@@ -19,24 +19,25 @@ import json
 import os
 
 from ycmd.utils import HashableDict, ReadFile
+from typing import Any, Dict, List, Union
 
 _USER_OPTIONS = {}
 
 
-def SetAll( new_options ):
+def SetAll( new_options: Any ) -> None:
   global _USER_OPTIONS
   _USER_OPTIONS = HashableDict( new_options )
 
 
-def GetAll():
+def GetAll() -> HashableDict:
   return _USER_OPTIONS
 
 
-def Value( key ):
+def Value( key: str ) -> Union[int, str, List[str]]:
   return _USER_OPTIONS[ key ]
 
 
-def DefaultOptions():
+def DefaultOptions() -> Dict[str, Union[int, Dict[str, int], str]]:
   settings_path = os.path.join(
       os.path.dirname( os.path.abspath( __file__ ) ), 'default_settings.json' )
   options = json.loads( ReadFile( settings_path ) )

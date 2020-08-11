@@ -27,6 +27,8 @@ from ycmd.responses import UnknownExtraConf, YCM_EXTRA_CONF_FILENAME
 from ycmd.utils import ( ExpandVariablesInPath, LoadPythonSource, LOGGER,
                          PathsToAllParentFolders )
 from fnmatch import fnmatch
+from typing import Any, Dict, Iterator, Optional, Tuple, Union
+from unittest.mock import MagicMock
 
 
 # Singleton variables
@@ -36,26 +38,26 @@ _module_file_for_source_file = {}
 _module_file_for_source_file_lock = Lock()
 
 
-def Get():
+def Get() -> Union[Tuple[Dict[Any, Any], Dict[str, None]], Tuple[Dict[Any, Any], Dict[Any, Any]], Tuple[Dict[str, None], Dict[Any, Any]], Tuple[Dict[str, None], Dict[str, None]]]:
   return _module_for_module_file, _module_file_for_source_file
 
 
-def Set( state ):
+def Set( state: Union[Tuple[Dict[str, None], Dict[str, None]], Tuple[Dict[Any, Any], Dict[Any, Any]], Tuple[Dict[str, None], Dict[Any, Any]], Tuple[Dict[Any, Any], Dict[str, None]]] ) -> None:
   global _module_for_module_file, _module_file_for_source_file
   _module_for_module_file, _module_file_for_source_file = state
 
 
-def Reset():
+def Reset() -> None:
   global _module_for_module_file, _module_file_for_source_file
   _module_for_module_file = {}
   _module_file_for_source_file = {}
 
 
-def ModuleForSourceFile( filename ):
+def ModuleForSourceFile( filename: str ) -> None:
   return Load( ModuleFileForSourceFile( filename ) )
 
 
-def ModuleFileForSourceFile( filename ):
+def ModuleFileForSourceFile( filename: str ) -> Optional[str]:
   """This will try all files returned by _ExtraConfModuleSourceFilesForFile in
   order and return the filename of the first module that was allowed to load.
   If no module was found or allowed to load, None is returned."""
@@ -81,7 +83,7 @@ def Shutdown():
   _CallGlobalExtraConfMethod( 'Shutdown' )
 
 
-def _CallGlobalExtraConfMethod( function_name ):
+def _CallGlobalExtraConfMethod( function_name: str ) -> None:
   global_ycm_extra_conf = _GlobalYcmExtraConfFileLocation()
   if not ( global_ycm_extra_conf and
            os.path.exists( global_ycm_extra_conf ) ):
@@ -111,13 +113,13 @@ def _CallGlobalExtraConfMethod( function_name ):
       'on conf file %s', function_name, global_ycm_extra_conf )
 
 
-def Disable( module_file ):
+def Disable( module_file: str ) -> None:
   """Disables the loading of a module for the current session."""
   with _module_for_module_file_lock:
     _module_for_module_file[ module_file ] = None
 
 
-def _ShouldLoad( module_file, is_global ):
+def _ShouldLoad( module_file: str, is_global: bool ) -> bool:
   """Checks if a module is safe to be loaded. By default this will try to
   decide using a white-/blacklist and ask the user for confirmation as a
   fallback."""
@@ -134,7 +136,7 @@ def _ShouldLoad( module_file, is_global ):
   raise UnknownExtraConf( module_file )
 
 
-def Load( module_file, force = False ):
+def Load( module_file: Optional[str], force: bool = False ) -> None:
   """Load and return the module contained in a file.
   Using force = True the module will be loaded regardless
   of the criteria in _ShouldLoad.
@@ -180,7 +182,7 @@ def Load( module_file, force = False ):
   return module
 
 
-def _MatchesGlobPattern( filename, glob ):
+def _MatchesGlobPattern( filename: str, glob: str ) -> bool:
   """Returns true if a filename matches a given pattern. Environment variables
   and a '~' in glob will be expanded and checking will be performed using
   absolute paths with symlinks resolved (except on Windows). See the
@@ -192,7 +194,7 @@ def _MatchesGlobPattern( filename, glob ):
   return fnmatch( realpath, os.path.realpath( ExpandVariablesInPath( glob ) ) )
 
 
-def _ExtraConfModuleSourceFilesForFile( filename ):
+def _ExtraConfModuleSourceFilesForFile( filename: str ) -> Iterator[str]:
   """For a given filename, search all parent folders for YCM_EXTRA_CONF_FILENAME
   files that will compute the flags necessary to compile the file.
   If _GlobalYcmExtraConfFileLocation() exists it is returned as a fallback."""
@@ -207,25 +209,25 @@ def _ExtraConfModuleSourceFilesForFile( filename ):
     yield global_ycm_extra_conf
 
 
-def _PathToCppCompleterFolder():
+def _PathToCppCompleterFolder() -> str:
   """Returns the path to the 'cpp' completer folder. This is necessary
   because ycm_extra_conf files need it on the path."""
   return os.path.join( _DirectoryOfThisScript(), 'completers', 'cpp' )
 
 
-def _DirectoryOfThisScript():
+def _DirectoryOfThisScript() -> str:
   return os.path.dirname( os.path.abspath( __file__ ) )
 
 
-def _RandomName():
+def _RandomName() -> str:
   """Generates a random module name."""
   return ''.join( random.choice( string.ascii_lowercase ) for x in range( 15 ) )
 
 
-def _GlobalYcmExtraConfFileLocation():
+def _GlobalYcmExtraConfFileLocation() -> str:
   return ExpandVariablesInPath(
     user_options_store.Value( 'global_ycm_extra_conf' ) )
 
 
-def IsGlobalExtraConfModule( module ):
+def IsGlobalExtraConfModule( module: MagicMock ) -> bool:
   return module.is_global_ycm_extra_conf

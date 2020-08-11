@@ -29,9 +29,12 @@ from ycmd.tests.javascript import IsolatedYcmd, PathToTestFile, SharedYcmd
 from ycmd.tests.test_utils import ( BuildRequest, ChunkMatcher,
                                     CompletionEntryMatcher, LocationMatcher )
 from ycmd.utils import ReadFile
+from hamcrest.library.collection.isdict_containingentries import IsDictContainingEntries
+from typing import Dict, Union
+from webtest.app import TestApp
 
 
-def RunTest( app, test ):
+def RunTest( app: TestApp, test: Dict[str, Union[str, Dict[str, Union[int, str]], Dict[str, Union[int, IsDictContainingEntries]]]] ) -> None:
   contents = ReadFile( test[ 'request' ][ 'filepath' ] )
 
   def CombineRequest( request, data ):
@@ -66,7 +69,7 @@ def RunTest( app, test ):
 
 
 @SharedYcmd
-def GetCompletions_Basic_test( app ):
+def GetCompletions_Basic_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'Extra and detailed info when completions are methods',
     'request': {
@@ -110,7 +113,7 @@ def GetCompletions_Basic_test( app ):
 
 
 @SharedYcmd
-def GetCompletions_Keyword_test( app ):
+def GetCompletions_Keyword_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'No extra and detailed info when completion is a keyword',
     'request': {
@@ -132,7 +135,7 @@ def GetCompletions_Keyword_test( app ):
 
 
 @SharedYcmd
-def GetCompletions_AutoImport_test( app ):
+def GetCompletions_AutoImport_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'test.js' )
   RunTest( app, {
     'description': 'Symbol from external module can be completed and '
@@ -173,7 +176,7 @@ def GetCompletions_AutoImport_test( app ):
 
 
 @IsolatedYcmd()
-def GetCompletions_IgnoreIdentifiers_test( app ):
+def GetCompletions_IgnoreIdentifiers_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'Identifier "test" is not returned as a suggestion',
     'request': {

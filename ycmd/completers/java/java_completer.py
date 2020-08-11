@@ -27,6 +27,9 @@ from ycmd import responses, utils
 from ycmd.completers.language_server import language_server_protocol as lsp
 from ycmd.completers.language_server import language_server_completer
 from ycmd.utils import LOGGER
+from typing import Any, Callable, Dict, Iterator, List, Optional, Tuple, Union
+from ycmd.request_wrap import RequestWrap
+from ycmd.responses import DebugInfoItem, FixIt
 
 NO_DOCUMENTATION_MESSAGE = 'No documentation available for current context'
 
@@ -102,7 +105,7 @@ WORKSPACE_ROOT_PATH_OPTION = 'java_jdtls_workspace_root_path'
 EXTENSION_PATH_OPTION = 'java_jdtls_extension_path'
 
 
-def ShouldEnableJavaCompleter( user_options ):
+def ShouldEnableJavaCompleter( user_options: Dict[str, Union[int, Dict[str, int], str]] ) -> bool:
   LOGGER.info( 'Looking for jdt.ls' )
 
   global PATH_TO_JAVA
@@ -125,7 +128,7 @@ def ShouldEnableJavaCompleter( user_options ):
   return True
 
 
-def _PathToLauncherJar():
+def _PathToLauncherJar() -> Optional[str]:
   # The file name changes between version of eclipse, so we use a glob as
   # recommended by the language server developers. There should only be one.
   launcher_jars = glob.glob(
@@ -143,7 +146,7 @@ def _PathToLauncherJar():
   return launcher_jars[ 0 ]
 
 
-def _CollectExtensionBundles( extension_path ):
+def _CollectExtensionBundles( extension_path: List[str] ) -> List[Any]:
   extension_bundles = []
 
   for extension_dir in extension_path:
@@ -183,7 +186,7 @@ def _CollectExtensionBundles( extension_path ):
   return extension_bundles
 
 
-def _LauncherConfiguration( workspace_root, wipe_config ):
+def _LauncherConfiguration( workspace_root: str, wipe_config: bool ) -> str:
   if utils.OnMac():
     config = 'config_mac'
   elif utils.OnWindows():
@@ -228,12 +231,12 @@ def _LauncherConfiguration( workspace_root, wipe_config ):
   return working_config
 
 
-def _MakeProjectFilesForPath( path ):
+def _MakeProjectFilesForPath( path: str ) -> Iterator[Tuple[str, str]]:
   for tail in PROJECT_FILE_TAILS:
     yield os.path.join( path, tail ), tail
 
 
-def _FindProjectDir( starting_dir ):
+def _FindProjectDir( starting_dir: str ) -> str:
   project_path = starting_dir
   project_type = None
 
@@ -265,9 +268,9 @@ def _FindProjectDir( starting_dir ):
   return project_path
 
 
-def _WorkspaceDirForProject( workspace_root_path,
-                             project_dir,
-                             use_clean_workspace ):
+def _WorkspaceDirForProject( workspace_root_path: str,
+                             project_dir: str,
+                             use_clean_workspace: Union[int, bool] ) -> str:
   if use_clean_workspace:
     temp_path = os.path.join( workspace_root_path, 'temp' )
 
@@ -284,7 +287,7 @@ def _WorkspaceDirForProject( workspace_root_path,
 
 
 class JavaCompleter( language_server_completer.LanguageServerCompleter ):
-  def __init__( self, user_options ):
+  def __init__( self, user_options: Dict[str, Union[int, Dict[str, int], str]] ) -> None:
     self._workspace_path = None
     super().__init__( user_options )
 
@@ -314,13 +317,13 @@ class JavaCompleter( language_server_completer.LanguageServerCompleter ):
     self._command = []
 
 
-  def DefaultSettings( self, request_data ):
+  def DefaultSettings( self, request_data: RequestWrap ) -> Dict[str, List[Any]]:
     return {
       'bundles': self._bundles
     }
 
 
-  def SupportedFiletypes( self ):
+  def SupportedFiletypes( self ) -> List[str]:
     return [ 'java' ]
 
 
@@ -328,7 +331,7 @@ class JavaCompleter( language_server_completer.LanguageServerCompleter ):
     return server_trigger_characters + [ ',' ]
 
 
-  def GetCustomSubcommands( self ):
+  def GetCustomSubcommands( self ) -> Dict[str, Callable]:
     return {
       'OrganizeImports': (
         lambda self, request_data, args: self.OrganizeImports( request_data )
@@ -343,13 +346,13 @@ class JavaCompleter( language_server_completer.LanguageServerCompleter ):
     }
 
 
-  def AdditionalLogFiles( self ):
+  def AdditionalLogFiles( self ) -> List[str]:
     if self._workspace_path:
       return [ os.path.join( self._workspace_path, '.metadata', '.log' ) ]
     return []
 
 
-  def ExtraDebugItems( self, request_data ):
+  def ExtraDebugItems( self, request_data: RequestWrap ) -> List[DebugInfoItem]:
     items = [
       responses.DebugInfoItem( 'Startup Status', self._server_init_status ),
       responses.DebugInfoItem( 'Java Path', PATH_TO_JAVA ),
@@ -369,17 +372,17 @@ class JavaCompleter( language_server_completer.LanguageServerCompleter ):
     return items
 
 
-  def ServerIsReady( self ):
+  def ServerIsReady( self ) -> bool:
     return ( self.ServerIsHealthy() and
              self._received_ready_message.is_set() and
              super().ServerIsReady() )
 
 
-  def GetProjectDirectory( self, *args, **kwargs ):
+  def GetProjectDirectory( self, *args, **kwargs) -> str:
     return self._java_project_dir
 
 
-  def _WipeWorkspace( self, request_data, args ):
+  def _WipeWorkspace( self, request_data: RequestWrap, args: List[str] ) -> None:
     with_config = False
     if len( args ) > 0 and '--with-config' in args:
       with_config = True
@@ -408,7 +411,7 @@ class JavaCompleter( language_server_completer.LanguageServerCompleter ):
     self._RestartServer( request_data, project_directory = project_directory )
 
 
-  def _Reset( self ):
+  def _Reset( self ) -> None:
     if self._workspace_path and self._use_clean_workspace:
       try:
         shutil.rmtree( self._workspace_path )
@@ -430,10 +433,10 @@ class JavaCompleter( language_server_completer.LanguageServerCompleter ):
 
 
   def StartServer( self,
-                   request_data,
-                   project_directory = None,
-                   wipe_workspace = False,
-                   wipe_config = False ):
+                   request_data: RequestWrap,
+                   project_directory: None = None,
+                   wipe_workspace: bool = False,
+                   wipe_config: bool = False ) -> bool:
     try:
       with self._server_info_mutex:
         LOGGER.info( 'Starting jdt.ls Language Server...' )
@@ -482,7 +485,7 @@ class JavaCompleter( language_server_completer.LanguageServerCompleter ):
       return False
 
 
-  def GetCodepointForCompletionRequest( self, request_data ):
+  def GetCodepointForCompletionRequest( self, request_data: RequestWrap ) -> int:
     """Returns the 1-based codepoint offset on the current line at which to make
     the completion request"""
     # When the user forces semantic completion, we pass the actual cursor
@@ -515,7 +518,7 @@ class JavaCompleter( language_server_completer.LanguageServerCompleter ):
     super().HandleNotificationInPollThread( notification )
 
 
-  def ConvertNotificationToMessage( self, request_data, notification ):
+  def ConvertNotificationToMessage( self, request_data: RequestWrap, notification: Dict[str, Union[str, Dict[str, Union[str, List[Dict[str, Union[Dict[str, Dict[str, int]], int, str]]]]], Dict[str, str], Dict[str, Union[int, str]]]] ) -> Optional[Union[Dict[str, str], Dict[str, Union[List[Dict[str, Union[List[Dict[str, Dict[str, Union[int, str]]]], Dict[str, Union[int, str]], Dict[str, Dict[str, Union[int, str]]], str, bool]]], str]]]]:
     if notification[ 'method' ] == 'language/status':
       message = notification[ 'params' ][ 'message' ]
       if notification[ 'params' ][ 'type' ] == 'Started':
@@ -530,7 +533,7 @@ class JavaCompleter( language_server_completer.LanguageServerCompleter ):
     return super().ConvertNotificationToMessage( request_data, notification )
 
 
-  def GetType( self, request_data ):
+  def GetType( self, request_data: Union[RequestWrap, Dict[str, Union[int, str, Dict[str, Dict[str, Union[str, List[str]]]]]]] ) -> Dict[str, str]:
     hover_response = self.GetHoverResponse( request_data )
 
     # The LSP defines the hover response as either:
@@ -572,7 +575,7 @@ class JavaCompleter( language_server_completer.LanguageServerCompleter ):
     return responses.BuildDisplayMessageResponse( hover_response[ 'value' ] )
 
 
-  def GetDoc( self, request_data ):
+  def GetDoc( self, request_data: Union[RequestWrap, Dict[str, Union[int, str, Dict[str, Dict[str, Union[str, List[str]]]]]]] ) -> Dict[str, str]:
     hover_response = self.GetHoverResponse( request_data )
 
     # The LSP defines the hover response as either:
@@ -613,7 +616,7 @@ class JavaCompleter( language_server_completer.LanguageServerCompleter ):
     return responses.BuildDetailedInfoResponse( documentation )
 
 
-  def OrganizeImports( self, request_data ):
+  def OrganizeImports( self, request_data: RequestWrap ) -> Dict[str, List[Dict[str, Union[Dict[str, Union[int, str]], List[Dict[str, Union[str, Dict[str, Dict[str, Union[int, str]]]]]], str, bool]]]]:
     fixit = {
       'resolve': True,
       'command': {
@@ -625,7 +628,7 @@ class JavaCompleter( language_server_completer.LanguageServerCompleter ):
     return self._ResolveFixit( request_data, fixit )
 
 
-  def CodeActionCommandToFixIt( self, request_data, command ):
+  def CodeActionCommandToFixIt( self, request_data: RequestWrap, command: Dict[str, Union[str, List[Dict[str, Union[Dict[str, Dict[str, int]], int, str]]], Dict[str, Union[str, List[Dict[str, Dict[str, List[Dict[str, Union[Dict[str, Dict[str, int]], str]]]]]]]]]] ) -> FixIt:
     # JDT wants us to special case `java.apply.workspaceEdit`
     # https://github.com/eclipse/eclipse.jdt.ls/issues/376
     if command[ 'command' ][ 'command' ] == 'java.apply.workspaceEdit':
@@ -634,9 +637,9 @@ class JavaCompleter( language_server_completer.LanguageServerCompleter ):
     return super().CodeActionCommandToFixIt( request_data, command )
 
 
-  def GetServerName( self ):
+  def GetServerName( self ) -> str:
     return 'jdt.ls'
 
 
-  def GetCommandLine( self ):
+  def GetCommandLine( self ) -> List[str]:
     return self._command

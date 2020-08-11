@@ -27,10 +27,11 @@ from ycmd.tests.go import ( IsolatedYcmd,
                             SharedYcmd,
                             StartGoCompleterServerInDirectory )
 from ycmd.tests.test_utils import BuildRequest
+from webtest.app import TestApp
 
 
 @SharedYcmd
-def DebugInfo_test( app ):
+def DebugInfo_test( app: TestApp ) -> None:
   request_data = BuildRequest( filetype = 'go' )
   assert_that(
     app.post_json( '/debug_info', request_data ).json,
@@ -67,7 +68,7 @@ def DebugInfo_test( app ):
 
 
 @IsolatedYcmd
-def DebugInfo_ProjectDirectory_test( app ):
+def DebugInfo_ProjectDirectory_test( app: TestApp ) -> None:
   project_dir = PathToTestFile( 'td' )
   StartGoCompleterServerInDirectory( app, project_dir )
   assert_that(

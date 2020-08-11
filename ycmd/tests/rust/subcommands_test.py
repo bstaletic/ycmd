@@ -38,12 +38,14 @@ from ycmd.tests.test_utils import ( BuildRequest,
                                     LocationMatcher,
                                     WithRetry )
 from ycmd.utils import ReadFile
+from typing import Any, Dict, List, Tuple, Type, Union
+from webtest.app import TestApp
 
 
 RESPONSE_TIMEOUT = 5
 
 
-def RunTest( app, test, contents = None ):
+def RunTest( app: TestApp, test: Dict[str, Any], contents: None = None ) -> None:
   if not contents:
     contents = ReadFile( test[ 'request' ][ 'filepath' ] )
 
@@ -86,7 +88,7 @@ def RunTest( app, test, contents = None ):
 
 
 @SharedYcmd
-def Subcommands_DefinedSubcommands_test( app ):
+def Subcommands_DefinedSubcommands_test( app: TestApp ) -> None:
   subcommands_data = BuildRequest( completer_target = 'rust' )
 
   assert_that( app.post_json( '/defined_subcommands', subcommands_data ).json,
@@ -106,7 +108,7 @@ def Subcommands_DefinedSubcommands_test( app ):
 
 
 @SharedYcmd
-def Subcommands_ServerNotInitialized_test( app ):
+def Subcommands_ServerNotInitialized_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'common', 'src', 'main.rs' )
 
   completer = handlers._server_state.GetFiletypeCompleter( [ 'rust' ] )
@@ -142,7 +144,7 @@ def Subcommands_ServerNotInitialized_test( app ):
 
 
 @SharedYcmd
-def Subcommands_Format_WholeFile_test( app ):
+def Subcommands_Format_WholeFile_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'common', 'src', 'main.rs' )
 
   RunTest( app, {
@@ -220,7 +222,7 @@ def Subcommands_Format_Range_test( app ):
 
 
 @SharedYcmd
-def Subcommands_GetDoc_NoDocumentation_test( app ):
+def Subcommands_GetDoc_NoDocumentation_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'GetDoc on a function with no documentation '
                    'raises an error',
@@ -239,7 +241,7 @@ def Subcommands_GetDoc_NoDocumentation_test( app ):
 
 
 @SharedYcmd
-def Subcommands_GetDoc_Function_test( app ):
+def Subcommands_GetDoc_Function_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'GetDoc on a function returns its documentation',
     'request': {
@@ -260,7 +262,7 @@ def Subcommands_GetDoc_Function_test( app ):
 
 
 @SharedYcmd
-def Subcommands_GetType_UnknownType_test( app ):
+def Subcommands_GetType_UnknownType_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'GetType on a unknown type raises an error',
     'request': {
@@ -278,7 +280,7 @@ def Subcommands_GetType_UnknownType_test( app ):
 
 @WithRetry
 @SharedYcmd
-def Subcommands_GetType_Function_test( app ):
+def Subcommands_GetType_Function_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'GetType on a function returns its type',
     'request': {
@@ -294,7 +296,7 @@ def Subcommands_GetType_Function_test( app ):
   } )
 
 
-def RunGoToTest( app, command, test ):
+def RunGoToTest( app: TestApp, command: str, test: Dict[str, Union[Tuple[str, int, int], str, Type[RuntimeError], List[Tuple[str, int, int]]]] ) -> None:
   folder = PathToTestFile( 'common', 'src' )
   filepath = os.path.join( folder, test[ 'req' ][ 0 ] )
   request = {
@@ -350,7 +352,7 @@ def RunGoToTest( app, command, test ):
     { 'req': ( 'main.rs',  3,  2 ), 'res': 'Cannot jump to location' },
   ] )
 @SharedYcmd
-def Subcommands_GoToType_Basic_test( app, test ):
+def Subcommands_GoToType_Basic_test( app: TestApp, test: Dict[str, Union[Tuple[str, int, int], str]] ) -> None:
   RunGoToTest( app, 'GoToType', test )
 
 
@@ -369,7 +371,7 @@ def Subcommands_GoToType_Basic_test( app, test ):
                                        'GoTo' ] )
 @WithRetry
 @SharedYcmd
-def Subcommands_GoTo_test( app, command, test ):
+def Subcommands_GoTo_test( app: TestApp, command: str, test: Dict[str, Union[Tuple[str, int, int], str]] ) -> None:
   RunGoToTest( app, command, test )
 
 
@@ -382,13 +384,13 @@ def Subcommands_GoTo_test( app, command, test ):
   ] )
 @WithRetry
 @SharedYcmd
-def Subcommands_GoToImplementation_test( app, test ):
+def Subcommands_GoToImplementation_test( app: TestApp, test: Dict[str, Union[Tuple[str, int, int], List[Tuple[str, int, int]]]] ) -> None:
   RunGoToTest( app, 'GoToImplementation', test )
 
 
 @WithRetry
 @SharedYcmd
-def Subcommands_GoToImplementation_Failure_test( app ):
+def Subcommands_GoToImplementation_Failure_test( app: TestApp ) -> None:
   RunGoToTest( app,
                'GoToImplementation',
                { 'req': ( 'main.rs', 11,  2 ),
@@ -411,13 +413,13 @@ def Subcommands_GoToImplementation_Failure_test( app ):
     { 'req': ( 'main.rs',  1,  1 ), 'res': 'Cannot jump to location' }
   ] )
 @SharedYcmd
-def Subcommands_GoToReferences_test( app, test ):
+def Subcommands_GoToReferences_test( app: TestApp, test: Dict[str, Union[Tuple[str, int, int], str, List[Tuple[str, int, int]]]] ) -> None:
   RunGoToTest( app, 'GoToReferences', test )
 
 
 @WithRetry
 @SharedYcmd
-def Subcommands_RefactorRename_Works_test( app ):
+def Subcommands_RefactorRename_Works_test( app: TestApp ) -> None:
   main_filepath = PathToTestFile( 'common', 'src', 'main.rs' )
   test_filepath = PathToTestFile( 'common', 'src', 'test.rs' )
 
@@ -450,7 +452,7 @@ def Subcommands_RefactorRename_Works_test( app ):
 
 
 @SharedYcmd
-def Subcommands_RefactorRename_Invalid_test( app ):
+def Subcommands_RefactorRename_Invalid_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'RefactorRename raises an error when cursor is invalid',
     'request': {
@@ -469,7 +471,7 @@ def Subcommands_RefactorRename_Invalid_test( app ):
 
 
 @SharedYcmd
-def Subcommands_FixIt_EmptyResponse_test( app ):
+def Subcommands_FixIt_EmptyResponse_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'common', 'src', 'main.rs' )
 
   RunTest( app, {
@@ -488,7 +490,7 @@ def Subcommands_FixIt_EmptyResponse_test( app ):
 
 
 @SharedYcmd
-def Subcommands_FixIt_Basic_test( app ):
+def Subcommands_FixIt_Basic_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'common', 'src', 'main.rs' )
 
   RunTest( app, {

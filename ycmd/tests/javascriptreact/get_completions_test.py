@@ -21,9 +21,12 @@ from hamcrest import assert_that, equal_to, has_entries, has_item
 from ycmd.tests.javascriptreact import PathToTestFile, SharedYcmd
 from ycmd.tests.test_utils import CombineRequest
 from ycmd.utils import ReadFile
+from hamcrest.library.collection.isdict_containingentries import IsDictContainingEntries
+from typing import Dict, Union
+from webtest.app import TestApp
 
 
-def RunTest( app, test ):
+def RunTest( app: TestApp, test: Dict[str, Union[str, Dict[str, Union[int, str]], Dict[str, Union[int, IsDictContainingEntries]]]] ) -> None:
   contents = ReadFile( test[ 'request' ][ 'filepath' ] )
   filetype = test[ 'request' ].get( 'filetype', 'javascriptreact' )
   app.post_json(
@@ -53,7 +56,7 @@ def RunTest( app, test ):
 
 
 @SharedYcmd
-def GetCompletions_JavaScriptReact_DefaultTriggers_test( app ):
+def GetCompletions_JavaScriptReact_DefaultTriggers_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'test.jsx' )
   RunTest( app, {
     'description': 'No need to force after a semantic trigger',

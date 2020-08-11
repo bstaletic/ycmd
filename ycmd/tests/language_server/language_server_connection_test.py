@@ -23,7 +23,7 @@ from ycmd.tests.language_server import MockConnection
 import queue
 
 
-def LanguageServerConnection_ReadPartialMessage_test():
+def LanguageServerConnection_ReadPartialMessage_test() -> None:
   connection = MockConnection()
 
   return_values = [
@@ -38,7 +38,7 @@ def LanguageServerConnection_ReadPartialMessage_test():
       dispatch_message.assert_called_with( { 'abc': '' } )
 
 
-def LanguageServerConnection_MissingHeader_test():
+def LanguageServerConnection_MissingHeader_test() -> None:
   connection = MockConnection()
 
   return_values = [
@@ -51,7 +51,7 @@ def LanguageServerConnection_MissingHeader_test():
     assert_that( calling( connection._ReadMessages ), raises( ValueError ) )
 
 
-def LanguageServerConnection_RequestAbortCallback_test():
+def LanguageServerConnection_RequestAbortCallback_test() -> None:
   connection = MockConnection()
 
   return_values = [
@@ -67,7 +67,7 @@ def LanguageServerConnection_RequestAbortCallback_test():
     callback.assert_called_with( response, None )
 
 
-def LanguageServerConnection_RequestAbortAwait_test():
+def LanguageServerConnection_RequestAbortAwait_test() -> None:
   connection = MockConnection()
 
   return_values = [
@@ -82,7 +82,7 @@ def LanguageServerConnection_RequestAbortAwait_test():
                  raises( lsc.ResponseAbortedException ) )
 
 
-def LanguageServerConnection_ServerConnectionDies_test():
+def LanguageServerConnection_ServerConnectionDies_test() -> None:
   connection = MockConnection()
 
   return_values = [
@@ -97,7 +97,7 @@ def LanguageServerConnection_ServerConnectionDies_test():
 @patch( 'ycmd.completers.language_server.language_server_completer.'
         'CONNECTION_TIMEOUT',
         0.5 )
-def LanguageServerConnection_ConnectionTimeout_test():
+def LanguageServerConnection_ConnectionTimeout_test() -> None:
   connection = MockConnection()
   with patch.object( connection,
                      'TryServerConnectionBlocking',
@@ -109,7 +109,7 @@ def LanguageServerConnection_ConnectionTimeout_test():
   assert_that( connection.is_alive(), equal_to( False ) )
 
 
-def LanguageServerConnection_CloseTwice_test():
+def LanguageServerConnection_CloseTwice_test() -> None:
   connection = MockConnection()
   with patch.object( connection,
                      'TryServerConnectionBlocking',
@@ -119,7 +119,7 @@ def LanguageServerConnection_CloseTwice_test():
 
 
 @patch.object( lsc, 'MAX_QUEUED_MESSAGES', 2 )
-def LanguageServerConnection_AddNotificationToQueue_RingBuffer_test():
+def LanguageServerConnection_AddNotificationToQueue_RingBuffer_test() -> None:
   connection = MockConnection()
   notifications = connection._notifications
 
@@ -154,7 +154,7 @@ def LanguageServerConnection_AddNotificationToQueue_RingBuffer_test():
   assert_that( calling( notifications.get_nowait ), raises( queue.Empty ) )
 
 
-def LanguageServerConnection_RejectUnsupportedRequest_test():
+def LanguageServerConnection_RejectUnsupportedRequest_test() -> None:
   connection = MockConnection()
 
   return_values = [

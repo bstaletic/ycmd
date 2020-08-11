@@ -30,16 +30,19 @@ from ycmd.tests.test_utils import ( CombineRequest,
                                     SignatureAvailableMatcher,
                                     WaitUntilCompleterServerReady,
                                     WithRetry )
+from hamcrest.library.collection.isdict_containingentries import IsDictContainingEntries
+from typing import Dict, Union
+from webtest.app import TestApp
 
 
-def ProjectPath( *args ):
+def ProjectPath( *args) -> str:
   return PathToTestFile( 'extra_confs',
                          'simple_extra_conf_project',
                          'src',
                          *args )
 
 
-def RunTest( app, test ):
+def RunTest( app: TestApp, test: Dict[str, Union[str, Dict[str, Union[int, str]], Dict[str, Union[int, IsDictContainingEntries]]]] ) -> None:
   """
   Method to run a simple signature help test and verify the result
 
@@ -75,7 +78,7 @@ def RunTest( app, test ):
 
 @WithRetry
 @SharedYcmd
-def SignatureHelp_MethodTrigger_test( app ):
+def SignatureHelp_MethodTrigger_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'Trigger after (',
     'request': {
@@ -103,7 +106,7 @@ def SignatureHelp_MethodTrigger_test( app ):
 
 @WithRetry
 @SharedYcmd
-def SignatureHelp_ArgTrigger_test( app ):
+def SignatureHelp_ArgTrigger_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'Trigger after ,',
     'request': {
@@ -135,7 +138,7 @@ def SignatureHelp_ArgTrigger_test( app ):
 
 @WithRetry
 @SharedYcmd
-def SignatureHelp_Constructor_test( app ):
+def SignatureHelp_Constructor_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'Constructor',
     'request': {
@@ -162,7 +165,7 @@ def SignatureHelp_Constructor_test( app ):
 
 
 @SharedYcmd
-def Signature_Help_Available_test( app ):
+def Signature_Help_Available_test( app: TestApp ) -> None:
   request = { 'filepath' : ProjectPath( 'SignatureHelp.java' ) }
   app.post_json( '/event_notification',
                  CombineRequest( request, {

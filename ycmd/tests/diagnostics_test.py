@@ -16,17 +16,18 @@
 # along with ycmd.  If not, see <http://www.gnu.org/licenses/>.
 
 from hamcrest import assert_that, equal_to
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 import requests
 
 from ycmd.responses import NoDiagnosticSupport, BuildDisplayMessageResponse
 from ycmd.tests import SharedYcmd
 from ycmd.tests.test_utils import ( BuildRequest, DummyCompleter, ErrorMatcher,
                                     MessageMatcher, PatchCompleter )
+from webtest.app import TestApp
 
 
 @SharedYcmd
-def Diagnostics_DoesntWork_test( app ):
+def Diagnostics_DoesntWork_test( app: TestApp ) -> None:
   with PatchCompleter( DummyCompleter, filetype = 'dummy_filetype' ):
     diag_data = BuildRequest( contents = "foo = 5",
                               line_num = 2,
@@ -44,7 +45,7 @@ def Diagnostics_DoesntWork_test( app ):
 @SharedYcmd
 @patch( 'ycmd.tests.test_utils.DummyCompleter.GetDetailedDiagnostic',
         return_value = BuildDisplayMessageResponse( 'detailed diagnostic' ) )
-def Diagnostics_DoesWork_test( get_detailed_diag, app ):
+def Diagnostics_DoesWork_test( get_detailed_diag: MagicMock, app: TestApp ) -> None:
   with PatchCompleter( DummyCompleter, filetype = 'dummy_filetype' ):
     diag_data = BuildRequest( contents = 'foo = 5',
                               filetype = 'dummy_filetype' )

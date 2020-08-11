@@ -22,14 +22,15 @@ from hamcrest import ( assert_that,
                        equal_to,
                        has_entries,
                        has_items )
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 from ycmd.tests import IsolatedYcmd, SharedYcmd, PathToTestFile
 from ycmd.tests.test_utils import ( BuildRequest, CompletionEntryMatcher,
                                     DummyCompleter, PatchCompleter )
+from webtest.app import TestApp
 
 
 @SharedYcmd
-def GetCompletions_RequestValidation_NoLineNumException_test( app ):
+def GetCompletions_RequestValidation_NoLineNumException_test( app: TestApp ) -> None:
   response = app.post_json( '/semantic_completion_available', {
     'column_num': 0,
     'filepath': '/foo',
@@ -44,7 +45,7 @@ def GetCompletions_RequestValidation_NoLineNumException_test( app ):
 
 
 @SharedYcmd
-def GetCompletions_IdentifierCompleter_Works_test( app ):
+def GetCompletions_IdentifierCompleter_Works_test( app: TestApp ) -> None:
   event_data = BuildRequest( contents = 'foo foogoo ba',
                              event_name = 'FileReadyToParse' )
 
@@ -64,7 +65,7 @@ def GetCompletions_IdentifierCompleter_Works_test( app ):
 
 
 @IsolatedYcmd( { 'min_num_identifier_candidate_chars': 4 } )
-def GetCompletions_IdentifierCompleter_FilterShortCandidates_test( app ):
+def GetCompletions_IdentifierCompleter_FilterShortCandidates_test( app: TestApp ) -> None:
   event_data = BuildRequest( contents = 'foo foogoo gooo',
                              event_name = 'FileReadyToParse' )
   app.post_json( '/event_notification', event_data )
@@ -79,7 +80,7 @@ def GetCompletions_IdentifierCompleter_FilterShortCandidates_test( app ):
 
 
 @SharedYcmd
-def GetCompletions_IdentifierCompleter_StartColumn_AfterWord_test( app ):
+def GetCompletions_IdentifierCompleter_StartColumn_AfterWord_test( app: TestApp ) -> None:
   completion_data = BuildRequest( contents = 'oo foo foogoo ba',
                                   column_num = 11 )
   response_data = app.post_json( '/completions', completion_data ).json
@@ -88,7 +89,7 @@ def GetCompletions_IdentifierCompleter_StartColumn_AfterWord_test( app ):
 
 @SharedYcmd
 def GetCompletions_IdentifierCompleter_WorksForSpecialIdentifierChars_test(
-  app ):
+  app: TestApp ) -> None:
   contents = """
     textarea {
       font-family: sans-serif;
@@ -115,7 +116,7 @@ def GetCompletions_IdentifierCompleter_WorksForSpecialIdentifierChars_test(
 
 
 @SharedYcmd
-def GetCompletions_IdentifierCompleter_Unicode_InLine_test( app ):
+def GetCompletions_IdentifierCompleter_Unicode_InLine_test( app: TestApp ) -> None:
   contents = """
     This is some text cøntaining unicøde
   """
@@ -140,7 +141,7 @@ def GetCompletions_IdentifierCompleter_Unicode_InLine_test( app ):
 
 
 @SharedYcmd
-def GetCompletions_IdentifierCompleter_UnicodeQuery_InLine_test( app ):
+def GetCompletions_IdentifierCompleter_UnicodeQuery_InLine_test( app: TestApp ) -> None:
   contents = """
     This is some text cøntaining unicøde
   """
@@ -166,7 +167,7 @@ def GetCompletions_IdentifierCompleter_UnicodeQuery_InLine_test( app ):
 
 
 @IsolatedYcmd()
-def GetCompletions_IdentifierCompleter_Unicode_MultipleCodePoints_test( app ):
+def GetCompletions_IdentifierCompleter_Unicode_MultipleCodePoints_test( app: TestApp ) -> None:
   # The first ō is on one code point while the second is on two ("o" + combining
   # macron character).
   event_data = BuildRequest( contents = 'fōo\nfōo',
@@ -191,7 +192,7 @@ def GetCompletions_IdentifierCompleter_Unicode_MultipleCodePoints_test( app ):
 @SharedYcmd
 @patch( 'ycmd.tests.test_utils.DummyCompleter.CandidatesList',
         return_value = [ 'foo', 'bar', 'qux' ] )
-def GetCompletions_ForceSemantic_Works_test( candidates, app ):
+def GetCompletions_ForceSemantic_Works_test( candidates: MagicMock, app: TestApp ) -> None:
   with PatchCompleter( DummyCompleter, 'dummy_filetype' ):
     completion_data = BuildRequest( filetype = 'dummy_filetype',
                                     force_semantic = True )
@@ -204,7 +205,7 @@ def GetCompletions_ForceSemantic_Works_test( candidates, app ):
 
 
 @SharedYcmd
-def GetCompletions_ForceSemantic_NoSemanticCompleter_test( app, *args ):
+def GetCompletions_ForceSemantic_NoSemanticCompleter_test( app: TestApp, *args) -> None:
   event_data = BuildRequest( event_name = 'FileReadyToParse',
                              filetype = 'dummy_filetype',
                              contents = 'complete_this_word\ncom' )
@@ -236,7 +237,7 @@ def GetCompletions_ForceSemantic_NoSemanticCompleter_test( app, *args ):
 
 
 @SharedYcmd
-def GetCompletions_IdentifierCompleter_SyntaxKeywordsAdded_test( app ):
+def GetCompletions_IdentifierCompleter_SyntaxKeywordsAdded_test( app: TestApp ) -> None:
   event_data = BuildRequest( event_name = 'FileReadyToParse',
                              syntax_keywords = [ 'foo', 'bar', 'zoo' ] )
 
@@ -253,7 +254,7 @@ def GetCompletions_IdentifierCompleter_SyntaxKeywordsAdded_test( app ):
 
 
 @SharedYcmd
-def GetCompletions_IdentifierCompleter_TagsAdded_test( app ):
+def GetCompletions_IdentifierCompleter_TagsAdded_test( app: TestApp ) -> None:
   event_data = BuildRequest( event_name = 'FileReadyToParse',
                              tag_files = [ PathToTestFile( 'basic.tags' ) ] )
   app.post_json( '/event_notification', event_data )
@@ -269,7 +270,7 @@ def GetCompletions_IdentifierCompleter_TagsAdded_test( app ):
 
 
 @SharedYcmd
-def GetCompletions_IdentifierCompleter_JustFinishedIdentifier_test( app ):
+def GetCompletions_IdentifierCompleter_JustFinishedIdentifier_test( app: TestApp ) -> None:
   event_data = BuildRequest( event_name = 'CurrentIdentifierFinished',
                              column_num = 4,
                              contents = 'foo' )
@@ -284,7 +285,7 @@ def GetCompletions_IdentifierCompleter_JustFinishedIdentifier_test( app ):
 
 @IsolatedYcmd()
 def GetCompletions_IdentifierCompleter_IgnoreFinishedIdentifierInString_test(
-  app ):
+  app: TestApp ) -> None:
 
   event_data = BuildRequest( event_name = 'CurrentIdentifierFinished',
                              column_num = 6,
@@ -299,7 +300,7 @@ def GetCompletions_IdentifierCompleter_IgnoreFinishedIdentifierInString_test(
 
 
 @SharedYcmd
-def GetCompletions_IdentifierCompleter_IdentifierUnderCursor_test( app ):
+def GetCompletions_IdentifierCompleter_IdentifierUnderCursor_test( app: TestApp ) -> None:
   event_data = BuildRequest( event_name = 'InsertLeave',
                              column_num = 2,
                              contents = 'foo' )
@@ -314,7 +315,7 @@ def GetCompletions_IdentifierCompleter_IdentifierUnderCursor_test( app ):
 
 @IsolatedYcmd()
 def GetCompletions_IdentifierCompleter_IgnoreCursorIdentifierInString_test(
-  app ):
+  app: TestApp ) -> None:
 
   event_data = BuildRequest( event_name = 'InsertLeave',
                              column_num = 3,
@@ -328,7 +329,7 @@ def GetCompletions_IdentifierCompleter_IgnoreCursorIdentifierInString_test(
 
 
 @SharedYcmd
-def GetCompletions_FilenameCompleter_Works_test( app ):
+def GetCompletions_FilenameCompleter_Works_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'filename_completer', 'test.foo' )
   completion_data = BuildRequest( filepath = filepath,
                                   contents = './',
@@ -340,7 +341,7 @@ def GetCompletions_FilenameCompleter_Works_test( app ):
 
 
 @SharedYcmd
-def GetCompletions_FilenameCompleter_FallBackToIdentifierCompleter_test( app ):
+def GetCompletions_FilenameCompleter_FallBackToIdentifierCompleter_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'filename_completer', 'test.foo' )
   event_data = BuildRequest( filepath = filepath,
                              contents = './nonexisting_dir',
@@ -361,7 +362,7 @@ def GetCompletions_FilenameCompleter_FallBackToIdentifierCompleter_test( app ):
 
 
 @SharedYcmd
-def GetCompletions_UltiSnipsCompleter_Works_test( app ):
+def GetCompletions_UltiSnipsCompleter_Works_test( app: TestApp ) -> None:
   event_data = BuildRequest(
     event_name = 'BufferVisit',
     ultisnips_snippets = [
@@ -386,7 +387,7 @@ def GetCompletions_UltiSnipsCompleter_Works_test( app ):
 
 
 @IsolatedYcmd( { 'use_ultisnips_completer': 0 } )
-def GetCompletions_UltiSnipsCompleter_UnusedWhenOffWithOption_test( app ):
+def GetCompletions_UltiSnipsCompleter_UnusedWhenOffWithOption_test( app: TestApp ) -> None:
   event_data = BuildRequest(
     event_name = 'BufferVisit',
     ultisnips_snippets = [
@@ -406,7 +407,7 @@ def GetCompletions_UltiSnipsCompleter_UnusedWhenOffWithOption_test( app ):
 @patch( 'ycmd.tests.test_utils.DummyCompleter.CandidatesList',
         return_value = [ 'some_candidate' ] )
 def GetCompletions_SemanticCompleter_WorksWhenTriggerIsIdentifier_test(
-  candidates, app ):
+  candidates: MagicMock, app: TestApp ) -> None:
   with PatchCompleter( DummyCompleter, 'dummy_filetype' ):
     completion_data = BuildRequest( filetype = 'dummy_filetype',
                                     contents = 'some_can',
@@ -426,7 +427,7 @@ def GetCompletions_SemanticCompleter_WorksWhenTriggerIsIdentifier_test(
 @patch( 'ycmd.tests.test_utils.DummyCompleter.CandidatesList',
         return_value = [ 'attribute' ] )
 def GetCompletions_CacheIsValid_test(
-  candidates_list, should_use, app ):
+  candidates_list: MagicMock, should_use: MagicMock, app: TestApp ) -> None:
   with PatchCompleter( DummyCompleter, 'dummy_filetype' ):
     completion_data = BuildRequest( filetype = 'dummy_filetype',
                                     contents = 'object.attr',
@@ -462,7 +463,7 @@ def GetCompletions_CacheIsValid_test(
 @patch( 'ycmd.tests.test_utils.DummyCompleter.CandidatesList',
         side_effect = [ [ 'attributeA' ], [ 'attributeB' ] ] )
 def GetCompletions_CacheIsNotValid_DifferentLineNumber_test(
-  candidates_list, should_use, app ):
+  candidates_list: MagicMock, should_use: MagicMock, app: TestApp ) -> None:
   with PatchCompleter( DummyCompleter, 'dummy_filetype' ):
     completion_data = BuildRequest( filetype = 'dummy_filetype',
                                     contents = 'objectA.attr\n'
@@ -501,7 +502,7 @@ def GetCompletions_CacheIsNotValid_DifferentLineNumber_test(
 @patch( 'ycmd.tests.test_utils.DummyCompleter.CandidatesList',
         side_effect = [ [ 'attributeA' ], [ 'attributeB' ] ] )
 def GetCompletions_CacheIsNotValid_DifferentStartColumn_test(
-  candidates_list, should_use, app ):
+  candidates_list: MagicMock, should_use: MagicMock, app: TestApp ) -> None:
   with PatchCompleter( DummyCompleter, 'dummy_filetype' ):
     # Start column is 9
     completion_data = BuildRequest( filetype = 'dummy_filetype',
@@ -540,7 +541,7 @@ def GetCompletions_CacheIsNotValid_DifferentStartColumn_test(
 @patch( 'ycmd.tests.test_utils.DummyCompleter.CandidatesList',
         side_effect = [ [ 'attributeA' ], [ 'attributeB' ] ] )
 def GetCompletions_CacheIsNotValid_DifferentForceSemantic_test(
-  candidates_list, should_use, app ):
+  candidates_list: MagicMock, should_use: MagicMock, app: TestApp ) -> None:
   with PatchCompleter( DummyCompleter, 'dummy_filetype' ):
     completion_data = BuildRequest( filetype = 'dummy_filetype',
                                     contents = 'objectA.attr',
@@ -578,7 +579,7 @@ def GetCompletions_CacheIsNotValid_DifferentForceSemantic_test(
 @patch( 'ycmd.tests.test_utils.DummyCompleter.CandidatesList',
         side_effect = [ [ 'attributeA' ], [ 'attributeB' ] ] )
 def GetCompletions_CacheIsNotValid_DifferentContents_test(
-  candidates_list, should_use, app ):
+  candidates_list: MagicMock, should_use: MagicMock, app: TestApp ) -> None:
   with PatchCompleter( DummyCompleter, 'dummy_filetype' ):
     completion_data = BuildRequest( filetype = 'dummy_filetype',
                                     contents = 'objectA = foo\n'
@@ -618,7 +619,7 @@ def GetCompletions_CacheIsNotValid_DifferentContents_test(
 @patch( 'ycmd.tests.test_utils.DummyCompleter.CandidatesList',
         side_effect = [ [ 'attributeA' ], [ 'attributeB' ] ] )
 def GetCompletions_CacheIsNotValid_DifferentNumberOfLines_test(
-  candidates_list, should_use, app ):
+  candidates_list: MagicMock, should_use: MagicMock, app: TestApp ) -> None:
   with PatchCompleter( DummyCompleter, 'dummy_filetype' ):
     completion_data = BuildRequest( filetype = 'dummy_filetype',
                                     contents = 'objectA.attr\n'
@@ -657,7 +658,7 @@ def GetCompletions_CacheIsNotValid_DifferentNumberOfLines_test(
 @patch( 'ycmd.tests.test_utils.DummyCompleter.CandidatesList',
         side_effect = [ [ 'attributeA' ], [ 'attributeB' ] ] )
 def GetCompletions_CacheIsNotValid_DifferentFileData_test(
-  candidates_list, should_use, app ):
+  candidates_list: MagicMock, should_use: MagicMock, app: TestApp ) -> None:
   with PatchCompleter( DummyCompleter, 'dummy_filetype' ):
     completion_data = BuildRequest( filetype = 'dummy_filetype',
                                     contents = 'objectA.attr',
@@ -707,7 +708,7 @@ def GetCompletions_CacheIsNotValid_DifferentFileData_test(
 @patch( 'ycmd.tests.test_utils.DummyCompleter.CandidatesList',
         side_effect = [ [ 'attributeA' ], [ 'attributeB' ] ] )
 def GetCompletions_CacheIsNotValid_DifferentExtraConfData_test(
-  candidates_list, should_use, app ):
+  candidates_list: MagicMock, should_use: MagicMock, app: TestApp ) -> None:
   with PatchCompleter( DummyCompleter, 'dummy_filetype' ):
     completion_data = BuildRequest( filetype = 'dummy_filetype',
                                     contents = 'objectA.attr',
@@ -744,9 +745,9 @@ def GetCompletions_CacheIsNotValid_DifferentExtraConfData_test(
         return_value = True )
 @patch( 'ycmd.tests.test_utils.DummyCompleter.CandidatesList',
         return_value = [ 'aba', 'cbc' ] )
-def GetCompletions_FilterThenReturnFromCache_test( candidates_list,
-                                                   should_use,
-                                                   app ):
+def GetCompletions_FilterThenReturnFromCache_test( candidates_list: MagicMock,
+                                                   should_use: MagicMock,
+                                                   app: TestApp ) -> None:
 
   with PatchCompleter( DummyCompleter, 'dummy_filetype' ):
     # First, fill the cache with an empty query

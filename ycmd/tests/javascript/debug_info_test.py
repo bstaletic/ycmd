@@ -26,10 +26,11 @@ from hamcrest import ( any_of,
 
 from ycmd.tests.javascript import IsolatedYcmd, SharedYcmd
 from ycmd.tests.test_utils import BuildRequest
+from webtest.app import TestApp
 
 
 @SharedYcmd
-def DebugInfo_TypeScriptCompleter_test( app ):
+def DebugInfo_TypeScriptCompleter_test( app: TestApp ) -> None:
   request_data = BuildRequest( filetype = 'javascript' )
   assert_that(
     app.post_json( '/debug_info', request_data ).json,

@@ -32,6 +32,7 @@ from ycmd.tests.test_utils import ( BuildRequest,
                                     WaitForDiagnosticsToBeReady,
                                     WithRetry )
 from ycmd.utils import ReadFile
+from webtest.app import TestApp
 
 
 MAIN_FILEPATH = PathToTestFile( 'goto.go' )
@@ -53,7 +54,7 @@ DIAG_MATCHERS_PER_FILE = {
 
 @WithRetry
 @SharedYcmd
-def Diagnostics_DetailedDiags_test( app ):
+def Diagnostics_DetailedDiags_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'goto.go' )
   contents = ReadFile( filepath )
   WaitForDiagnosticsToBeReady( app, filepath, contents, 'go' )
@@ -70,7 +71,7 @@ def Diagnostics_DetailedDiags_test( app ):
 
 @WithRetry
 @SharedYcmd
-def Diagnostics_FileReadyToParse_test( app ):
+def Diagnostics_FileReadyToParse_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'goto.go' )
   contents = ReadFile( filepath )
 
@@ -83,7 +84,7 @@ def Diagnostics_FileReadyToParse_test( app ):
 
 @WithRetry
 @SharedYcmd
-def Diagnostics_Poll_test( app ):
+def Diagnostics_Poll_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'goto.go' )
   contents = ReadFile( filepath )
 

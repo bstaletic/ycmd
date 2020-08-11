@@ -24,9 +24,12 @@ import requests
 from ycmd.tests.test_utils import CombineRequest
 from ycmd.tests.javascriptreact import PathToTestFile, SharedYcmd
 from ycmd.utils import ReadFile
+from hamcrest.library.collection.issequence_containinginanyorder import IsSequenceContainingInAnyOrder
+from typing import Dict, Union
+from webtest.app import TestApp
 
 
-def RunTest( app, test ):
+def RunTest( app: TestApp, test: Dict[str, Union[str, Dict[str, Union[int, str]], Dict[str, Union[int, IsSequenceContainingInAnyOrder]]]] ) -> None:
   contents = ReadFile( test[ 'request' ][ 'filepath' ] )
 
   app.post_json(
@@ -69,7 +72,7 @@ def RunTest( app, test ):
 
 
 @SharedYcmd
-def Subcommands_GoToReferences_test( app ):
+def Subcommands_GoToReferences_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'GoToReferences works',
     'request': {

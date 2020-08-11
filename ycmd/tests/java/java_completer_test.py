@@ -19,7 +19,7 @@ import os
 import requests
 
 from hamcrest import assert_that, equal_to, calling, has_entries, is_not, raises
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from ycmd import handlers, user_options_store
 from ycmd.tests.test_utils import BuildRequest, ErrorMatcher
@@ -27,6 +27,7 @@ from ycmd.tests.java import SharedYcmd
 from ycmd.completers.java import java_completer, hook
 from ycmd.completers.java.java_completer import NO_DOCUMENTATION_MESSAGE
 from ycmd.tests import IsolatedYcmd as IsolatedYcmdWithoutJava
+from webtest.app import TestApp
 
 
 DEFAULT_OPTIONS = user_options_store.DefaultOptions()
@@ -34,13 +35,13 @@ DEFAULT_OPTIONS = user_options_store.DefaultOptions()
 
 @patch( 'ycmd.completers.java.java_completer.utils.FindExecutable',
         return_value = '' )
-def ShouldEnableJavaCompleter_NoJava_test( *args ):
+def ShouldEnableJavaCompleter_NoJava_test( *args) -> None:
   assert_that( java_completer.ShouldEnableJavaCompleter( DEFAULT_OPTIONS ),
                equal_to( False ) )
 
 
 @IsolatedYcmdWithoutJava( { 'java_binary_path': '/this/path/does/not/exist' } )
-def ShouldEnableJavaCompleter_JavaNotFound_test( app ):
+def ShouldEnableJavaCompleter_JavaNotFound_test( app: TestApp ) -> None:
   request_data = BuildRequest( filetype = 'java' )
   response = app.post_json( '/defined_subcommands',
                             request_data,
@@ -53,7 +54,7 @@ def ShouldEnableJavaCompleter_JavaNotFound_test( app ):
                              "['java']" ) )
 
 
-def ShouldEnableJavaCompleter_NotInstalled_test():
+def ShouldEnableJavaCompleter_NotInstalled_test() -> None:
   orig_language_server_home = java_completer.LANGUAGE_SERVER_HOME
   try:
     java_completer.LANGUAGE_SERVER_HOME = ''
@@ -64,13 +65,13 @@ def ShouldEnableJavaCompleter_NotInstalled_test():
 
 
 @patch( 'glob.glob', return_value = [] )
-def ShouldEnableJavaCompleter_NoLauncherJar_test( glob ):
+def ShouldEnableJavaCompleter_NoLauncherJar_test( glob: MagicMock ) -> None:
   assert_that( java_completer.ShouldEnableJavaCompleter( DEFAULT_OPTIONS ),
                equal_to( False ) )
   glob.assert_called()
 
 
-def WorkspaceDirForProject_HashProjectDir_test():
+def WorkspaceDirForProject_HashProjectDir_test() -> None:
   assert_that(
     java_completer._WorkspaceDirForProject( os.getcwd(),
                                             os.getcwd(),
@@ -81,7 +82,7 @@ def WorkspaceDirForProject_HashProjectDir_test():
   )
 
 
-def WorkspaceDirForProject_UniqueDir_test():
+def WorkspaceDirForProject_UniqueDir_test() -> None:
   assert_that(
     java_completer._WorkspaceDirForProject( os.getcwd(),
                                             os.getcwd(),
@@ -93,7 +94,7 @@ def WorkspaceDirForProject_UniqueDir_test():
 
 
 @SharedYcmd
-def JavaCompleter_GetType_test( app ):
+def JavaCompleter_GetType_test( app: TestApp ) -> None:
   completer = handlers._server_state.GetFiletypeCompleter( [ 'java' ] )
 
   # The LSP defines the hover response as either:
@@ -164,7 +165,7 @@ def JavaCompleter_GetType_test( app ):
 
 
 @SharedYcmd
-def JavaCompleter_GetDoc_test( app ):
+def JavaCompleter_GetDoc_test( app: TestApp ) -> None:
   completer = handlers._server_state.GetFiletypeCompleter( [ 'java' ] )
 
   # The LSP defines the hover response as either:
@@ -232,5 +233,5 @@ def JavaCompleter_GetDoc_test( app ):
 
 @patch( 'ycmd.completers.java.hook.ShouldEnableJavaCompleter',
         return_value = False )
-def JavaHook_JavaNotEnabled_test( *args ):
+def JavaHook_JavaNotEnabled_test( *args) -> None:
   assert_that( hook.GetCompleter( {} ), equal_to( None ) )

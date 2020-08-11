@@ -52,6 +52,9 @@ from ycmd.completers.language_server.language_server_completer import (
   ResponseFailedException
 )
 from ycmd.responses import UnknownExtraConf
+from hamcrest.library.collection.isdict_containingentries import IsDictContainingEntries
+from typing import Any, Dict, List, Union
+from webtest.app import TestApp
 
 TESTLAUNCHER_JAVA = PathToTestFile( 'simple_eclipse_project',
                                     'src',
@@ -75,7 +78,7 @@ TSET_JAVA = PathToTestFile( 'simple_eclipse_project',
 
 @WithRetry
 @SharedYcmd
-def Subcommands_DefinedSubcommands_test( app ):
+def Subcommands_DefinedSubcommands_test( app: TestApp ) -> None:
   subcommands_data = BuildRequest( completer_target = 'java' )
 
   assert_that( app.post_json( '/defined_subcommands', subcommands_data ).json,
@@ -113,7 +116,7 @@ def Subcommands_DefinedSubcommands_test( app ):
   ( 'RefactorRename', [ 'test' ] ),
 ] )
 @SharedYcmd
-def Subcommands_ServerNotInitialized_test( app, cmd, arguments ):
+def Subcommands_ServerNotInitialized_test( app: TestApp, cmd: str, arguments: List[str] ) -> None:
   filepath = PathToTestFile( 'simple_eclipse_project',
                              'src',
                              'com',
@@ -143,7 +146,7 @@ def Subcommands_ServerNotInitialized_test( app, cmd, arguments ):
   Test( app, cmd, arguments )
 
 
-def RunTest( app, test, contents = None ):
+def RunTest( app: TestApp, test: Dict[str, Any], contents: None = None ) -> None:
   if not contents:
     contents = ReadFile( test[ 'request' ][ 'filepath' ] )
 
@@ -191,7 +194,7 @@ def RunTest( app, test, contents = None ):
 
 @WithRetry
 @SharedYcmd
-def Subcommands_GetDoc_NoDoc_test( app ):
+def Subcommands_GetDoc_NoDoc_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'simple_eclipse_project',
                              'src',
                              'com',
@@ -220,7 +223,7 @@ def Subcommands_GetDoc_NoDoc_test( app ):
 
 @WithRetry
 @SharedYcmd
-def Subcommands_GetDoc_Method_test( app ):
+def Subcommands_GetDoc_Method_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'simple_eclipse_project',
                              'src',
                              'com',
@@ -245,7 +248,7 @@ def Subcommands_GetDoc_Method_test( app ):
 
 @WithRetry
 @SharedYcmd
-def Subcommands_GetDoc_Class_test( app ):
+def Subcommands_GetDoc_Class_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'simple_eclipse_project',
                              'src',
                              'com',
@@ -271,7 +274,7 @@ def Subcommands_GetDoc_Class_test( app ):
 
 @WithRetry
 @SharedYcmd
-def Subcommands_GetType_NoKnownType_test( app ):
+def Subcommands_GetType_NoKnownType_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'simple_eclipse_project',
                              'src',
                              'com',
@@ -300,7 +303,7 @@ def Subcommands_GetType_NoKnownType_test( app ):
 
 @WithRetry
 @SharedYcmd
-def Subcommands_GetType_Class_test( app ):
+def Subcommands_GetType_Class_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'simple_eclipse_project',
                              'src',
                              'com',
@@ -323,7 +326,7 @@ def Subcommands_GetType_Class_test( app ):
 
 @WithRetry
 @SharedYcmd
-def Subcommands_GetType_Constructor_test( app ):
+def Subcommands_GetType_Constructor_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'simple_eclipse_project',
                              'src',
                              'com',
@@ -347,7 +350,7 @@ def Subcommands_GetType_Constructor_test( app ):
 
 @WithRetry
 @SharedYcmd
-def Subcommands_GetType_ClassMemberVariable_test( app ):
+def Subcommands_GetType_ClassMemberVariable_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'simple_eclipse_project',
                              'src',
                              'com',
@@ -370,7 +373,7 @@ def Subcommands_GetType_ClassMemberVariable_test( app ):
 
 @WithRetry
 @SharedYcmd
-def Subcommands_GetType_MethodArgument_test( app ):
+def Subcommands_GetType_MethodArgument_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'simple_eclipse_project',
                              'src',
                              'com',
@@ -395,7 +398,7 @@ def Subcommands_GetType_MethodArgument_test( app ):
 
 @WithRetry
 @SharedYcmd
-def Subcommands_GetType_MethodVariable_test( app ):
+def Subcommands_GetType_MethodVariable_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'simple_eclipse_project',
                              'src',
                              'com',
@@ -419,7 +422,7 @@ def Subcommands_GetType_MethodVariable_test( app ):
 
 @WithRetry
 @SharedYcmd
-def Subcommands_GetType_Method_test( app ):
+def Subcommands_GetType_Method_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'simple_eclipse_project',
                              'src',
                              'com',
@@ -443,7 +446,7 @@ def Subcommands_GetType_Method_test( app ):
 
 @WithRetry
 @SharedYcmd
-def Subcommands_GetType_Unicode_test( app ):
+def Subcommands_GetType_Unicode_test( app: TestApp ) -> None:
   contents = ReadFile( TEST_JAVA )
 
   app.post_json( '/event_notification',
@@ -468,7 +471,7 @@ def Subcommands_GetType_Unicode_test( app ):
 
 @WithRetry
 @SharedYcmd
-def Subcommands_GetType_LiteralValue_test( app ):
+def Subcommands_GetType_LiteralValue_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'simple_eclipse_project',
                              'src',
                              'com',
@@ -497,7 +500,7 @@ def Subcommands_GetType_LiteralValue_test( app ):
 
 @WithRetry
 @SharedYcmd
-def Subcommands_GoTo_NoLocation_test( app ):
+def Subcommands_GoTo_NoLocation_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'simple_eclipse_project',
                              'src',
                              'com',
@@ -526,7 +529,7 @@ def Subcommands_GoTo_NoLocation_test( app ):
 
 @WithRetry
 @SharedYcmd
-def Subcommands_GoToReferences_NoReferences_test( app ):
+def Subcommands_GoToReferences_NoReferences_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'simple_eclipse_project',
                              'src',
                              'com',
@@ -558,7 +561,7 @@ def Subcommands_GoToReferences_NoReferences_test( app ):
 @IsolatedYcmd( {
   'extra_conf_globlist': PathToTestFile( 'multiple_projects', '*' )
 } )
-def Subcommands_GoToReferences_MultipleProjects_test( app ):
+def Subcommands_GoToReferences_MultipleProjects_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'multiple_projects',
                              'src',
                              'core',
@@ -602,7 +605,7 @@ def Subcommands_GoToReferences_MultipleProjects_test( app ):
 
 @WithRetry
 @SharedYcmd
-def Subcommands_GoToReferences_test( app ):
+def Subcommands_GoToReferences_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'simple_eclipse_project',
                              'src',
                              'com',
@@ -644,7 +647,7 @@ def Subcommands_GoToReferences_test( app ):
 
 @WithRetry
 @SharedYcmd
-def Subcommands_GoToSymbol_SingleSameFile_test( app ):
+def Subcommands_GoToSymbol_SingleSameFile_test( app: TestApp ) -> None:
   contents = ReadFile( TEST_JAVA )
 
   event_data = BuildRequest( filepath = TEST_JAVA,
@@ -667,7 +670,7 @@ def Subcommands_GoToSymbol_SingleSameFile_test( app ):
 
 @WithRetry
 @SharedYcmd
-def Subcommands_GoToSymbol_Multiple_test( app ):
+def Subcommands_GoToSymbol_Multiple_test( app: TestApp ) -> None:
   contents = ReadFile( TEST_JAVA )
 
   event_data = BuildRequest( filepath = TEST_JAVA,
@@ -726,7 +729,7 @@ def Subcommands_GoToSymbol_Multiple_test( app ):
 
 @WithRetry
 @SharedYcmd
-def Subcommands_GoToSymbol_None_test( app ):
+def Subcommands_GoToSymbol_None_test( app: TestApp ) -> None:
   contents = ReadFile( TEST_JAVA )
 
   event_data = BuildRequest( filepath = TEST_JAVA,
@@ -751,7 +754,7 @@ def Subcommands_GoToSymbol_None_test( app ):
 
 @WithRetry
 @SharedYcmd
-def Subcommands_RefactorRename_Simple_test( app ):
+def Subcommands_RefactorRename_Simple_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'simple_eclipse_project',
                              'src',
                              'com',
@@ -850,7 +853,7 @@ def Subcommands_RefactorRename_MultipleFiles_test( app ):
 
 @WithRetry
 @SharedYcmd
-def Subcommands_RefactorRename_Missing_New_Name_test( app ):
+def Subcommands_RefactorRename_Missing_New_Name_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'simple_eclipse_project',
                              'src',
                              'com',
@@ -875,7 +878,7 @@ def Subcommands_RefactorRename_Missing_New_Name_test( app ):
 
 @WithRetry
 @SharedYcmd
-def Subcommands_RefactorRename_Unicode_test( app ):
+def Subcommands_RefactorRename_Unicode_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'Rename works for unicode identifier',
     'request': {
@@ -904,7 +907,7 @@ def Subcommands_RefactorRename_Unicode_test( app ):
 
 
 @WithRetry
-def RunFixItTest( app, description, filepath, line, col, fixits_for_line ):
+def RunFixItTest( app: TestApp, description: str, filepath: str, line: int, col: int, fixits_for_line: IsDictContainingEntries ) -> None:
   RunTest( app, {
     'description': description,
     'request': {
@@ -927,9 +930,9 @@ def RunFixItTest( app, description, filepath, line, col, fixits_for_line ):
   ( 'FixIt works at the end of the line', 34 ),
 ] )
 @SharedYcmd
-def Subcommands_FixIt_SingleDiag_MultipleOption_Insertion_test( app,
-                                                                description,
-                                                                column ):
+def Subcommands_FixIt_SingleDiag_MultipleOption_Insertion_test( app: TestApp,
+                                                                description: str,
+                                                                column: int ) -> None:
   import os
   wibble_path = PathToTestFile( 'simple_eclipse_project',
                                 'src',
@@ -1059,7 +1062,7 @@ def Subcommands_FixIt_SingleDiag_MultipleOption_Insertion_test( app,
 
 
 @SharedYcmd
-def Subcommands_FixIt_SingleDiag_SingleOption_Modify_test( app ):
+def Subcommands_FixIt_SingleDiag_SingleOption_Modify_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'simple_eclipse_project',
                              'src',
                              'com',
@@ -1120,7 +1123,7 @@ def Subcommands_FixIt_SingleDiag_SingleOption_Modify_test( app ):
 
 
 @SharedYcmd
-def Subcommands_FixIt_SingleDiag_MultiOption_Delete_test( app ):
+def Subcommands_FixIt_SingleDiag_MultiOption_Delete_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'simple_eclipse_project',
                              'src',
                              'com',
@@ -1174,10 +1177,10 @@ def Subcommands_FixIt_SingleDiag_MultiOption_Delete_test( app ):
   ( 'diags are merged in FixIt options - end of line', 55, 'MERGE' ),
 ] )
 @SharedYcmd
-def Subcommands_FixIt_MultipleDiags_test( app,
-                                          description,
-                                          column,
-                                          expect_fixits ):
+def Subcommands_FixIt_MultipleDiags_test( app: TestApp,
+                                          description: str,
+                                          column: int,
+                                          expect_fixits: str ) -> None:
   filepath = PathToTestFile( 'simple_eclipse_project',
                              'src',
                              'com',
@@ -1246,7 +1249,7 @@ def Subcommands_FixIt_MultipleDiags_test( app,
 
 
 @SharedYcmd
-def Subcommands_FixIt_Range_test( app ):
+def Subcommands_FixIt_Range_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'simple_eclipse_project',
                              'src',
                              'com',
@@ -1361,7 +1364,7 @@ def Subcommands_FixIt_Range_test( app ):
 
 
 @SharedYcmd
-def Subcommands_FixIt_NoDiagnostics_test( app ):
+def Subcommands_FixIt_NoDiagnostics_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'simple_eclipse_project',
                              'src',
                              'com',
@@ -1381,7 +1384,7 @@ def Subcommands_FixIt_NoDiagnostics_test( app ):
 
 
 @SharedYcmd
-def Subcommands_FixIt_Unicode_test( app ):
+def Subcommands_FixIt_Unicode_test( app: TestApp ) -> None:
   fixits = has_entries( {
     'fixits': contains_inanyorder(
       has_entries( {
@@ -1428,7 +1431,7 @@ def Subcommands_FixIt_Unicode_test( app ):
 
 @WithRetry
 @IsolatedYcmd()
-def Subcommands_FixIt_InvalidURI_test( app ):
+def Subcommands_FixIt_InvalidURI_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'simple_eclipse_project',
                              'src',
                              'com',
@@ -1513,7 +1516,7 @@ def Subcommands_FixIt_InvalidURI_test( app ):
 
 @WithRetry
 @SharedYcmd
-def Subcommands_Format_WholeFile_Spaces_test( app ):
+def Subcommands_Format_WholeFile_Spaces_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'Formatting is applied on the whole file '
                    'with tabs composed of 4 spaces',
@@ -1599,7 +1602,7 @@ def Subcommands_Format_WholeFile_Spaces_test( app ):
 
 @WithRetry
 @SharedYcmd
-def Subcommands_Format_WholeFile_Tabs_test( app ):
+def Subcommands_Format_WholeFile_Tabs_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'Formatting is applied on the whole file '
                    'with tabs composed of 2 spaces',
@@ -1685,7 +1688,7 @@ def Subcommands_Format_WholeFile_Tabs_test( app ):
 
 @WithRetry
 @SharedYcmd
-def Subcommands_Format_Range_Spaces_test( app ):
+def Subcommands_Format_Range_Spaces_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'Formatting is applied on some part of the file '
                    'with tabs composed of 4 spaces',
@@ -1736,7 +1739,7 @@ def Subcommands_Format_Range_Spaces_test( app ):
 
 @WithRetry
 @SharedYcmd
-def Subcommands_Format_Range_Tabs_test( app ):
+def Subcommands_Format_Range_Tabs_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'Formatting is applied on some part of the file '
                    'with tabs instead of spaces',
@@ -1790,7 +1793,7 @@ def Subcommands_Format_Range_Tabs_test( app ):
 
 @WithRetry
 @SharedYcmd
-def RunGoToTest( app, description, filepath, line, col, cmd, goto_response ):
+def RunGoToTest( app: TestApp, description: str, filepath: str, line: int, col: int, cmd: str, goto_response: IsDictContainingEntries ) -> None:
   RunTest( app, {
     'description': description,
     'request': {
@@ -1861,7 +1864,7 @@ def RunGoToTest( app, description, filepath, line, col, cmd, goto_response ):
                                        'GoToDefinition',
                                        'GoToDeclaration' ] )
 @SharedYcmd
-def Subcommands_GoTo_test( app, command, test ):
+def Subcommands_GoTo_test( app: TestApp, command: str, test: Dict[str, Union[Dict[str, Union[int, str]], str]] ) -> None:
   RunGoToTest( app,
                test[ 'description' ],
                test[ 'request' ][ 'filepath' ],
@@ -1883,7 +1886,7 @@ def Subcommands_GoTo_test( app, command, test ):
       'description': 'GoToType works for member variable' },
   ] )
 @SharedYcmd
-def Subcommands_GoToType_test( app, test ):
+def Subcommands_GoToType_test( app: TestApp, test: Dict[str, Union[Dict[str, Union[int, str]], str]] ) -> None:
   RunGoToTest( app,
                test[ 'description' ],
                test[ 'request' ][ 'filepath' ],
@@ -1908,7 +1911,7 @@ def Subcommands_GoToType_test( app, test ):
                      'jumpts to its implementation' },
   ] )
 @SharedYcmd
-def Subcommands_GoToImplementation_test( app, test ):
+def Subcommands_GoToImplementation_test( app: TestApp, test: Dict[str, Union[Dict[str, Union[int, str]], str]] ) -> None:
   RunGoToTest( app,
                test[ 'description' ],
                test[ 'request' ][ 'filepath' ],
@@ -1920,7 +1923,7 @@ def Subcommands_GoToImplementation_test( app, test ):
 
 @WithRetry
 @SharedYcmd
-def Subcommands_OrganizeImports_test( app ):
+def Subcommands_OrganizeImports_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'Imports are resolved and sorted, '
                    'and unused ones are removed',
@@ -1949,7 +1952,7 @@ def Subcommands_OrganizeImports_test( app ):
 @patch( 'ycmd.completers.language_server.language_server_completer.'
         'REQUEST_TIMEOUT_COMMAND',
         5 )
-def Subcommands_RequestTimeout_test( app ):
+def Subcommands_RequestTimeout_test( app: TestApp ) -> None:
   with patch.object(
     handlers._server_state.GetFiletypeCompleter( [ 'java' ] ).GetConnection(),
     'WriteData' ):
@@ -1970,7 +1973,7 @@ def Subcommands_RequestTimeout_test( app ):
 
 @WithRetry
 @SharedYcmd
-def Subcommands_RequestFailed_test( app ):
+def Subcommands_RequestFailed_test( app: TestApp ) -> None:
   connection = handlers._server_state.GetFiletypeCompleter(
     [ 'java' ] ).GetConnection()
 
@@ -2001,7 +2004,7 @@ def Subcommands_RequestFailed_test( app ):
 
 @WithRetry
 @SharedYcmd
-def Subcommands_IndexOutOfRange_test( app ):
+def Subcommands_IndexOutOfRange_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'Request with invalid position does not crash',
     'request': {
@@ -2021,7 +2024,7 @@ def Subcommands_IndexOutOfRange_test( app ):
 
 @WithRetry
 @SharedYcmd
-def Subcommands_InvalidRange_test( app ):
+def Subcommands_InvalidRange_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'Request with invalid visual range is rejected',
     'request': {
@@ -2049,7 +2052,7 @@ def Subcommands_InvalidRange_test( app ):
 
 @WithRetry
 @SharedYcmd
-def Subcommands_DifferentFileTypesUpdate_test( app ):
+def Subcommands_DifferentFileTypesUpdate_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'Request error handles the error',
     'request': {
@@ -2088,7 +2091,7 @@ def Subcommands_DifferentFileTypesUpdate_test( app ):
 @WithRetry
 @IsolatedYcmd( { 'extra_conf_globlist':
                  PathToTestFile( 'extra_confs', '*' ) } )
-def Subcommands_ExtraConf_SettingsValid_test( app ):
+def Subcommands_ExtraConf_SettingsValid_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'extra_confs',
                              'simple_extra_conf_project',
                              'src',
@@ -2117,7 +2120,7 @@ def Subcommands_ExtraConf_SettingsValid_test( app ):
 @WithRetry
 @IsolatedYcmd( { 'extra_conf_globlist':
                  PathToTestFile( 'extra_confs', '*' ) } )
-def Subcommands_AdditionalFormatterOptions_test( app ):
+def Subcommands_AdditionalFormatterOptions_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'extra_confs',
                              'simple_extra_conf_project',
                              'src',
@@ -2195,7 +2198,7 @@ def Subcommands_AdditionalFormatterOptions_test( app ):
 
 @WithRetry
 @IsolatedYcmd()
-def Subcommands_ExtraConf_SettingsValid_UnknownExtraConf_test( app ):
+def Subcommands_ExtraConf_SettingsValid_UnknownExtraConf_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'extra_confs',
                              'simple_extra_conf_project',
                              'src',
@@ -2247,7 +2250,7 @@ def Subcommands_ExtraConf_SettingsValid_UnknownExtraConf_test( app ):
 
 
 @SharedYcmd
-def Subcommands_ExecuteCommand_NoArguments_test( app ):
+def Subcommands_ExecuteCommand_NoArguments_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'Running a command without args fails',
     'request': {
@@ -2265,7 +2268,7 @@ def Subcommands_ExecuteCommand_NoArguments_test( app ):
 
 
 @SharedYcmd
-def Subcommands_ExecuteCommand_test( app ):
+def Subcommands_ExecuteCommand_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'Running a command does what it says it does',
     'request': {

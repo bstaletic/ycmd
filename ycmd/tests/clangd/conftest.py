@@ -16,6 +16,11 @@
 # along with ycmd.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
+from _pytest.fixtures import SubRequest
+from _pytest.mark.structures import MarkDecorator
+from typing import Dict, Iterator, List, Union
+from webtest.app import TestApp
+
 import pytest
 from ycmd.tests.test_utils import ( ClearCompletionsCache,
                                     IgnoreExtraConfOutsideTestsFolder,
@@ -27,7 +32,7 @@ shared_app = None
 
 
 @pytest.fixture( scope='module', autouse=True )
-def set_up_shared_app():
+def set_up_shared_app() -> Iterator[None]:
   global shared_app
   shared_app = SetUpApp()
   yield
@@ -35,7 +40,7 @@ def set_up_shared_app():
 
 
 @pytest.fixture
-def app( request ):
+def app( request: SubRequest ) -> Iterator[TestApp]:
   which = request.param[ 0 ]
   assert which == 'isolated' or which == 'shared'
   if which == 'isolated':
@@ -64,7 +69,7 @@ SharedYcmd = pytest.mark.parametrize(
     indirect = True )
 
 
-def IsolatedYcmd( custom_options = {} ):
+def IsolatedYcmd( custom_options: Dict[str, Union[List[str], bool, int, str]] = {} ) -> MarkDecorator:
   """Defines a decorator to be attached to tests of this package. This decorator
   passes a unique ycmd application as a parameter. It should be used on tests
   that change the server state in a irreversible way (ex: a semantic subserver
@@ -92,6 +97,6 @@ def IsolatedYcmd( custom_options = {} ):
       indirect = True )
 
 
-def PathToTestFile( *args ):
+def PathToTestFile( *args) -> str:
   dir_of_current_script = os.path.dirname( os.path.abspath( __file__ ) )
   return os.path.join( dir_of_current_script, 'testdata', *args )

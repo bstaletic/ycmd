@@ -17,7 +17,7 @@
 
 from hamcrest import ( any_of, assert_that, contains_exactly, empty, equal_to,
                        has_entries, instance_of )
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 import requests
 
 from ycmd.tests import IsolatedYcmd, PathToTestFile, SharedYcmd
@@ -26,29 +26,30 @@ from ycmd.tests.test_utils import ( BuildRequest,
                                     PatchCompleter,
                                     SignatureAvailableMatcher,
                                     ErrorMatcher )
+from webtest.app import TestApp
 
 
 @SharedYcmd
-def MiscHandlers_Healthy_test( app ):
+def MiscHandlers_Healthy_test( app: TestApp ) -> None:
   assert_that( app.get( '/healthy' ).json, equal_to( True ) )
 
 
 @SharedYcmd
-def MiscHandlers_Healthy_Subserver_test( app ):
+def MiscHandlers_Healthy_Subserver_test( app: TestApp ) -> None:
   with PatchCompleter( DummyCompleter, filetype = 'dummy_filetype' ):
     assert_that( app.get( '/healthy', { 'subserver': 'dummy_filetype' } ).json,
                  equal_to( True ) )
 
 
 @SharedYcmd
-def MiscHandlers_SignatureHelpAvailable_test( app ):
+def MiscHandlers_SignatureHelpAvailable_test( app: TestApp ) -> None:
   response = app.get( '/signature_help_available', expect_errors = True ).json
   assert_that( response,
                ErrorMatcher( RuntimeError, 'Subserver not specified' ) )
 
 
 @SharedYcmd
-def MiscHandlers_SignatureHelpAvailable_Subserver_test( app ):
+def MiscHandlers_SignatureHelpAvailable_Subserver_test( app: TestApp ) -> None:
   with PatchCompleter( DummyCompleter, filetype = 'dummy_filetype' ):
     assert_that( app.get( '/signature_help_available',
                           { 'subserver': 'dummy_filetype' } ).json,
@@ -56,26 +57,26 @@ def MiscHandlers_SignatureHelpAvailable_Subserver_test( app ):
 
 
 @SharedYcmd
-def MiscHandlers_SignatureHelpAvailable_NoSemanticCompleter_test( app ):
+def MiscHandlers_SignatureHelpAvailable_NoSemanticCompleter_test( app: TestApp ) -> None:
   assert_that( app.get( '/signature_help_available',
                         { 'subserver': 'dummy_filetype' } ).json,
                SignatureAvailableMatcher( 'NO' ) )
 
 
 @SharedYcmd
-def MiscHandlers_Ready_test( app ):
+def MiscHandlers_Ready_test( app: TestApp ) -> None:
   assert_that( app.get( '/ready' ).json, equal_to( True ) )
 
 
 @SharedYcmd
-def MiscHandlers_Ready_Subserver_test( app ):
+def MiscHandlers_Ready_Subserver_test( app: TestApp ) -> None:
   with PatchCompleter( DummyCompleter, filetype = 'dummy_filetype' ):
     assert_that( app.get( '/ready', { 'subserver': 'dummy_filetype' } ).json,
                  equal_to( True ) )
 
 
 @SharedYcmd
-def MiscHandlers_SemanticCompletionAvailable_test( app ):
+def MiscHandlers_SemanticCompletionAvailable_test( app: TestApp ) -> None:
   with PatchCompleter( DummyCompleter, filetype = 'dummy_filetype' ):
     request_data = BuildRequest( filetype = 'dummy_filetype' )
     assert_that( app.post_json( '/semantic_completion_available',
@@ -84,7 +85,7 @@ def MiscHandlers_SemanticCompletionAvailable_test( app ):
 
 
 @SharedYcmd
-def MiscHandlers_EventNotification_AlwaysJsonResponse_test( app ):
+def MiscHandlers_EventNotification_AlwaysJsonResponse_test( app: TestApp ) -> None:
   event_data = BuildRequest( contents = 'foo foogoo ba',
                              event_name = 'FileReadyToParse' )
 
@@ -93,7 +94,7 @@ def MiscHandlers_EventNotification_AlwaysJsonResponse_test( app ):
 
 
 @SharedYcmd
-def MiscHandlers_EventNotification_ReturnJsonOnBigFileError_test( app ):
+def MiscHandlers_EventNotification_ReturnJsonOnBigFileError_test( app: TestApp ) -> None:
   # We generate a content greater than Bottle.MEMFILE_MAX, which is set to 10MB.
   contents = "foo " * 5000000
   event_data = BuildRequest( contents = contents,
@@ -111,7 +112,7 @@ def MiscHandlers_EventNotification_ReturnJsonOnBigFileError_test( app ):
 
 
 @SharedYcmd
-def MiscHandlers_FilterAndSortCandidates_Basic_test( app ):
+def MiscHandlers_FilterAndSortCandidates_Basic_test( app: TestApp ) -> None:
   candidate1 = { 'prop1': 'aoo', 'prop2': 'bar' }
   candidate2 = { 'prop1': 'bfo', 'prop2': 'zoo' }
   candidate3 = { 'prop1': 'cfo', 'prop2': 'moo' }
@@ -128,7 +129,7 @@ def MiscHandlers_FilterAndSortCandidates_Basic_test( app ):
 
 
 @SharedYcmd
-def MiscHandlers_LoadExtraConfFile_AlwaysJsonResponse_test( app ):
+def MiscHandlers_LoadExtraConfFile_AlwaysJsonResponse_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'extra_conf', 'project', '.ycm_extra_conf.py' )
   extra_conf_data = BuildRequest( filepath = filepath )
 
@@ -137,7 +138,7 @@ def MiscHandlers_LoadExtraConfFile_AlwaysJsonResponse_test( app ):
 
 
 @SharedYcmd
-def MiscHandlers_IgnoreExtraConfFile_AlwaysJsonResponse_test( app ):
+def MiscHandlers_IgnoreExtraConfFile_AlwaysJsonResponse_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'extra_conf', 'project', '.ycm_extra_conf.py' )
   extra_conf_data = BuildRequest( filepath = filepath )
 
@@ -146,7 +147,7 @@ def MiscHandlers_IgnoreExtraConfFile_AlwaysJsonResponse_test( app ):
 
 
 @IsolatedYcmd()
-def MiscHandlers_DebugInfo_ExtraConfLoaded_test( app ):
+def MiscHandlers_DebugInfo_ExtraConfLoaded_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'extra_conf', 'project', '.ycm_extra_conf.py' )
   app.post_json( '/load_extra_conf_file', { 'filepath': filepath } )
 
@@ -172,7 +173,7 @@ def MiscHandlers_DebugInfo_ExtraConfLoaded_test( app ):
 
 
 @SharedYcmd
-def MiscHandlers_DebugInfo_NoExtraConfFound_test( app ):
+def MiscHandlers_DebugInfo_NoExtraConfFound_test( app: TestApp ) -> None:
   request_data = BuildRequest()
   assert_that(
     app.post_json( '/debug_info', request_data ).json,
@@ -195,7 +196,7 @@ def MiscHandlers_DebugInfo_NoExtraConfFound_test( app ):
 
 
 @IsolatedYcmd()
-def MiscHandlers_DebugInfo_ExtraConfFoundButNotLoaded_test( app ):
+def MiscHandlers_DebugInfo_ExtraConfFoundButNotLoaded_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'extra_conf', 'project', '.ycm_extra_conf.py' )
   request_data = BuildRequest( filepath = filepath )
   assert_that(
@@ -219,14 +220,14 @@ def MiscHandlers_DebugInfo_ExtraConfFoundButNotLoaded_test( app ):
 
 
 @SharedYcmd
-def MiscHandlers_ReceiveMessages_NoCompleter_test( app ):
+def MiscHandlers_ReceiveMessages_NoCompleter_test( app: TestApp ) -> None:
   request_data = BuildRequest()
   assert_that( app.post_json( '/receive_messages', request_data ).json,
                equal_to( False ) )
 
 
 @SharedYcmd
-def MiscHandlers_ReceiveMessages_NotSupportedByCompleter_test( app ):
+def MiscHandlers_ReceiveMessages_NotSupportedByCompleter_test( app: TestApp ) -> None:
   with PatchCompleter( DummyCompleter, filetype = 'dummy_filetype' ):
     request_data = BuildRequest( filetype = 'dummy_filetype' )
     assert_that( app.post_json( '/receive_messages', request_data ).json,
@@ -236,7 +237,7 @@ def MiscHandlers_ReceiveMessages_NotSupportedByCompleter_test( app ):
 @SharedYcmd
 @patch( 'ycmd.completers.completer.Completer.ShouldUseSignatureHelpNow',
         return_value = True )
-def MiscHandlers_SignatureHelp_DefaultEmptyResponse_test( should_use, app ):
+def MiscHandlers_SignatureHelp_DefaultEmptyResponse_test( should_use: MagicMock, app: TestApp ) -> None:
   with PatchCompleter( DummyCompleter, filetype = 'dummy_filetype' ):
     request_data = BuildRequest( filetype = 'dummy_filetype' )
     response = app.post_json( '/signature_help', request_data ).json
@@ -253,7 +254,7 @@ def MiscHandlers_SignatureHelp_DefaultEmptyResponse_test( should_use, app ):
 @SharedYcmd
 @patch( 'ycmd.completers.completer.Completer.ComputeSignatures',
         side_effect = RuntimeError )
-def MiscHandlers_SignatureHelp_ComputeSignatureThrows_test( compute_sig, app ):
+def MiscHandlers_SignatureHelp_ComputeSignatureThrows_test( compute_sig: MagicMock, app: TestApp ) -> None:
   with PatchCompleter( DummyCompleter, filetype = 'dummy_filetype' ):
     request_data = BuildRequest( filetype = 'dummy_filetype' )
     response = app.post_json( '/signature_help', request_data ).json

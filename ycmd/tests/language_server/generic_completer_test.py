@@ -25,7 +25,7 @@ from hamcrest import ( assert_that,
                        has_entry,
                        has_items,
                        instance_of )
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 from os import path as p
 
 from ycmd.completers.language_server.language_server_completer import (
@@ -41,6 +41,7 @@ from ycmd.tests.test_utils import ( BuildRequest,
                                     SignatureAvailableMatcher,
                                     WaitUntilCompleterServerReady )
 from ycmd.utils import ReadFile
+from webtest.app import TestApp
 
 DIR_OF_THIS_SCRIPT = p.dirname( p.abspath( __file__ ) )
 PATH_TO_GENERIC_COMPLETER = p.join( DIR_OF_THIS_SCRIPT,
@@ -59,7 +60,7 @@ TEST_FILE_CONTENT = ReadFile( TEST_FILE )
   [ { 'name': 'foo',
       'filetypes': [ 'foo' ],
       'cmdline': [ 'node', PATH_TO_GENERIC_COMPLETER, '--stdio' ] } ] } )
-def GenericLSPCompleter_GetCompletions_NotACompletionProvider_test( app ):
+def GenericLSPCompleter_GetCompletions_NotACompletionProvider_test( app: TestApp ) -> None:
   completer = handlers._server_state.GetFiletypeCompleter( [ 'foo' ] )
   with patch.object( completer, '_is_completion_provider', False ):
     request = BuildRequest( filepath = TEST_FILE,
@@ -81,7 +82,7 @@ def GenericLSPCompleter_GetCompletions_NotACompletionProvider_test( app ):
   [ { 'name': 'foo',
       'filetypes': [ 'foo' ],
       'cmdline': [ 'node', PATH_TO_GENERIC_COMPLETER, '--stdio' ] } ] } )
-def GenericLSPCompleter_GetCompletions_FilteredNoForce_test( app ):
+def GenericLSPCompleter_GetCompletions_FilteredNoForce_test( app: TestApp ) -> None:
   request = BuildRequest( filepath = TEST_FILE,
                           filetype = 'foo',
                           line_num = 1,
@@ -105,7 +106,7 @@ def GenericLSPCompleter_GetCompletions_FilteredNoForce_test( app ):
   [ { 'name': 'foo',
       'filetypes': [ 'foo' ],
       'cmdline': [ 'node', PATH_TO_GENERIC_COMPLETER, '--stdio' ] } ] } )
-def GenericLSPCompleter_GetCompletions_test( app ):
+def GenericLSPCompleter_GetCompletions_test( app: TestApp ) -> None:
   request = BuildRequest( filepath = TEST_FILE,
                           filetype = 'foo',
                           line_num = 1,
@@ -131,7 +132,7 @@ def GenericLSPCompleter_GetCompletions_test( app ):
   [ { 'name': 'foo',
       'filetypes': [ 'foo' ],
       'cmdline': [ 'node', PATH_TO_GENERIC_COMPLETER, '--stdio' ] } ] } )
-def GenericLSPCompleter_Diagnostics_test( app ):
+def GenericLSPCompleter_Diagnostics_test( app: TestApp ) -> None:
   request = BuildRequest( filepath = TEST_FILE,
                           filetype = 'foo',
                           line_num = 1,
@@ -160,7 +161,7 @@ def GenericLSPCompleter_Diagnostics_test( app ):
   [ { 'name': 'foo',
       'filetypes': [ 'foo' ],
       'cmdline': [ 'node', PATH_TO_GENERIC_COMPLETER, '--stdio' ] } ] } )
-def GenericLSPCompleter_Hover_RequestFails_test( app ):
+def GenericLSPCompleter_Hover_RequestFails_test( app: TestApp ) -> None:
   request = BuildRequest( filepath = TEST_FILE,
                           filetype = 'foo',
                           line_num = 1,
@@ -188,7 +189,7 @@ def GenericLSPCompleter_Hover_RequestFails_test( app ):
       'cmdline': [ 'node', PATH_TO_GENERIC_COMPLETER, '--stdio' ] } ] } )
 @patch( 'ycmd.completers.language_server.generic_lsp_completer.'
         'GenericLSPCompleter.GetHoverResponse', return_value = 'asd' )
-def GenericLSPCompleter_HoverIsString_test( get_hover, app ):
+def GenericLSPCompleter_HoverIsString_test( get_hover: MagicMock, app: TestApp ) -> None:
   request = BuildRequest( filepath = TEST_FILE,
                           filetype = 'foo',
                           line_num = 1,
@@ -211,7 +212,7 @@ def GenericLSPCompleter_HoverIsString_test( get_hover, app ):
 @patch( 'ycmd.completers.language_server.generic_lsp_completer.'
         'GenericLSPCompleter.GetHoverResponse',
         return_value = { 'whatever': 'blah', 'value': 'asd' } )
-def GenericLSPCompleter_HoverIsDict_test( get_hover, app ):
+def GenericLSPCompleter_HoverIsDict_test( get_hover: MagicMock, app: TestApp ) -> None:
   request = BuildRequest( filepath = TEST_FILE,
                           filetype = 'foo',
                           line_num = 1,
@@ -236,7 +237,7 @@ def GenericLSPCompleter_HoverIsDict_test( get_hover, app ):
         return_value = [ { 'whatever': 'blah', 'value': 'asd' },
                          'qe',
                          { 'eh?': 'hover_sucks', 'value': 'yes, it does' } ] )
-def GenericLSPCompleter_HoverIsList_test( get_hover, app ):
+def GenericLSPCompleter_HoverIsList_test( get_hover: MagicMock, app: TestApp ) -> None:
   request = BuildRequest( filepath = TEST_FILE,
                           filetype = 'foo',
                           line_num = 1,
@@ -258,7 +259,7 @@ def GenericLSPCompleter_HoverIsList_test( get_hover, app ):
       'filetypes': [ 'foo' ],
       'project_root_files': [ 'proj_root' ],
       'cmdline': [ 'node', PATH_TO_GENERIC_COMPLETER, '--stdio' ] } ] } )
-def GenericLSPCompleter_DebugInfo_CustomRoot_test( app, *args ):
+def GenericLSPCompleter_DebugInfo_CustomRoot_test( app: TestApp, *args) -> None:
   test_file = PathToTestFile(
       'generic_server', 'foo', 'bar', 'baz', 'test_file' )
   request = BuildRequest( filepath = test_file,
@@ -310,7 +311,7 @@ def GenericLSPCompleter_DebugInfo_CustomRoot_test( app, *args ):
       'filetypes': [ 'foo' ],
       'project_root_files': [ 'proj_root' ],
       'cmdline': [ 'node', PATH_TO_GENERIC_COMPLETER, '--stdio' ] } ] } )
-def GenericLSPCompleter_SignatureHelp_NoTriggers_test( app ):
+def GenericLSPCompleter_SignatureHelp_NoTriggers_test( app: TestApp ) -> None:
   test_file = PathToTestFile(
       'generic_server', 'foo', 'bar', 'baz', 'test_file' )
   request = BuildRequest( filepath = test_file,
@@ -341,8 +342,8 @@ def GenericLSPCompleter_SignatureHelp_NoTriggers_test( app ):
       'cmdline': [ 'node', PATH_TO_GENERIC_COMPLETER, '--stdio' ] } ] } )
 @patch( 'ycmd.completers.completer.Completer.ShouldUseSignatureHelpNow',
         return_value = True )
-def GenericLSPCompleter_SignatureHelp_NotASigHelpProvider_test( should_use_sig,
-                                                                app ):
+def GenericLSPCompleter_SignatureHelp_NotASigHelpProvider_test( should_use_sig: MagicMock,
+                                                                app: TestApp ) -> None:
   test_file = PathToTestFile(
       'generic_server', 'foo', 'bar', 'baz', 'test_file' )
   request = BuildRequest( filepath = test_file,
@@ -370,7 +371,7 @@ def GenericLSPCompleter_SignatureHelp_NotASigHelpProvider_test( should_use_sig,
       'filetypes': [ 'foo' ],
       'project_root_files': [ 'proj_root' ],
       'cmdline': [ 'node', PATH_TO_GENERIC_COMPLETER, '--stdio' ] } ] } )
-def GenericLSPCompleter_SignatureHelp_NotSupported_test( app ):
+def GenericLSPCompleter_SignatureHelp_NotSupported_test( app: TestApp ) -> None:
   test_file = PathToTestFile(
       'generic_server', 'foo', 'bar', 'baz', 'test_file' )
   app.post_json( '/event_notification',

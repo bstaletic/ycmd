@@ -16,6 +16,9 @@
 # along with ycmd.  If not, see <http://www.gnu.org/licenses/>.
 
 import pytest
+from _pytest.fixtures import SubRequest
+from typing import Iterator
+from webtest.app import TestApp
 
 from ycmd.tests.test_utils import ( ClearCompletionsCache,
                                     IgnoreExtraConfOutsideTestsFolder,
@@ -27,7 +30,7 @@ shared_app = None
 
 
 @pytest.fixture( scope='module', autouse=True )
-def set_up_shared_app():
+def set_up_shared_app() -> Iterator[None]:
   global shared_app
   shared_app = SetUpApp()
   WaitUntilCompleterServerReady( shared_app, 'typescript' )
@@ -36,7 +39,7 @@ def set_up_shared_app():
 
 
 @pytest.fixture
-def app( request ):
+def app( request: SubRequest ) -> Iterator[TestApp]:
   which = request.param[ 0 ]
   assert which == 'isolated' or which == 'shared'
   if which == 'isolated':

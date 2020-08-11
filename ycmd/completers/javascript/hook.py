@@ -19,9 +19,10 @@ from ycmd.completers.javascript.tern_completer import (
   ShouldEnableTernCompleter, TernCompleter )
 from ycmd.completers.typescript.typescript_completer import (
   ShouldEnableTypeScriptCompleter, TypeScriptCompleter )
+from typing import Dict, Union, Optional
 
 
-def GetCompleter( user_options ):
+def GetCompleter( user_options: Dict[str, Union[int, Dict[str, int], str]] ) -> Optional[Union[TernCompleter, TypeScriptCompleter]]:
   if ShouldEnableTernCompleter():
     return TernCompleter( user_options )
   if ShouldEnableTypeScriptCompleter( user_options ):

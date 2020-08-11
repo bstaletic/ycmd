@@ -17,7 +17,7 @@
 
 import json
 import requests
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 from hamcrest import assert_that, contains_exactly, empty, equal_to, has_entries
 
 from ycmd import handlers
@@ -30,9 +30,12 @@ from ycmd.tests.test_utils import ( EMPTY_SIGNATURE_HELP,
                                     SignatureAvailableMatcher,
                                     WaitUntilCompleterServerReady )
 from ycmd.utils import ReadFile
+from hamcrest.library.collection.isdict_containingentries import IsDictContainingEntries
+from typing import Dict, Union
+from webtest.app import TestApp
 
 
-def RunTest( app, test ):
+def RunTest( app: TestApp, test: Dict[str, Union[str, Dict[str, Union[int, str]], Dict[str, Union[int, IsDictContainingEntries]]]] ) -> None:
   """
   Method to run a simple completion test and verify the result
 
@@ -82,7 +85,7 @@ def RunTest( app, test ):
 
 
 @SharedYcmd
-def Signature_Help_Trigger_test( app ):
+def Signature_Help_Trigger_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'trigger after (',
     'request': {
@@ -123,7 +126,7 @@ def Signature_Help_Trigger_test( app ):
 
 
 @IsolatedYcmd( { 'disable_signature_help': 1 } )
-def Signature_Help_Disabled_test( app ):
+def Signature_Help_Disabled_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'trigger after (',
     'request': {
@@ -145,7 +148,7 @@ def Signature_Help_Disabled_test( app ):
 
 
 @SharedYcmd
-def Signature_Help_NoTrigger_test( app ):
+def Signature_Help_NoTrigger_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'do not trigger before (',
     'request': {
@@ -167,7 +170,7 @@ def Signature_Help_NoTrigger_test( app ):
 
 
 @SharedYcmd
-def Signature_Help_NoTrigger_After_Trigger_test( app ):
+def Signature_Help_NoTrigger_After_Trigger_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'do not trigger too far after (',
     'request': {
@@ -189,7 +192,7 @@ def Signature_Help_NoTrigger_After_Trigger_test( app ):
 
 
 @SharedYcmd
-def Signature_Help_Trigger_After_Trigger_test( app ):
+def Signature_Help_Trigger_After_Trigger_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'Auto trigger due to state of existing request',
     'request': {
@@ -230,7 +233,7 @@ def Signature_Help_Trigger_After_Trigger_test( app ):
 
 
 @IsolatedYcmd( { 'disable_signature_help': 1 } )
-def Signature_Help_Trigger_After_Trigger_Disabled_test( app ):
+def Signature_Help_Trigger_After_Trigger_Disabled_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'Auto trigger due to state of existing request',
     'request': {
@@ -252,7 +255,7 @@ def Signature_Help_Trigger_After_Trigger_Disabled_test( app ):
 
 
 @SharedYcmd
-def Signature_Help_Trigger_After_Trigger_PlusText_test( app ):
+def Signature_Help_Trigger_After_Trigger_PlusText_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'Triggering after additional text beyond (',
     'request': {
@@ -293,7 +296,7 @@ def Signature_Help_Trigger_After_Trigger_PlusText_test( app ):
 
 
 @SharedYcmd
-def Signature_Help_Trigger_After_Trigger_PlusCompletion_test( app ):
+def Signature_Help_Trigger_After_Trigger_PlusCompletion_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'Triggering after semantic trigger after (',
     'request': {
@@ -334,7 +337,7 @@ def Signature_Help_Trigger_After_Trigger_PlusCompletion_test( app ):
 
 
 @SharedYcmd
-def Signature_Help_Trigger_After_OtherTrigger_test( app ):
+def Signature_Help_Trigger_After_OtherTrigger_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'Triggering after ,',
     'request': {
@@ -375,7 +378,7 @@ def Signature_Help_Trigger_After_OtherTrigger_test( app ):
 
 
 @SharedYcmd
-def Signature_Help_Trigger_After_Arguments_Narrow_test( app ):
+def Signature_Help_Trigger_After_Arguments_Narrow_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'After resolution of overload',
     'request': {
@@ -409,7 +412,7 @@ def Signature_Help_Trigger_After_Arguments_Narrow_test( app ):
 
 
 @SharedYcmd
-def Signature_Help_Trigger_After_Arguments_Narrow2_test( app ):
+def Signature_Help_Trigger_After_Arguments_Narrow2_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'After resolution of overload not the first one',
     'request': {
@@ -443,7 +446,7 @@ def Signature_Help_Trigger_After_Arguments_Narrow2_test( app ):
 
 
 @SharedYcmd
-def Signature_Help_Trigger_After_OtherTrigger_ReTrigger_test( app ):
+def Signature_Help_Trigger_After_OtherTrigger_ReTrigger_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'Triggering after , but already ACTIVE',
     'request': {
@@ -484,7 +487,7 @@ def Signature_Help_Trigger_After_OtherTrigger_ReTrigger_test( app ):
 
 
 @SharedYcmd
-def Signature_Help_Trigger_JustBeforeClose_test( app ):
+def Signature_Help_Trigger_JustBeforeClose_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'Last argument, before )',
     'request': {
@@ -525,7 +528,7 @@ def Signature_Help_Trigger_JustBeforeClose_test( app ):
 
 
 @SharedYcmd
-def Signature_Help_Clears_After_EndFunction_test( app ):
+def Signature_Help_Clears_After_EndFunction_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'Empty response on )',
     'request': {
@@ -547,7 +550,7 @@ def Signature_Help_Clears_After_EndFunction_test( app ):
 
 
 @SharedYcmd
-def Signature_Help_Clears_After_Function_Call_test( app ):
+def Signature_Help_Clears_After_Function_Call_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'Empty response after )',
     'request': {
@@ -573,9 +576,9 @@ def Signature_Help_Clears_After_Function_Call_test( app ):
 @patch( 'ycmd.completers.language_server.language_server_completer.'
         'LanguageServerCompleter._ServerIsInitialized', return_value = False )
 @IsolatedYcmd()
-def Signature_Help_Server_Not_Initialized_test( should_use_sig,
-                                                server_init,
-                                                app ):
+def Signature_Help_Server_Not_Initialized_test( should_use_sig: MagicMock,
+                                                server_init: MagicMock,
+                                                app: TestApp ) -> None:
   filepath = PathToTestFile( 'general_fallback', 'make_drink.cc' )
   request = {
     'filetype'  : 'cpp',
@@ -594,7 +597,7 @@ def Signature_Help_Server_Not_Initialized_test( should_use_sig,
       } ) )
 
 
-def Signature_Help_Available_Server_Not_Initialized_test():
+def Signature_Help_Available_Server_Not_Initialized_test() -> None:
   completer = handlers._server_state.GetFiletypeCompleter( [ 'cpp' ] )
 
   @SharedYcmd
@@ -606,7 +609,7 @@ def Signature_Help_Available_Server_Not_Initialized_test():
 
 
 @SharedYcmd
-def Signature_Help_Supported_test( app ):
+def Signature_Help_Supported_test( app: TestApp ) -> None:
   request = { 'filepath' : PathToTestFile( 'goto.cc' ) }
   app.post_json( '/event_notification',
                  CombineRequest( request, {
@@ -622,7 +625,7 @@ def Signature_Help_Supported_test( app ):
 
 
 @IsolatedYcmd( { 'disable_signature_help': 1 } )
-def Signature_Help_Available_Disabled_By_User_test( app, *args ):
+def Signature_Help_Available_Disabled_By_User_test( app: TestApp, *args) -> None:
   request = { 'filepath' : PathToTestFile( 'goto.cc' ) }
   app.post_json( '/event_notification',
                  CombineRequest( request, {

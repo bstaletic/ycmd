@@ -20,9 +20,10 @@ import glob
 from inspect import getfile
 from ycmd import extra_conf_store
 from ycmd.utils import LOGGER
+from typing import List, Optional
 
 
-def FindSolutionPath( filepath ):
+def FindSolutionPath( filepath: str ) -> Optional[str]:
   """Try to find suitable solution file given a source file path using all
      available information sources"""
   # try to load ycm_extra_conf
@@ -37,7 +38,7 @@ def FindSolutionPath( filepath ):
   return path_to_solutionfile
 
 
-def PollModule( module, filepath ):
+def PollModule( module: None, filepath: str ) -> None:
   """ Try to use passed module in the selection process by calling
   CSharpSolutionFile on it """
   path_to_solutionfile = None
@@ -67,7 +68,7 @@ def PollModule( module, filepath ):
   return path_to_solutionfile
 
 
-def GuessFile( filepath ):
+def GuessFile( filepath: str ) -> Optional[str]:
   """ Find solution files by searching upwards in the file tree """
   tokens = _PathComponents( filepath )
   for i in reversed( range( len( tokens ) - 1 ) ):
@@ -79,7 +80,7 @@ def GuessFile( filepath ):
   return None
 
 
-def _SolutionTestCheckHeuristics( candidates, tokens, i ):
+def _SolutionTestCheckHeuristics( candidates: List[str], tokens: List[str], i: int ) -> Optional[str]:
   """ Test if one of the candidate files stands out """
   path = os.path.join( *tokens[ : i + 1 ] )
   selection = None
@@ -111,7 +112,7 @@ def _SolutionTestCheckHeuristics( candidates, tokens, i ):
   return selection
 
 
-def _PathComponents( path ):
+def _PathComponents( path: str ) -> List[str]:
   path_components = []
   while True:
     path, folder = os.path.split( path )

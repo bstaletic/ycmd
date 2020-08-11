@@ -17,9 +17,11 @@
 
 from ycmd.completers.cs.cs_completer import ( CsharpCompleter,
                                               ShouldEnableCsCompleter )
+from typing import Dict, Optional, Union
+from ycmd.utils import HashableDict
 
 
-def GetCompleter( user_options ):
+def GetCompleter( user_options: Union[Dict[str, Union[int, Dict[str, int], str, bool]], Dict[str, Union[int, Dict[str, int], str]], HashableDict] ) -> Optional[CsharpCompleter]:
   if not ShouldEnableCsCompleter( user_options ):
     return None
   return CsharpCompleter( user_options )

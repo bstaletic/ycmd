@@ -17,10 +17,11 @@
 # along with ycmd.  If not, see <http://www.gnu.org/licenses/>.
 
 from hamcrest import assert_that, contains_exactly
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from ycmd.tests import SharedYcmd
 from ycmd.tests.test_utils import BuildRequest, DummyCompleter, PatchCompleter
+from webtest.app import TestApp
 
 
 @SharedYcmd
@@ -28,7 +29,7 @@ from ycmd.tests.test_utils import BuildRequest, DummyCompleter, PatchCompleter
         return_value = { 'A': lambda x: x,
                          'B': lambda x: x,
                          'C': lambda x: x } )
-def Subcommands_Basic_test( get_subcmd_map, app ):
+def Subcommands_Basic_test( get_subcmd_map: MagicMock, app: TestApp ) -> None:
   with PatchCompleter( DummyCompleter, 'dummy_filetype' ):
     subcommands_data = BuildRequest( completer_target = 'dummy_filetype' )
     assert_that( app.post_json( '/defined_subcommands', subcommands_data ).json,
@@ -40,7 +41,7 @@ def Subcommands_Basic_test( get_subcmd_map, app ):
         return_value = { 'A': lambda x: x,
                          'B': lambda x: x,
                          'C': lambda x: x } )
-def Subcommands_NoExplicitCompleterTargetSpecified_test( get_subcmd_map, app ):
+def Subcommands_NoExplicitCompleterTargetSpecified_test( get_subcmd_map: MagicMock, app: TestApp ) -> None:
   with PatchCompleter( DummyCompleter, 'dummy_filetype' ):
     subcommands_data = BuildRequest( filetype = 'dummy_filetype' )
     assert_that( app.post_json( '/defined_subcommands', subcommands_data ).json,

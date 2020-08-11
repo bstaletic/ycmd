@@ -22,10 +22,11 @@ from hamcrest import ( assert_that, contains_exactly, empty, has_entries,
 from ycmd.tests.clang import IsolatedYcmd, PathToTestFile, SharedYcmd
 from ycmd.tests.test_utils import ( BuildRequest, TemporaryTestDir,
                                     TemporaryClangProject )
+from webtest.app import TestApp
 
 
 @SharedYcmd
-def DebugInfo_FlagsWhenExtraConfLoadedAndNoCompilationDatabase_test( app ):
+def DebugInfo_FlagsWhenExtraConfLoadedAndNoCompilationDatabase_test( app: TestApp ) -> None:
   app.post_json( '/load_extra_conf_file',
                  { 'filepath': PathToTestFile( '.ycm_extra_conf.py' ) } )
   request_data = BuildRequest( filepath = PathToTestFile( 'basic.cpp' ),
@@ -54,7 +55,7 @@ def DebugInfo_FlagsWhenExtraConfLoadedAndNoCompilationDatabase_test( app ):
 
 
 @SharedYcmd
-def DebugInfo_FlagsWhenNoExtraConfAndNoCompilationDatabase_test( app ):
+def DebugInfo_FlagsWhenNoExtraConfAndNoCompilationDatabase_test( app: TestApp ) -> None:
   request_data = BuildRequest( filetype = 'cpp' )
   # First request, FlagsForFile raises a NoExtraConfDetected exception.
   assert_that(
@@ -104,7 +105,7 @@ def DebugInfo_FlagsWhenNoExtraConfAndNoCompilationDatabase_test( app ):
 
 @IsolatedYcmd()
 def DebugInfo_FlagsWhenExtraConfNotLoadedAndNoCompilationDatabase_test(
-  app ):
+  app: TestApp ) -> None:
 
   request_data = BuildRequest( filepath = PathToTestFile( 'basic.cpp' ),
                                filetype = 'cpp' )
@@ -132,7 +133,7 @@ def DebugInfo_FlagsWhenExtraConfNotLoadedAndNoCompilationDatabase_test(
 
 
 @IsolatedYcmd()
-def DebugInfo_FlagsWhenNoExtraConfAndCompilationDatabaseLoaded_test( app ):
+def DebugInfo_FlagsWhenNoExtraConfAndCompilationDatabaseLoaded_test( app: TestApp ) -> None:
   with TemporaryTestDir() as tmp_dir:
     compile_commands = [
       {
@@ -172,7 +173,7 @@ def DebugInfo_FlagsWhenNoExtraConfAndCompilationDatabaseLoaded_test( app ):
 
 
 @IsolatedYcmd()
-def DebugInfo_FlagsWhenNoExtraConfAndInvalidCompilationDatabase_test( app ):
+def DebugInfo_FlagsWhenNoExtraConfAndInvalidCompilationDatabase_test( app: TestApp ) -> None:
   with TemporaryTestDir() as tmp_dir:
     compile_commands = 'garbage'
     with TemporaryClangProject( tmp_dir, compile_commands ):
@@ -205,7 +206,7 @@ def DebugInfo_FlagsWhenNoExtraConfAndInvalidCompilationDatabase_test( app ):
 
 @IsolatedYcmd(
   { 'global_ycm_extra_conf': PathToTestFile( '.ycm_extra_conf.py' ) } )
-def DebugInfo_FlagsWhenGlobalExtraConfAndCompilationDatabaseLoaded_test( app ):
+def DebugInfo_FlagsWhenGlobalExtraConfAndCompilationDatabaseLoaded_test( app: TestApp ) -> None:
   with TemporaryTestDir() as tmp_dir:
     compile_commands = [
       {
@@ -246,7 +247,7 @@ def DebugInfo_FlagsWhenGlobalExtraConfAndCompilationDatabaseLoaded_test( app ):
 
 @IsolatedYcmd(
   { 'global_ycm_extra_conf': PathToTestFile( '.ycm_extra_conf.py' ) } )
-def DebugInfo_FlagsWhenGlobalExtraConfAndNoCompilationDatabase_test( app ):
+def DebugInfo_FlagsWhenGlobalExtraConfAndNoCompilationDatabase_test( app: TestApp ) -> None:
   request_data = BuildRequest( filepath = PathToTestFile( 'basic.cpp' ),
                                filetype = 'cpp' )
   assert_that(
@@ -273,7 +274,7 @@ def DebugInfo_FlagsWhenGlobalExtraConfAndNoCompilationDatabase_test( app ):
 
 
 @SharedYcmd
-def DebugInfo_Unity_test( app ):
+def DebugInfo_Unity_test( app: TestApp ) -> None:
   # Main TU
   app.post_json( '/load_extra_conf_file',
                  { 'filepath': PathToTestFile( '.ycm_extra_conf.py' ) } )

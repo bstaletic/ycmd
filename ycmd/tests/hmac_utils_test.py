@@ -20,14 +20,14 @@ from hamcrest import raises, assert_that, calling, equal_to
 from ycmd import hmac_utils as hu
 
 
-def CreateHmac_ArgsNotBytes_test():
+def CreateHmac_ArgsNotBytes_test() -> None:
   assert_that( calling( hu.CreateHmac ).with_args( u'foo', bytes( b'foo' ) ),
                raises( TypeError, '.*content*' ) )
   assert_that( calling( hu.CreateHmac ).with_args( bytes( b'foo' ), u'foo' ),
                raises( TypeError, '.*hmac_secret*' ) )
 
 
-def CreateHmac_WithBytes_test():
+def CreateHmac_WithBytes_test() -> None:
   # Test vectors from Wikipedia (HMAC_SHA256): https://goo.gl/cvX0Tn
   assert_that( hexlify( hu.CreateHmac(
     bytes( b'The quick brown fox jumps over the lazy dog' ),
@@ -36,7 +36,7 @@ def CreateHmac_WithBytes_test():
                      b'ef4d59a14946175997479dbc2d1a3cd8' ) ) )
 
 
-def CreateRequestHmac_ArgsNotBytes_test():
+def CreateRequestHmac_ArgsNotBytes_test() -> None:
   assert_that(
     calling( hu.CreateRequestHmac ).with_args(
       u'foo', bytes( b'foo' ), bytes( b'foo' ), bytes( b'foo' ) ),
@@ -58,7 +58,7 @@ def CreateRequestHmac_ArgsNotBytes_test():
     raises( TypeError, '.*hmac_secret*' ) )
 
 
-def CreateRequestHmac_WithBytes_test():
+def CreateRequestHmac_WithBytes_test() -> None:
   assert_that( hexlify( hu.CreateRequestHmac(
     bytes( b'GET' ),
     bytes( b'/foo' ),

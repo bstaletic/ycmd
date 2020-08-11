@@ -26,10 +26,11 @@ from webtest import AppError
 from ycmd.tests.cs import PathToTestFile, SharedYcmd, WrapOmniSharpServer
 from ycmd.tests.test_utils import BuildRequest, CompletionEntryMatcher
 from ycmd.utils import ReadFile
+from webtest.app import TestApp
 
 
 @SharedYcmd
-def GetCompletions_DefaultToIdentifier_test( app ):
+def GetCompletions_DefaultToIdentifier_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'testy', 'Program.cs' )
   with WrapOmniSharpServer( app, filepath ):
     contents = ReadFile( filepath )
@@ -53,7 +54,7 @@ def GetCompletions_DefaultToIdentifier_test( app ):
 
 
 @SharedYcmd
-def GetCompletions_Basic_test( app ):
+def GetCompletions_Basic_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'testy', 'Program.cs' )
   with WrapOmniSharpServer( app, filepath ):
     contents = ReadFile( filepath )
@@ -82,7 +83,7 @@ def GetCompletions_Basic_test( app ):
 
 
 @SharedYcmd
-def GetCompletions_Unicode_test( app ):
+def GetCompletions_Unicode_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'testy', 'Unicode.cs' )
   with WrapOmniSharpServer( app, filepath ):
     contents = ReadFile( filepath )
@@ -107,7 +108,7 @@ def GetCompletions_Unicode_test( app ):
 
 
 @SharedYcmd
-def GetCompletions_MultipleSolution_test( app ):
+def GetCompletions_MultipleSolution_test( app: TestApp ) -> None:
   filepaths = [ PathToTestFile( 'testy', 'Program.cs' ),
                 PathToTestFile( 'testy-multiple-solutions',
                                 'solution-named-like-folder',
@@ -143,7 +144,7 @@ def GetCompletions_MultipleSolution_test( app ):
 
 
 @SharedYcmd
-def GetCompletions_PathWithSpace_test( app ):
+def GetCompletions_PathWithSpace_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'неприличное слово', 'Program.cs' )
   with WrapOmniSharpServer( app, filepath ):
     contents = ReadFile( filepath )
@@ -172,7 +173,7 @@ def GetCompletions_PathWithSpace_test( app ):
 
 
 @SharedYcmd
-def GetCompletions_DoesntStartWithAmbiguousMultipleSolutions_test( app ):
+def GetCompletions_DoesntStartWithAmbiguousMultipleSolutions_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'testy-multiple-solutions',
                              'solution-not-named-like-folder',
                              'testy', 'Program.cs' )

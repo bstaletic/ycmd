@@ -34,9 +34,12 @@ from ycmd.tests.test_utils import ( BuildRequest,
                                     CombineRequest,
                                     CompletionEntryMatcher,
                                     ErrorMatcher )
+from hamcrest.library.collection.isdict_containingentries import IsDictContainingEntries
+from typing import Dict, Union
+from webtest.app import TestApp
 
 
-def RunTest( app, test ):
+def RunTest( app: TestApp, test: Dict[str, Union[str, Dict[str, Union[int, str]], Dict[str, Union[int, IsDictContainingEntries]], Dict[str, Union[str, int, bool]]]] ) -> None:
   """
   Method to run a simple completion test and verify the result
 
@@ -71,7 +74,7 @@ def RunTest( app, test ):
 
 
 @SharedYcmd
-def GetCompletions_Basic_test( app ):
+def GetCompletions_Basic_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'basic.py' )
   completion_data = BuildRequest( filepath = filepath,
                                   filetype = 'python',
@@ -119,7 +122,7 @@ def GetCompletions_Basic_test( app ):
 
 
 @SharedYcmd
-def GetCompletions_UnicodeDescription_test( app ):
+def GetCompletions_UnicodeDescription_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'unicode.py' )
   completion_data = BuildRequest( filepath = filepath,
                                   filetype = 'python',
@@ -135,7 +138,7 @@ def GetCompletions_UnicodeDescription_test( app ):
 
 
 @SharedYcmd
-def GetCompletions_NoSuggestions_Fallback_test( app ):
+def GetCompletions_NoSuggestions_Fallback_test( app: TestApp ) -> None:
   # Python completer doesn't raise NO_COMPLETIONS_MESSAGE, so this is a
   # different code path to the Clang completer cases
 
@@ -164,7 +167,7 @@ def GetCompletions_NoSuggestions_Fallback_test( app ):
 
 
 @SharedYcmd
-def GetCompletions_Unicode_InLine_test( app ):
+def GetCompletions_Unicode_InLine_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'return completions for strings with multi-byte chars',
     'request': {
@@ -188,7 +191,7 @@ def GetCompletions_Unicode_InLine_test( app ):
 
 @IsolatedYcmd( { 'global_ycm_extra_conf':
                  PathToTestFile( 'project', 'empty_extra_conf.py' ) } )
-def GetCompletions_SysPath_EmptyExtraConf_test( app ):
+def GetCompletions_SysPath_EmptyExtraConf_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'Module is not added to sys.path through extra conf file',
     'request': {
@@ -209,7 +212,7 @@ def GetCompletions_SysPath_EmptyExtraConf_test( app ):
 
 @IsolatedYcmd( { 'global_ycm_extra_conf':
                  PathToTestFile( 'project', 'settings_extra_conf.py' ) } )
-def GetCompletions_SysPath_SettingsFunctionInExtraConf_test( app ):
+def GetCompletions_SysPath_SettingsFunctionInExtraConf_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'Module is added to sys.path through the Settings '
                    'function in extra conf file',
@@ -236,7 +239,7 @@ def GetCompletions_SysPath_SettingsFunctionInExtraConf_test( app ):
                                            'settings_extra_conf.py' ),
   'disable_signature_help': True
 } )
-def GetCompletions_SysPath_SettingsFunctionInExtraConf_DisableSig_test( app ):
+def GetCompletions_SysPath_SettingsFunctionInExtraConf_DisableSig_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'Module is added to sys.path through the Settings '
                    'function in extra conf file',
@@ -260,7 +263,7 @@ def GetCompletions_SysPath_SettingsFunctionInExtraConf_DisableSig_test( app ):
 
 @IsolatedYcmd( { 'global_ycm_extra_conf':
                  PathToTestFile( 'project', 'settings_empty_extra_conf.py' ) } )
-def GetCompletions_SysPath_SettingsEmptyInExtraConf_test( app ):
+def GetCompletions_SysPath_SettingsEmptyInExtraConf_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'The Settings function returns an empty dictionary '
                    'in extra conf file',
@@ -282,7 +285,7 @@ def GetCompletions_SysPath_SettingsEmptyInExtraConf_test( app ):
 
 @IsolatedYcmd( { 'global_ycm_extra_conf':
                  PathToTestFile( 'project', 'settings_none_extra_conf.py' ) } )
-def GetCompletions_SysPath_SettingsNoneInExtraConf_test( app ):
+def GetCompletions_SysPath_SettingsNoneInExtraConf_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'The Settings function returns None in extra conf file',
     'request': {
@@ -303,7 +306,7 @@ def GetCompletions_SysPath_SettingsNoneInExtraConf_test( app ):
 
 @IsolatedYcmd( { 'global_ycm_extra_conf':
                  PathToTestFile( 'project', 'sys_path_extra_conf.py' ) } )
-def GetCompletions_SysPath_PythonSysPathInExtraConf_test( app ):
+def GetCompletions_SysPath_PythonSysPathInExtraConf_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'Module is added to sys.path through the PythonSysPath '
                    'function in extra conf file',
@@ -327,7 +330,7 @@ def GetCompletions_SysPath_PythonSysPathInExtraConf_test( app ):
 
 @IsolatedYcmd( { 'global_ycm_extra_conf':
                  PathToTestFile( 'project', 'invalid_python_extra_conf.py' ) } )
-def GetCompletions_PythonInterpreter_InvalidPythonInExtraConf_test( app ):
+def GetCompletions_PythonInterpreter_InvalidPythonInExtraConf_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'Python interpreter path specified in extra conf file '
                    'does not exist',
@@ -353,7 +356,7 @@ def GetCompletions_PythonInterpreter_InvalidPythonInExtraConf_test( app ):
 
 @IsolatedYcmd( { 'global_ycm_extra_conf':
                  PathToTestFile( 'project', 'client_data_extra_conf.py' ) } )
-def GetCompletions_PythonInterpreter_ExtraConfData_test( app ):
+def GetCompletions_PythonInterpreter_ExtraConfData_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'project', '__main__.py' )
   contents = ReadFile( filepath )
   request = {
@@ -395,7 +398,7 @@ def GetCompletions_PythonInterpreter_ExtraConfData_test( app ):
 
 
 @SharedYcmd
-def GetCompletions_NumpyDoc_test( app ):
+def GetCompletions_NumpyDoc_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'Type hinting is working with docstrings '
                    'in the Numpy format',

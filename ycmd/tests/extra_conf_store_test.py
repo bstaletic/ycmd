@@ -16,7 +16,7 @@
 # along with ycmd.  If not, see <http://www.gnu.org/licenses/>.
 
 import inspect
-from unittest.mock import patch
+from unittest.mock import NonCallableMagicMock, patch
 
 from hamcrest import ( assert_that, calling, equal_to, has_length, has_property,
                        none, raises, same_instance )
@@ -24,6 +24,7 @@ from ycmd import extra_conf_store
 from ycmd.responses import UnknownExtraConf
 from ycmd.tests import IsolatedYcmd, PathToTestFile
 from ycmd.tests.test_utils import TemporarySymlink, UnixOnly, WindowsOnly
+from webtest.app import TestApp
 
 
 GLOBAL_EXTRA_CONF = PathToTestFile( 'extra_conf', 'global_extra_conf.py' )
@@ -34,7 +35,7 @@ PROJECT_EXTRA_CONF = PathToTestFile( 'extra_conf', 'project',
 
 
 @IsolatedYcmd()
-def ExtraConfStore_ModuleForSourceFile_UnknownExtraConf_test( app ):
+def ExtraConfStore_ModuleForSourceFile_UnknownExtraConf_test( app: TestApp ) -> None:
   filename = PathToTestFile( 'extra_conf', 'project', 'some_file' )
   assert_that(
     calling( extra_conf_store.ModuleForSourceFile ).with_args( filename ),
@@ -43,7 +44,7 @@ def ExtraConfStore_ModuleForSourceFile_UnknownExtraConf_test( app ):
 
 
 @IsolatedYcmd( { 'confirm_extra_conf': 0 } )
-def ExtraConfStore_ModuleForSourceFile_NoConfirmation_test( app ):
+def ExtraConfStore_ModuleForSourceFile_NoConfirmation_test( app: TestApp ) -> None:
   filename = PathToTestFile( 'extra_conf', 'project', 'some_file' )
   module = extra_conf_store.ModuleForSourceFile( filename )
   assert_that( inspect.ismodule( module ) )
@@ -55,7 +56,7 @@ def ExtraConfStore_ModuleForSourceFile_NoConfirmation_test( app ):
 
 
 @IsolatedYcmd( { 'extra_conf_globlist': [ PROJECT_EXTRA_CONF ] } )
-def ExtraConfStore_ModuleForSourceFile_Whitelisted_test( app ):
+def ExtraConfStore_ModuleForSourceFile_Whitelisted_test( app: TestApp ) -> None:
   filename = PathToTestFile( 'extra_conf', 'project', 'some_file' )
   module = extra_conf_store.ModuleForSourceFile( filename )
   assert_that( inspect.ismodule( module ) )
@@ -67,14 +68,14 @@ def ExtraConfStore_ModuleForSourceFile_Whitelisted_test( app ):
 
 
 @IsolatedYcmd( { 'extra_conf_globlist': [ '!' + PROJECT_EXTRA_CONF ] } )
-def ExtraConfStore_ModuleForSourceFile_Blacklisted_test( app ):
+def ExtraConfStore_ModuleForSourceFile_Blacklisted_test( app: TestApp ) -> None:
   filename = PathToTestFile( 'extra_conf', 'project', 'some_file' )
   assert_that( extra_conf_store.ModuleForSourceFile( filename ), none() )
 
 
 @patch.dict( 'os.environ', { 'YCMD_TEST': PROJECT_EXTRA_CONF } )
 @IsolatedYcmd( { 'extra_conf_globlist': [ '$YCMD_TEST' ] } )
-def ExtraConfStore_ModuleForSourceFile_UnixVarEnv_test( app ):
+def ExtraConfStore_ModuleForSourceFile_UnixVarEnv_test( app: TestApp ) -> None:
   filename = PathToTestFile( 'extra_conf', 'project', 'some_file' )
   module = extra_conf_store.ModuleForSourceFile( filename )
   assert_that( inspect.ismodule( module ) )
@@ -102,7 +103,7 @@ def ExtraConfStore_ModuleForSourceFile_WinVarEnv_test( app ):
 @UnixOnly
 @IsolatedYcmd( { 'extra_conf_globlist': [
     PathToTestFile( 'extra_conf', 'symlink', '*' ) ] } )
-def ExtraConfStore_ModuleForSourceFile_SupportSymlink_test( app ):
+def ExtraConfStore_ModuleForSourceFile_SupportSymlink_test( app: TestApp ) -> None:
   with TemporarySymlink( PathToTestFile( 'extra_conf', 'project' ),
                          PathToTestFile( 'extra_conf', 'symlink' ) ):
     filename = PathToTestFile( 'extra_conf', 'project', 'some_file' )
@@ -116,7 +117,7 @@ def ExtraConfStore_ModuleForSourceFile_SupportSymlink_test( app ):
 
 
 @IsolatedYcmd( { 'global_ycm_extra_conf': GLOBAL_EXTRA_CONF } )
-def ExtraConfStore_ModuleForSourceFile_GlobalExtraConf_test( app ):
+def ExtraConfStore_ModuleForSourceFile_GlobalExtraConf_test( app: TestApp ) -> None:
   filename = PathToTestFile( 'extra_conf', 'some_file' )
   module = extra_conf_store.ModuleForSourceFile( filename )
   assert_that( inspect.ismodule( module ) )
@@ -129,7 +130,7 @@ def ExtraConfStore_ModuleForSourceFile_GlobalExtraConf_test( app ):
 
 @patch.dict( 'os.environ', { 'YCMD_TEST': GLOBAL_EXTRA_CONF } )
 @IsolatedYcmd( { 'global_ycm_extra_conf': '$YCMD_TEST' } )
-def ExtraConfStore_ModuleForSourceFile_GlobalExtraConf_UnixEnvVar_test( app ):
+def ExtraConfStore_ModuleForSourceFile_GlobalExtraConf_UnixEnvVar_test( app: TestApp ) -> None:
   filename = PathToTestFile( 'extra_conf', 'some_file' )
   module = extra_conf_store.ModuleForSourceFile( filename )
   assert_that( inspect.ismodule( module ) )
@@ -156,8 +157,8 @@ def ExtraConfStore_ModuleForSourceFile_GlobalExtraConf_WinEnvVar_test( app ):
 
 @IsolatedYcmd( { 'global_ycm_extra_conf': NO_EXTRA_CONF } )
 @patch( 'ycmd.extra_conf_store.LOGGER', autospec = True )
-def ExtraConfStore_CallGlobalExtraConfMethod_NoGlobalExtraConf_test( logger,
-                                                                     app ):
+def ExtraConfStore_CallGlobalExtraConfMethod_NoGlobalExtraConf_test( logger: NonCallableMagicMock,
+                                                                     app: TestApp ) -> None:
   extra_conf_store._CallGlobalExtraConfMethod( 'SomeMethod' )
   assert_that( logger.method_calls, has_length( 1 ) )
   logger.debug.assert_called_with(
@@ -167,7 +168,7 @@ def ExtraConfStore_CallGlobalExtraConfMethod_NoGlobalExtraConf_test( logger,
 
 @IsolatedYcmd( { 'global_ycm_extra_conf': GLOBAL_EXTRA_CONF } )
 @patch( 'ycmd.extra_conf_store.LOGGER', autospec = True )
-def CallGlobalExtraConfMethod_NoMethodInGlobalExtraConf_test( logger, app ):
+def CallGlobalExtraConfMethod_NoMethodInGlobalExtraConf_test( logger: NonCallableMagicMock, app: TestApp ) -> None:
   extra_conf_store._CallGlobalExtraConfMethod( 'MissingMethod' )
   assert_that( logger.method_calls, has_length( 1 ) )
   logger.debug.assert_called_with(
@@ -177,7 +178,7 @@ def CallGlobalExtraConfMethod_NoMethodInGlobalExtraConf_test( logger, app ):
 
 @IsolatedYcmd( { 'global_ycm_extra_conf': GLOBAL_EXTRA_CONF } )
 @patch( 'ycmd.extra_conf_store.LOGGER', autospec = True )
-def CallGlobalExtraConfMethod_NoExceptionFromMethod_test( logger, app ):
+def CallGlobalExtraConfMethod_NoExceptionFromMethod_test( logger: NonCallableMagicMock, app: TestApp ) -> None:
   extra_conf_store._CallGlobalExtraConfMethod( 'NoException' )
   assert_that( logger.method_calls, has_length( 1 ) )
   logger.info.assert_called_with(
@@ -188,7 +189,7 @@ def CallGlobalExtraConfMethod_NoExceptionFromMethod_test( logger, app ):
 
 @IsolatedYcmd( { 'global_ycm_extra_conf': GLOBAL_EXTRA_CONF } )
 @patch( 'ycmd.extra_conf_store.LOGGER', autospec = True )
-def CallGlobalExtraConfMethod_CatchExceptionFromMethod_test( logger, app ):
+def CallGlobalExtraConfMethod_CatchExceptionFromMethod_test( logger: NonCallableMagicMock, app: TestApp ) -> None:
   extra_conf_store._CallGlobalExtraConfMethod( 'RaiseException' )
   assert_that( logger.method_calls, has_length( 2 ) )
   logger.info.assert_called_with(
@@ -203,7 +204,7 @@ def CallGlobalExtraConfMethod_CatchExceptionFromMethod_test( logger, app ):
 
 @IsolatedYcmd( { 'global_ycm_extra_conf': ERRONEOUS_EXTRA_CONF } )
 @patch( 'ycmd.extra_conf_store.LOGGER', autospec = True )
-def CallGlobalExtraConfMethod_CatchExceptionFromExtraConf_test( logger, app ):
+def CallGlobalExtraConfMethod_CatchExceptionFromExtraConf_test( logger: NonCallableMagicMock, app: TestApp ) -> None:
   extra_conf_store._CallGlobalExtraConfMethod( 'NoException' )
   assert_that( logger.method_calls, has_length( 1 ) )
   logger.exception.assert_called_with(
@@ -212,7 +213,7 @@ def CallGlobalExtraConfMethod_CatchExceptionFromExtraConf_test( logger, app ):
 
 
 @IsolatedYcmd()
-def Load_DoNotReloadExtraConf_NoForce_test( app ):
+def Load_DoNotReloadExtraConf_NoForce_test( app: TestApp ) -> None:
   with patch( 'ycmd.extra_conf_store._ShouldLoad', return_value = True ):
     module = extra_conf_store.Load( PROJECT_EXTRA_CONF )
     assert_that( inspect.ismodule( module ) )
@@ -228,7 +229,7 @@ def Load_DoNotReloadExtraConf_NoForce_test( app ):
 
 
 @IsolatedYcmd()
-def Load_DoNotReloadExtraConf_ForceEqualsTrue_test( app ):
+def Load_DoNotReloadExtraConf_ForceEqualsTrue_test( app: TestApp ) -> None:
   with patch( 'ycmd.extra_conf_store._ShouldLoad', return_value = True ):
     module = extra_conf_store.Load( PROJECT_EXTRA_CONF )
     assert_that( inspect.ismodule( module ) )
@@ -243,6 +244,6 @@ def Load_DoNotReloadExtraConf_ForceEqualsTrue_test( app ):
     )
 
 
-def ExtraConfStore_IsGlobalExtraConfStore_NotAExtraConf_test():
+def ExtraConfStore_IsGlobalExtraConfStore_NotAExtraConf_test() -> None:
   assert_that( calling( extra_conf_store.IsGlobalExtraConfModule ).with_args(
     extra_conf_store ), raises( AttributeError ) )

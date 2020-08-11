@@ -25,6 +25,9 @@ from ycmd.tests.test_utils import ( CombineRequest,
                                     SignatureMatcher,
                                     SignatureAvailableMatcher,
                                     WaitUntilCompleterServerReady )
+from hamcrest.library.collection.isdict_containingentries import IsDictContainingEntries
+from typing import Dict, Union
+from webtest.app import TestApp
 
 
 def ProjectPath( *args ):
@@ -34,7 +37,7 @@ def ProjectPath( *args ):
                          *args )
 
 
-def RunTest( app, test ):
+def RunTest( app: TestApp, test: Dict[str, Union[str, Dict[str, Union[int, str]], Dict[str, Union[int, IsDictContainingEntries]]]] ) -> None:
   """
   Method to run a simple signature help test and verify the result
 
@@ -69,7 +72,7 @@ def RunTest( app, test ):
 
 
 @SharedYcmd
-def SignatureHelp_NoParams_test( app ):
+def SignatureHelp_NoParams_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'Trigger after (',
     'request': {
@@ -95,7 +98,7 @@ def SignatureHelp_NoParams_test( app ):
 
 
 @SharedYcmd
-def SignatureHelp_NullResponse_test( app ):
+def SignatureHelp_NullResponse_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'No error on null response',
     'request': {
@@ -119,7 +122,7 @@ def SignatureHelp_NullResponse_test( app ):
 
 
 @SharedYcmd
-def SignatureHelp_MethodTrigger_test( app ):
+def SignatureHelp_MethodTrigger_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'Trigger after (',
     'request': {
@@ -147,7 +150,7 @@ def SignatureHelp_MethodTrigger_test( app ):
 
 
 @SharedYcmd
-def Signature_Help_Available_test( app ):
+def Signature_Help_Available_test( app: TestApp ) -> None:
   request = { 'filepath' : PathToTestFile( 'td', 'signature_help.go' ) }
   app.post_json( '/event_notification',
                  CombineRequest( request, {

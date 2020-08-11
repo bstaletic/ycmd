@@ -30,10 +30,11 @@ from hamcrest import ( assert_that,
 from ycmd.tests.javascript import PathToTestFile, SharedYcmd
 from ycmd.tests.test_utils import BuildRequest, LocationMatcher, RangeMatcher
 from ycmd.utils import ReadFile
+from webtest.app import TestApp
 
 
 @SharedYcmd
-def Diagnostics_FileReadyToParse_test( app ):
+def Diagnostics_FileReadyToParse_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'test.js' )
   contents = ReadFile( filepath )
 
@@ -92,7 +93,7 @@ def Diagnostics_FileReadyToParse_test( app ):
 
 
 @SharedYcmd
-def Diagnostics_DetailedDiagnostics_test( app ):
+def Diagnostics_DetailedDiagnostics_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'test.js' )
   contents = ReadFile( filepath )
 

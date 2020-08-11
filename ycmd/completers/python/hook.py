@@ -16,7 +16,8 @@
 # along with ycmd.  If not, see <http://www.gnu.org/licenses/>.
 
 from ycmd.completers.python.python_completer import PythonCompleter
+from typing import Dict, Union
 
 
-def GetCompleter( user_options ):
+def GetCompleter( user_options: Dict[str, Union[int, Dict[str, int], str, bool]] ) -> PythonCompleter:
   return PythonCompleter( user_options )

@@ -16,6 +16,7 @@
 # along with ycmd.  If not, see <http://www.gnu.org/licenses/>.
 
 from ycmd.completers.completer import Completer
+from typing import Any, Dict, Set
 
 
 class GeneralCompleter( Completer ):
@@ -28,9 +29,9 @@ class GeneralCompleter( Completer ):
   Subclass Completer directly.
 
   """
-  def __init__( self, user_options ):
+  def __init__( self, user_options: Dict[str, Any] ) -> None:
     super().__init__( user_options )
 
 
-  def SupportedFiletypes( self ):
+  def SupportedFiletypes( self ) -> Set[Any]:
     return set()

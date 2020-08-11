@@ -25,13 +25,13 @@ from ycmd.tests import PathToTestFile
 from ycmd.tests.test_utils import BuildRequest
 
 
-def BuildRequestWrap( contents, column_num, line_num = 1 ):
+def BuildRequestWrap( contents: str, column_num: int, line_num: int = 1 ) -> RequestWrap:
   return RequestWrap( BuildRequest( column_num = column_num,
                                     line_num = line_num,
                                     contents = contents ) )
 
 
-def GetCursorIdentifier_StartOfLine_test():
+def GetCursorIdentifier_StartOfLine_test() -> None:
   assert_that( 'foo', equal_to(
     ic._GetCursorIdentifier( False,
                              BuildRequestWrap( 'foo',
@@ -42,77 +42,77 @@ def GetCursorIdentifier_StartOfLine_test():
                              1 ) ) ) )
 
 
-def GetCursorIdentifier_EndOfLine_test():
+def GetCursorIdentifier_EndOfLine_test() -> None:
   assert_that( 'foo', equal_to(
     ic._GetCursorIdentifier( False,
                              BuildRequestWrap( 'foo',
                              3 ) ) ) )
 
 
-def GetCursorIdentifier_PastEndOfLine_test():
+def GetCursorIdentifier_PastEndOfLine_test() -> None:
   assert_that( '', equal_to(
     ic._GetCursorIdentifier( False,
                              BuildRequestWrap( 'foo',
                              11 ) ) ) )
 
 
-def GetCursorIdentifier_NegativeColumn_test():
+def GetCursorIdentifier_NegativeColumn_test() -> None:
   assert_that( 'foo', equal_to(
     ic._GetCursorIdentifier( False,
                              BuildRequestWrap( 'foo',
                              -10 ) ) ) )
 
 
-def GetCursorIdentifier_StartOfLine_StopsAtNonIdentifierChar_test():
+def GetCursorIdentifier_StartOfLine_StopsAtNonIdentifierChar_test() -> None:
   assert_that( 'foo', equal_to(
     ic._GetCursorIdentifier( False,
                              BuildRequestWrap( 'foo(goo)',
                              1 ) ) ) )
 
 
-def GetCursorIdentifier_AtNonIdentifier_test():
+def GetCursorIdentifier_AtNonIdentifier_test() -> None:
   assert_that( 'goo', equal_to(
     ic._GetCursorIdentifier( False,
                              BuildRequestWrap( 'foo(goo)',
                              4 ) ) ) )
 
 
-def GetCursorIdentifier_WalksForwardForIdentifier_test():
+def GetCursorIdentifier_WalksForwardForIdentifier_test() -> None:
   assert_that( 'foo', equal_to(
     ic._GetCursorIdentifier( False,
                              BuildRequestWrap( '       foo',
                              1 ) ) ) )
 
 
-def GetCursorIdentifier_FindsNothingForward_test():
+def GetCursorIdentifier_FindsNothingForward_test() -> None:
   assert_that( '', equal_to(
     ic._GetCursorIdentifier( False,
                              BuildRequestWrap( 'foo   ()***()',
                              5 ) ) ) )
 
 
-def GetCursorIdentifier_SingleCharIdentifier_test():
+def GetCursorIdentifier_SingleCharIdentifier_test() -> None:
   assert_that( 'f', equal_to(
     ic._GetCursorIdentifier( False,
                              BuildRequestWrap( '    f    ',
                              1 ) ) ) )
 
 
-def GetCursorIdentifier_StartsInMiddleOfIdentifier_test():
+def GetCursorIdentifier_StartsInMiddleOfIdentifier_test() -> None:
   assert_that( 'foobar', equal_to(
     ic._GetCursorIdentifier( False,
                              BuildRequestWrap( 'foobar',
                              4 ) ) ) )
 
 
-def GetCursorIdentifier_LineEmpty_test():
+def GetCursorIdentifier_LineEmpty_test() -> None:
   assert_that( '', equal_to(
     ic._GetCursorIdentifier( False,
                              BuildRequestWrap( '',
                              12 ) ) ) )
 
 
-def GetCursorIdentifier_IgnoreIdentifierFromCommentsAndStrings_test():
+def GetCursorIdentifier_IgnoreIdentifierFromCommentsAndStrings_test() -> None:
   assert_that( '', equal_to(
     ic._GetCursorIdentifier( False,
                              BuildRequestWrap( '"foobar"',
@@ -124,7 +124,7 @@ def GetCursorIdentifier_IgnoreIdentifierFromCommentsAndStrings_test():
                              2 ) ) ) )
 
 
-def GetCursorIdentifier_CollectIdentifierFromCommentsAndStrings_test():
+def GetCursorIdentifier_CollectIdentifierFromCommentsAndStrings_test() -> None:
   assert_that( 'foobar', equal_to(
     ic._GetCursorIdentifier( True,
                              BuildRequestWrap( '"foobar"',
@@ -136,7 +136,7 @@ def GetCursorIdentifier_CollectIdentifierFromCommentsAndStrings_test():
                              2 ) ) ) )
 
 
-def PreviousIdentifier_Simple_test():
+def PreviousIdentifier_Simple_test() -> None:
   assert_that( 'foo', equal_to(
     ic._PreviousIdentifier( 2,
                             False,
@@ -144,7 +144,7 @@ def PreviousIdentifier_Simple_test():
                             4 ) ) ) )
 
 
-def PreviousIdentifier_WholeIdentShouldBeBeforeColumn_test():
+def PreviousIdentifier_WholeIdentShouldBeBeforeColumn_test() -> None:
   assert_that( '', equal_to(
     ic._PreviousIdentifier( 2,
                             False,
@@ -152,7 +152,7 @@ def PreviousIdentifier_WholeIdentShouldBeBeforeColumn_test():
                             column_num = 4 ) ) ) )
 
 
-def PreviousIdentifier_DoNotWrap_test():
+def PreviousIdentifier_DoNotWrap_test() -> None:
   assert_that( '', equal_to(
     ic._PreviousIdentifier( 2,
                             False,
@@ -160,7 +160,7 @@ def PreviousIdentifier_DoNotWrap_test():
                             column_num = 4 ) ) ) )
 
 
-def PreviousIdentifier_IgnoreForwardIdents_test():
+def PreviousIdentifier_IgnoreForwardIdents_test() -> None:
   assert_that( 'foo', equal_to(
     ic._PreviousIdentifier( 2,
                             False,
@@ -168,7 +168,7 @@ def PreviousIdentifier_IgnoreForwardIdents_test():
                             4 ) ) ) )
 
 
-def PreviousIdentifier_IgnoreTooSmallIdent_test():
+def PreviousIdentifier_IgnoreTooSmallIdent_test() -> None:
   assert_that( '', equal_to(
     ic._PreviousIdentifier( 4,
                             False,
@@ -176,7 +176,7 @@ def PreviousIdentifier_IgnoreTooSmallIdent_test():
                             4 ) ) ) )
 
 
-def PreviousIdentifier_IgnoreTooSmallIdent_DontContinueLooking_test():
+def PreviousIdentifier_IgnoreTooSmallIdent_DontContinueLooking_test() -> None:
   assert_that( '', equal_to(
     ic._PreviousIdentifier( 4,
                             False,
@@ -184,7 +184,7 @@ def PreviousIdentifier_IgnoreTooSmallIdent_DontContinueLooking_test():
                             10 ) ) ) )
 
 
-def PreviousIdentifier_WhitespaceAfterIdent_test():
+def PreviousIdentifier_WhitespaceAfterIdent_test() -> None:
   assert_that( 'foo', equal_to(
     ic._PreviousIdentifier( 2,
                             False,
@@ -192,7 +192,7 @@ def PreviousIdentifier_WhitespaceAfterIdent_test():
                             6 ) ) ) )
 
 
-def PreviousIdentifier_JunkAfterIdent_test():
+def PreviousIdentifier_JunkAfterIdent_test() -> None:
   assert_that( 'foo', equal_to(
     ic._PreviousIdentifier( 2,
                             False,
@@ -200,7 +200,7 @@ def PreviousIdentifier_JunkAfterIdent_test():
                             13 ) ) ) )
 
 
-def PreviousIdentifier_IdentInMiddleOfJunk_test():
+def PreviousIdentifier_IdentInMiddleOfJunk_test() -> None:
   assert_that( 'aa', equal_to(
     ic._PreviousIdentifier( 2,
                             False,
@@ -208,7 +208,7 @@ def PreviousIdentifier_IdentInMiddleOfJunk_test():
                             13 ) ) ) )
 
 
-def PreviousIdentifier_IdentOnPreviousLine_test():
+def PreviousIdentifier_IdentOnPreviousLine_test() -> None:
   assert_that( 'foo', equal_to(
     ic._PreviousIdentifier( 2,
                             False,
@@ -224,7 +224,7 @@ def PreviousIdentifier_IdentOnPreviousLine_test():
                             line_num = 2 ) ) ) )
 
 
-def PreviousIdentifier_IdentOnPreviousLine_JunkAfterIdent_test():
+def PreviousIdentifier_IdentOnPreviousLine_JunkAfterIdent_test() -> None:
   assert_that( 'foo', equal_to(
     ic._PreviousIdentifier( 2,
                             False,
@@ -233,7 +233,7 @@ def PreviousIdentifier_IdentOnPreviousLine_JunkAfterIdent_test():
                             line_num = 2 ) ) ) )
 
 
-def PreviousIdentifier_NoGoodIdentFound_test():
+def PreviousIdentifier_NoGoodIdentFound_test() -> None:
   assert_that( '', equal_to(
     ic._PreviousIdentifier( 5,
                             False,
@@ -242,7 +242,7 @@ def PreviousIdentifier_NoGoodIdentFound_test():
                             line_num = 2 ) ) ) )
 
 
-def PreviousIdentifier_IgnoreIdentifierFromCommentsAndStrings_test():
+def PreviousIdentifier_IgnoreIdentifierFromCommentsAndStrings_test() -> None:
   assert_that( '', equal_to(
     ic._PreviousIdentifier( 2,
                             False,
@@ -257,7 +257,7 @@ def PreviousIdentifier_IgnoreIdentifierFromCommentsAndStrings_test():
                             line_num = 3 ) ) ) )
 
 
-def PreviousIdentifier_CollectIdentifierFromCommentsAndStrings_test():
+def PreviousIdentifier_CollectIdentifierFromCommentsAndStrings_test() -> None:
   assert_that( 'foo', equal_to(
     ic._PreviousIdentifier( 2,
                             True,
@@ -272,27 +272,27 @@ def PreviousIdentifier_CollectIdentifierFromCommentsAndStrings_test():
                             line_num = 3 ) ) ) )
 
 
-def FilterUnchangedTagFiles_NoFiles_test():
+def FilterUnchangedTagFiles_NoFiles_test() -> None:
   ident_completer = IdentifierCompleter( DefaultOptions() )
   assert_that( list( ident_completer._FilterUnchangedTagFiles( [] ) ),
                empty() )
 
 
-def FilterUnchangedTagFiles_SkipBadFiles_test():
+def FilterUnchangedTagFiles_SkipBadFiles_test() -> None:
   ident_completer = IdentifierCompleter( DefaultOptions() )
   assert_that( list( ident_completer._FilterUnchangedTagFiles(
                        [ '/some/tags' ] ) ),
                empty() )
 
 
-def FilterUnchangedTagFiles_KeepGoodFiles_test():
+def FilterUnchangedTagFiles_KeepGoodFiles_test() -> None:
   ident_completer = IdentifierCompleter( DefaultOptions() )
   tag_file = PathToTestFile( 'basic.tags' )
   assert_that( ident_completer._FilterUnchangedTagFiles( [ tag_file ] ),
                contains_exactly( tag_file ) )
 
 
-def FilterUnchangedTagFiles_SkipUnchangesFiles_test():
+def FilterUnchangedTagFiles_SkipUnchangesFiles_test() -> None:
   ident_completer = IdentifierCompleter( DefaultOptions() )
 
   # simulate an already open tags file that didn't change in the meantime.

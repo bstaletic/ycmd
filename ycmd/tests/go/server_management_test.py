@@ -16,7 +16,7 @@
 # along with ycmd.  If not, see <http://www.gnu.org/licenses/>.
 
 from hamcrest import assert_that, contains_exactly, equal_to, has_entry
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from ycmd.completers.language_server.language_server_completer import (
     LanguageServerConnectionTimeout )
@@ -26,9 +26,10 @@ from ycmd.tests.go import ( PathToTestFile,
 from ycmd.tests.test_utils import ( BuildRequest,
                                     MockProcessTerminationTimingOut,
                                     WaitUntilCompleterServerReady )
+from webtest.app import TestApp
 
 
-def AssertGoCompleterServerIsRunning( app, is_running ):
+def AssertGoCompleterServerIsRunning( app: TestApp, is_running: bool ) -> None:
   request_data = BuildRequest( filetype = 'go' )
   assert_that( app.post_json( '/debug_info', request_data ).json,
                has_entry(
@@ -40,7 +41,7 @@ def AssertGoCompleterServerIsRunning( app, is_running ):
 
 
 @IsolatedYcmd
-def ServerManagement_RestartServer_test( app ):
+def ServerManagement_RestartServer_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'goto.go' )
   StartGoCompleterServerInDirectory( app, filepath )
 
@@ -64,7 +65,7 @@ def ServerManagement_RestartServer_test( app ):
 @patch( 'shutil.rmtree', side_effect = OSError )
 @patch( 'ycmd.utils.WaitUntilProcessIsTerminated',
         MockProcessTerminationTimingOut )
-def ServerManagement_CloseServer_Unclean_test( rm_tree, app ):
+def ServerManagement_CloseServer_Unclean_test( rm_tree: MagicMock, app: TestApp ) -> None:
   StartGoCompleterServerInDirectory( app, PathToTestFile() )
 
   app.post_json(
@@ -86,7 +87,7 @@ def ServerManagement_CloseServer_Unclean_test( rm_tree, app ):
 
 
 @IsolatedYcmd
-def ServerManagement_StopServerTwice_test( app ):
+def ServerManagement_StopServerTwice_test( app: TestApp ) -> None:
   StartGoCompleterServerInDirectory( app, PathToTestFile() )
 
   app.post_json(
@@ -112,7 +113,7 @@ def ServerManagement_StopServerTwice_test( app ):
 
 
 @IsolatedYcmd
-def ServerManagement_StartServer_Fails_test( app ):
+def ServerManagement_StartServer_Fails_test( app: TestApp ) -> None:
   with patch( 'ycmd.completers.language_server.language_server_completer.'
               'LanguageServerConnection.AwaitServerConnection',
               side_effect = LanguageServerConnectionTimeout ):

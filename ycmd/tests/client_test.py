@@ -36,6 +36,8 @@ from ycmd.user_options_store import DefaultOptions
 from ycmd.utils import ( CloseStandardStreams, CreateLogfile,
                          GetUnusedLocalhostPort, ReadFile, RemoveIfExists,
                          SafePopen, ToBytes, ToUnicode )
+from requests.models import Response
+from typing import Callable, Dict, List, Optional, Union
 
 HEADERS = { 'content-type': 'application/json' }
 HMAC_HEADER = 'x-ycm-hmac'
@@ -46,7 +48,7 @@ LOGFILE_FORMAT = 'server_{port}_{std}_'
 
 
 class Client_test:
-  def setup_method( self ):
+  def setup_method( self ) -> None:
     self._location = None
     self._port = None
     self._servers = []
@@ -58,7 +60,7 @@ class Client_test:
       b64encode( self._hmac_secret ) )
 
 
-  def teardown_method( self ):
+  def teardown_method( self ) -> None:
     for server in self._servers:
       if server.is_running():
         server.terminate()
@@ -67,8 +69,8 @@ class Client_test:
       RemoveIfExists( logfile )
 
 
-  def Start( self, idle_suicide_seconds = 60,
-             check_interval_seconds = 60 * 10 ):
+  def Start( self, idle_suicide_seconds: int = 60,
+             check_interval_seconds: int = 60 * 10 ) -> None:
     # The temp options file is deleted by ycmd during startup.
     with NamedTemporaryFile( mode = 'w+', delete = False ) as options_file:
       json.dump( self._options_dict, options_file )
@@ -111,14 +113,14 @@ class Client_test:
     self.PostRequest( 'load_extra_conf_file', { 'filepath': extra_conf } )
 
 
-  def _IsReady( self, filetype = None ):
+  def _IsReady( self, filetype: Optional[str] = None ) -> bool:
     params = { 'subserver': filetype } if filetype else None
     response = self.GetRequest( 'ready', params )
     response.raise_for_status()
     return response.json()
 
 
-  def _WaitUntilReady( self, filetype = None, timeout = 60 ):
+  def _WaitUntilReady( self, filetype: Optional[str] = None, timeout: int = 60 ) -> None:
     expiration = time.time() + timeout
     while True:
       try:
@@ -135,7 +137,7 @@ class Client_test:
         time.sleep( 0.1 )
 
 
-  def StartSubserverForFiletype( self, filetype ):
+  def StartSubserverForFiletype( self, filetype: str ) -> None:
     filepath = PathToTestFile( 'client', 'some_file' )
     # Calling the BufferVisit event before the FileReadyToParse one is needed
     # for the TypeScript completer.
@@ -163,17 +165,17 @@ class Client_test:
       self._logfiles.extend( server[ 'logfiles' ] )
 
 
-  def AssertServersAreRunning( self ):
+  def AssertServersAreRunning( self ) -> None:
     for server in self._servers:
       assert_that( server.is_running(), equal_to( True ) )
 
 
-  def AssertServersShutDown( self, timeout = 5 ):
+  def AssertServersShutDown( self, timeout: int = 5 ) -> None:
     _, alive_procs = psutil.wait_procs( self._servers, timeout = timeout )
     assert_that( alive_procs, empty() )
 
 
-  def AssertLogfilesAreRemoved( self ):
+  def AssertLogfilesAreRemoved( self ) -> None:
     existing_logfiles = []
     for logfile in self._logfiles:
       if os.path.isfile( logfile ):
@@ -181,19 +183,19 @@ class Client_test:
     assert_that( existing_logfiles, empty() )
 
 
-  def GetRequest( self, handler, params = None ):
+  def GetRequest( self, handler: str, params: Optional[Dict[str, str]] = None ) -> Response:
     return self._Request( 'GET', handler, params = params )
 
 
-  def PostRequest( self, handler, data = None ):
+  def PostRequest( self, handler: str, data: Optional[Union[Dict[str, Union[int, str, Dict[str, Dict[str, Union[str, List[str]]]]]], Dict[str, str]]] = None ) -> Response:
     return self._Request( 'POST', handler, data = data )
 
 
-  def _ToUtf8Json( self, data ):
+  def _ToUtf8Json( self, data: Optional[Union[Dict[str, Union[int, str, Dict[str, Dict[str, Union[str, List[str]]]]]], Dict[str, str]]] ) -> bytes:
     return ToBytes( json.dumps( data ) if data else None )
 
 
-  def _Request( self, method, handler, data = None, params = None ):
+  def _Request( self, method: str, handler: str, data: Optional[Union[Dict[str, Union[int, str, Dict[str, Dict[str, Union[str, List[str]]]]]], Dict[str, str]]] = None, params: Optional[Dict[str, str]] = None ) -> Response:
     request_uri = self._BuildUri( handler )
     data = self._ToUtf8Json( data )
     headers = self._ExtraHeaders( method,
@@ -208,11 +210,11 @@ class Client_test:
     return response
 
 
-  def _BuildUri( self, handler ):
+  def _BuildUri( self, handler: str ) -> bytes:
     return ToBytes( urljoin( self._location, handler ) )
 
 
-  def _ExtraHeaders( self, method, request_uri, request_body = None ):
+  def _ExtraHeaders( self, method: str, request_uri: bytes, request_body: Optional[bytes] = None ) -> Dict[str, Union[str, bytes]]:
     if not request_body:
       request_body = bytes( b'' )
     headers = dict( HEADERS )
@@ -224,7 +226,7 @@ class Client_test:
     return headers
 
 
-  def AssertResponse( self, response ):
+  def AssertResponse( self, response: Response ) -> None:
     assert_that( response.status_code, equal_to( requests.codes.ok ) )
     assert_that( HMAC_HEADER, is_in( response.headers ) )
     assert_that(
@@ -233,14 +235,14 @@ class Client_test:
     )
 
 
-  def _ContentHmacValid( self, response ):
+  def _ContentHmacValid( self, response: Response ) -> bool:
     our_hmac = CreateHmac( response.content, self._hmac_secret )
     their_hmac = ToBytes( b64decode( response.headers[ HMAC_HEADER ] ) )
     return compare_digest( our_hmac, their_hmac )
 
 
   @staticmethod
-  def CaptureLogfiles( test ):
+  def CaptureLogfiles( test: Callable ) -> Callable:
     @functools.wraps( test )
     def Wrapper( self, *args ):
       try:

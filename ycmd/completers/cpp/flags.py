@@ -18,7 +18,7 @@
 import os
 import inspect
 from ycmd import extra_conf_store
-from ycmd.utils import ( AbsolutePath,
+from ycmd.utils import ( HashableDict, AbsolutePath,
                          ImportCore,
                          OnMac,
                          OnWindows,
@@ -27,6 +27,10 @@ from ycmd.utils import ( AbsolutePath,
                          ToUnicode,
                          CLANG_RESOURCE_DIR )
 from ycmd.responses import NoExtraConfDetected
+from typing import Any, Dict, List, Optional, Tuple, Union
+from unittest.mock import MagicMock
+from ycm_core import CompilationDatabase, CompilationInfoForFile, StringVector
+
 ycm_core = ImportCore()
 
 # -include-pch and --sysroot= must be listed before -include and --sysroot
@@ -96,7 +100,7 @@ class Flags:
   The flags are loaded from user-created python files (hereafter referred to as
   'modules') that contain a method Settings( **kwargs )."""
 
-  def __init__( self ):
+  def __init__( self ) -> None:
     # We cache the flags by a tuple of filename and client data.
     self.flags_for_file = {}
     self.no_extra_conf_file_warning_posted = False
@@ -109,9 +113,9 @@ class Flags:
 
 
   def FlagsForFile( self,
-                    filename,
-                    add_extra_clang_flags = True,
-                    client_data = None ):
+                    filename: str,
+                    add_extra_clang_flags: bool = True,
+                    client_data: Optional[HashableDict] = None ) -> Union[Tuple[List[Any], str], Tuple[StringVector, str]]:
     """Returns a tuple describing the compiler invocation required to parse the
     file |filename|. The tuple contains 2 entries:
       1. A list of the compiler flags to use,
@@ -139,10 +143,10 @@ class Flags:
 
 
   def _ParseFlagsFromExtraConfOrDatabase( self,
-                                          filename,
-                                          results,
-                                          add_extra_clang_flags,
-                                          client_data ):
+                                          filename: str,
+                                          results: Dict[str, Any],
+                                          add_extra_clang_flags: bool,
+                                          client_data: Optional[HashableDict] ) -> Union[Tuple[List[Any], str], Tuple[StringVector, str]]:
     if 'override_filename' in results:
       filename = results[ 'override_filename' ] or filename
 
@@ -161,7 +165,7 @@ class Flags:
     return sanitized_flags, filename
 
 
-  def _GetFlagsFromExtraConfOrDatabase( self, filename, client_data ):
+  def _GetFlagsFromExtraConfOrDatabase( self, filename: str, client_data: Optional[HashableDict] ) -> Dict[str, Any]:
     # Load the flags from the extra conf file if one is found and is not global.
     module = extra_conf_store.ModuleForSourceFile( filename )
     if module and not extra_conf_store.IsGlobalExtraConfModule( module ):
@@ -190,7 +194,7 @@ class Flags:
     self.compilation_database_dir_map.clear()
 
 
-  def _GetFlagsFromCompilationDatabase( self, database, file_name ):
+  def _GetFlagsFromCompilationDatabase( self, database: CompilationDatabase, file_name: str ) -> Dict[str, Union[List[Any], List[str]]]:
     _, file_extension = os.path.splitext( file_name )
 
     compilation_info = _GetCompilationInfoForFile( database,
@@ -210,7 +214,7 @@ class Flags:
 
   # Return a compilation database object for the supplied path or None if no
   # compilation database is found.
-  def LoadCompilationDatabase( self, file_dir ):
+  def LoadCompilationDatabase( self, file_dir: str ) -> Optional[CompilationDatabase]:
     # We search up the directory hierarchy, to first see if we have a
     # compilation database already for that path, or if a compile_commands.json
     # file exists in that directory.
@@ -236,11 +240,11 @@ class Flags:
     return None
 
 
-def _ExtractFlagsList( flags_for_file_output ):
+def _ExtractFlagsList( flags_for_file_output: Dict[str, Any] ) -> List[str]:
   return [ ToUnicode( x ) for x in flags_for_file_output[ 'flags' ] ]
 
 
-def ShouldAllowWinStyleFlags( flags ):
+def ShouldAllowWinStyleFlags( flags: Union[StringVector, List[str]] ) -> bool:
   if OnWindows():
     # Iterate in reverse because we only care
     # about the last occurrence of --driver-mode flag.
@@ -254,7 +258,7 @@ def ShouldAllowWinStyleFlags( flags ):
   return False
 
 
-def _CallExtraConfFlagsForFile( module, filename, client_data ):
+def _CallExtraConfFlagsForFile( module: MagicMock, filename: str, client_data: None ) -> Dict[str, Any]:
   filename = ToUnicode( filename )
 
   if hasattr( module, 'Settings' ):
@@ -278,10 +282,10 @@ def _CallExtraConfFlagsForFile( module, filename, client_data ):
   return results
 
 
-def PrepareFlagsForClang( flags,
-                          filename,
-                          add_extra_clang_flags = True,
-                          enable_windows_style_flags = False ):
+def PrepareFlagsForClang( flags: List[str],
+                          filename: str,
+                          add_extra_clang_flags: bool = True,
+                          enable_windows_style_flags: bool = False ) -> StringVector:
   flags = _AddLanguageFlagWhenAppropriate( flags, enable_windows_style_flags )
   flags = _RemoveXclangFlags( flags )
   flags = RemoveUnusedFlags( flags, filename, enable_windows_style_flags )
@@ -308,7 +312,7 @@ def PrepareFlagsForClang( flags,
   return vector
 
 
-def _RemoveXclangFlags( flags ):
+def _RemoveXclangFlags( flags: List[str] ) -> List[str]:
   """Drops -Xclang flags.  These are typically used to pass in options to
   clang cc1 which are not used in the front-end, so they are not needed for
   code completion."""
@@ -328,7 +332,7 @@ def _RemoveXclangFlags( flags ):
   return sanitized_flags
 
 
-def _RemoveFlagsPrecedingCompiler( flags, enable_windows_style_flags ):
+def _RemoveFlagsPrecedingCompiler( flags: List[str], enable_windows_style_flags: bool ) -> List[str]:
   """Assuming that the flag just before the first flag (looks like a flag,
   not like a file path) is the compiler path, removes all flags preceding it."""
 
@@ -342,7 +346,7 @@ def _RemoveFlagsPrecedingCompiler( flags, enable_windows_style_flags ):
   return flags[ :-1 ]
 
 
-def _AddLanguageFlagWhenAppropriate( flags, enable_windows_style_flags ):
+def _AddLanguageFlagWhenAppropriate( flags: List[str], enable_windows_style_flags: bool ) -> List[str]:
   """When flags come from the compile_commands.json file, the flag preceding the
   first flag starting with a dash is usually the path to the compiler that
   should be invoked. Since LibClang does not deduce the language from the
@@ -389,7 +393,7 @@ def _AddLanguageFlagWhenAppropriate( flags, enable_windows_style_flags ):
   return flags
 
 
-def RemoveUnusedFlags( flags, filename, enable_windows_style_flags ):
+def RemoveUnusedFlags( flags: List[str], filename: str, enable_windows_style_flags: bool ) -> List[str]:
   """Given an iterable object that produces strings (flags for Clang), removes
   the '-c' and '-o' options that Clang does not like to see when it's producing
   completions for a file. Same for '-MD' etc.
@@ -446,9 +450,9 @@ def RemoveUnusedFlags( flags, filename, enable_windows_style_flags ):
   return new_flags
 
 
-def _SkipStrayFilenameFlag( current_flag,
-                            previous_flag,
-                            enable_windows_style_flags ):
+def _SkipStrayFilenameFlag( current_flag: str,
+                            previous_flag: str,
+                            enable_windows_style_flags: bool ) -> bool:
   current_flag_starts_with_slash = current_flag.startswith( '/' )
   previous_flag_starts_with_slash = previous_flag.startswith( '/' )
 
@@ -580,7 +584,7 @@ def AddMacIncludePaths( flags ):
   return flags
 
 
-def _EnableTypoCorrection( flags ):
+def _EnableTypoCorrection( flags: List[str] ) -> List[str]:
   """Adds the -fspell-checking flag if the -fno-spell-checking flag is not
   present"""
 
@@ -598,7 +602,7 @@ def _EnableTypoCorrection( flags ):
   return flags
 
 
-def _MakeRelativePathsInFlagsAbsolute( flags, working_directory ):
+def _MakeRelativePathsInFlagsAbsolute( flags: Union[StringVector, List[str], List[Union[bytes, str]]], working_directory: Optional[str] ) -> Union[List[str], List[Union[bytes, str]]]:
   if not working_directory:
     return list( flags )
   new_flags = []
@@ -635,7 +639,7 @@ def _MakeRelativePathsInFlagsAbsolute( flags, working_directory ):
 # Find the compilation info structure from the supplied database for the
 # supplied file. If the source file is a header, try and find an appropriate
 # source file and return the compilation_info for that.
-def _GetCompilationInfoForFile( database, file_name, file_extension ):
+def _GetCompilationInfoForFile( database: CompilationDatabase, file_name: str, file_extension: str ) -> Optional[CompilationInfoForFile]:
   # Ask the database for the flags.
   compilation_info = database.GetCompilationInfoForFile( file_name )
   if compilation_info.compiler_flags_:
@@ -643,7 +647,7 @@ def _GetCompilationInfoForFile( database, file_name, file_extension ):
   return None
 
 
-def UserIncludePaths( user_flags, filename ):
+def UserIncludePaths( user_flags: StringVector, filename: str ) -> Union[Tuple[List[str], List[Any], List[Any]], Tuple[List[str], List[Any], List[str]], Tuple[List[str], List[str], List[str]], Tuple[List[str], List[str], List[Any]]]:
   """
   Returns a tuple ( quoted_include_paths, include_paths )
 

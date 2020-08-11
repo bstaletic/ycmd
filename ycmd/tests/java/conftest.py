@@ -16,6 +16,11 @@
 # along with ycmd.  If not, see <http://www.gnu.org/licenses/>.
 
 import contextlib
+from _pytest.fixtures import SubRequest
+from _pytest.mark.structures import MarkDecorator
+from typing import Callable, Dict, Iterator
+from webtest.app import TestApp
+
 import os
 import pytest
 from ycmd.tests.test_utils import ( BuildRequest,
@@ -33,7 +38,7 @@ DEFAULT_PROJECT_DIR = 'simple_eclipse_project'
 
 
 @pytest.fixture( scope='module', autouse=True )
-def set_up_shared_app():
+def set_up_shared_app() -> Iterator[None]:
   """Initializes the ycmd server as a WebTest application that will be shared
   by all tests using the SharedYcmd decorator in this package. Additional
   configuration that is common to these tests, like starting a semantic
@@ -47,12 +52,12 @@ def set_up_shared_app():
   StopCompleterServer( shared_app, 'java' )
 
 
-def StartJavaCompleterServerInDirectory( app, directory ):
+def StartJavaCompleterServerInDirectory( app: TestApp, directory: str ) -> None:
   StartJavaCompleterServerWithFile( app,
                                     os.path.join( directory, 'test.java' ) )
 
 
-def StartJavaCompleterServerWithFile( app, file_path ):
+def StartJavaCompleterServerWithFile( app: TestApp, file_path: str ) -> None:
   app.post_json( '/event_notification',
                  BuildRequest(
                    event_name = 'FileReadyToParse',
@@ -62,7 +67,7 @@ def StartJavaCompleterServerWithFile( app, file_path ):
 
 
 @pytest.fixture
-def isolated_app():
+def isolated_app() -> Callable:
   """Defines a pytest fixture to be used in cases where it is easier to
   specify user options of the isolated ycmdat some point inside the function.
 
@@ -85,7 +90,7 @@ def isolated_app():
 
 
 @pytest.fixture
-def app( request ):
+def app( request: SubRequest ) -> Iterator[TestApp]:
   which = request.param[ 0 ]
   assert which == 'isolated' or which == 'shared'
   if which == 'isolated':
@@ -113,7 +118,7 @@ SharedYcmd = pytest.mark.parametrize(
     indirect = True )
 
 
-def IsolatedYcmd( custom_options = {} ):
+def IsolatedYcmd( custom_options: Dict[str, str] = {} ) -> MarkDecorator:
   """Defines a decorator to be attached to tests of this package. This decorator
   passes a unique ycmd application as a parameter. It should be used on tests
   that change the server state in a irreversible way (ex: a semantic subserver
@@ -141,6 +146,6 @@ def IsolatedYcmd( custom_options = {} ):
       indirect = True )
 
 
-def PathToTestFile( *args ):
+def PathToTestFile( *args) -> str:
   dir_of_current_script = os.path.dirname( os.path.abspath( __file__ ) )
   return os.path.join( dir_of_current_script, 'testdata', *args )

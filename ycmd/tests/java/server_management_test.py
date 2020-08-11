@@ -21,7 +21,7 @@ import psutil
 import requests
 import time
 
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 from hamcrest import ( assert_that,
                        contains_exactly,
                        equal_to,
@@ -43,9 +43,11 @@ from ycmd.tests.test_utils import ( BuildRequest,
                                     TemporaryTestDir,
                                     WaitUntilCompleterServerReady )
 from ycmd import utils, handlers
+from typing import Callable
+from webtest.app import TestApp
 
 
-def TidyJDTProjectFiles( dir_name ):
+def TidyJDTProjectFiles( dir_name: str ) -> Callable:
   """Defines a test decorator which deletes the .project etc. files that are
   created by the jdt.ls server when it detects a project. This ensures the tests
   actually check that jdt.ls detects the project."""
@@ -69,7 +71,7 @@ def TidyJDTProjectFiles( dir_name ):
 
 @TidyJDTProjectFiles( PathToTestFile( 'simple_maven_project' ) )
 @IsolatedYcmd()
-def ServerManagement_RestartServer_test( app ):
+def ServerManagement_RestartServer_test( app: TestApp ) -> None:
   StartJavaCompleterServerInDirectory(
     app, PathToTestFile( 'simple_eclipse_project' ) )
 
@@ -118,7 +120,7 @@ def ServerManagement_RestartServer_test( app ):
                CompleterProjectDirectoryMatcher( maven_project ) )
 
 
-def ServerManagement_WipeWorkspace_NoConfig_test( isolated_app ):
+def ServerManagement_WipeWorkspace_NoConfig_test( isolated_app: Callable ) -> None:
   with TemporaryTestDir() as tmp_dir:
     with isolated_app( {
       'java_jdtls_use_clean_workspace': 0,
@@ -168,7 +170,7 @@ def ServerManagement_WipeWorkspace_NoConfig_test( isolated_app ):
         ) )
 
 
-def ServerManagement_WipeWorkspace_WithConfig_test( isolated_app ):
+def ServerManagement_WipeWorkspace_WithConfig_test( isolated_app: Callable ) -> None:
   with TemporaryTestDir() as tmp_dir:
     with isolated_app( {
       'java_jdtls_use_clean_workspace': 0,
@@ -221,7 +223,7 @@ def ServerManagement_WipeWorkspace_WithConfig_test( isolated_app ):
 @IsolatedYcmd( {
   'extra_conf_globlist': PathToTestFile( 'multiple_projects', '*' )
 } )
-def ServerManagement_ProjectDetection_MultipleProjects_test( app ):
+def ServerManagement_ProjectDetection_MultipleProjects_test( app: TestApp ) -> None:
   # The ycm_extra_conf.py file should set the project path to
   # multiple_projects/src
   project = PathToTestFile( 'multiple_projects', 'src' )
@@ -242,7 +244,7 @@ def ServerManagement_ProjectDetection_MultipleProjects_test( app ):
 
 
 @IsolatedYcmd()
-def ServerManagement_ProjectDetection_EclipseParent_test( app ):
+def ServerManagement_ProjectDetection_EclipseParent_test( app: TestApp ) -> None:
   StartJavaCompleterServerInDirectory(
     app, PathToTestFile( 'simple_eclipse_project', 'src' ) )
 
@@ -256,7 +258,7 @@ def ServerManagement_ProjectDetection_EclipseParent_test( app ):
 
 @TidyJDTProjectFiles( PathToTestFile( 'simple_maven_project' ) )
 @IsolatedYcmd()
-def ServerManagement_ProjectDetection_MavenParent_test( app ):
+def ServerManagement_ProjectDetection_MavenParent_test( app: TestApp ) -> None:
   StartJavaCompleterServerInDirectory( app,
                                        PathToTestFile( 'simple_maven_project',
                                                        'src',
@@ -277,7 +279,7 @@ def ServerManagement_ProjectDetection_MavenParent_test( app ):
                                       'simple_submodule' ) )
 @TidyJDTProjectFiles( PathToTestFile( 'simple_maven_project' ) )
 @IsolatedYcmd()
-def ServerManagement_ProjectDetection_MavenParent_Submodule_test( app ):
+def ServerManagement_ProjectDetection_MavenParent_Submodule_test( app: TestApp ) -> None:
   StartJavaCompleterServerInDirectory( app,
                                        PathToTestFile( 'simple_maven_project',
                                                        'simple_submodule',
@@ -296,7 +298,7 @@ def ServerManagement_ProjectDetection_MavenParent_Submodule_test( app ):
 
 
 @SharedYcmd
-def ServerManagement_OpenProject_RelativePathNoWD_test( app ):
+def ServerManagement_OpenProject_RelativePathNoWD_test( app: TestApp ) -> None:
   response = app.post_json(
     '/run_completer_command',
     BuildRequest(
@@ -316,7 +318,7 @@ def ServerManagement_OpenProject_RelativePathNoWD_test( app ):
 
 
 @SharedYcmd
-def ServerManagement_OpenProject_RelativePathNoPath_test( app ):
+def ServerManagement_OpenProject_RelativePathNoPath_test( app: TestApp ) -> None:
   response = app.post_json(
     '/run_completer_command',
     BuildRequest(
@@ -334,7 +336,7 @@ def ServerManagement_OpenProject_RelativePathNoPath_test( app ):
                              'Usage: OpenProject <project directory>' ) )
 
 
-def ServerManagement_ProjectDetection_NoParent_test( isolated_app ):
+def ServerManagement_ProjectDetection_NoParent_test( isolated_app: Callable ) -> None:
   with TemporaryTestDir() as tmp_dir:
     with isolated_app() as app:
       StartJavaCompleterServerInDirectory( app, tmp_dir )
@@ -350,7 +352,7 @@ def ServerManagement_ProjectDetection_NoParent_test( isolated_app ):
 @patch( 'shutil.rmtree', side_effect = OSError )
 @patch( 'ycmd.utils.WaitUntilProcessIsTerminated',
         MockProcessTerminationTimingOut )
-def ServerManagement_CloseServer_Unclean_test( rm, app ):
+def ServerManagement_CloseServer_Unclean_test( rm: MagicMock, app: TestApp ) -> None:
   StartJavaCompleterServerInDirectory(
     app, PathToTestFile( 'simple_eclipse_project' ) )
 
@@ -373,7 +375,7 @@ def ServerManagement_CloseServer_Unclean_test( rm, app ):
 
 
 @IsolatedYcmd()
-def ServerManagement_StopServerTwice_test( app ):
+def ServerManagement_StopServerTwice_test( app: TestApp ) -> None:
   StartJavaCompleterServerInDirectory(
     app, PathToTestFile( 'simple_eclipse_project' ) )
 
@@ -415,7 +417,7 @@ def ServerManagement_StopServerTwice_test( app ):
 
 
 @IsolatedYcmd()
-def ServerManagement_ServerDies_test( app ):
+def ServerManagement_ServerDies_test( app: TestApp ) -> None:
   StartJavaCompleterServerInDirectory(
     app,
     PathToTestFile( 'simple_eclipse_project' ) )
@@ -446,7 +448,7 @@ def ServerManagement_ServerDies_test( app ):
 
 
 @IsolatedYcmd()
-def ServerManagement_ServerDiesWhileShuttingDown_test( app ):
+def ServerManagement_ServerDiesWhileShuttingDown_test( app: TestApp ) -> None:
   StartJavaCompleterServerInDirectory(
     app,
     PathToTestFile( 'simple_eclipse_project' ) )
@@ -492,7 +494,7 @@ def ServerManagement_ServerDiesWhileShuttingDown_test( app ):
 
 
 @IsolatedYcmd()
-def ServerManagement_ConnectionRaisesWhileShuttingDown_test( app ):
+def ServerManagement_ConnectionRaisesWhileShuttingDown_test( app: TestApp ) -> None:
   StartJavaCompleterServerInDirectory(
     app,
     PathToTestFile( 'simple_eclipse_project' ) )
@@ -537,7 +539,7 @@ def ServerManagement_ConnectionRaisesWhileShuttingDown_test( app ):
 
 
 @IsolatedYcmd()
-def ServerManagement_StartServer_Fails_test( app ):
+def ServerManagement_StartServer_Fails_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'simple_eclipse_project',
                              'src',
                              'com',

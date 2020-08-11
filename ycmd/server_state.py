@@ -21,9 +21,13 @@ from ycmd.completers.general.general_completer_store import (
     GeneralCompleterStore )
 from ycmd.completers.language_server import generic_lsp_completer
 from ycmd.utils import LOGGER
+from typing import Any, Dict, List, Optional, Union
+from ycmd.completers.completer import Completer
+from ycmd.completers.language_server.generic_lsp_completer import GenericLSPCompleter
+from ycmd.request_wrap import RequestWrap
 
 
-def _GetGenericLSPCompleter( user_options, filetype ):
+def _GetGenericLSPCompleter( user_options: Dict[str, Any], filetype: str ) -> Optional[GenericLSPCompleter]:
   custom_lsp = user_options[ 'language_server' ]
   for server_settings in custom_lsp:
     if filetype in server_settings[ 'filetypes' ]:
@@ -33,7 +37,7 @@ def _GetGenericLSPCompleter( user_options, filetype ):
 
 
 class ServerState:
-  def __init__( self, user_options ):
+  def __init__( self, user_options: Dict[str, Any] ) -> None:
     self._user_options = user_options
     self._filetype_completers = {}
     self._filetype_completers_lock = threading.Lock()
@@ -41,7 +45,7 @@ class ServerState:
 
 
   @property
-  def user_options( self ):
+  def user_options( self ) -> Dict[str, Union[int, Dict[str, int], str]]:
     return self._user_options
 
 
@@ -54,7 +58,7 @@ class ServerState:
     self._gencomp.Shutdown()
 
 
-  def _GetFiletypeCompleterForFiletype( self, filetype ):
+  def _GetFiletypeCompleterForFiletype( self, filetype: str ) -> Any:
     with self._filetype_completers_lock:
       try:
         return self._filetype_completers[ filetype ]
@@ -80,7 +84,7 @@ class ServerState:
       return completer
 
 
-  def GetFiletypeCompleter( self, current_filetypes ):
+  def GetFiletypeCompleter( self, current_filetypes: List[str] ) -> Completer:
     completers = [ self._GetFiletypeCompleterForFiletype( filetype )
                    for filetype in current_filetypes ]
 
@@ -92,13 +96,13 @@ class ServerState:
       f'No semantic completer exists for filetypes: { current_filetypes }' )
 
 
-  def GetLoadedFiletypeCompleters( self ):
+  def GetLoadedFiletypeCompleters( self ) -> Any:
     with self._filetype_completers_lock:
       return { completer for completer in
                self._filetype_completers.values() if completer }
 
 
-  def FiletypeCompletionAvailable( self, filetypes, silent = False ):
+  def FiletypeCompletionAvailable( self, filetypes: List[str], silent: bool = False ) -> bool:
     """Returns True if there is a ycmd semantic completer defined for any
     filetype in the list |filetypes|. Otherwise, returns False and prints an
     error to the log file, unless silent = True."""
@@ -112,14 +116,14 @@ class ServerState:
       return False
 
 
-  def FiletypeCompletionUsable( self, filetypes, silent = False ):
+  def FiletypeCompletionUsable( self, filetypes: List[str], silent: bool = False ) -> bool:
     """Return True if ycmd supports semantic compltion for any filetype in the
     list |filetypes| and those filetypes are not disabled by user options."""
     return ( self.CurrentFiletypeCompletionEnabled( filetypes ) and
              self.FiletypeCompletionAvailable( filetypes, silent ) )
 
 
-  def ShouldUseFiletypeCompleter( self, request_data ):
+  def ShouldUseFiletypeCompleter( self, request_data: RequestWrap ) -> bool:
     """Determines whether or not the semantic completion should be called for
     completion request."""
     filetypes = request_data[ 'filetypes' ]
@@ -137,11 +141,11 @@ class ServerState:
     return filetype_completer.ShouldUseNow( request_data )
 
 
-  def GetGeneralCompleter( self ):
+  def GetGeneralCompleter( self ) -> GeneralCompleterStore:
     return self._gencomp
 
 
-  def CurrentFiletypeCompletionEnabled( self, current_filetypes ):
+  def CurrentFiletypeCompletionEnabled( self, current_filetypes: List[str] ) -> bool:
     """Return False if all filetypes in the list |current_filetypes| are
     disabled by the user option 'filetype_specific_completion_to_disable'."""
     filetype_to_disable = self._user_options[

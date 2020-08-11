@@ -22,6 +22,9 @@ import os
 from ycmd import responses
 from ycmd import utils
 from ycmd.completers.language_server import language_server_completer
+from typing import Dict, List, Optional, Union
+from ycmd.request_wrap import RequestWrap
+from ycmd.utils import HashableDict
 
 
 PATH_TO_GOPLS = os.path.abspath( os.path.join( os.path.dirname( __file__ ),
@@ -34,7 +37,7 @@ PATH_TO_GOPLS = os.path.abspath( os.path.join( os.path.dirname( __file__ ),
   utils.ExecutableName( 'gopls' ) ) )
 
 
-def ShouldEnableGoCompleter( user_options ):
+def ShouldEnableGoCompleter( user_options: Union[Dict[str, Union[int, Dict[str, int], str]], HashableDict] ) -> bool:
   server_exists = utils.FindExecutableWithFallback(
       user_options[ 'gopls_binary_path' ],
       PATH_TO_GOPLS )
@@ -45,7 +48,7 @@ def ShouldEnableGoCompleter( user_options ):
 
 
 class GoCompleter( language_server_completer.LanguageServerCompleter ):
-  def __init__( self, user_options ):
+  def __init__( self, user_options: Union[Dict[str, Union[int, Dict[str, int], str]], HashableDict] ) -> None:
     super().__init__( user_options )
     self._user_supplied_gopls_args = user_options[ 'gopls_args' ]
     self._gopls_path = utils.FindExecutableWithFallback(
@@ -53,11 +56,11 @@ class GoCompleter( language_server_completer.LanguageServerCompleter ):
         PATH_TO_GOPLS )
 
 
-  def GetServerName( self ):
+  def GetServerName( self ) -> str:
     return 'gopls'
 
 
-  def GetProjectRootFiles( self ):
+  def GetProjectRootFiles( self ) -> List[str]:
     # Without LSP workspaces support, GOPLS relies on the rootUri to detect a
     # project.
     # TODO: add support for LSP workspaces to allow users to change project
@@ -65,7 +68,7 @@ class GoCompleter( language_server_completer.LanguageServerCompleter ):
     return [ 'go.mod' ]
 
 
-  def GetCommandLine( self ):
+  def GetCommandLine( self ) -> Union[List[Optional[str]], List[str]]:
     cmdline = [ self._gopls_path ] + self._user_supplied_gopls_args + [
                 '-logfile',
                 self._stderr_file ]
@@ -74,11 +77,11 @@ class GoCompleter( language_server_completer.LanguageServerCompleter ):
     return cmdline
 
 
-  def SupportedFiletypes( self ):
+  def SupportedFiletypes( self ) -> List[str]:
     return [ 'go' ]
 
 
-  def GetDoc( self, request_data ):
+  def GetDoc( self, request_data: RequestWrap ) -> Dict[str, str]:
     assert self._settings[ 'ls' ][ 'hoverKind' ] == 'Structured'
     try:
       result = json.loads( self.GetHoverResponse( request_data )[ 'value' ] )
@@ -88,7 +91,7 @@ class GoCompleter( language_server_completer.LanguageServerCompleter ):
       raise RuntimeError( 'No documentation available.' )
 
 
-  def GetType( self, request_data ):
+  def GetType( self, request_data: RequestWrap ) -> Dict[str, str]:
     try:
       result = json.loads(
           self.GetHoverResponse( request_data )[ 'value' ] )[ 'signature' ]
@@ -97,5 +100,5 @@ class GoCompleter( language_server_completer.LanguageServerCompleter ):
       raise RuntimeError( 'Unknown type.' )
 
 
-  def DefaultSettings( self, request_data ):
+  def DefaultSettings( self, request_data: RequestWrap ) -> Dict[str, str]:
     return { 'hoverKind': 'Structured' }

@@ -18,7 +18,7 @@
 
 """This test is for utilities used in clangd."""
 
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 from hamcrest import assert_that, equal_to
 from ycmd import handlers
 from ycmd.completers.cpp import clangd_completer
@@ -27,9 +27,11 @@ from ycmd.completers.language_server.language_server_completer import (
 from ycmd.tests.clangd import IsolatedYcmd, PathToTestFile
 from ycmd.tests.test_utils import BuildRequest
 from ycmd.user_options_store import DefaultOptions
+from typing import Tuple
+from webtest.app import TestApp
 
 
-def ClangdCompleter_GetClangdCommand_NoCustomBinary_test():
+def ClangdCompleter_GetClangdCommand_NoCustomBinary_test() -> None:
   user_options = DefaultOptions()
 
   # Supported binary in third_party.
@@ -57,7 +59,7 @@ def ClangdCompleter_GetClangdCommand_NoCustomBinary_test():
 
 
 @patch( 'ycmd.completers.cpp.clangd_completer.FindExecutable', lambda exe: exe )
-def ClangdCompleter_GetClangdCommand_CustomBinary_test():
+def ClangdCompleter_GetClangdCommand_CustomBinary_test() -> None:
   CLANGD_PATH = '/test/clangd'
   user_options = DefaultOptions()
   user_options[ 'clangd_binary_path' ] = CLANGD_PATH
@@ -93,7 +95,7 @@ def ClangdCompleter_GetClangdCommand_CustomBinary_test():
                         ( 10, 0, 0 ),
                         ( 10, 10, 10 ),
                         ( 100, 100, 100 ) ] )
-def ClangdCompleter_CheckClangdVersion_test( *args ):
+def ClangdCompleter_CheckClangdVersion_test( *args) -> None:
   assert_that( clangd_completer.CheckClangdVersion( 'clangd' ),
                 equal_to( True ) )
   assert_that( clangd_completer.CheckClangdVersion( 'clangd' ),
@@ -108,7 +110,7 @@ def ClangdCompleter_CheckClangdVersion_test( *args ):
                equal_to( True ) )
 
 
-def ClangdCompleter_ShouldEnableClangdCompleter_test():
+def ClangdCompleter_ShouldEnableClangdCompleter_test() -> None:
   user_options = DefaultOptions()
 
   # Clangd not in third_party (or an old version).
@@ -169,18 +171,18 @@ class MockPopen:
   stdout = None
   pid = 0
 
-  def communicate( self ):
+  def communicate( self ) -> Tuple[bytes, None]:
     return ( bytes(), None )
 
 
 @patch( 'subprocess.Popen', return_value = MockPopen() )
-def ClangdCompleter_GetVersion_test( mock_popen ):
+def ClangdCompleter_GetVersion_test( mock_popen: MagicMock ) -> None:
   assert_that( clangd_completer.GetVersion( '' ),
                equal_to( None ) )
   mock_popen.assert_called()
 
 
-def ClangdCompleter_ParseClangdVersion_test():
+def ClangdCompleter_ParseClangdVersion_test() -> None:
   cases = [
     ( 'clangd version 10.0.0 (https://github.com/llvm/llvm-project.git '
       '45be5e477e9216363191a8ac9123bea4585cf14f)', ( 10, 0, 0 ) ),
@@ -196,7 +198,7 @@ def ClangdCompleter_ParseClangdVersion_test():
 
 
 @IsolatedYcmd()
-def ClangdCompleter_ShutdownFail_test( app ):
+def ClangdCompleter_ShutdownFail_test( app: TestApp ) -> None:
   completer = handlers._server_state.GetFiletypeCompleter( [ 'cpp' ] )
   with patch.object( completer, 'ShutdownServer',
                      side_effect = Exception ) as shutdown_server:
@@ -206,7 +208,7 @@ def ClangdCompleter_ShutdownFail_test( app ):
       shutdown_server.assert_called()
 
 
-def ClangdCompleter_GetThirdParty_test():
+def ClangdCompleter_GetThirdParty_test() -> None:
   with patch( 'ycmd.completers.cpp.clangd_completer.GetExecutable',
               return_value = None ):
     assert_that( clangd_completer.GetThirdPartyClangd(),
@@ -226,7 +228,7 @@ def ClangdCompleter_GetThirdParty_test():
 
 
 @IsolatedYcmd()
-def ClangdCompleter_StartServer_Fails_test( app ):
+def ClangdCompleter_StartServer_Fails_test( app: TestApp ) -> None:
   with patch( 'ycmd.completers.language_server.language_server_completer.'
               'LanguageServerConnection.AwaitServerConnection',
               side_effect = LanguageServerConnectionTimeout ):

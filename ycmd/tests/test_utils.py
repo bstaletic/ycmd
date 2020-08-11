@@ -50,6 +50,13 @@ from ycmd.utils import ( GetCurrentDirectory,
 ycm_core = ImportCore()
 
 from unittest import skipIf
+from hamcrest.core.core.isinstanceof import IsInstanceOf
+from hamcrest.library.collection.isdict_containing import IsDictContaining
+from hamcrest.library.collection.isdict_containingentries import IsDictContainingEntries
+from hamcrest.library.text.stringcontains import StringContains
+from hamcrest.library.text.stringmatches import StringMatchesPattern
+from typing import Any, Callable, Dict, Iterator, List, Optional, Tuple, Type, Union
+from ycmd.request_wrap import RequestWrap
 
 TESTS_DIR = os.path.abspath( os.path.dirname( __file__ ) )
 
@@ -66,7 +73,7 @@ EMPTY_SIGNATURE_HELP = has_entries( {
 } )
 
 
-def BuildRequest( **kwargs ):
+def BuildRequest( **kwargs) -> Dict[str, Any]:
   filepath = kwargs[ 'filepath' ] if 'filepath' in kwargs else '/foo'
   contents = kwargs[ 'contents' ] if 'contents' in kwargs else ''
   filetype = kwargs[ 'filetype' ] if 'filetype' in kwargs else 'foo'
@@ -97,13 +104,13 @@ def BuildRequest( **kwargs ):
   return request
 
 
-def CombineRequest( request, data ):
+def CombineRequest( request: Dict[str, Any], data: Dict[str, Union[str, List[str], Dict[str, List[str]], bool]] ) -> Dict[str, Any]:
   kwargs = request.copy()
   kwargs.update( data )
   return BuildRequest( **kwargs )
 
 
-def ErrorMatcher( cls, msg = None ):
+def ErrorMatcher( cls: Any, msg: Optional[str] = None ) -> IsDictContainingEntries:
   """ Returns a hamcrest matcher for a server exception response """
   entry = { 'exception': has_entry( 'TYPE', cls.__name__ ) }
 
@@ -113,9 +120,9 @@ def ErrorMatcher( cls, msg = None ):
   return has_entries( entry )
 
 
-def CompletionEntryMatcher( insertion_text,
-                            extra_menu_info = None,
-                            extra_params = None ):
+def CompletionEntryMatcher( insertion_text: str,
+                            extra_menu_info: Optional[str] = None,
+                            extra_params: Optional[Union[Dict[str, Union[StringMatchesPattern, str]], Dict[str, str], Dict[str, Union[str, IsDictContainingEntries]]]] = None ) -> IsDictContainingEntries:
   match = { 'insertion_text': insertion_text }
 
   if extra_menu_info:
@@ -127,11 +134,11 @@ def CompletionEntryMatcher( insertion_text,
   return has_entries( match )
 
 
-def MessageMatcher( msg ):
+def MessageMatcher( msg: str ) -> IsDictContaining:
   return has_entry( 'message', contains_string( msg ) )
 
 
-def LocationMatcher( filepath, line_num, column_num, description=None ):
+def LocationMatcher( filepath: Union[StringContains, str], line_num: int, column_num: int, description: Optional[str] = None ) -> IsDictContainingEntries:
   entry = {
     'line_num': line_num,
     'column_num': column_num,
@@ -143,14 +150,14 @@ def LocationMatcher( filepath, line_num, column_num, description=None ):
   return has_entries( entry )
 
 
-def RangeMatcher( filepath, start, end ):
+def RangeMatcher( filepath: Union[StringContains, str], start: Tuple[int, int], end: Tuple[int, int] ) -> IsDictContainingEntries:
   return has_entries( {
     'start': LocationMatcher( filepath, *start ),
     'end': LocationMatcher( filepath, *end ),
   } )
 
 
-def ChunkMatcher( replacement_text, start, end ):
+def ChunkMatcher( replacement_text: Union[str, IsInstanceOf, StringMatchesPattern], start: IsDictContainingEntries, end: IsDictContainingEntries ) -> IsDictContainingEntries:
   return has_entries( {
     'replacement_text': replacement_text,
     'range': has_entries( {
@@ -160,14 +167,14 @@ def ChunkMatcher( replacement_text, start, end ):
   } )
 
 
-def LineColMatcher( line, col ):
+def LineColMatcher( line: int, col: int ) -> IsDictContainingEntries:
   return has_entries( {
     'line_num': line,
     'column_num': col
   } )
 
 
-def CompleterProjectDirectoryMatcher( project_directory ):
+def CompleterProjectDirectoryMatcher( project_directory: str ) -> IsDictContaining:
   return has_entry(
     'completer',
     has_entry( 'servers', contains_exactly(
@@ -181,25 +188,43 @@ def CompleterProjectDirectoryMatcher( project_directory ):
   )
 
 
-def SignatureMatcher( label, parameters ):
+def SignatureMatcher( label: str, parameters: List[IsDictContainingEntries] ) -> IsDictContainingEntries:
   return has_entries( {
     'label': equal_to( label ),
     'parameters': contains_exactly( *parameters )
   } )
 
 
-def SignatureAvailableMatcher( available ):
+def SignatureAvailableMatcher( available: str ) -> IsDictContainingEntries:
   return has_entries( { 'available': equal_to( available ) } )
 
 
-def ParameterMatcher( begin, end ):
+def ParameterMatcher( begin: int, end: int ) -> IsDictContainingEntries:
   return has_entries( {
     'label': contains_exactly( begin, end )
   } )
 
 
+class DummyCompleter( Completer ):
+  def __init__( self, user_options: Dict[str, Union[int, Dict[str, List[str]], Dict[str, int], str, List[str]]] ) -> None:
+    super().__init__( user_options )
+
+  def SupportedFiletypes( self ) -> List[Any]:
+    return []
+
+
+  def ComputeCandidatesInner( self, request_data: RequestWrap ) -> List[Dict[str, str]]:
+    return [ BuildCompletionData( candidate )
+             for candidate in self.CandidatesList() ]
+
+
+  # This method is here for testing purpose, so it can be mocked during tests
+  def CandidatesList( self ):
+    return []
+
+
 @contextlib.contextmanager
-def PatchCompleter( completer, filetype ):
+def PatchCompleter( completer: Type[DummyCompleter], filetype: str ) -> Iterator[None]:
   user_options = handlers._server_state._user_options
   with patch.dict( 'ycmd.handlers._server_state._filetype_completers',
                    { filetype: completer( user_options ) } ):
@@ -207,7 +232,7 @@ def PatchCompleter( completer, filetype ):
 
 
 @contextlib.contextmanager
-def CurrentWorkingDirectory( path ):
+def CurrentWorkingDirectory( path: str ) -> Iterator[str]:
   old_cwd = GetCurrentDirectory()
   os.chdir( path )
   try:
@@ -218,7 +243,7 @@ def CurrentWorkingDirectory( path ):
 
 # The "exe" suffix is needed on Windows and not harmful on other platforms.
 @contextlib.contextmanager
-def TemporaryExecutable( extension = '.exe' ):
+def TemporaryExecutable( extension: str = '.exe' ) -> Iterator[str]:
   with tempfile.NamedTemporaryFile( prefix = 'Temp',
                                     suffix = extension ) as executable:
     os.chmod( executable.name, stat.S_IXUSR )
@@ -226,7 +251,7 @@ def TemporaryExecutable( extension = '.exe' ):
 
 
 @contextlib.contextmanager
-def TemporarySymlink( source, link ):
+def TemporarySymlink( source: str, link: str ) -> Iterator[None]:
   os.symlink( source, link )
   try:
     yield
@@ -234,7 +259,7 @@ def TemporarySymlink( source, link ):
     os.remove( link )
 
 
-def SetUpApp( custom_options = {} ):
+def SetUpApp( custom_options: Dict[str, Any] = {} ) -> TestApp:
   bottle.debug( True )
   options = user_options_store.DefaultOptions()
   options.update( custom_options )
@@ -244,14 +269,14 @@ def SetUpApp( custom_options = {} ):
 
 
 @contextlib.contextmanager
-def IgnoreExtraConfOutsideTestsFolder():
+def IgnoreExtraConfOutsideTestsFolder() -> Iterator[None]:
   with patch( 'ycmd.utils.IsRootDirectory',
               lambda path, parent: path in [ parent, TESTS_DIR ] ):
     yield
 
 
 @contextlib.contextmanager
-def IsolatedApp( custom_options = {} ):
+def IsolatedApp( custom_options: Dict[str, Any] = {} ) -> Iterator[TestApp]:
   old_server_state = handlers._server_state
   old_extra_conf_store_state = extra_conf_store.Get()
   old_options = user_options_store.GetAll()
@@ -271,7 +296,7 @@ def StartCompleterServer( app, filetype, filepath = '/foo' ):
                                filepath = filepath ) )
 
 
-def StopCompleterServer( app, filetype, filepath = '/foo' ):
+def StopCompleterServer( app: TestApp, filetype: str, filepath: str = '/foo' ) -> None:
   app.post_json( '/run_completer_command',
                  BuildRequest( command_arguments = [ 'StopServer' ],
                                filetype = filetype,
@@ -279,7 +304,7 @@ def StopCompleterServer( app, filetype, filepath = '/foo' ):
                  expect_errors = True )
 
 
-def WaitUntilCompleterServerReady( app, filetype, timeout = 30 ):
+def WaitUntilCompleterServerReady( app: TestApp, filetype: str, timeout: int = 30 ) -> None:
   expiration = time.time() + timeout
   while True:
     if time.time() > expiration:
@@ -298,7 +323,7 @@ def MockProcessTerminationTimingOut( handle, timeout = 5 ):
                       'aborting.' )
 
 
-def ClearCompletionsCache():
+def ClearCompletionsCache() -> None:
   """Invalidates cached completions for completers stored in the server state:
   filetype completers and general completers (identifier, filename, and
   ultisnips completers).
@@ -313,25 +338,7 @@ def ClearCompletionsCache():
     completer._completions_cache.Invalidate()
 
 
-class DummyCompleter( Completer ):
-  def __init__( self, user_options ):
-    super().__init__( user_options )
-
-  def SupportedFiletypes( self ):
-    return []
-
-
-  def ComputeCandidatesInner( self, request_data ):
-    return [ BuildCompletionData( candidate )
-             for candidate in self.CandidatesList() ]
-
-
-  # This method is here for testing purpose, so it can be mocked during tests
-  def CandidatesList( self ):
-    return []
-
-
-def ExpectedFailure( reason, *exception_matchers ):
+def ExpectedFailure( reason: str, *exception_matchers) -> Callable:
   """Defines a decorator to be attached to tests. This decorator
   marks the test as being known to fail, e.g. where documenting or exercising
   known incorrect behaviour.
@@ -375,7 +382,7 @@ def ExpectedFailure( reason, *exception_matchers ):
 
 
 @contextlib.contextmanager
-def TemporaryTestDir():
+def TemporaryTestDir() -> Iterator[str]:
   """Context manager to execute a test with a temporary workspace area. The
   workspace is deleted upon completion of the test. This is useful particularly
   for testing project detection (e.g. compilation databases, etc.), by ensuring
@@ -387,7 +394,7 @@ def TemporaryTestDir():
     shutil.rmtree( tmp_dir )
 
 
-def WithRetry( test ):
+def WithRetry( test: Callable ) -> Callable:
   """Decorator to be applied to tests that retries the test over and over
   until it passes or |timeout| seconds have passed."""
 
@@ -410,7 +417,7 @@ def WithRetry( test ):
 
 
 @contextlib.contextmanager
-def TemporaryClangProject( tmp_dir, compile_commands ):
+def TemporaryClangProject( tmp_dir: str, compile_commands: Union[str, List[Dict[str, str]]] ) -> Iterator[None]:
   """Context manager to create a compilation database in a directory and delete
   it when the test completes. |tmp_dir| is the directory in which to create the
   database file (typically used in conjunction with |TemporaryTestDir|) and
@@ -442,7 +449,7 @@ def TemporaryClangProject( tmp_dir, compile_commands ):
     os.remove( path )
 
 
-def WaitForDiagnosticsToBeReady( app, filepath, contents, filetype, **kwargs ):
+def WaitForDiagnosticsToBeReady( app: TestApp, filepath: str, contents: str, filetype: str, **kwargs ) -> List[Dict[str, Union[List[Dict[str, Dict[str, Union[int, str]]]], Dict[str, Union[int, str]], Dict[str, Dict[str, Union[int, str]]], str, bool]]]:
   results = None
   for tries in range( 0, 60 ):
     event_data = BuildRequest( event_name = 'FileReadyToParse',

@@ -49,12 +49,16 @@ from ycmd.tests.test_utils import ( BuildRequest,
                                     WithRetry,
                                     WaitUntilCompleterServerReady )
 from ycmd.utils import ReadFile
+from hamcrest.library.collection.isdict_containing import IsDictContaining
+from hamcrest.library.collection.isdict_containingentries import IsDictContainingEntries
+from typing import Any, Callable, Dict, List, Tuple, Union
+from webtest.app import TestApp
 
 
 # This test is isolated to trigger objcpp hooks, rather than fetching completer
 # from cache.
 @IsolatedYcmd()
-def Subcommands_DefinedSubcommands_test( app ):
+def Subcommands_DefinedSubcommands_test( app: TestApp ) -> None:
   file_path = PathToTestFile( 'GoTo_Clang_ZeroBasedLineAndColumn_test.cc' )
   RunAfterInitialized( app, {
       'request': {
@@ -103,7 +107,7 @@ def Subcommands_DefinedSubcommands_test( app ):
   'GoToReferences',
   'RefactorRename',
 ] )
-def Subcommands_ServerNotInitialized_test( app, cmd ):
+def Subcommands_ServerNotInitialized_test( app: TestApp, cmd: str ) -> None:
 
   completer = handlers._server_state.GetFiletypeCompleter( [ 'cpp' ] )
 
@@ -133,7 +137,7 @@ def Subcommands_ServerNotInitialized_test( app, cmd ):
 
 
 @SharedYcmd
-def Subcommands_GoTo_ZeroBasedLineAndColumn_test( app ):
+def Subcommands_GoTo_ZeroBasedLineAndColumn_test( app: TestApp ) -> None:
   file_path = PathToTestFile( 'GoTo_Clang_ZeroBasedLineAndColumn_test.cc' )
   RunAfterInitialized( app, {
       'request': {
@@ -157,7 +161,7 @@ def Subcommands_GoTo_ZeroBasedLineAndColumn_test( app ):
   } )
 
 
-def RunGoToTest_all( app, folder, command, test ):
+def RunGoToTest_all( app: TestApp, folder: str, command: str, test: Dict[str, Union[Tuple[str, int, int, List[str]], Tuple[str, int, int], str, List[Tuple[str, int, int]]]] ) -> None:
   req = test[ 'req' ]
   filepath = PathToTestFile( folder, req[ 0 ] )
   request = {
@@ -232,7 +236,7 @@ def RunGoToTest_all( app, folder, command, test ):
   ] )
 @pytest.mark.parametrize( 'cmd', [ 'GoToImprecise', 'GoToDefinition', 'GoTo' ] )
 @SharedYcmd
-def Subcommands_GoTo_all_test( app, cmd, test ):
+def Subcommands_GoTo_all_test( app: TestApp, cmd: str, test: Dict[str, Union[Tuple[str, int, int], str]] ) -> None:
   RunGoToTest_all( app, '', cmd, test )
 
 
@@ -262,7 +266,7 @@ def Subcommands_GoTo_all_test( app, cmd, test ):
     { 'req': ( 'goto.cc', 16,  6 ), 'res': 'Cannot jump to location' },
   ] )
 @SharedYcmd
-def Subcommands_GoToDeclaration_all_test( app, test ):
+def Subcommands_GoToDeclaration_all_test( app: TestApp, test: Dict[str, Union[Tuple[str, int, int], str]] ) -> None:
   RunGoToTest_all( app, '', 'GoToDeclaration', test )
 
 
@@ -281,7 +285,7 @@ def Subcommands_GoToDeclaration_all_test( app, test ):
   ] )
 @pytest.mark.parametrize( 'cmd', [ 'GoToImprecise', 'GoToInclude', 'GoTo' ] )
 @SharedYcmd
-def Subcommands_GoToInclude_test( app, cmd, test ):
+def Subcommands_GoToInclude_test( app: TestApp, cmd: str, test: Dict[str, Union[Tuple[str, int, int], str]] ) -> None:
   RunGoToTest_all( app, 'test-include', cmd, test )
 
 
@@ -300,7 +304,7 @@ def Subcommands_GoToInclude_test( app, cmd, test ):
     { 'req': ( 'goto.cc', 27,  8 ), 'res': 'Cannot jump to location' },
   ] )
 @SharedYcmd
-def Subcommands_GoToReferences_test( app, test ):
+def Subcommands_GoToReferences_test( app: TestApp, test: Dict[str, Union[Tuple[str, int, int], List[Tuple[str, int, int]], str]] ) -> None:
   RunGoToTest_all( app, '', 'GoToReferences', test )
 
 
@@ -319,16 +323,16 @@ def Subcommands_GoToReferences_test( app, test ):
   # thing.
 ] )
 @SharedYcmd
-def Subcommands_GoToSymbol_test( app, test ):
+def Subcommands_GoToSymbol_test( app: TestApp, test: Dict[str, Union[Tuple[str, int, int, List[str]], Tuple[str, int, int], str, List[Tuple[str, int, int]]]] ) -> None:
   RunGoToTest_all( app, '', 'GoToSymbol', test )
 
 
-def RunGetSemanticTest( app,
-                        filepath,
-                        filetype,
-                        test,
-                        command,
-                        response = requests.codes.ok ):
+def RunGetSemanticTest( app: TestApp,
+                        filepath: str,
+                        filetype: str,
+                        test: Union[List[Union[Dict[str, int], IsDictContainingEntries, int]], List[Union[Dict[str, int], IsDictContaining, int]], List[Union[Dict[str, int], str, int]]],
+                        command: List[str],
+                        response: int = requests.codes.ok ) -> None:
   contents = ReadFile( filepath )
   common_args = {
     'completer_target' : 'filetype_default',
@@ -499,7 +503,7 @@ def RunGetSemanticTest( app,
   ] )
 @pytest.mark.parametrize( 'subcommand', [ 'GetType', 'GetTypeImprecise' ] )
 @SharedYcmd
-def Subcommands_GetType_test( app, subcommand, test ):
+def Subcommands_GetType_test( app: TestApp, subcommand: str, test: Union[List[Union[Dict[str, int], IsDictContaining, int]], List[Union[Dict[str, int], str, int]]] ) -> None:
   RunGetSemanticTest( app,
                       PathToTestFile( 'GetType_Clang_test.cc' ),
                       'cpp',
@@ -534,7 +538,7 @@ def Subcommands_GetType_test( app, subcommand, test ):
   ] )
 @pytest.mark.parametrize( 'subcommand', [ 'GetDoc', 'GetDocImprecise' ] )
 @SharedYcmd
-def Subcommands_GetDoc_test( app, subcommand, test ):
+def Subcommands_GetDoc_test( app: TestApp, subcommand: str, test: Union[List[Union[Dict[str, int], IsDictContainingEntries, int]], List[Union[Dict[str, int], IsDictContaining, int]]] ) -> None:
   RunGetSemanticTest( app,
                       PathToTestFile( 'GetDoc_Clang_test.cc' ),
                       'cpp',
@@ -543,7 +547,7 @@ def Subcommands_GetDoc_test( app, subcommand, test ):
                       test[ 2 ] )
 
 
-def RunFixItTest( app, line, column, lang, file_path, check ):
+def RunFixItTest( app: TestApp, line: int, column: int, lang: str, file_path: str, check: Callable ) -> None:
   contents = ReadFile( file_path )
 
   language_options = {
@@ -582,7 +586,7 @@ def RunFixItTest( app, line, column, lang, file_path, check ):
   check( results )
 
 
-def FixIt_Check_cpp11_Ins( results ):
+def FixIt_Check_cpp11_Ins( results: Dict[str, List[Dict[str, Union[Dict[str, Union[int, str]], List[Dict[str, Union[str, Dict[str, Dict[str, Union[int, str]]]]]], str, bool]]]] ) -> None:
   # First fixit
   #   switch(A()) { // expected-error{{explicit conversion to}}
   assert_that( results, has_entries( {
@@ -609,7 +613,7 @@ def FixIt_Check_cpp11_Ins( results ):
   } ) )
 
 
-def FixIt_Check_cpp11_InsMultiLine( results ):
+def FixIt_Check_cpp11_InsMultiLine( results: Dict[str, List[Dict[str, Union[Dict[str, Union[int, str]], List[Dict[str, Union[str, Dict[str, Dict[str, Union[int, str]]]]]], str, bool]]]] ) -> None:
   # Similar to FixIt_Check_cpp11_1 but inserts split across lines
   #
   assert_that( results, has_entries( {
@@ -636,7 +640,7 @@ def FixIt_Check_cpp11_InsMultiLine( results ):
   } ) )
 
 
-def FixIt_Check_cpp11_Del( results ):
+def FixIt_Check_cpp11_Del( results: Dict[str, List[Dict[str, Union[Dict[str, Union[int, str]], List[Dict[str, Union[str, Dict[str, Dict[str, Union[int, str]]]]]], str, bool]]]] ) -> None:
   # Removal of ::
   assert_that( results, has_entries( {
     'fixits': contains_exactly( has_entries( {
@@ -655,7 +659,7 @@ def FixIt_Check_cpp11_Del( results ):
   } ) )
 
 
-def FixIt_Check_cpp11_Repl( results ):
+def FixIt_Check_cpp11_Repl( results: Dict[str, List[Dict[str, Union[Dict[str, Union[int, str]], List[Dict[str, Union[str, Dict[str, Dict[str, Union[int, str]]]]]], str, bool]]]] ) -> None:
   assert_that( results, has_entries( {
     'fixits': contains_exactly( has_entries( {
       'kind': 'quickfix',
@@ -673,7 +677,7 @@ def FixIt_Check_cpp11_Repl( results ):
   } ) )
 
 
-def FixIt_Check_cpp11_DelAdd( results ):
+def FixIt_Check_cpp11_DelAdd( results: Dict[str, List[Dict[str, Union[Dict[str, Union[int, str]], List[Dict[str, Union[str, Dict[str, Dict[str, Union[int, str]]]]]], str, bool, Dict[str, Union[List[Dict[str, Union[Dict[str, Dict[str, int]], str]]], str]]]]]] ) -> None:
   assert_that( results, has_entries( {
     'fixits': contains_exactly(
       has_entries( {
@@ -718,7 +722,7 @@ def FixIt_Check_cpp11_DelAdd( results ):
   } ) )
 
 
-def FixIt_Check_objc( results ):
+def FixIt_Check_objc( results: Dict[str, List[Dict[str, Union[Dict[str, Union[int, str]], List[Dict[str, Union[str, Dict[str, Dict[str, Union[int, str]]]]]], str, bool]]]] ) -> None:
   assert_that( results, has_entries( {
     'fixits': contains_exactly( has_entries( {
       'kind': 'quickfix',
@@ -736,12 +740,12 @@ def FixIt_Check_objc( results ):
   } ) )
 
 
-def FixIt_Check_objc_NoFixIt( results ):
+def FixIt_Check_objc_NoFixIt( results: Dict[str, List[Any]] ) -> None:
   # and finally, a warning with no fixits
   assert_that( results, equal_to( { 'fixits': [] } ) )
 
 
-def FixIt_Check_cpp11_MultiFirst( results ):
+def FixIt_Check_cpp11_MultiFirst( results: Dict[str, List[Dict[str, Union[Dict[str, Union[int, str]], List[Dict[str, Union[str, Dict[str, Dict[str, Union[int, str]]]]]], str, bool]]]] ) -> None:
   assert_that( results, has_entries( {
     'fixits': contains_exactly(
       # first fix-it at 54,16
@@ -762,7 +766,7 @@ def FixIt_Check_cpp11_MultiFirst( results ):
   } ) )
 
 
-def FixIt_Check_cpp11_MultiSecond( results ):
+def FixIt_Check_cpp11_MultiSecond( results: Dict[str, List[Dict[str, Union[Dict[str, Union[int, str]], List[Dict[str, Union[str, Dict[str, Dict[str, Union[int, str]]]]]], str, bool]]]] ) -> None:
   assert_that( results, has_entries( {
     'fixits': contains_exactly(
       # second fix-it at 54,52
@@ -803,7 +807,7 @@ def FixIt_Check_cpp11_MultiSecond( results ):
   } ) )
 
 
-def FixIt_Check_unicode_Ins( results ):
+def FixIt_Check_unicode_Ins( results: Dict[str, List[Dict[str, Union[Dict[str, Union[int, str]], List[Dict[str, Union[str, Dict[str, Dict[str, Union[int, str]]]]]], str, bool]]]] ) -> None:
   assert_that( results, has_entries( {
     'fixits': contains_exactly( has_entries( {
       'kind': 'quickfix',
@@ -821,7 +825,7 @@ def FixIt_Check_unicode_Ins( results ):
   } ) )
 
 
-def FixIt_Check_cpp11_Note( results ):
+def FixIt_Check_cpp11_Note( results: Dict[str, List[Dict[str, Union[Dict[str, Union[int, str]], List[Dict[str, Union[str, Dict[str, Dict[str, Union[int, str]]]]]], str, bool]]]] ) -> None:
   assert_that( results, has_entries( {
     'fixits': contains_exactly(
       # First note: put parens around it
@@ -854,7 +858,7 @@ def FixIt_Check_cpp11_Note( results ):
   } ) )
 
 
-def FixIt_Check_cpp11_SpellCheck( results ):
+def FixIt_Check_cpp11_SpellCheck( results: Dict[str, List[Dict[str, Union[Dict[str, Union[int, str]], List[Dict[str, Union[str, Dict[str, Dict[str, Union[int, str]]]]]], str, bool]]]] ) -> None:
   assert_that( results, has_entries( {
     'fixits': contains_exactly(
       # Change to SpellingIsNotMyStrongPoint
@@ -872,7 +876,7 @@ def FixIt_Check_cpp11_SpellCheck( results ):
   } ) )
 
 
-def FixIt_Check_cuda( results ):
+def FixIt_Check_cuda( results: Dict[str, List[Dict[str, Union[Dict[str, Union[int, str]], List[Dict[str, Union[str, Dict[str, Dict[str, Union[int, str]]]]]], str, bool]]]] ) -> None:
   assert_that( results, has_entries( {
     'fixits': contains_exactly(
       has_entries( {
@@ -889,7 +893,7 @@ def FixIt_Check_cuda( results ):
   } ) )
 
 
-def FixIt_Check_SubexprExtract_Resolved( results ):
+def FixIt_Check_SubexprExtract_Resolved( results: Dict[str, List[Dict[str, Union[Dict[str, Union[int, str]], List[Dict[str, Union[str, Dict[str, Dict[str, Union[int, str]]]]]], str, bool]]]] ) -> None:
   assert_that( results, has_entries( {
     'fixits': contains_exactly( has_entries( {
         'text': 'Extract subexpression to variable',
@@ -905,7 +909,7 @@ def FixIt_Check_SubexprExtract_Resolved( results ):
   } ) )
 
 
-def FixIt_Check_RawStringReplace_Resolved( results ):
+def FixIt_Check_RawStringReplace_Resolved( results: Dict[str, List[Dict[str, Union[Dict[str, Union[int, str]], List[Dict[str, Union[str, Dict[str, Dict[str, Union[int, str]]]]]], str, bool]]]] ) -> None:
   assert_that( results, has_entries( {
     'fixits': contains_exactly( has_entries( {
         'text': 'Convert to raw string',
@@ -918,7 +922,7 @@ def FixIt_Check_RawStringReplace_Resolved( results ):
   } ) )
 
 
-def FixIt_Check_MacroExpand_Resolved( results ):
+def FixIt_Check_MacroExpand_Resolved( results: Dict[str, List[Dict[str, Union[Dict[str, Union[int, str]], List[Dict[str, Union[str, Dict[str, Dict[str, Union[int, str]]]]]], str, bool]]]] ) -> None:
   assert_that( results, has_entries( {
     'fixits': contains_exactly( has_entries( {
         'text': "Expand macro 'DECLARE_INT'",
@@ -931,7 +935,7 @@ def FixIt_Check_MacroExpand_Resolved( results ):
   } ) )
 
 
-def FixIt_Check_AutoExpand_Resolved( results ):
+def FixIt_Check_AutoExpand_Resolved( results: Dict[str, List[Dict[str, Union[Dict[str, Union[int, str]], List[Dict[str, Union[str, Dict[str, Dict[str, Union[int, str]]]]]], str, bool]]]] ) -> None:
   assert_that( results, has_entries( {
     'fixits': contains_exactly( has_entries( {
         'text': "Expand auto type",
@@ -979,12 +983,12 @@ def FixIt_Check_AutoExpand_Resolved( results ):
       FixIt_Check_cpp11_SpellCheck ],
   ] )
 @SharedYcmd
-def Subcommands_FixIt_all_test( app, line, column, language, filepath, check ):
+def Subcommands_FixIt_all_test( app: TestApp, line: int, column: int, language: str, filepath: str, check: Callable ) -> None:
   RunFixItTest( app, line, column, language, filepath, check )
 
 
 @WithRetry
-def RunRangedFixItTest( app, rng, expected, chosen_fixit = 0 ):
+def RunRangedFixItTest( app: TestApp, rng: Dict[str, Dict[str, int]], expected: Callable, chosen_fixit: int = 0 ) -> None:
   contents = ReadFile( PathToTestFile( 'FixIt_Clang_cpp11.cpp' ) )
   args = {
     'completer_target' : 'filetype_default',
@@ -1033,13 +1037,13 @@ def RunRangedFixItTest( app, rng, expected, chosen_fixit = 0 ):
       FixIt_Check_RawStringReplace_Resolved ],
   ] )
 @SharedYcmd
-def Subcommands_FixIt_Ranged_test( app, test ):
+def Subcommands_FixIt_Ranged_test( app: TestApp, test: List[Union[Dict[str, Dict[str, int]], Callable]] ) -> None:
   RunRangedFixItTest( app, test[ 0 ], test[ 1 ] )
 
 
 @WithRetry
 @SharedYcmd
-def Subcommands_FixIt_AlreadyResolved_test( app ):
+def Subcommands_FixIt_AlreadyResolved_test( app: TestApp ) -> None:
   filename = PathToTestFile( 'FixIt_Clang_cpp11.cpp' )
   request = {
     'completer_target' : 'filetype_default',
@@ -1069,7 +1073,7 @@ def Subcommands_FixIt_AlreadyResolved_test( app ):
 
 
 @IsolatedYcmd( { 'clangd_args': [ '-hidden-features' ] } )
-def Subcommands_FixIt_ClangdTweaks_test( app ):
+def Subcommands_FixIt_ClangdTweaks_test( app: TestApp ) -> None:
   selection = {
       'start': { 'line_num': 80, 'column_num': 19 },
       'end': { 'line_num': 80, 'column_num': 4 }
@@ -1087,7 +1091,7 @@ def Subcommands_FixIt_ClangdTweaks_test( app ):
 
 
 @SharedYcmd
-def Subcommands_RefactorRename_test( app ):
+def Subcommands_RefactorRename_test( app: TestApp ) -> None:
   test = {
     'request': {
       'filetype': 'cpp',

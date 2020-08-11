@@ -22,10 +22,11 @@ from ycmd.tests.clang import PathToTestFile, SharedYcmd
 from ycmd.tests.test_utils import ( EMPTY_SIGNATURE_HELP,
                                     BuildRequest,
                                     CompletionEntryMatcher )
+from webtest.app import TestApp
 
 
 @SharedYcmd
-def SignatureHelp_NotImplemented_test( app ):
+def SignatureHelp_NotImplemented_test( app: TestApp ) -> None:
   app.post_json(
     '/load_extra_conf_file',
     { 'filepath': PathToTestFile( '.ycm_extra_conf.py' ) } )

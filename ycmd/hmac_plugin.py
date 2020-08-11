@@ -83,7 +83,7 @@ def RequestAuthenticated( method, path, body, hmac_secret ):
       ToBytes( b64decode( request.headers[ _HMAC_HEADER ] ) ) )
 
 
-def SetHmacHeader( body, hmac_secret ):
+def SetHmacHeader( body: str, hmac_secret: bytes ) -> None:
   value = b64encode( hmac_utils.CreateHmac( ToBytes( body ),
                                             ToBytes( hmac_secret ) ) )
   response.set_header( _HMAC_HEADER, ToUnicode( value ) )

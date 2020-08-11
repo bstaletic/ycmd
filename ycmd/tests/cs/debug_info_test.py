@@ -25,10 +25,12 @@ from ycmd.tests.test_utils import ( BuildRequest,
                                     WaitUntilCompleterServerReady )
 from ycmd import user_options_store
 from ycmd.utils import ReadFile
+from typing import Optional
+from webtest.app import TestApp
 
 
 @SharedYcmd
-def DebugInfo_ServerIsRunning_test( app ):
+def DebugInfo_ServerIsRunning_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'testy', 'Program.cs' )
   contents = ReadFile( filepath )
   event_data = BuildRequest( filepath = filepath,
@@ -65,7 +67,7 @@ def DebugInfo_ServerIsRunning_test( app ):
 
 
 @SharedYcmd
-def DebugInfo_ServerIsNotRunning_NoSolution_test( app ):
+def DebugInfo_ServerIsNotRunning_NoSolution_test( app: TestApp ) -> None:
   request_data = BuildRequest( filetype = 'cs' )
   assert_that(
     app.post_json( '/debug_info', request_data ).json,
@@ -85,8 +87,8 @@ def DebugInfo_ServerIsNotRunning_NoSolution_test( app ):
   )
 
 
-def SolutionSelectCheck( app, sourcefile, reference_solution,
-                         extra_conf_store = None ):
+def SolutionSelectCheck( app: TestApp, sourcefile: str, reference_solution: str,
+                         extra_conf_store: Optional[str] = None ) -> None:
   # reusable test: verify that the correct solution (reference_solution) is
   #   detected for a given source file (and optionally a given extra_conf)
   if extra_conf_store:
@@ -113,7 +115,7 @@ def SolutionSelectCheck( app, sourcefile, reference_solution,
 
 
 @SharedYcmd
-def DebugInfo_UsesSubfolderHint_test( app ):
+def DebugInfo_UsesSubfolderHint_test( app: TestApp ) -> None:
   SolutionSelectCheck( app,
                        PathToTestFile( 'testy-multiple-solutions',
                                        'solution-named-like-folder',
@@ -124,7 +126,7 @@ def DebugInfo_UsesSubfolderHint_test( app ):
 
 
 @SharedYcmd
-def DebugInfo_UsesSuperfolderHint_test( app ):
+def DebugInfo_UsesSuperfolderHint_test( app: TestApp ) -> None:
   SolutionSelectCheck( app,
                        PathToTestFile( 'testy-multiple-solutions',
                                        'solution-named-like-folder',
@@ -135,7 +137,7 @@ def DebugInfo_UsesSuperfolderHint_test( app ):
 
 
 @SharedYcmd
-def DebugInfo_ExtraConfStoreAbsolute_test( app ):
+def DebugInfo_ExtraConfStoreAbsolute_test( app: TestApp ) -> None:
   SolutionSelectCheck( app,
                        PathToTestFile( 'testy-multiple-solutions',
                                        'solution-not-named-like-folder',
@@ -151,7 +153,7 @@ def DebugInfo_ExtraConfStoreAbsolute_test( app ):
 
 
 @SharedYcmd
-def DebugInfo_ExtraConfStoreRelative_test( app ):
+def DebugInfo_ExtraConfStoreRelative_test( app: TestApp ) -> None:
   SolutionSelectCheck( app,
                        PathToTestFile( 'testy-multiple-solutions',
                                        'solution-not-named-like-folder',
@@ -168,7 +170,7 @@ def DebugInfo_ExtraConfStoreRelative_test( app ):
 
 
 @SharedYcmd
-def DebugInfo_ExtraConfStoreNonexisting_test( app ):
+def DebugInfo_ExtraConfStoreNonexisting_test( app: TestApp ) -> None:
   SolutionSelectCheck( app,
                        PathToTestFile( 'testy-multiple-solutions',
                                        'solution-not-named-like-folder',
@@ -184,27 +186,27 @@ def DebugInfo_ExtraConfStoreNonexisting_test( app ):
                                        'testy', '.ycm_extra_conf.py' ) )
 
 
-def GetCompleter_RoslynFound_test():
+def GetCompleter_RoslynFound_test() -> None:
   assert_that( GetCompleter( user_options_store.GetAll() ) )
 
 
 @patch( 'ycmd.completers.cs.cs_completer.PATH_TO_OMNISHARP_ROSLYN_BINARY',
         None )
-def GetCompleter_RoslynNotFound_test( *args ):
+def GetCompleter_RoslynNotFound_test( *args) -> None:
   assert_that( not GetCompleter( user_options_store.GetAll() ) )
 
 
 @patch( 'ycmd.completers.cs.cs_completer.FindExecutableWithFallback',
         wraps = lambda x, fb: x if x == 'roslyn' else fb )
 @patch( 'os.path.isfile', return_value = True )
-def GetCompleter_RoslynFromUserOption_test( *args ):
+def GetCompleter_RoslynFromUserOption_test( *args) -> None:
   user_options = user_options_store.GetAll().copy(
       roslyn_binary_path = 'roslyn' )
   assert_that( GetCompleter( user_options )._roslyn_path, equal_to( 'roslyn' ) )
 
 
 @patch( 'os.path.isfile', return_value = False )
-def GetCompleter_CustomPathToServer_NotAFile_test( *args ):
+def GetCompleter_CustomPathToServer_NotAFile_test( *args) -> None:
   user_options = user_options_store.GetAll().copy(
     roslyn_binary_path = 'does-not-exist' )
   assert_that( not GetCompleter( user_options ) )

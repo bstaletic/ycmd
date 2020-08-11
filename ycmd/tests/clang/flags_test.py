@@ -33,10 +33,11 @@ from ycmd.tests.test_utils import ( MacOnly, TemporaryTestDir, WindowsOnly,
                                     TemporaryClangProject )
 from ycmd.utils import CLANG_RESOURCE_DIR
 from ycmd.responses import NoExtraConfDetected
+from typing import Callable, Dict, Iterator, List, Union
 
 
 @contextlib.contextmanager
-def MockExtraConfModule( settings_function ):
+def MockExtraConfModule( settings_function: Callable ) -> Iterator[None]:
   module = MagicMock( spec = ModuleType )
   module.is_global_ycm_extra_conf = False
   setattr( module, settings_function.__name__, settings_function )
@@ -45,7 +46,7 @@ def MockExtraConfModule( settings_function ):
     yield
 
 
-def FlagsForFile_NothingReturned_test():
+def FlagsForFile_NothingReturned_test() -> None:
   flags_object = flags.Flags()
 
   def Settings( **kwargs ):
@@ -57,7 +58,7 @@ def FlagsForFile_NothingReturned_test():
     assert_that( filename, equal_to( '/foo' ) )
 
 
-def FlagsForFile_FlagsNotReady_test():
+def FlagsForFile_FlagsNotReady_test() -> None:
   flags_object = flags.Flags()
 
   def Settings( **kwargs ):
@@ -72,7 +73,7 @@ def FlagsForFile_FlagsNotReady_test():
     assert_that( filename, equal_to( '/foo' ) )
 
 
-def FlagsForFile_BadNonUnicodeFlagsAreAlsoRemoved_test( *args ):
+def FlagsForFile_BadNonUnicodeFlagsAreAlsoRemoved_test( *args) -> None:
   flags_object = flags.Flags()
 
   def Settings( **kwargs ):
@@ -85,7 +86,7 @@ def FlagsForFile_BadNonUnicodeFlagsAreAlsoRemoved_test( *args ):
     assert_that( list( flags_list ), equal_to( [ '-foo', '-bar' ] ) )
 
 
-def FlagsForFile_FlagsCachedByDefault_test():
+def FlagsForFile_FlagsCachedByDefault_test() -> None:
   flags_object = flags.Flags()
 
   def Settings( **kwargs ):
@@ -107,7 +108,7 @@ def FlagsForFile_FlagsCachedByDefault_test():
     assert_that( flags_list, contains_exactly( '-x', 'c' ) )
 
 
-def FlagsForFile_FlagsNotCachedWhenDoCacheIsFalse_test():
+def FlagsForFile_FlagsNotCachedWhenDoCacheIsFalse_test() -> None:
   flags_object = flags.Flags()
 
   def Settings( **kwargs ):
@@ -130,7 +131,7 @@ def FlagsForFile_FlagsNotCachedWhenDoCacheIsFalse_test():
     assert_that( flags_list, contains_exactly( '-x', 'c++' ) )
 
 
-def FlagsForFile_FlagsCachedWhenDoCacheIsTrue_test():
+def FlagsForFile_FlagsCachedWhenDoCacheIsTrue_test() -> None:
   flags_object = flags.Flags()
 
   def Settings( **kwargs ):
@@ -153,7 +154,7 @@ def FlagsForFile_FlagsCachedWhenDoCacheIsTrue_test():
     assert_that( flags_list, contains_exactly( '-x', 'c' ) )
 
 
-def FlagsForFile_DoNotMakeRelativePathsAbsoluteByDefault_test():
+def FlagsForFile_DoNotMakeRelativePathsAbsoluteByDefault_test() -> None:
   flags_object = flags.Flags()
 
   def Settings( **kwargs ):
@@ -168,7 +169,7 @@ def FlagsForFile_DoNotMakeRelativePathsAbsoluteByDefault_test():
                            '-I', 'header' ) )
 
 
-def FlagsForFile_MakeRelativePathsAbsoluteIfOptionSpecified_test():
+def FlagsForFile_MakeRelativePathsAbsoluteIfOptionSpecified_test() -> None:
   flags_object = flags.Flags()
 
   def Settings( **kwargs ):
@@ -538,7 +539,7 @@ def FlagsForFile_AddMacIncludePaths_NoBuiltinIncludes_test():
       '-fspell-checking' ) )
 
 
-def FlagsForFile_OverrideTranslationUnit_test():
+def FlagsForFile_OverrideTranslationUnit_test() -> None:
   flags_object = flags.Flags()
 
   def Settings( **kwargs ):
@@ -612,7 +613,7 @@ def FlagsForFile_OverrideTranslationUnit_test():
     assert_that( filename, equal_to( '0' ) )
 
 
-def FlagsForFile_Compatibility_KeywordArguments_test():
+def FlagsForFile_Compatibility_KeywordArguments_test() -> None:
   flags_object = flags.Flags()
 
   def FlagsForFile( filename, **kwargs ):
@@ -625,7 +626,7 @@ def FlagsForFile_Compatibility_KeywordArguments_test():
     assert_that( flags_list, contains_exactly( '-x', 'c' ) )
 
 
-def FlagsForFile_Compatibility_NoKeywordArguments_test():
+def FlagsForFile_Compatibility_NoKeywordArguments_test() -> None:
   flags_object = flags.Flags()
 
   def FlagsForFile( filename ):
@@ -638,7 +639,7 @@ def FlagsForFile_Compatibility_NoKeywordArguments_test():
     assert_that( flags_list, contains_exactly( '-x', 'c' ) )
 
 
-def RemoveUnusedFlags_Passthrough_test():
+def RemoveUnusedFlags_Passthrough_test() -> None:
   compiler_flags = [ '-foo', '-bar' ]
   assert_that( flags.RemoveUnusedFlags(
                   compiler_flags,
@@ -647,7 +648,7 @@ def RemoveUnusedFlags_Passthrough_test():
                contains_exactly( '-foo', '-bar' ) )
 
 
-def RemoveUnusedFlags_RemoveDashC_test():
+def RemoveUnusedFlags_RemoveDashC_test() -> None:
   expected = [ '-foo', '-bar' ]
   to_remove = [ '-c' ]
   filename = 'file'
@@ -671,7 +672,7 @@ def RemoveUnusedFlags_RemoveDashC_test():
                                            expected[ -1: ] ) ) ) )
 
 
-def RemoveUnusedFlags_RemoveColor_test():
+def RemoveUnusedFlags_RemoveColor_test() -> None:
   expected = [ '-foo', '-bar' ]
   to_remove = [ '--fcolor-diagnostics' ]
   filename = 'file'
@@ -695,7 +696,7 @@ def RemoveUnusedFlags_RemoveColor_test():
                                            expected[ -1: ] ) ) ) )
 
 
-def RemoveUnusedFlags_RemoveDashO_test():
+def RemoveUnusedFlags_RemoveDashO_test() -> None:
   expected = [ '-foo', '-bar' ]
   to_remove = [ '-o', 'output_name' ]
   filename = 'file'
@@ -719,7 +720,7 @@ def RemoveUnusedFlags_RemoveDashO_test():
                                            expected[ -1: ] ) ) ) )
 
 
-def RemoveUnusedFlags_RemoveMP_test():
+def RemoveUnusedFlags_RemoveMP_test() -> None:
   expected = [ '-foo', '-bar' ]
   to_remove = [ '-MP' ]
   filename = 'file'
@@ -743,7 +744,7 @@ def RemoveUnusedFlags_RemoveMP_test():
                                            expected[ -1: ] ) ) ) )
 
 
-def RemoveUnusedFlags_RemoveFilename_test():
+def RemoveUnusedFlags_RemoveFilename_test() -> None:
   expected = [ 'foo', '-bar' ]
   to_remove = [ 'file' ]
   filename = 'file'
@@ -769,7 +770,7 @@ def RemoveUnusedFlags_RemoveFilename_test():
                                            expected[ -1: ] ) ) ) )
 
 
-def RemoveUnusedFlags_RemoveFlagWithoutPrecedingDashFlag_test():
+def RemoveUnusedFlags_RemoveFlagWithoutPrecedingDashFlag_test() -> None:
   expected = [ 'g++', '-foo', '-x', 'c++', '-bar', 'include_dir' ]
   to_remove = [ 'unrelated_file' ]
   filename = 'file'
@@ -945,7 +946,7 @@ def RemoveUnusedFlags_MultipleDriverModeFlagsWindows_test():
                  ShouldAllowWinStyleFlags( flags_all ) ) ) )
 
 
-def RemoveUnusedFlags_Depfiles_test():
+def RemoveUnusedFlags_Depfiles_test() -> None:
   full_flags = [
     '/bin/clang',
     '-x', 'objective-c',
@@ -969,29 +970,29 @@ def RemoveUnusedFlags_Depfiles_test():
                contains_exactly( *expected ) )
 
 
-def EnableTypoCorrection_Empty_test():
+def EnableTypoCorrection_Empty_test() -> None:
   assert_that( flags._EnableTypoCorrection( [] ),
                equal_to( [ '-fspell-checking' ] ) )
 
 
-def EnableTypoCorrection_Trivial_test():
+def EnableTypoCorrection_Trivial_test() -> None:
   assert_that( flags._EnableTypoCorrection( [ '-x', 'c++' ] ),
                equal_to( [ '-x', 'c++', '-fspell-checking' ] ) )
 
 
-def EnableTypoCorrection_Reciprocal_test():
+def EnableTypoCorrection_Reciprocal_test() -> None:
   assert_that( flags._EnableTypoCorrection( [ '-fno-spell-checking' ] ),
                equal_to( [ '-fno-spell-checking' ] ) )
 
 
-def EnableTypoCorrection_ReciprocalOthers_test():
+def EnableTypoCorrection_ReciprocalOthers_test() -> None:
   compile_flags = [ '-x', 'c++', '-fno-spell-checking' ]
   assert_that( flags._EnableTypoCorrection( compile_flags ),
                equal_to( compile_flags ) )
 
 
 @pytest.mark.parametrize( 'flag', INCLUDE_FLAGS )
-def RemoveUnusedFlags_RemoveFilenameWithoutPrecedingInclude_test( flag ):
+def RemoveUnusedFlags_RemoveFilenameWithoutPrecedingInclude_test( flag: str ) -> None:
   to_remove = [ '/moo/boo' ]
   filename = 'file'
   expected = [ 'clang', flag, '/foo/bar', '-isystem/zoo/goo' ]
@@ -1019,7 +1020,7 @@ def RemoveUnusedFlags_RemoveFilenameWithoutPrecedingInclude_test( flag ):
                                            expected[ 1: ] ) ) ) )
 
 
-def RemoveXclangFlags_test():
+def RemoveXclangFlags_test() -> None:
   expected = [ '-I', '/foo/bar', '-DMACRO=Value' ]
   to_remove = [ '-Xclang', 'load', '-Xclang', 'libplugin.so',
                 '-Xclang', '-add-plugin', '-Xclang', 'plugin-name' ]
@@ -1036,7 +1037,7 @@ def RemoveXclangFlags_test():
                                                    expected ) ) )
 
 
-def AddLanguageFlagWhenAppropriate_Passthrough_test():
+def AddLanguageFlagWhenAppropriate_Passthrough_test() -> None:
   compiler_flags = [ '-foo', '-bar' ]
   assert_that( flags._AddLanguageFlagWhenAppropriate(
                   compiler_flags,
@@ -1053,7 +1054,7 @@ def AddLanguageFlagWhenAppropriate_CLDriver_Passthrough_test():
                contains_exactly( '-foo', '-bar', '--driver-mode=cl' ) )
 
 
-def _AddLanguageFlagWhenAppropriateTester( compiler, language_flag = [] ):
+def _AddLanguageFlagWhenAppropriateTester( compiler: str, language_flag: List[str] = [] ) -> None:
   to_removes = [
     [],
     [ '/usr/bin/ccache' ],
@@ -1072,7 +1073,7 @@ def _AddLanguageFlagWhenAppropriateTester( compiler, language_flag = [] ):
 
 @pytest.mark.parametrize( 'compiler', [ 'cc', 'gcc', 'clang', '/usr/bin/cc',
                                         '/some/other/path', 'some_command' ] )
-def AddLanguageFlagWhenAppropriate_CCompiler_test( compiler ):
+def AddLanguageFlagWhenAppropriate_CCompiler_test( compiler: str ) -> None:
   _AddLanguageFlagWhenAppropriateTester( compiler )
 
 
@@ -1082,11 +1083,11 @@ def AddLanguageFlagWhenAppropriate_CCompiler_test( compiler ):
                 'c++-5.11', 'g++-50.1.49', 'clang++-3.12.3', '/usr/bin/c++-10',
                 '/some/other/path++-4.9.3', 'some_command++-5.1',
                 '/some/other/path++-4.9.31', 'some_command++-5.10' ] )
-def AddLanguageFlagWhenAppropriate_CppCompiler_test( compiler ):
+def AddLanguageFlagWhenAppropriate_CppCompiler_test( compiler: str ) -> None:
   _AddLanguageFlagWhenAppropriateTester( compiler, [ '-x', 'c++' ] )
 
 
-def CompilationDatabase_NoDatabase_test():
+def CompilationDatabase_NoDatabase_test() -> None:
   with TemporaryTestDir() as tmp_dir:
     assert_that(
       calling( flags.Flags().FlagsForFile ).with_args(
@@ -1094,7 +1095,7 @@ def CompilationDatabase_NoDatabase_test():
       raises( NoExtraConfDetected ) )
 
 
-def CompilationDatabase_FileNotInDatabase_test():
+def CompilationDatabase_FileNotInDatabase_test() -> None:
   compile_commands = []
   with TemporaryTestDir() as tmp_dir:
     with TemporaryClangProject( tmp_dir, compile_commands ):
@@ -1103,7 +1104,7 @@ def CompilationDatabase_FileNotInDatabase_test():
                    equal_to( ( [], os.path.join( tmp_dir, 'test.cc' ) ) ) )
 
 
-def CompilationDatabase_InvalidDatabase_test():
+def CompilationDatabase_InvalidDatabase_test() -> None:
   with TemporaryTestDir() as tmp_dir:
     with TemporaryClangProject( tmp_dir, 'this is junk' ):
       assert_that(
@@ -1112,7 +1113,7 @@ def CompilationDatabase_InvalidDatabase_test():
         raises( NoExtraConfDetected ) )
 
 
-def CompilationDatabase_UseFlagsFromDatabase_test():
+def CompilationDatabase_UseFlagsFromDatabase_test() -> None:
   with TemporaryTestDir() as tmp_dir:
     compile_commands = [
       {
@@ -1137,7 +1138,7 @@ def CompilationDatabase_UseFlagsFromDatabase_test():
                   '-Wall' ) )
 
 
-def CompilationDatabase_UseFlagsFromSameDir_test():
+def CompilationDatabase_UseFlagsFromSameDir_test() -> None:
   with TemporaryTestDir() as tmp_dir:
     compile_commands = [
       {
@@ -1183,7 +1184,7 @@ def CompilationDatabase_UseFlagsFromSameDir_test():
       )
 
 
-def CompilationDatabase_HeaderFile_SameNameAsSourceFile_test():
+def CompilationDatabase_HeaderFile_SameNameAsSourceFile_test() -> None:
   with TemporaryTestDir() as tmp_dir:
     compile_commands = [
       {
@@ -1210,7 +1211,7 @@ def CompilationDatabase_HeaderFile_SameNameAsSourceFile_test():
                   'c++-header' ) )
 
 
-def CompilationDatabase_HeaderFile_DifferentNameFromSourceFile_test():
+def CompilationDatabase_HeaderFile_DifferentNameFromSourceFile_test() -> None:
   with TemporaryTestDir() as tmp_dir:
     compile_commands = [
       {
@@ -1237,7 +1238,7 @@ def CompilationDatabase_HeaderFile_DifferentNameFromSourceFile_test():
                   'c++-header' ) )
 
 
-def CompilationDatabase_ExplicitHeaderFileEntry_test():
+def CompilationDatabase_ExplicitHeaderFileEntry_test() -> None:
   with TemporaryTestDir() as tmp_dir:
     # Have an explicit header file entry which should take priority over the
     # corresponding source file
@@ -1266,7 +1267,7 @@ def CompilationDatabase_ExplicitHeaderFileEntry_test():
                   '-Wall' ) )
 
 
-def CompilationDatabase_CUDALanguageFlags_test():
+def CompilationDatabase_CUDALanguageFlags_test() -> None:
   with TemporaryTestDir() as tmp_dir:
     compile_commands = [
       {
@@ -1289,7 +1290,7 @@ def CompilationDatabase_CUDALanguageFlags_test():
                   '-Wall' ) )
 
 
-def _MakeRelativePathsInFlagsAbsoluteTest( test ):
+def _MakeRelativePathsInFlagsAbsoluteTest( test: Dict[str, Union[str, List[str]]] ) -> None:
   wd = test[ 'wd' ] if 'wd' in test else '/not_test'
   assert_that(
     flags._MakeRelativePathsInFlagsAbsolute( test[ 'flags' ], wd ),
@@ -1472,7 +1473,7 @@ def _MakeRelativePathsInFlagsAbsoluteTest( test ):
       'wd':     '/test',
     },
   ] )
-def MakeRelativePathsInFlagsAbsolute_test( test ):
+def MakeRelativePathsInFlagsAbsolute_test( test: Dict[str, Union[str, List[str]]] ) -> None:
   _MakeRelativePathsInFlagsAbsoluteTest( test )
 
 
@@ -1581,11 +1582,11 @@ def MakeRelativePathsInFlagsAbsolute_test( test ):
       'wd': '/test',
     },
   ] )
-def MakeRelativePathsInFlagsAbsolute_IgnoreUnknown_test( test ):
+def MakeRelativePathsInFlagsAbsolute_IgnoreUnknown_test( test: Dict[str, Union[str, List[str]]] ) -> None:
   _MakeRelativePathsInFlagsAbsoluteTest( test )
 
 
-def MakeRelativePathsInFlagsAbsolute_NoWorkingDir_test():
+def MakeRelativePathsInFlagsAbsolute_NoWorkingDir_test() -> None:
   _MakeRelativePathsInFlagsAbsoluteTest( {
     'flags': [ 'list', 'of', 'flags', 'not', 'changed', '-Itest' ],
     'expect': [ 'list', 'of', 'flags', 'not', 'changed', '-Itest' ],

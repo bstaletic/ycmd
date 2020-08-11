@@ -21,7 +21,7 @@ from hamcrest import ( assert_that,
                        equal_to,
                        has_entries,
                        none )
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 from pprint import pformat
 import os
 import requests
@@ -29,10 +29,11 @@ import requests
 from ycmd.tests.test_utils import BuildRequest, ErrorMatcher
 from ycmd.tests.tern import IsolatedYcmd, PathToTestFile
 from ycmd import utils
+from webtest.app import TestApp
 
 
 @IsolatedYcmd
-def EventNotification_OnFileReadyToParse_ProjectFile_cwd_test( app ):
+def EventNotification_OnFileReadyToParse_ProjectFile_cwd_test( app: TestApp ) -> None:
   response = app.post_json( '/event_notification',
                             BuildRequest(
                               filepath = PathToTestFile(),
@@ -61,7 +62,7 @@ def EventNotification_OnFileReadyToParse_ProjectFile_cwd_test( app ):
 
 
 @IsolatedYcmd
-def EventNotification_OnFileReadyToParse_ProjectFile_parentdir_test( app ):
+def EventNotification_OnFileReadyToParse_ProjectFile_parentdir_test( app: TestApp ) -> None:
   response = app.post_json( '/event_notification',
                             BuildRequest(
                               filepath = PathToTestFile( 'lamelib' ),
@@ -93,7 +94,7 @@ def EventNotification_OnFileReadyToParse_ProjectFile_parentdir_test( app ):
 @patch( 'ycmd.completers.javascript.tern_completer.GlobalConfigExists',
         return_value = False )
 def EventNotification_OnFileReadyToParse_NoProjectFile_test(
-    global_config_exists, app ):
+    global_config_exists: MagicMock, app: TestApp ) -> None:
   # We raise an error if we can't detect a .tern-project file.
   # We only do this on the first OnFileReadyToParse event after a
   # server startup.
@@ -214,7 +215,7 @@ def EventNotification_OnFileReadyToParse_NoProjectFile_test(
 @patch( 'ycmd.completers.javascript.tern_completer.GlobalConfigExists',
         return_value = True )
 def EventNotification_OnFileReadyToParse_UseGlobalConfig_test(
-    global_config_exists, app ):
+    global_config_exists: MagicMock, app: TestApp ) -> None:
   # No working directory is given.
   response = app.post_json( '/event_notification',
                             BuildRequest( filepath = PathToTestFile( '..' ),

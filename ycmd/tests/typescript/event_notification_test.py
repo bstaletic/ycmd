@@ -20,10 +20,11 @@ from hamcrest import assert_that, contains_exactly, has_entries
 from ycmd.tests.typescript import IsolatedYcmd, PathToTestFile
 from ycmd.tests.test_utils import BuildRequest, CompletionEntryMatcher
 from ycmd.utils import ReadFile
+from webtest.app import TestApp
 
 
 @IsolatedYcmd()
-def EventNotification_OnBufferUnload_CloseFile_test( app ):
+def EventNotification_OnBufferUnload_CloseFile_test( app: TestApp ) -> None:
   # Open main.ts file in a buffer.
   main_filepath = PathToTestFile( 'buffer_unload', 'main.ts' )
   main_contents = ReadFile( main_filepath )

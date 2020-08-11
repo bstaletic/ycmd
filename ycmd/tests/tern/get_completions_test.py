@@ -28,6 +28,9 @@ from ycmd.tests.tern import ( IsolatedYcmd, PathToTestFile, SharedYcmd,
                               StartJavaScriptCompleterServerInDirectory )
 from ycmd.tests.test_utils import CombineRequest, CompletionEntryMatcher
 from ycmd.utils import ReadFile
+from hamcrest.library.collection.isdict_containingentries import IsDictContainingEntries
+from typing import Dict, List, Union
+from webtest.app import TestApp
 
 # The following properties/methods are in Object.prototype, so are present
 # on all objects:
@@ -40,7 +43,7 @@ from ycmd.utils import ReadFile
 # isPrototypeOf()
 
 
-def RunTest( app, test ):
+def RunTest( app: TestApp, test: Dict[str, Union[str, Dict[str, Union[int, str]], Dict[str, Union[int, IsDictContainingEntries]], Dict[str, Union[str, int, bool]], Dict[str, Union[int, str, Dict[str, Dict[str, Union[str, List[str]]]]]]]] ) -> None:
   """
   Method to run a simple completion test and verify the result
 
@@ -78,7 +81,7 @@ def RunTest( app, test ):
 
 
 @SharedYcmd
-def GetCompletions_NoQuery_test( app ):
+def GetCompletions_NoQuery_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'semantic completion works for simple object no query',
     'request': {
@@ -112,7 +115,7 @@ def GetCompletions_NoQuery_test( app ):
 
 
 @SharedYcmd
-def GetCompletions_Query_test( app ):
+def GetCompletions_Query_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'semantic completion works for simple object with query',
     'request': {
@@ -136,7 +139,7 @@ def GetCompletions_Query_test( app ):
 
 
 @SharedYcmd
-def GetCompletions_Require_NoQuery_test( app ):
+def GetCompletions_Require_NoQuery_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'semantic completion works for simple object no query',
     'request': {
@@ -172,7 +175,7 @@ def GetCompletions_Require_NoQuery_test( app ):
 
 
 @SharedYcmd
-def GetCompletions_Require_Query_test( app ):
+def GetCompletions_Require_Query_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'semantic completion works for require object with query',
     'request': {
@@ -195,7 +198,7 @@ def GetCompletions_Require_Query_test( app ):
 
 
 @SharedYcmd
-def GetCompletions_Require_Query_LCS_test( app ):
+def GetCompletions_Require_Query_LCS_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': ( 'completion works for require object '
                      'with query not prefix' ),
@@ -221,7 +224,7 @@ def GetCompletions_Require_Query_LCS_test( app ):
 
 
 @SharedYcmd
-def GetCompletions_DirtyNamedBuffers_test( app ):
+def GetCompletions_DirtyNamedBuffers_test( app: TestApp ) -> None:
   # This tests that when we have dirty buffers in our editor, tern actually
   # uses them correctly
   RunTest( app, {
@@ -262,7 +265,7 @@ def GetCompletions_DirtyNamedBuffers_test( app ):
 
 
 @SharedYcmd
-def GetCompletions_ReturnsDocsInCompletions_test( app ):
+def GetCompletions_ReturnsDocsInCompletions_test( app: TestApp ) -> None:
   # This tests that we supply docs for completions
   RunTest( app, {
     'description': 'completions supply docs',
@@ -300,7 +303,7 @@ def GetCompletions_ReturnsDocsInCompletions_test( app ):
 
 
 @SharedYcmd
-def GetCompletions_IgoreNonJSFiles_test( app ):
+def GetCompletions_IgoreNonJSFiles_test( app: TestApp ) -> None:
   trivial1 = {
     'filetypes': [ 'python' ],
     'contents':  ReadFile( PathToTestFile( 'trivial.js' ) ),
@@ -342,7 +345,7 @@ def GetCompletions_IgoreNonJSFiles_test( app ):
 
 
 @SharedYcmd
-def GetCompletions_IncludeMultiFileType_test( app ):
+def GetCompletions_IncludeMultiFileType_test( app: TestApp ) -> None:
   trivial1 = {
     'filetypes': [ 'python', 'javascript' ],
     'contents':  ReadFile( PathToTestFile( 'trivial.js' ) ),
@@ -399,7 +402,7 @@ def GetCompletions_IncludeMultiFileType_test( app ):
 
 
 @SharedYcmd
-def GetCompletions_Unicode_AfterLine_test( app ):
+def GetCompletions_Unicode_AfterLine_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'completions work with unicode chars in the file',
     'request': {
@@ -423,7 +426,7 @@ def GetCompletions_Unicode_AfterLine_test( app ):
 
 
 @SharedYcmd
-def GetCompletions_Unicode_InLine_test( app ):
+def GetCompletions_Unicode_InLine_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'completions work with unicode chars in the file',
     'request': {
@@ -447,7 +450,7 @@ def GetCompletions_Unicode_InLine_test( app ):
 
 
 @SharedYcmd
-def GetCompletions_Unicode_InFile_test( app ):
+def GetCompletions_Unicode_InFile_test( app: TestApp ) -> None:
   RunTest( app, {
     'description': 'completions work with unicode chars in the file',
     'request': {
@@ -471,7 +474,7 @@ def GetCompletions_Unicode_InFile_test( app ):
 
 
 @IsolatedYcmd
-def GetCompletions_ChangeStartColumn_test( app ):
+def GetCompletions_ChangeStartColumn_test( app: TestApp ) -> None:
   StartJavaScriptCompleterServerInDirectory( app, PathToTestFile( 'node' ) )
   RunTest( app, {
     'description': 'the completion_start_column is updated by tern',

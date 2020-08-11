@@ -17,10 +17,12 @@
 
 from ycmd import responses, utils
 from ycmd.completers.language_server import language_server_completer
+from typing import Callable, Dict, List, Union
+from ycmd.request_wrap import RequestWrap
 
 
 class GenericLSPCompleter( language_server_completer.LanguageServerCompleter ):
-  def __init__( self, user_options, server_settings ):
+  def __init__( self, user_options: Dict[str, Union[int, Dict[str, List[str]], Dict[str, int], str, List[Dict[str, Union[str, List[str]]]]]], server_settings: Dict[str, Union[str, List[str]]] ) -> None:
     self._name = server_settings[ 'name' ]
     self._supported_filetypes = server_settings[ 'filetypes' ]
     self._project_root_files = server_settings.get( 'project_root_files', [] )
@@ -29,28 +31,28 @@ class GenericLSPCompleter( language_server_completer.LanguageServerCompleter ):
     self._command_line[ 0 ] = utils.FindExecutable( self._command_line[ 0 ] )
 
 
-  def GetProjectRootFiles( self ):
+  def GetProjectRootFiles( self ) -> List[str]:
     return self._project_root_files
 
 
-  def Language( self ):
+  def Language( self ) -> str:
     return self._name
 
 
-  def GetServerName( self ):
+  def GetServerName( self ) -> str:
     return self._name + 'Completer'
 
 
-  def GetCommandLine( self ):
+  def GetCommandLine( self ) -> List[str]:
     return self._command_line
 
 
-  def GetCustomSubcommands( self ):
+  def GetCustomSubcommands( self ) -> Dict[str, Callable]:
     return { 'GetHover': lambda self, request_data, args:
       self._GetHover( request_data ) }
 
 
-  def _GetHover( self, request_data ):
+  def _GetHover( self, request_data: RequestWrap ) -> Dict[str, str]:
     raw_hover = self.GetHoverResponse( request_data )
     if isinstance( raw_hover, dict ):
       # Both MarkedString and MarkupContent contain 'value' key.
@@ -69,11 +71,11 @@ class GenericLSPCompleter( language_server_completer.LanguageServerCompleter ):
     return responses.BuildDetailedInfoResponse( '\n'.join( lines ) )
 
 
-  def GetCodepointForCompletionRequest( self, request_data ):
+  def GetCodepointForCompletionRequest( self, request_data: RequestWrap ) -> int:
     if request_data[ 'force_semantic' ]:
       return request_data[ 'column_codepoint' ]
     return super().GetCodepointForCompletionRequest( request_data )
 
 
-  def SupportedFiletypes( self ):
+  def SupportedFiletypes( self ) -> List[str]:
     return self._supported_filetypes

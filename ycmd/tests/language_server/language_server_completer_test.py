@@ -47,10 +47,12 @@ from ycmd.tests.test_utils import ( BuildRequest,
 from ycmd.tests.language_server import IsolatedYcmd, PathToTestFile
 from ycmd import handlers, utils, responses
 import os
+from typing import Dict, Tuple
+from webtest.app import TestApp
 
 
 class MockCompleter( lsc.LanguageServerCompleter, DummyCompleter ):
-  def __init__( self, custom_options = {} ):
+  def __init__( self, custom_options: Dict[str, int] = {} ) -> None:
     user_options = handlers._server_state._user_options.copy()
     user_options.update( custom_options )
     super().__init__( user_options )
@@ -58,17 +60,17 @@ class MockCompleter( lsc.LanguageServerCompleter, DummyCompleter ):
     self._connection = MockConnection()
     self._started = False
 
-  def Language( self ):
+  def Language( self ) -> str:
     return 'foo'
 
 
-  def StartServer( self, request_data, **kwargs ):
+  def StartServer( self, request_data: RequestWrap, **kwargs) -> bool:
     self._started = True
     self._project_directory = self.GetProjectDirectory( request_data )
     return True
 
 
-  def GetConnection( self ):
+  def GetConnection( self ) -> MockConnection:
     return self._connection
 
 
@@ -76,7 +78,7 @@ class MockCompleter( lsc.LanguageServerCompleter, DummyCompleter ):
     return super().HandleServerCommand( request_data, command )
 
 
-  def ServerIsHealthy( self ):
+  def ServerIsHealthy( self ) -> bool:
     return self._started
 
 
@@ -90,7 +92,7 @@ class MockCompleter( lsc.LanguageServerCompleter, DummyCompleter ):
 
 @IsolatedYcmd( { 'global_ycm_extra_conf':
                  PathToTestFile( 'extra_confs', 'settings_extra_conf.py' ) } )
-def LanguageServerCompleter_ExtraConf_ServerReset_test( app ):
+def LanguageServerCompleter_ExtraConf_ServerReset_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'extra_confs', 'foo' )
   app.post_json( '/event_notification',
                  BuildRequest( filepath = filepath,
@@ -115,7 +117,7 @@ def LanguageServerCompleter_ExtraConf_ServerReset_test( app ):
 
 @IsolatedYcmd( { 'global_ycm_extra_conf':
                  PathToTestFile( 'extra_confs', 'empty_extra_conf.py' ) } )
-def LanguageServerCompleter_ExtraConf_FileEmpty_test( app ):
+def LanguageServerCompleter_ExtraConf_FileEmpty_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'extra_confs', 'foo' )
 
   completer = MockCompleter()
@@ -142,7 +144,7 @@ def LanguageServerCompleter_ExtraConf_FileEmpty_test( app ):
 @IsolatedYcmd( { 'global_ycm_extra_conf':
                  PathToTestFile( 'extra_confs',
                                  'settings_none_extra_conf.py' ) } )
-def LanguageServerCompleter_ExtraConf_SettingsReturnsNone_test( app ):
+def LanguageServerCompleter_ExtraConf_SettingsReturnsNone_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'extra_confs', 'foo' )
 
   completer = MockCompleter()
@@ -159,7 +161,7 @@ def LanguageServerCompleter_ExtraConf_SettingsReturnsNone_test( app ):
 
 @IsolatedYcmd( { 'global_ycm_extra_conf':
                  PathToTestFile( 'extra_confs', 'settings_extra_conf.py' ) } )
-def LanguageServerCompleter_ExtraConf_SettingValid_test( app ):
+def LanguageServerCompleter_ExtraConf_SettingValid_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'extra_confs', 'foo' )
 
   completer = MockCompleter()
@@ -178,7 +180,7 @@ def LanguageServerCompleter_ExtraConf_SettingValid_test( app ):
 
 
 @IsolatedYcmd( { 'extra_conf_globlist': [ '!*' ] } )
-def LanguageServerCompleter_ExtraConf_NoExtraConf_test( app ):
+def LanguageServerCompleter_ExtraConf_NoExtraConf_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'extra_confs', 'foo' )
 
   completer = MockCompleter()
@@ -204,7 +206,7 @@ def LanguageServerCompleter_ExtraConf_NoExtraConf_test( app ):
 
 
 @IsolatedYcmd( { 'extra_conf_globlist': [ '*' ] } )
-def LanguageServerCompleter_ExtraConf_NonGlobal_test( app ):
+def LanguageServerCompleter_ExtraConf_NonGlobal_test( app: TestApp ) -> None:
   filepath = PathToTestFile( 'project',
                              'settings_extra_conf',
                              'foo' )
@@ -233,7 +235,7 @@ def LanguageServerCompleter_ExtraConf_NonGlobal_test( app ):
 
 
 @IsolatedYcmd()
-def LanguageServerCompleter_Initialise_Aborted_test( app ):
+def LanguageServerCompleter_Initialise_Aborted_test( app: TestApp ) -> None:
   completer = MockCompleter()
   request_data = RequestWrap( BuildRequest() )
 
@@ -258,7 +260,7 @@ def LanguageServerCompleter_Initialise_Aborted_test( app ):
 
 
 @IsolatedYcmd()
-def LanguageServerCompleter_Initialise_Shutdown_test( app ):
+def LanguageServerCompleter_Initialise_Shutdown_test( app: TestApp ) -> None:
   completer = MockCompleter()
   request_data = RequestWrap( BuildRequest() )
 
@@ -283,7 +285,7 @@ def LanguageServerCompleter_Initialise_Shutdown_test( app ):
 
 
 @IsolatedYcmd()
-def LanguageServerCompleter_GoTo_test( app ):
+def LanguageServerCompleter_GoTo_test( app: TestApp ) -> None:
   if utils.OnWindows():
     filepath = 'C:\\test.test'
     uri = 'file:///c:/test.test'
@@ -466,7 +468,7 @@ def LanguageServerCompleter_GoTo_test( app ):
   } ], 'GoTo', LocationMatcher( filepath, 2, 4 ), False )
 
 
-def GetCompletions_RejectInvalid_test():
+def GetCompletions_RejectInvalid_test() -> None:
   if utils.OnWindows():
     filepath = 'C:\\test.test'
   else:
@@ -532,7 +534,7 @@ def GetCompletions_RejectInvalid_test():
     equal_to( 7 ) )
 
 
-def WorkspaceEditToFixIt_test():
+def WorkspaceEditToFixIt_test() -> None:
   if utils.OnWindows():
     filepath = 'C:\\test.test'
     uri = 'file:///c:/test.test'
@@ -626,7 +628,7 @@ def WorkspaceEditToFixIt_test():
 
 
 @IsolatedYcmd( { 'extra_conf_globlist': [ '!*' ] } )
-def LanguageServerCompleter_DelayedInitialization_test( app ):
+def LanguageServerCompleter_DelayedInitialization_test( app: TestApp ) -> None:
   completer = MockCompleter()
   request_data = RequestWrap( BuildRequest( filepath = 'Test.ycmtest' ) )
 
@@ -650,7 +652,7 @@ def LanguageServerCompleter_DelayedInitialization_test( app ):
 
 
 @IsolatedYcmd()
-def LanguageServerCompleter_ShowMessage_test( app ):
+def LanguageServerCompleter_ShowMessage_test( app: TestApp ) -> None:
   completer = MockCompleter()
   request_data = RequestWrap( BuildRequest() )
   notification = {
@@ -665,7 +667,7 @@ def LanguageServerCompleter_ShowMessage_test( app ):
 
 
 @IsolatedYcmd()
-def LanguageServerCompleter_GetCompletions_List_test( app ):
+def LanguageServerCompleter_GetCompletions_List_test( app: TestApp ) -> None:
   completer = MockCompleter()
   request_data = RequestWrap( BuildRequest() )
 
@@ -690,7 +692,7 @@ def LanguageServerCompleter_GetCompletions_List_test( app ):
 
 
 @IsolatedYcmd()
-def LanguageServerCompleter_GetCompletions_UnsupportedKinds_test( app ):
+def LanguageServerCompleter_GetCompletions_UnsupportedKinds_test( app: TestApp ) -> None:
   completer = MockCompleter()
   request_data = RequestWrap( BuildRequest() )
 
@@ -717,7 +719,7 @@ def LanguageServerCompleter_GetCompletions_UnsupportedKinds_test( app ):
 
 
 @IsolatedYcmd()
-def LanguageServerCompleter_GetCompletions_NullNoError_test( app ):
+def LanguageServerCompleter_GetCompletions_NullNoError_test( app: TestApp ) -> None:
   completer = MockCompleter()
   request_data = RequestWrap( BuildRequest() )
   complete_response = { 'result': None }
@@ -740,7 +742,7 @@ def LanguageServerCompleter_GetCompletions_NullNoError_test( app ):
 
 
 @IsolatedYcmd()
-def LanguageServerCompleter_GetCompletions_CompleteOnStartColumn_test( app ):
+def LanguageServerCompleter_GetCompletions_CompleteOnStartColumn_test( app: TestApp ) -> None:
   completer = MockCompleter()
   completer._resolve_completion_items = False
   complete_response = {
@@ -799,7 +801,7 @@ def LanguageServerCompleter_GetCompletions_CompleteOnStartColumn_test( app ):
 
 
 @IsolatedYcmd()
-def LanguageServerCompleter_GetCompletions_CompleteOnCurrentColumn_test( app ):
+def LanguageServerCompleter_GetCompletions_CompleteOnCurrentColumn_test( app: TestApp ) -> None:
   completer = MockCompleter()
   completer._resolve_completion_items = False
 
@@ -998,12 +1000,12 @@ def LanguageServerCompleter_GetCompletions_CompleteOnCurrentColumn_test( app ):
     ( 'Have some CoCo and CoCo', 'CoCo and CoCo is here.', 13 ),
     ( 'TEST xyAzA', 'xyAzA test', 5 ),
   ] )
-def FindOverlapLength_test( line, text, overlap ):
+def FindOverlapLength_test( line: str, text: str, overlap: int ) -> None:
   assert_that( lsc.FindOverlapLength( line, text ), equal_to( overlap ) )
 
 
 @IsolatedYcmd()
-def LanguageServerCompleter_GetCodeActions_CursorOnEmptyLine_test( app ):
+def LanguageServerCompleter_GetCodeActions_CursorOnEmptyLine_test( app: TestApp ) -> None:
   completer = MockCompleter()
   request_data = RequestWrap( BuildRequest( line_num = 1,
                                             column_num = 1,
@@ -1039,7 +1041,7 @@ def LanguageServerCompleter_GetCodeActions_CursorOnEmptyLine_test( app ):
 
 @IsolatedYcmd()
 def LanguageServerCompleter_Diagnostics_MaxDiagnosticsNumberExceeded_test(
-    app ):
+    app: TestApp ) -> None:
   completer = MockCompleter( { 'max_diagnostics_to_display': 1 } )
   filepath = os.path.realpath( '/foo' )
   uri = lsp.FilePathToUri( filepath )
@@ -1116,7 +1118,7 @@ def LanguageServerCompleter_Diagnostics_MaxDiagnosticsNumberExceeded_test(
 
 @IsolatedYcmd()
 def LanguageServerCompleter_Diagnostics_NoLimitToNumberOfDiagnostics_test(
-    app ):
+    app: TestApp ) -> None:
   completer = MockCompleter( { 'max_diagnostics_to_display': 0 } )
   filepath = os.path.realpath( '/foo' )
   uri = lsp.FilePathToUri( filepath )
@@ -1192,7 +1194,7 @@ def LanguageServerCompleter_Diagnostics_NoLimitToNumberOfDiagnostics_test(
 
 
 @IsolatedYcmd()
-def LanguageServerCompleter_GetHoverResponse_test( app ):
+def LanguageServerCompleter_GetHoverResponse_test( app: TestApp ) -> None:
   completer = MockCompleter()
   request_data = RequestWrap( BuildRequest( line_num = 1,
                                             column_num = 1,
@@ -1214,7 +1216,7 @@ def LanguageServerCompleter_GetHoverResponse_test( app ):
 
 
 @IsolatedYcmd()
-def LanguageServerCompleter_Diagnostics_Code_test( app ):
+def LanguageServerCompleter_Diagnostics_Code_test( app: TestApp ) -> None:
   completer = MockCompleter()
   filepath = os.path.realpath( '/foo.cpp' )
   uri = lsp.FilePathToUri( filepath )
@@ -1309,7 +1311,7 @@ def LanguageServerCompleter_Diagnostics_Code_test( app ):
 
 
 @IsolatedYcmd()
-def LanguageServerCompleter_Diagnostics_PercentEncodeCannonical_test( app ):
+def LanguageServerCompleter_Diagnostics_PercentEncodeCannonical_test( app: TestApp ) -> None:
   completer = MockCompleter()
   filepath = os.path.realpath( '/foo?' )
   uri = lsp.FilePathToUri( filepath )
@@ -1371,14 +1373,14 @@ def LanguageServerCompleter_Diagnostics_PercentEncodeCannonical_test( app ):
 
 @IsolatedYcmd()
 @patch.object( completer, 'MESSAGE_POLL_TIMEOUT', 0.01 )
-def LanguageServerCompleter_PollForMessages_ServerNotStarted_test( app ):
+def LanguageServerCompleter_PollForMessages_ServerNotStarted_test( app: TestApp ) -> None:
   server = MockCompleter()
   request_data = RequestWrap( BuildRequest() )
   assert_that( server.PollForMessages( request_data ), equal_to( True ) )
 
 
 @IsolatedYcmd()
-def LanguageServerCompleter_OnFileSave_BeforeServerReady_test( app ):
+def LanguageServerCompleter_OnFileSave_BeforeServerReady_test( app: TestApp ) -> None:
   completer = MockCompleter()
   request_data = RequestWrap( BuildRequest() )
   with patch.object( completer, 'ServerIsReady', return_value = False ):
@@ -1389,7 +1391,7 @@ def LanguageServerCompleter_OnFileSave_BeforeServerReady_test( app ):
 
 
 @IsolatedYcmd()
-def LanguageServerCompleter_OnFileReadyToParse_InvalidURI_test( app ):
+def LanguageServerCompleter_OnFileReadyToParse_InvalidURI_test( app: TestApp ) -> None:
   completer = MockCompleter()
   filepath = os.path.realpath( '/foo?' )
   uri = lsp.FilePathToUri( filepath )
@@ -1444,11 +1446,11 @@ def LanguageServerCompleter_OnFileReadyToParse_InvalidURI_test( app ):
       uri_to_filepath.assert_called()
 
 
-def _TupleToLSPRange( tuple ):
+def _TupleToLSPRange( tuple: Tuple[int, int] ) -> Dict[str, int]:
   return { 'line': tuple[ 0 ], 'character': tuple[ 1 ] }
 
 
-def _Check_Distance( point, start, end, expected ):
+def _Check_Distance( point: Tuple[int, int], start: Tuple[int, int], end: Tuple[int, int], expected: int ) -> None:
   point = _TupleToLSPRange( point )
   start = _TupleToLSPRange( start )
   end = _TupleToLSPRange( end )
@@ -1457,7 +1459,7 @@ def _Check_Distance( point, start, end, expected ):
   assert_that( result, equal_to( expected ) )
 
 
-def LanguageServerCompleter_DistanceOfPointToRange_SingleLineRange_test():
+def LanguageServerCompleter_DistanceOfPointToRange_SingleLineRange_test() -> None:
   # Point to the left of range.
   _Check_Distance( ( 0, 0 ), ( 0, 2 ), ( 0, 5 ) , 2 )
   # Point inside range.
@@ -1466,7 +1468,7 @@ def LanguageServerCompleter_DistanceOfPointToRange_SingleLineRange_test():
   _Check_Distance( ( 0, 8 ), ( 0, 2 ), ( 0, 5 ) , 3 )
 
 
-def LanguageServerCompleter_DistanceOfPointToRange_MultiLineRange_test():
+def LanguageServerCompleter_DistanceOfPointToRange_MultiLineRange_test() -> None:
   # Point to the left of range.
   _Check_Distance( ( 0, 0 ), ( 0, 2 ), ( 3, 5 ) , 2 )
   # Point inside range.

@@ -24,12 +24,13 @@ from ycmd.utils import ( ByteOffsetToCodepointOffset,
                          SplitLines )
 from ycmd.identifier_utils import StartOfLongestIdentifierEndingAtIndex
 from ycmd.request_validation import EnsureRequestValid
+from typing import Any, Dict, List, Optional, Union
 
 
 # TODO: Change the custom computed (and other) keys to be actual properties on
 # the object.
 class RequestWrap:
-  def __init__( self, request, validate = True ):
+  def __init__( self, request: Dict[str, Any], validate: bool = True ) -> None:
     if validate:
       EnsureRequestValid( request )
     self._request = request
@@ -87,7 +88,7 @@ class RequestWrap:
     self._cached_computed = {}
 
 
-  def __getitem__( self, key ):
+  def __getitem__( self, key: str ) -> Any:
     if key in self._cached_computed:
       return self._cached_computed[ key ]
     if key in self._computed_key:
@@ -98,7 +99,7 @@ class RequestWrap:
     return self._request[ key ]
 
 
-  def __setitem__( self, key, value ):
+  def __setitem__( self, key: str, value: Union[int, str] ) -> None:
     if key in self._computed_key:
       _, setter = self._computed_key[ key ]
       if setter:
@@ -108,11 +109,11 @@ class RequestWrap:
     raise ValueError( f'Key "{ key }" is read-only' )
 
 
-  def __contains__( self, key ):
+  def __contains__( self, key: str ) -> bool:
     return key in self._computed_key or key in self._request
 
 
-  def __eq__( self, other ):
+  def __eq__( self, other ) -> bool:
     if ( self[ 'filepath' ]         != other[ 'filepath' ] or
          self[ 'filetypes' ]        != other[ 'filetypes' ] or
          self[ 'line_num' ]         != other[ 'line_num' ] or
@@ -142,20 +143,20 @@ class RequestWrap:
     return True
 
 
-  def get( self, key, default = None ):
+  def get( self, key: str, default: Optional[str] = None ) -> Optional[Union[str, Dict[str, Dict[str, Union[str, List[str]]]], List[Dict[str, str]]]]:
     try:
       return self[ key ]
     except KeyError:
       return default
 
 
-  def _CurrentLines( self ):
+  def _CurrentLines( self ) -> List[str]:
     current_file = self[ 'filepath' ]
     contents = self[ 'file_data' ][ current_file ][ 'contents' ]
     return SplitLines( contents )
 
 
-  def _CurrentLine( self ):
+  def _CurrentLine( self ) -> str:
     try:
       return self[ 'lines' ][ self[ 'line_num' ] - 1 ]
     except IndexError:
@@ -166,13 +167,13 @@ class RequestWrap:
       return ''
 
 
-  def _GetCompletionStartColumn( self ):
+  def _GetCompletionStartColumn( self ) -> int:
     return CompletionStartColumn( self[ 'line_value' ],
                                   self[ 'column_num' ],
                                   self[ 'first_filetype' ] )
 
 
-  def _SetCompletionStartColumn( self, column_num ):
+  def _SetCompletionStartColumn( self, column_num: int ) -> None:
     self._cached_computed[ 'start_column' ] = column_num
 
     # Note: We must pre-compute (and cache) the codepoint equivalent. This is
@@ -191,13 +192,13 @@ class RequestWrap:
     self._cached_computed.pop( 'query', None )
 
 
-  def _GetCompletionStartCodepoint( self ):
+  def _GetCompletionStartCodepoint( self ) -> int:
     return CompletionStartCodepoint( self[ 'line_value' ],
                                      self[ 'column_num' ],
                                      self[ 'first_filetype' ] )
 
 
-  def _SetCompletionStartCodepoint( self, codepoint_offset ):
+  def _SetCompletionStartCodepoint( self, codepoint_offset: int ) -> None:
     self._cached_computed[ 'start_codepoint' ] = codepoint_offset
 
     # Note: We must pre-compute (and cache) the byte equivalent. This is because
@@ -215,37 +216,37 @@ class RequestWrap:
     self._cached_computed.pop( 'query', None )
 
 
-  def _Query( self ):
+  def _Query( self ) -> str:
     return self[ 'line_value' ][
         self[ 'start_codepoint' ] - 1 : self[ 'column_codepoint' ] - 1
     ]
 
 
-  def _Prefix( self ):
+  def _Prefix( self ) -> str:
     return self[ 'line_value' ][ : ( self[ 'start_codepoint' ] - 1 ) ]
 
 
-  def _FirstFiletype( self ):
+  def _FirstFiletype( self ) -> str:
     try:
       return self[ 'filetypes' ][ 0 ]
     except ( KeyError, IndexError ):
       return None
 
 
-  def _Filetypes( self ):
+  def _Filetypes( self ) -> List[str]:
     path = self[ 'filepath' ]
     return self[ 'file_data' ][ path ][ 'filetypes' ]
 
 
-  def _GetForceSemantic( self ):
+  def _GetForceSemantic( self ) -> bool:
     return bool( self._request.get( 'force_semantic', False ) )
 
 
-  def _GetExtraConfData( self ):
+  def _GetExtraConfData( self ) -> HashableDict:
     return HashableDict( self._request.get( 'extra_conf_data', {} ) )
 
 
-def CompletionStartColumn( line_value, column_num, filetype ):
+def CompletionStartColumn( line_value: str, column_num: int, filetype: str ) -> int:
   """Returns the 1-based byte index where the completion query should start.
   So if the user enters:
     foo.bar^
@@ -261,7 +262,7 @@ def CompletionStartColumn( line_value, column_num, filetype ):
       CompletionStartCodepoint( line_value, column_num, filetype ) )
 
 
-def CompletionStartCodepoint( line_value, column_num, filetype ):
+def CompletionStartCodepoint( line_value: str, column_num: int, filetype: str ) -> int:
   """Returns the 1-based codepoint index where the completion query should
   start.  So if the user enters:
     ƒøø.∫å®^

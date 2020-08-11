@@ -17,6 +17,8 @@
 
 from ycmd.completers.general_completer import GeneralCompleter
 from ycmd import responses
+from typing import Any, Dict, List
+from ycmd.request_wrap import RequestWrap
 
 
 class UltiSnipsCompleter( GeneralCompleter ):
@@ -24,24 +26,24 @@ class UltiSnipsCompleter( GeneralCompleter ):
   General completer that provides UltiSnips snippet names in completions.
   """
 
-  def __init__( self, user_options ):
+  def __init__( self, user_options: Dict[str, Any] ) -> None:
     super().__init__( user_options )
     self._candidates = None
     self._filtered_candidates = None
 
 
-  def ShouldUseNow( self, request_data ):
+  def ShouldUseNow( self, request_data: RequestWrap ) -> bool:
     return self.QueryLengthAboveMinThreshold( request_data )
 
 
-  def ComputeCandidates( self, request_data ):
+  def ComputeCandidates( self, request_data: RequestWrap ) -> List[Dict[str, str]]:
     if not self.ShouldUseNow( request_data ):
       return []
     return self.FilterAndSortCandidates(
       self._candidates, request_data[ 'query' ] )
 
 
-  def OnBufferVisit( self, request_data ):
+  def OnBufferVisit( self, request_data: RequestWrap ) -> None:
     raw_candidates = request_data.get( 'ultisnips_snippets', [] )
     self._candidates = [
       responses.BuildCompletionData( snip[ 'trigger' ],

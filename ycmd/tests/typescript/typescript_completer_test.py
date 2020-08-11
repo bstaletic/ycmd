@@ -24,13 +24,13 @@ from ycmd.completers.typescript.typescript_completer import (
     FindTSServer )
 
 
-def ShouldEnableTypeScriptCompleter_NodeAndTsserverFound_test():
+def ShouldEnableTypeScriptCompleter_NodeAndTsserverFound_test() -> None:
   user_options = user_options_store.GetAll()
   assert_that( ShouldEnableTypeScriptCompleter( user_options ) )
 
 
 @patch( 'ycmd.utils.FindExecutable', return_value = None )
-def ShouldEnableTypeScriptCompleter_TsserverNotFound_test( *args ):
+def ShouldEnableTypeScriptCompleter_TsserverNotFound_test( *args) -> None:
   user_options = user_options_store.GetAll()
   assert_that( not ShouldEnableTypeScriptCompleter( user_options ) )
 
@@ -38,5 +38,5 @@ def ShouldEnableTypeScriptCompleter_TsserverNotFound_test( *args ):
 @patch( 'ycmd.utils.FindExecutableWithFallback',
         wraps = lambda x, fb: x if x == 'tsserver' else None )
 @patch( 'os.path.isfile', return_value = True )
-def FindTSServer_CustomTsserverPath_test( *args ):
+def FindTSServer_CustomTsserverPath_test( *args) -> None:
   assert_that( 'tsserver', equal_to( FindTSServer( 'tsserver' ) ) )
