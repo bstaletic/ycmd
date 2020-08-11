@@ -26,6 +26,8 @@ from ycmd.tests.test_utils import ( BuildRequest,
                                     CompletionEntryMatcher,
                                     WindowsOnly )
 from ycmd.utils import GetCurrentDirectory, ToBytes
+from typing import Dict, Tuple, Union
+from webtest.app import TestApp
 
 TEST_DIR = os.path.dirname( os.path.abspath( __file__ ) )
 DATA_DIR = os.path.join( TEST_DIR,
@@ -39,11 +41,11 @@ DRIVE = os.path.splitdrive( TEST_DIR )[ 0 ]
 PATH_TO_TEST_FILE = os.path.join( DATA_DIR, 'test.cpp' )
 
 
-def FilenameCompleter_Completion( app,
-                                  contents,
-                                  environ,
-                                  filetype,
-                                  completions ):
+def FilenameCompleter_Completion( app: TestApp,
+                                  contents: str,
+                                  environ: Dict[str, str],
+                                  filetype: str,
+                                  completions: Union[Tuple[Tuple[str, str], Tuple[str, str], Tuple[str, str], Tuple[str, str], Tuple[str, str], Tuple[str, str], Tuple[str, str], Tuple[str, str], Tuple[str, str], Tuple[str, str], Tuple[str, str], Tuple[str, str], Tuple[str, str], Tuple[str, str], Tuple[str, str], Tuple[str, str], Tuple[str, str], Tuple[str, str], Tuple[str, str], Tuple[str, str], Tuple[str, str]], Tuple[Tuple[str, str], Tuple[str, str], Tuple[str, str], Tuple[str, str]], Tuple[Tuple[str, str]], Tuple[Tuple[str, str], Tuple[str, str]]] ) -> None:
   completion_data = BuildRequest( contents = contents,
                                   filepath = PATH_TO_TEST_FILE,
                                   filetype = filetype,
@@ -193,7 +195,7 @@ def FilenameCompleter_Completion( app,
       ( ( '∂†∫', '[Dir]' ), ) ),
   ] )
 @IsolatedYcmd( { 'max_num_candidates': 0 } )
-def FilenameCompleter_Completion_test( app, contents, env, expected ):
+def FilenameCompleter_Completion_test( app: TestApp, contents: str, env: Dict[str, str], expected: Union[Tuple[Tuple[str, str], Tuple[str, str], Tuple[str, str], Tuple[str, str], Tuple[str, str], Tuple[str, str], Tuple[str, str], Tuple[str, str], Tuple[str, str], Tuple[str, str], Tuple[str, str], Tuple[str, str], Tuple[str, str], Tuple[str, str], Tuple[str, str], Tuple[str, str], Tuple[str, str], Tuple[str, str], Tuple[str, str], Tuple[str, str], Tuple[str, str]], Tuple[Tuple[str, str], Tuple[str, str], Tuple[str, str], Tuple[str, str]], Tuple[Tuple[str, str]], Tuple[Tuple[str, str], Tuple[str, str]]] ) -> None:
   FilenameCompleter_Completion( app, contents, env, 'foo', expected )
 
 
@@ -269,7 +271,7 @@ def FilenameCompleter_Completion_Windows_test( app, contents, env, expected ):
 
 
 @IsolatedYcmd( { 'filepath_completion_use_working_dir': 0 } )
-def WorkingDir_UseFilePath_test( app ):
+def WorkingDir_UseFilePath_test( app: TestApp ) -> None:
   assert_that( GetCurrentDirectory() != DATA_DIR, 'Please run this test from a '
                                           'different directory' )
 
@@ -285,7 +287,7 @@ def WorkingDir_UseFilePath_test( app ):
 
 
 @IsolatedYcmd( { 'filepath_completion_use_working_dir': 1 } )
-def WorkingDir_UseServerWorkingDirectory_test( app ):
+def WorkingDir_UseServerWorkingDirectory_test( app: TestApp ) -> None:
   test_dir = os.path.join( DATA_DIR, 'dir with spaces (x64)' )
   with CurrentWorkingDirectory( test_dir ) as old_current_dir:
     assert_that( old_current_dir != test_dir,
@@ -303,7 +305,7 @@ def WorkingDir_UseServerWorkingDirectory_test( app ):
 
 
 @IsolatedYcmd( { 'filepath_completion_use_working_dir': 1 } )
-def WorkingDir_UseServerWorkingDirectory_Unicode_test( app ):
+def WorkingDir_UseServerWorkingDirectory_Unicode_test( app: TestApp ) -> None:
   test_dir = os.path.join( TEST_DIR, 'testdata', 'filename_completer', '∂†∫' )
   with CurrentWorkingDirectory( test_dir ) as old_current_dir:
     assert_that( old_current_dir != test_dir,
@@ -322,7 +324,7 @@ def WorkingDir_UseServerWorkingDirectory_Unicode_test( app ):
 
 
 @IsolatedYcmd( { 'filepath_completion_use_working_dir': 1 } )
-def WorkingDir_UseClientWorkingDirectory_test( app ):
+def WorkingDir_UseClientWorkingDirectory_test( app: TestApp ) -> None:
   test_dir = os.path.join( DATA_DIR, 'dir with spaces (x64)' )
   assert_that( GetCurrentDirectory() != test_dir,
                'Please run this test from a different directory' )
@@ -342,7 +344,7 @@ def WorkingDir_UseClientWorkingDirectory_test( app ):
 
 
 @IsolatedYcmd( { 'filepath_blacklist': {} } )
-def FilenameCompleter_NoFiletypeBlacklisted_test( app ):
+def FilenameCompleter_NoFiletypeBlacklisted_test( app: TestApp ) -> None:
   completion_data = BuildRequest( filetypes = [ 'foo', 'bar' ],
                                   contents = './',
                                   column_num = 3 )
@@ -352,7 +354,7 @@ def FilenameCompleter_NoFiletypeBlacklisted_test( app ):
 
 
 @IsolatedYcmd( { 'filepath_blacklist': { 'foo': 1 } } )
-def FilenameCompleter_FirstFiletypeBlacklisted_test( app ):
+def FilenameCompleter_FirstFiletypeBlacklisted_test( app: TestApp ) -> None:
   completion_data = BuildRequest( filetypes = [ 'foo', 'bar' ],
                                   contents = './',
                                   column_num = 3 )
@@ -362,7 +364,7 @@ def FilenameCompleter_FirstFiletypeBlacklisted_test( app ):
 
 
 @IsolatedYcmd( { 'filepath_blacklist': { 'bar': 1 } } )
-def FilenameCompleter_SecondFiletypeBlacklisted_test( app ):
+def FilenameCompleter_SecondFiletypeBlacklisted_test( app: TestApp ) -> None:
   completion_data = BuildRequest( filetypes = [ 'foo', 'bar' ],
                                   contents = './',
                                   column_num = 3 )
@@ -372,7 +374,7 @@ def FilenameCompleter_SecondFiletypeBlacklisted_test( app ):
 
 
 @IsolatedYcmd( { 'filepath_blacklist': { '*': 1 } } )
-def FilenameCompleter_AllFiletypesBlacklisted_test( app ):
+def FilenameCompleter_AllFiletypesBlacklisted_test( app: TestApp ) -> None:
   completion_data = BuildRequest( filetypes = [ 'foo', 'bar' ],
                                   contents = './',
                                   column_num = 3 )
