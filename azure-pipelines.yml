@@ -25,7 +25,5 @@ jobs:
     MSBUILD_PATH: 'C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\MSBuild\Current\Bin'
     COVERAGE: true
   steps:
-  - checkout: self
-    submodules: recursive
   - script: azure\windows\install_dependencies.bat
     displayName: Install dependencies
