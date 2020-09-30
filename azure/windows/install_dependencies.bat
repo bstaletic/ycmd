@@ -1,1 +1,1 @@
-dir /b/s c:\**\Windows.h
+dir /b/s c:\*\Windows.h
