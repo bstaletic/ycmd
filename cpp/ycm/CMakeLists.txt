@@ -193,6 +193,11 @@ endif()
 
 set( PYBIND11_INCLUDES_DIR "${CMAKE_SOURCE_DIR}/pybind11" )
 
+# Makes MSVC conform to the standard
+if ( MSVC )
+  set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /permissive-" )
+endif()
+
 file( GLOB_RECURSE SERVER_SOURCES *.h *.cpp )
 
 # The test and benchmark sources are a part of a different target, so we remove
