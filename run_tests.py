@@ -226,15 +226,7 @@ def PytestValgrind( parsed_args, extra_pytests_args ):
   if extra_pytests_args:
     pytests_args.extend( extra_pytests_args )
   else:
-    pytests_args += glob.glob(
-      p.join( DIR_OF_THIS_SCRIPT, 'ycmd', 'tests', 'bindings', '*_test.py' ) )
-    pytests_args += glob.glob(
-      p.join( DIR_OF_THIS_SCRIPT, 'ycmd', 'tests', 'clang', '*_test.py' ) )
-    pytests_args += glob.glob(
-      p.join( DIR_OF_THIS_SCRIPT, 'ycmd', 'tests', '*_test.py' ) )
-    # Avoids needing all completers for a valgrind run
-    pytests_args += [ '-m', 'not valgrind_skip' ]
-
+    pytests_args += 'ycmd/tests/clang/diagnostics_test.py'
   new_env = os.environ.copy()
   new_env[ 'PYTHONMALLOC' ] = 'malloc'
   new_env[ 'LD_LIBRARY_PATH' ] = LIBCLANG_DIR
