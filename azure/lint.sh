@@ -2,6 +2,7 @@
 set -e
 
 python build.py --clang-completer
+pip install -r test_requirements.txt
 PYTHONMALLOC=malloc LD_PRELOAD=third_party/clang/lib/libclang.so.10 valgrind --leak-check=full --show-leak-kinds=definite python -m pytest ycmd/tests/clang/get_completions_test.py
 touch x.cpp
 cd third_party/clang/lib
