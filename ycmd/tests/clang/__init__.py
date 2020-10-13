@@ -16,7 +16,6 @@
 # along with ycmd.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
-from ycmd.tests.clang.conftest import * # noqa
 
 shared_app = None
 

@@ -15,23 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with ycmd.  If not, see <http://www.gnu.org/licenses/>.
 
-from hamcrest import ( assert_that,
-                       contains_exactly,
-                       contains_inanyorder,
-                       contains_string,
-                       has_entries,
-                       has_entry,
-                       has_items,
-                       empty,
-                       equal_to )
-from pprint import pprint
-
-from ycmd.tests.clang import SharedYcmd, IsolatedYcmd, PathToTestFile
-from ycmd.tests.test_utils import BuildRequest, LocationMatcher, RangeMatcher
-from ycmd.utils import ReadFile
-from ycmd import handlers
-from ycmd.request_wrap import RequestWrap
-
 
 def Diagnostics_ZeroBasedLineAndColumn_test():
   return
