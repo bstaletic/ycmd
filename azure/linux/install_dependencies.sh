@@ -6,7 +6,6 @@ set -e
 #
 sudo apt-get update
 sudo apt-get install libsqlite3-dev
-sudo apt-get install clang
 if [ "${YCM_COMPILER}" == "clang" ]; then
   sudo apt-get install clang-9
   sudo update-alternatives --install /usr/bin/cc cc /usr/bin/clang-9 100
