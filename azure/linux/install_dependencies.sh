@@ -6,20 +6,10 @@ set -e
 #
 sudo apt-get update
 sudo apt-get install libsqlite3-dev
-if [ "${YCM_COMPILER}" == "clang" ]; then
-  sudo apt-get install clang-8
-  sudo update-alternatives --install /usr/bin/cc cc /usr/bin/clang-8 100
-  sudo update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++-8 100
-else
-  sudo apt-get install gcc g++
-fi
-
-if [ "${YCM_CLANG_TIDY}" ]; then
-  wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-  sudo apt-get update
-  sudo apt-get install -y clang-tidy valgrind
-  sudo update-alternatives --install /usr/bin/clang-tidy clang-tidy /usr/bin/clang-tidy-10 100
-fi
+wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+sudo apt-get update
+sudo apt-get install -y clang-tidy valgrind
+sudo update-alternatives --install /usr/bin/clang-tidy clang-tidy /usr/bin/clang-tidy-10 100
 
 #
 # Go setup
@@ -65,11 +55,5 @@ LDFLAGS="-L$(brew --prefix openssl)/lib" \
 pyenv install ${YCM_PYTHON_VERSION}
 pyenv global ${YCM_PYTHON_VERSION}
 
-pip install -r test_requirements.txt
-
-# Enable coverage for Python subprocesses. See:
-# http://coverage.readthedocs.io/en/latest/subprocess.html
-echo -e "import coverage\ncoverage.process_startup()" > \
-${HOME}/.pyenv/versions/${YCM_PYTHON_VERSION}/lib/python${YCM_PYTHON_VERSION%.*}/site-packages/sitecustomize.py
 
 set +e

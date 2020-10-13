@@ -23,22 +23,10 @@ jobs:
   variables:
     COVERAGE: true
   steps:
-  - checkout: self
-    submodules: recursive
   - script: ./azure/linux/install_dependencies.sh
     displayName: Install dependencies
-  - script: ./azure/run_tests.sh
-    displayName: Run tests
-    condition: and(succeeded(), and(ne(variables['YCM_BENCHMARK'], 'true'), ne(variables['YCM_CLANG_TIDY'], 'true')))
-  - script: ./azure/benchmark.sh
-    displayName: Benchmark
-    condition: and(succeeded(), eq(variables['YCM_BENCHMARK'], 'true'))
   - script: ./azure/lint.sh
     displayName: Lint
-    condition: and(succeeded(), eq(variables['YCM_CLANG_TIDY'], 'true'))
-  - script: ./azure/send_coverage.sh
-    displayName: Send coverage
-    condition: and(succeeded(), eq(variables['COVERAGE'], 'true'))
     env:
       CODECOV_TOKEN: $(CODECOV_TOKEN)
       CODECOV_JOB_NAME: '$(Agent.JobName)'
