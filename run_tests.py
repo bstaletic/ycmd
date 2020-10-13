@@ -226,7 +226,7 @@ def PytestValgrind( parsed_args, extra_pytests_args ):
   if extra_pytests_args:
     pytests_args.extend( extra_pytests_args )
   else:
-    pytests_args += 'ycmd/tests/clang/diagnostics_test.py'
+    pytests_args += [ 'ycmd/tests/clang/diagnostics_test.py' ]
   new_env = os.environ.copy()
   new_env[ 'PYTHONMALLOC' ] = 'malloc'
   new_env[ 'LD_LIBRARY_PATH' ] = LIBCLANG_DIR
