@@ -54,26 +54,7 @@ void foo() {
 
 @IsolatedYcmd()
 def Diagnostics_SimpleLocationExtent_test( app ):
-  contents = """
-void foo() {
-  baz = 5;
-}
-// Padding to 5 lines
-// Padding to 5 lines
-"""
-
-  event_data = BuildRequest( compilation_flags = [ '-x', 'c++' ],
-                             event_name = 'FileReadyToParse',
-                             contents = contents,
-                             filepath = 'foo',
-                             filetype = 'cpp' )
-
-  results = app.post_json( '/event_notification', event_data ).json
-  assert_that( results, contains_exactly(
-    has_entries( {
-      'location_extent': RangeMatcher( 'foo', ( 3, 3 ), ( 3, 6 ) )
-    } )
-  ) )
+  return
 
 
 @IsolatedYcmd()
