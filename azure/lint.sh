@@ -13,6 +13,7 @@ python_version=$(python -c 'import sys; print( "{}.{}.{}".format( *sys.version_i
 echo "Checking python version (actual ${python_version} vs expected ${YCM_PYTHON_VERSION})"
 test ${python_version} == ${YCM_PYTHON_VERSION}
 python build.py --clang-complete
+pip install bottle waitress watchdog requests
 PYTHONMALLOC=malloc LD_LIBRARY_PATH=third_party/clang/lib valgrind --error-exitcode=1 python -m pytest ycmd/tests/clang/diagnostics_test.py
 
 set +e
