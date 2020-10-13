@@ -29,6 +29,8 @@ from pprint import pprint
 from ycmd.tests.clang import SharedYcmd, IsolatedYcmd, PathToTestFile
 from ycmd.tests.test_utils import BuildRequest, LocationMatcher, RangeMatcher
 from ycmd.utils import ReadFile
+from ycmd import handlers
+from ycmd.request_wrap import RequestWrap
 
 
 @IsolatedYcmd()
@@ -41,23 +43,14 @@ void foo() {
 // Padding to 5 lines
 """
 
-  event_data = BuildRequest( compilation_flags = [ '-x', 'c++' ],
+  event_data = RequestWrap( BuildRequest( compilation_flags = [ '-x', 'c++' ],
                              event_name = 'FileReadyToParse',
                              contents = contents,
                              filepath = 'foo',
-                             filetype = 'cpp' )
+                             filetype = 'cpp' ) )
 
-  results = app.post_json( '/event_notification', event_data ).json
-  assert_that( results, contains_exactly(
-    has_entries( {
-      'kind': equal_to( 'ERROR' ),
-      'text': contains_string( 'cannot initialize' ),
-      'ranges': contains_exactly( RangeMatcher( 'foo', ( 3, 16 ), ( 3, 21 ) ) ),
-      'location': LocationMatcher( 'foo', 3, 10 ),
-      'location_extent': RangeMatcher( 'foo', ( 3, 10 ), ( 3, 13 ) )
-    } )
-  ) )
-
+  completer = handlers._server_state.GetFiletypeCompleter( [ 'cpp' ] )
+  completer.OnFileReadyToParse( event_data )
 
 @IsolatedYcmd()
 def Diagnostics_SimpleLocationExtent_test( app ):
