@@ -16,17 +16,10 @@
 # along with ycmd.  If not, see <http://www.gnu.org/licenses/>.
 
 import pytest
-shared_app = None
 
+@pytest.fixture
+def f():
+  pass
 
-def SetUpApp( custom_options = {} ):
-  return 1
-
-
-@pytest.fixture( scope='module', autouse=True )
-def set_up_shared_app():
-  global shared_app
-  shared_app = SetUpApp( { 'use_clangd': 0 } )
-
-def Diagnostics_ZeroBasedLineAndColumn_test():
+def test_test( f ):
   return
