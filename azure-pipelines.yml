@@ -10,23 +10,11 @@ jobs:
 - job: linux
   displayName: 'Linux'
   pool:
-    # List of available software on this image:
-    # https://github.com/Microsoft/azure-pipelines-image-generation/blob/master/images/linux/Ubuntu1604-README.md
     vmImage: 'ubuntu-20.04'
   strategy:
     matrix:
       'C++ linting':
         YCM_PYTHON_VERSION: '3.9.0'
-        YCM_CLANG_TIDY: true
-        COVERAGE: false
-    maxParallel: 5
-  variables:
-    COVERAGE: true
   steps:
-  - script: ./azure/linux/install_dependencies.sh
-    displayName: Install dependencies
   - script: ./azure/lint.sh
     displayName: Lint
-    env:
-      CODECOV_TOKEN: $(CODECOV_TOKEN)
-      CODECOV_JOB_NAME: '$(Agent.JobName)'
