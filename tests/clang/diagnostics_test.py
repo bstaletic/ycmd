@@ -15,11 +15,5 @@
 # You should have received a copy of the GNU General Public License
 # along with ycmd.  If not, see <http://www.gnu.org/licenses/>.
 
-import pytest
-
-@pytest.fixture
-def f():
-  pass
-
-def test_test( f ):
+def test_test():
   return
