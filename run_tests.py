@@ -15,7 +15,7 @@ def Main():
           '--leak-check=full',
           '--show-leak-kinds=definite,indirect',
           '--errors-for-leak-kinds=definite,indirect',
-          sys.executable, '-m', 'pytest', '-v', '--color=yes' ]
+          sys.executable, '-m', 'pytest', '-v', '--color=yes', '--co' ]
   subprocess.check_call( cmd, env = new_env )
 
 
