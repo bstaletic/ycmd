@@ -1,4 +1,10 @@
 ::
+:: GMock, GTest and Google Benchmark
+::
+git clone -b release-1.10.0 --depth 1 https://github.com/google/googletest ..\..\cpp\ycm\test\gmock
+git clone -b v1.5.2 --depth 1 https://github.com/google/benchmark ..\..\cpp\ycm\benchmarks\benchmark
+
+::
 :: Python configuration
 ::
 curl %YCM_PYTHON_INSTALLER_URL% -o C:\python-installer.exe
