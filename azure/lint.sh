@@ -25,12 +25,14 @@ sudo apt-get install -y build-essential \
                         liblzma-dev \
                         python-openssl \
                         git
+sudo apt-get install -y gcc-10
+sudo update-alternatives --install /usr/bin/cc cc /usr/bin/gcc-10 100
 curl https://pyenv.run | bash
 export PATH="$HOME/.pyenv/bin:$PATH"
 eval "$(pyenv init -)"
 PYTHON_CONFIGURE_OPTS="--enable-shared" pyenv install ${YCM_PYTHON_VERSION}
 pyenv global ${YCM_PYTHON_VERSION}
-gcc test.c $(python-config --cflags) $(python-config --ldflags) -lpython3.9 -o python-error
+gcc-10 test.c $(python-config --cflags) $(python-config --ldflags) -lpython3.9 -o python-error
 LD_LIBRARY_PATH=$(python-config --prefix)/lib PYTHONMALLOC=malloc valgrind ./python-error
 
 set +e
