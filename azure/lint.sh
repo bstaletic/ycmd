@@ -31,6 +31,6 @@ eval "$(pyenv init -)"
 PYTHON_CONFIGURE_OPTS="--enable-shared" pyenv install ${YCM_PYTHON_VERSION}
 pyenv global ${YCM_PYTHON_VERSION}
 gcc test.c $(python-config --cflags) $(python-config --ldflags) -lpython3.9 -o python-error
-LD_LOAD_LIBRARIES=$(python-config --prefix)/lib PYTHONMALLOC=malloc valgrind ./python-error
+LD_LIBRARY_PATH=$(python-config --prefix)/lib PYTHONMALLOC=malloc valgrind ./python-error
 
 set +e
