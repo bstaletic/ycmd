@@ -1,7 +1,6 @@
 # Exit immediately if a command returns a non-zero status.
 set -e
 sudo apt-get update
-sudo apt-get install libsqlite3-dev
 sudo apt-get install -y valgrind
 
 test -d "$HOME/.pyenv/bin" && export PATH="$HOME/.pyenv/bin:$PATH"
@@ -31,7 +30,7 @@ export PATH="$HOME/.pyenv/bin:$PATH"
 eval "$(pyenv init -)"
 PYTHON_CONFIGURE_OPTS="--enable-shared" pyenv install ${YCM_PYTHON_VERSION}
 pyenv global ${YCM_PYTHON_VERSION}
-pip install pytest
-python run_tests.py --valgrind
+gcc test.c $(python-config --cflags) $(python-config --ldflags) -lpython3.9 -o python-error
+LD_LOAD_LIBRARIES=$(python-config --prefix)/lib PYTHONMALLOC=malloc valgrind ./python-error
 
 set +e
