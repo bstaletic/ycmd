@@ -70,6 +70,7 @@ def RunTest( app, test ):
   assert_that( response.status_code,
                equal_to( test[ 'expect' ][ 'response' ] ) )
 
+  print(response.json)
   assert_that( response.json, test[ 'expect' ][ 'data' ] )
 
 
@@ -89,7 +90,7 @@ def SignatureHelp_MethodTrigger_test( app ):
       'data': has_entries( {
         'errors': empty(),
         'signature_help': has_entries( {
-          'activeSignature': 0,
+          'activeSignature': 1,
           'activeParameter': 0,
           'signatures': contains_exactly(
             SignatureMatcher( 'unique(double d) : void',
@@ -117,7 +118,7 @@ def SignatureHelp_ArgTrigger_test( app ):
       'data': has_entries( {
         'errors': empty(),
         'signature_help': has_entries( {
-          'activeSignature': 1,
+          'activeSignature': 2,
           'activeParameter': 1,
           'signatures': contains_exactly(
             SignatureMatcher( 'test(int i, String s) : void',
@@ -149,7 +150,7 @@ def SignatureHelp_Constructor_test( app ):
       'data': has_entries( {
         'errors': empty(),
         'signature_help': has_entries( {
-          'activeSignature': 0,
+          'activeSignature': 1,
           'activeParameter': 0,
           'signatures': contains_exactly(
             SignatureMatcher( 'SignatureHelp(String signature)',
