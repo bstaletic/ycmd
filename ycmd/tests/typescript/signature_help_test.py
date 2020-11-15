@@ -81,7 +81,7 @@ def Signature_Help_Trigger_Paren_test( app ):
     'request': {
       'filetype'  : 'typescript',
       'filepath'  : PathToTestFile( 'signatures.ts' ),
-      'line_num'  : 27,
+      'line_num'  : 28,
       'column_num': 29,
     },
     'expect': {
@@ -109,7 +109,7 @@ def Signature_Help_Trigger_Paren_Disabled_test( app ):
     'request': {
       'filetype'  : 'typescript',
       'filepath'  : PathToTestFile( 'signatures.ts' ),
-      'line_num'  : 27,
+      'line_num'  : 28,
       'column_num': 29,
     },
     'expect': {
@@ -133,7 +133,7 @@ def Signature_Help_Trigger_Comma_test( app ):
     'request': {
       'filetype'  : 'typescript',
       'filepath'  : PathToTestFile( 'signatures.ts' ),
-      'line_num'  : 60,
+      'line_num'  : 61,
       'column_num': 32,
     },
     'expect': {
@@ -163,7 +163,7 @@ def Signature_Help_Trigger_AngleBracket_test( app ):
     'request': {
       'filetype'  : 'typescript',
       'filepath'  : PathToTestFile( 'signatures.ts' ),
-      'line_num'  : 68,
+      'line_num'  : 69,
       'column_num': 9,
     },
     'expect': {
@@ -192,7 +192,7 @@ def Signature_Help_Multiple_Signatures_test( app ):
     'request': {
       'filetype'  : 'typescript',
       'filepath'  : PathToTestFile( 'signatures.ts' ),
-      'line_num'  : 89,
+      'line_num'  : 90,
       'column_num': 18,
     },
     'expect': {
@@ -224,7 +224,7 @@ def Signature_Help_NoSignatures_test( app ):
     'request': {
       'filetype'  : 'typescript',
       'filepath'  : PathToTestFile( 'signatures.ts' ),
-      'line_num'  : 68,
+      'line_num'  : 69,
       'column_num': 22,
     },
     'expect': {
@@ -248,7 +248,7 @@ def Signature_Help_WithDoc_test( app ):
     'request': {
       'filetype': 'typescript',
       'filepath': PathToTestFile( 'signatures.ts' ),
-      'line_num': 92,
+      'line_num': 93,
       'column_num': 29,
     },
     'expect': {
@@ -275,7 +275,7 @@ def Signature_Help_NoErrorWhenNoSignatureInfo_test( app ):
     'request': {
       'filetype'  : 'typescript',
       'filepath'  : PathToTestFile( 'signatures.ts' ),
-      'line_num'  : 94,
+      'line_num'  : 95,
       'column_num': 5,
     },
     'expect': {

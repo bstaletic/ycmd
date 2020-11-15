@@ -1,4 +1,5 @@
-// SIMPLE FUNCTIONS
+/// <reference path="signatures.d.ts" />
+//SIMPLE FUNCTIONS
 
 function no_arguments_no_return() {
 }
@@ -6,7 +7,7 @@ function no_arguments_no_return() {
 interface ReturnValue {
   a: string;
   b: number;
-};
+}
 
 function no_arguments_with_return() : ReturnValue {
   return {
@@ -48,7 +49,7 @@ class SomeClass implements ReturnValue {
   public TestAgain( d ) : number {
     return this.b * d;
   }
-};
+}
 
 function multi_argument_no_return(
   løng_våriable_name: number,
@@ -89,7 +90,6 @@ function øverløåd( a: string | number, b: number = 1 ) : string {
 øverløåd( 'a', 1 );
 øverløåd( 1 );
 
-single_argument_with_return("a");
+test.single_argument_with_doc("a");
 
 dod(
-
