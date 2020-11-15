@@ -258,7 +258,10 @@ def Signature_Help_WithDoc_test( app ):
         'signature_help': has_entries( {
           'activeSignature': 0,
           'activeParameter': 0,
-          'signatures': empty(),
+          'signatures': contains_exactly(
+            SignatureMatcher( 'single_argument_with_return(a: string): string',
+                              [ ParameterMatcher( 28, 37, '' ) ],
+                              '' ) )
         } ),
       } )
     }
