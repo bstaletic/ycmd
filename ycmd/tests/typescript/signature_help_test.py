@@ -248,7 +248,7 @@ def Signature_Help_WithDoc_test( app ):
     'request': {
       'filetype': 'typescript',
       'filepath': PathToTestFile( 'signatures.ts' ),
-      'line_num': 101,
+      'line_num': 92,
       'column_num': 29,
     },
     'expect': {
@@ -275,7 +275,7 @@ def Signature_Help_NoErrorWhenNoSignatureInfo_test( app ):
     'request': {
       'filetype'  : 'typescript',
       'filepath'  : PathToTestFile( 'signatures.ts' ),
-      'line_num'  : 103,
+      'line_num'  : 94,
       'column_num': 5,
     },
     'expect': {
