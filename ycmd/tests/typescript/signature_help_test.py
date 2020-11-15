@@ -242,13 +242,37 @@ def Signature_Help_NoSignatures_test( app ):
 
 
 @SharedYcmd
+def Signature_Help_WithDoc_test( app ):
+  RunTest( app, {
+    'description': 'Test parameter documentation',
+    'request': {
+      'filetype': 'typescript',
+      'filepath': PathToTestFile( 'signatures.ts' ),
+      'line_num': 101,
+      'column_num': 29,
+    },
+    'expect': {
+      'response': requests.codes.ok,
+      'data': has_entries( {
+        'errors': empty(),
+        'signature_help': has_entries( {
+          'activeSignature': 0,
+          'activeParameter': 0,
+          'signatures': empty(),
+        } ),
+      } )
+    }
+  } )
+
+
+@SharedYcmd
 def Signature_Help_NoErrorWhenNoSignatureInfo_test( app ):
   RunTest( app, {
     'description': 'Test dodgy (',
     'request': {
       'filetype'  : 'typescript',
       'filepath'  : PathToTestFile( 'signatures.ts' ),
-      'line_num'  : 92,
+      'line_num'  : 103,
       'column_num': 5,
     },
     'expect': {
