@@ -1,3 +1,4 @@
+git clone -b v1.5.2 https://github.com/google/benchmark cpp/ycm/benchmarks/benchmark
 ::
 :: Python configuration
 ::
