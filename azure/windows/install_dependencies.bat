@@ -1,4 +1,5 @@
-git clone -b v1.5.2 https://github.com/google/benchmark cpp/ycm/benchmarks/benchmark
+git clone --depth 1 -b release-1.10.0 https://github.com/google/googletest/ cpp/ycm/tests/gmock
+git clone --depth 1 -b v1.5.2 https://github.com/google/benchmark cpp/ycm/benchmarks/benchmark
 ::
 :: Python configuration
 ::
