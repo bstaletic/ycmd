@@ -654,29 +654,29 @@ class CsharpSolutionCompleter( object ):
     # wrapped it in a try/except and set `reference` to `{ 'QuickFixes': None }`
     # After being unable to hit that case with tests,
     # that code path was thrown away.
-    reference = self._GetResponse(
-       '/findusages',
-       self._DefaultParameters( request_data ) )
+    try:
+      reference = self._GetResponse(
+         '/findusages',
+         self._DefaultParameters( request_data ) )
+    except Exception:
+      raise RuntimeError( 'No references found' )
 
     quickfixes = reference[ 'QuickFixes' ]
-    if quickfixes:
-      if len( quickfixes ) == 1:
-        ref = quickfixes[ 0 ]
-        return responses.BuildGoToResponseFromLocation(
-          _BuildLocation(
-            request_data,
-            ref[ 'FileName' ],
-            ref[ 'Line' ],
-            ref[ 'Column' ] ) )
-      else:
-        return [ responses.BuildGoToResponseFromLocation(
-                   _BuildLocation( request_data,
-                                   ref[ 'FileName' ],
-                                   ref[ 'Line' ],
-                                   ref[ 'Column' ] ) )
-                 for ref in quickfixes ]
+    if len( quickfixes ) == 1:
+      ref = quickfixes[ 0 ]
+      return responses.BuildGoToResponseFromLocation(
+        _BuildLocation(
+          request_data,
+          ref[ 'FileName' ],
+          ref[ 'Line' ],
+          ref[ 'Column' ] ) )
     else:
-      raise RuntimeError( 'No references found' )
+      return [ responses.BuildGoToResponseFromLocation(
+                 _BuildLocation( request_data,
+                                 ref[ 'FileName' ],
+                                 ref[ 'Line' ],
+                                 ref[ 'Column' ] ) )
+               for ref in quickfixes ]
 
 
   def _GetType( self, request_data ):
