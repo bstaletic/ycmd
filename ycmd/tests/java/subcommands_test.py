@@ -2287,6 +2287,7 @@ def Subcommands_ExecuteCommand_NoArguments_test( app ):
   } )
 
 
+@WithRetry
 @SharedYcmd
 def Subcommands_ExecuteCommand_test( app ):
   RunTest( app, {
