@@ -335,6 +335,11 @@ endif()
 # Makes MSVC conform to the standard
 if ( MSVC )
   target_compile_options( ${PROJECT_NAME} PUBLIC "/permissive-" )
+  target_compile_options( ${PROJECT_NAME} PUBLIC "/Zc:__cplusplus" )
+  target_compile_options( ${PROJECT_NAME} PUBLIC "/Zc:externConstexpr" )
+  target_compile_options( ${PROJECT_NAME} PUBLIC "/Zc:inline" )
+  target_compile_options( ${PROJECT_NAME} PUBLIC "/Zc:preprocessor" )
+  target_compile_options( ${PROJECT_NAME} PUBLIC "/Zc:throwingNew" )
 endif()
 
 target_include_directories(
