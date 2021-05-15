@@ -184,7 +184,7 @@ endif()
 
 # Makes MSVC conform to the standard
 if ( MSVC )
-  set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /permissive- /Zc:__cplusplus /Zc:externConstexpr /Zc:inline /Zc:throwingNew" )
+  set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /permissive- /Zc:preprocessor /Zc:__cplusplus /Zc:externConstexpr /Zc:inline /Zc:throwingNew" )
 endif()
 
 # Enables Python compilation for 64-bit Windows. Already defined by Python
