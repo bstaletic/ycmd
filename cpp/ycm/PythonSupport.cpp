@@ -101,6 +101,31 @@ pybind11::list FilterAndSortCandidates(
 }
 
 
+std::vector< Result > CppFilterAndSortCandidates(
+		std::vector< std::string >&& candidate_strings,
+		std::string&& query,
+		size_t max_candidates ) {
+	std::vector repository_candidates =
+		Repository< Candidate >::Instance().GetElements(
+				std::move( candidate_strings ) );
+	Word query_object( std::move( query ) );
+	std::vector< Result > results;
+	results.reserve( repository_candidates.size() );
+	for(auto candidate : repository_candidates ) {
+		if(candidate->IsEmpty() || !candidate->ContainsBytes( query_object )) {
+			continue;
+		}
+
+		Result result = candidate->QueryMatchResult( query_object );
+		if(result.IsSubsequence()) {
+			results.push_back(result);
+		}
+	}
+	PartialSort( results, max_candidates );
+	return results;
+}
+
+
 std::string GetUtf8String( pybind11::handle value ) {
   // If already a unicode or string (or something derived from it)
   // pybind will already convert to utf8 when converting to std::string.
