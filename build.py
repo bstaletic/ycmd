@@ -537,7 +537,6 @@ def RunYcmdTests( args, build_dir ):
   if args.core_tests != '*':
     tests_cmd.append( f'--gtest_filter={ args.core_tests }' )
   if args.valgrind:
-    new_env[ 'PYTHONMALLOC' ] = 'malloc'
     tests_cmd = [ 'valgrind',
             '--gen-suppressions=all',
             '--error-exitcode=1',

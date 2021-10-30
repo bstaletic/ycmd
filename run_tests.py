@@ -228,11 +228,8 @@ def UnittestValgrind( parsed_args, extra_unittest_args ):
       p.join( DIR_OF_THIS_SCRIPT, 'ycmd', 'tests', 'clang', '*_test.py' ) )
     unittest_args += glob.glob(
       p.join( DIR_OF_THIS_SCRIPT, 'ycmd', 'tests', '*_test.py' ) )
-    # # Avoids needing all completers for a valgrind run
-    # unittest_args += [ '-m', 'not valgrind_skip' ]
 
   new_env = os.environ.copy()
-  new_env[ 'PYTHONMALLOC' ] = 'malloc'
   new_env[ 'LD_LIBRARY_PATH' ] = LIBCLANG_DIR
   new_env[ 'YCM_VALGRIND_RUN' ] = '1'
   cmd = [ 'valgrind',
