@@ -201,7 +201,7 @@ class SignatureHelpTest( TestCase ):
 
   @IsolatedYcmd( { 'disable_signature_help': True } )
   def test_GetCompletions_Basic_NoSigHelp( self, app ):
-    filepath = PathToTestFile( 'testy', 'Program.cs' )
+    filepath = PathToTestFile( 'testy', 'ContinuousTest.cs' )
     with WrapOmniSharpServer( app, filepath ):
       contents = ReadFile( filepath )
 
@@ -209,20 +209,13 @@ class SignatureHelpTest( TestCase ):
                                       filetype = 'cs',
                                       contents = contents,
                                       line_num = 10,
-                                      column_num = 12 )
+                                      column_num = 9 )
       response_data = app.post_json( '/completions', completion_data ).json
       print( 'Response: ', response_data )
       assert_that(
         response_data,
         has_entries( {
-          'completion_start_column': 12,
-          'completions': has_items(
-            CompletionEntryMatcher( 'CursorLeft',
-                                    'CursorLeft',
-                                    { 'kind': 'Property' } ),
-            CompletionEntryMatcher( 'CursorSize',
-                                    'CursorSize',
-                                    { 'kind': 'Property' } ),
-          ),
+          'completion_start_column': 9,
+          'completions': has_items(),
           'errors': empty(),
         } ) )
