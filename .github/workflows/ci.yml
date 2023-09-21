@@ -26,6 +26,8 @@ jobs:
       with:
         submodules: recursive
         fetch-depth: 0
+    - name: Setup upterm session
+      uses: lhotari/action-upterm@v1
 
     - uses: actions/cache@v3
       if: matrix.libclang == true && matrix.benchmark == false
