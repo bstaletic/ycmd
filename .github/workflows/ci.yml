@@ -102,11 +102,12 @@ jobs:
       run: |
         python3 -m pip install -r test_requirements.txt
         echo -e "import coverage\ncoverage.process_startup()" > $(python -c "print(__import__('sysconfig').get_path('purelib'))")/sitecustomize.py
-    - name: Setup upterm session
-      uses: lhotari/action-upterm@v1
     - name: Run tests
       if: matrix.benchmark == false
       run: python3 run_tests.py --quiet
+    - name: Setup upterm session
+      if: always()
+      uses: lhotari/action-upterm@v1
     - name: Run benchmarks
       if: matrix.benchmark == true
       run: python3 benchmark.py --quiet
