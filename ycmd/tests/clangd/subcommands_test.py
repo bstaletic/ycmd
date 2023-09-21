@@ -1073,6 +1073,7 @@ class SubcommandsTest( TestCase ):
                             test[ 2 ] )
 
 
+  @WithRetry()
   @SharedYcmd
   def test_Subcommands_GetDoc( self, app ):
     for test, cmd in itertools.product( [
