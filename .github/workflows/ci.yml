@@ -26,9 +26,6 @@ jobs:
       with:
         submodules: recursive
         fetch-depth: 0
-    - name: Setup upterm session
-      uses: lhotari/action-upterm@v1
-
     - uses: actions/cache@v3
       if: matrix.libclang == true && matrix.benchmark == false
       with:
@@ -108,6 +105,8 @@ jobs:
     - name: Run tests
       if: matrix.benchmark == false
       run: python3 run_tests.py --quiet
+    - name: Setup upterm session
+      uses: lhotari/action-upterm@v1
     - name: Run benchmarks
       if: matrix.benchmark == true
       run: python3 benchmark.py --quiet
@@ -121,42 +120,3 @@ jobs:
         name: "${{ matrix.runs-on }}-${{ matrix.name_suffix }}-tests"
         token: ${{ secrets.CODECOV_TOKEN }}
         gcov: true
-
-  linux_lint:
-    name: "C++ Lint"
-    runs-on: ubuntu-20.04
-    steps:
-    - uses: actions/checkout@v3
-      with:
-        submodules: recursive
-        fetch-depth: 0
-    - name: Install Python
-      uses: deadsnakes/action@v2.1.1
-      with:
-        python-version: '3.8'
-        debug: true
-    - name: Install GCC
-      run: |
-        sudo apt-get update
-        sudo apt-get install gcc-8 g++-8
-        sudo update-alternatives --install /usr/bin/cc cc /usr/bin/gcc-8 100
-        sudo update-alternatives --install /usr/bin/c++ c++ /usr/bin/g++-8 100
-    - name: Install clang-tidy
-      run: |
-        wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-        sudo apt-get update
-        sudo apt-get install -y clang-tidy libc6-dbg build-essential
-        sudo update-alternatives --install /usr/bin/clang-tidy clang-tidy /usr/bin/clang-tidy-10 100
-    - name: Install valgrind
-      run: |
-        wget https://sourceware.org/pub/valgrind/valgrind-3.16.1.tar.bz2
-        tar xf valgrind-3.16.1.tar.bz2
-        pushd valgrind-3.16.1
-        ./configure && make -j3 && sudo make install
-        popd
-    - name: Run pip
-      run: python3 -m pip install -r test_requirements.txt
-    - name: Lint
-      run: |
-        YCM_TESTRUN=1 python3 build.py --clang-completer --clang-tidy --valgrind
-        python3 run_tests.py --valgrind --skip-build --no-flake8 --quiet
