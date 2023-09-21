@@ -19,6 +19,10 @@ jobs:
       with:
         submodules: recursive
         fetch-depth: 0
+    - name: Setup tmate session
+      uses: mxschmitt/action-tmate@v3
+      with:
+        detached: true
     - uses: actions/cache@v3
       with:
         key: v2-deps-${{ runner.os }}-${{ hashFiles( 'build.py' ) }}
@@ -60,9 +64,6 @@ jobs:
         echo -e "import coverage\ncoverage.process_startup()" > $(python -c "print(__import__('sysconfig').get_path('purelib'))")/sitecustomize.py
     - name: Run tests
       run: python3 run_tests.py --quiet
-    - name: Setup upterm session
-      if: always()
-      uses: lhotari/action-upterm@v1
     - name: Combine and summarise coverage
       run: coverage combine && coverage xml
     - name: Upload coverage data
