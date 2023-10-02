@@ -15,17 +15,26 @@ jobs:
         runs-on: [ ubuntu-20.04, macos-12 ]
         compiler: [ 'gcc' ] # Only used on linux
         libclang: [ true ] # Only used on linux
+        python-version: [ '3.8' ]
         benchmark: [ true, false ]
         include:
+          - runs-on: ubuntu-20.04
+            compiler: 'gcc'
+            benchmark: false
+            libclang: false
+            python-version: '3.12'
+            name_suffix: 'with latest python - '
           - runs-on: ubuntu-20.04
             compiler: 'clang'
             benchmark: false
             libclang: true
+            python-version: '3.8'
             name_suffix: 'with Clang compiler - '
           - runs-on: ubuntu-20.04
             compiler: 'gcc'
             benchmark: false
             libclang: false
+            python-version: '3.8'
             name_suffix: 'without libclang completer - '
     env:
       USE_CLANG_COMPLETER: ${{ matrix.libclang }}
