@@ -22,7 +22,7 @@ jobs:
             compiler: 'gcc'
             benchmark: false
             libclang: false
-            python_version: '3.12'
+            python_version: '3.12-dev'
             name_suffix: 'with latest python - '
           - runs-on: ubuntu-20.04
             compiler: 'clang'
