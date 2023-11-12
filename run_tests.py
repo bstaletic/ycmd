@@ -4,13 +4,14 @@ import argparse
 import platform
 import os
 import glob
+import multiprocessing
 import subprocess
 import os.path as p
 import shlex
 import sys
 import urllib.request
 
-BASE_UNITTEST_ARGS = [ '-cb' ]
+BASE_UNITTEST_ARGS = [ '-b' ]
 DIR_OF_THIS_SCRIPT = p.dirname( p.abspath( __file__ ) )
 DIR_OF_THIRD_PARTY = p.join( DIR_OF_THIS_SCRIPT, 'third_party' )
 DIR_OF_WATCHDOG_DEPS = p.join( DIR_OF_THIRD_PARTY, 'watchdog_deps' )
@@ -151,6 +152,10 @@ def ParseArguments():
   parser.add_argument( '--valgrind',
                        action = 'store_true',
                        help = 'Run tests inside valgrind.' )
+  parser.add_argument( '--use-parallel',
+                       type = int, default = multiprocessing.cpu_count(),
+                       help = 'Number of threads to run the tests on. '
+                              '(default: %(default)s).' )
 
   parsed_args, unittest_args = parser.parse_known_args()
 
@@ -255,12 +260,15 @@ def UnittestTests( parsed_args, extra_unittest_args ):
   # arguments are unittest-aware test selection:
   #  - don't use discover
   #  - don't set the pattern to search for
+  #  - don't use unittest_parallel
   prefer_regular = any( arg == '--' or p.isfile( arg )
                         for arg in extra_unittest_args )
   unittest_args = BASE_UNITTEST_ARGS
 
   if not prefer_regular:
     unittest_args += [ '-p', '*_test.py' ]
+  else:
+    unittest_args += [ '-c' ]
 
   if parsed_args.quiet:
     unittest_args.append( '-q' )
@@ -268,7 +276,7 @@ def UnittestTests( parsed_args, extra_unittest_args ):
   if extra_unittest_args:
     unittest_args.extend( extra_unittest_args )
 
-  if not ( extra_unittest_args or prefer_regular ):
+  if not prefer_regular:
     unittest_args.append( '-s' )
     unittest_args.append( 'ycmd.tests' )
 
@@ -290,9 +298,13 @@ def UnittestTests( parsed_args, extra_unittest_args ):
   else:
     executable = [ sys.executable ]
 
-  unittest = [ '-m', 'unittest' ]
-  if not prefer_regular:
-    unittest.append( 'discover' )
+  if prefer_regular:
+    unittest = [ '-m', 'unittest' ]
+  else:
+    unittest = [ '-m', 'unittest_parallel' ]
+
+  if parsed_args.use_parallel:
+    unittest.extend( [ '-j', '16', '--level', 'module' ] )
 
   unittest_cmd = executable + unittest + unittest_args
   cmd_string = ' '.join( shlex.quote( arg ) for arg in unittest_cmd )
