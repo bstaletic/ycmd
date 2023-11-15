@@ -304,7 +304,10 @@ def UnittestTests( parsed_args, extra_unittest_args ):
     unittest = [ '-m', 'unittest_parallel' ]
 
   if not prefer_regular:
-    unittest.extend( [ '-j', f'{multiprocessing.cpu_count()//2}', '--level', 'module' ] )
+    unittest.extend( [ '-j',
+                       f'{multiprocessing.cpu_count()//2}',
+                       '--level',
+                       'module' ] )
 
   unittest_cmd = executable + unittest + unittest_args
   cmd_string = ' '.join( shlex.quote( arg ) for arg in unittest_cmd )
