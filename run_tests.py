@@ -273,12 +273,12 @@ def UnittestTests( parsed_args, extra_unittest_args ):
   if parsed_args.quiet:
     unittest_args.append( '-q' )
 
-  if extra_unittest_args:
-    unittest_args.extend( extra_unittest_args )
-
   if not prefer_regular:
     unittest_args.append( '-s' )
     unittest_args.append( 'ycmd.tests' )
+
+  if extra_unittest_args:
+    unittest_args.extend( extra_unittest_args )
 
   env = os.environ.copy()
 
@@ -303,8 +303,8 @@ def UnittestTests( parsed_args, extra_unittest_args ):
   else:
     unittest = [ '-m', 'unittest_parallel' ]
 
-  if parsed_args.use_parallel:
-    unittest.extend( [ '-j', '16', '--level', 'module' ] )
+  if not prefer_regular:
+    unittest.extend( [ '-j', f'{multiprocessing.cpu_count()//2}', '--level', 'module' ] )
 
   unittest_cmd = executable + unittest + unittest_args
   cmd_string = ' '.join( shlex.quote( arg ) for arg in unittest_cmd )
