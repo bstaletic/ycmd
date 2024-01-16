@@ -29,8 +29,8 @@ namespace YouCompleteMe {
 namespace {
 
 std::vector< const Candidate * > CandidatesFromObjectList(
-  const pybind11::list& candidates,
-  pybind11::str candidate_property,
+  const nanobind::list& candidates,
+  nanobind::str candidate_property,
   size_t num_candidates ) {
   std::vector< std::string > candidate_strings( num_candidates );
   auto it = candidate_strings.begin();
@@ -54,9 +54,9 @@ std::vector< const Candidate * > CandidatesFromObjectList(
 } // unnamed namespace
 
 
-pybind11::list FilterAndSortCandidates(
-  const pybind11::list& candidates,
-  pybind11::str candidate_property,
+nanobind::list FilterAndSortCandidates(
+  const nanobind::list& candidates,
+  nanobind::str candidate_property,
   std::string& query,
   const size_t max_candidates ) {
 
@@ -68,7 +68,7 @@ pybind11::list FilterAndSortCandidates(
 
   std::vector< ResultAnd< size_t > > result_and_objects;
   {
-    pybind11::gil_scoped_release unlock;
+    nanobind::gil_scoped_release unlock;
     Word query_object( std::move( query ) );
 
     for ( size_t i = 0; i < num_candidates; ++i ) {
@@ -88,7 +88,7 @@ pybind11::list FilterAndSortCandidates(
     PartialSort( result_and_objects, max_candidates );
   }
 
-  pybind11::list filtered_candidates( result_and_objects.size() );
+  auto filtered_candidates = nanobind::steal<nanobind::list>( PyList_New( result_and_objects.size() ) );
   for ( size_t i = 0; i < result_and_objects.size(); ++i ) {
     auto new_candidate = PyList_GET_ITEM(
         candidates.ptr(),
@@ -101,7 +101,7 @@ pybind11::list FilterAndSortCandidates(
 }
 
 
-std::string GetUtf8String( pybind11::handle value ) {
+std::string GetUtf8String( nanobind::handle value ) {
   // If already a unicode or string (or something derived from it)
   // pybind will already convert to utf8 when converting to std::string.
   // For `bytes` the contents are left untouched:
@@ -119,7 +119,7 @@ std::string GetUtf8String( pybind11::handle value ) {
   }
 
   // Otherwise go through Python's built-in `str`.
-  pybind11::str keep_alive( value );
+  nanobind::str keep_alive( value );
   ptrdiff_t size = 0;
   const char* buffer =
       PyUnicode_AsUTF8AndSize( keep_alive.ptr(), &size );

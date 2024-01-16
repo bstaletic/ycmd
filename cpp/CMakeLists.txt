@@ -232,16 +232,25 @@ if ( NOT CPP17_AVAILABLE )
   message( FATAL_ERROR "Your C++ compiler does NOT fully support C++17." )
 endif()
 
-find_package( Python3 3.6 REQUIRED COMPONENTS Interpreter Development )
+find_package( Python 3.6 REQUIRED COMPONENTS Interpreter Development )
 
 #############################################################################
 
 set( CMAKE_POSITION_INDEPENDENT_CODE ON )
+
+include( FetchContent )
+FetchContent_Declare(
+  nanobind
+  GIT_REPOSITORY https://github.com/wjakob/nanobind
+  GIT_TAG 1a309ba444a47e081dc6213d72345a2fbbd20795
+  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/nanobind
+)
+FetchContent_MakeAvailable( nanobind )
+
 set( ABSL_PROPAGATE_CXX_STD ON )
 if ( USE_SYSTEM_ABSEIL )
   find_package( absl REQUIRED )
 else()
-  include( FetchContent )
   FetchContent_Declare(
     absl
     GIT_REPOSITORY https://github.com/abseil/abseil-cpp

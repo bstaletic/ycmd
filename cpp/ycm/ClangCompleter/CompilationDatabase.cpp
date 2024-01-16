@@ -35,7 +35,7 @@ using CompileCommandsWrap =
 
 
 CompilationDatabase::CompilationDatabase(
-  pybind11::object path_to_directory )
+  nanobind::object path_to_directory )
   : is_loaded_( false ),
     path_to_directory_( GetUtf8String( path_to_directory ) ) {
   CXCompilationDatabase_Error status;
@@ -63,7 +63,7 @@ bool CompilationDatabase::AlreadyGettingFlags() {
 
 
 CompilationInfoForFile CompilationDatabase::GetCompilationInfoForFile(
-  pybind11::object path_to_file ) {
+  nanobind::object path_to_file ) {
   CompilationInfoForFile info;
 
   if ( !is_loaded_ ) {
@@ -71,7 +71,7 @@ CompilationInfoForFile CompilationDatabase::GetCompilationInfoForFile(
   }
 
   std::string path_to_file_string = GetUtf8String( path_to_file );
-  pybind11::gil_scoped_release unlock;
+  nanobind::gil_scoped_release unlock;
 
   lock_guard< mutex > lock( compilation_database_mutex_ );
 

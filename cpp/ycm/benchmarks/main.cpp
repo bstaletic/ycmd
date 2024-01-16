@@ -16,13 +16,14 @@
 // along with ycmd.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <benchmark/benchmark.h>
-#include <pybind11/embed.h>
 
 int main( int argc, char** argv ) {
-  pybind11::scoped_interpreter guard{};
-
-  benchmark::Initialize(&argc, argv);
-  benchmark::RunSpecifiedBenchmarks();
+  Py_Initialize();
+  {
+	  benchmark::Initialize(&argc, argv);
+	  benchmark::RunSpecifiedBenchmarks();
+  }
+  Py_Finalize();
 
   return 0;
 }

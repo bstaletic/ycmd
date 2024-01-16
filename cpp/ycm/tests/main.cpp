@@ -17,11 +17,14 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <pybind11/embed.h>
+#include <nanobind/nanobind.h>
 
 int main( int argc, char **argv ) {
-  pybind11::scoped_interpreter guard{};
+  Py_Initialize();
 
-  testing::InitGoogleMock( &argc, argv );
-  return RUN_ALL_TESTS();
+  {
+	  testing::InitGoogleMock( &argc, argv );
+	  return RUN_ALL_TESTS();
+  }
+  Py_Finalize();
 }

@@ -178,8 +178,6 @@ if ( NOT EXTERNAL_LIBCLANG_PATH AND PATH_TO_LLVM_ROOT )
   set( EXTERNAL_LIBCLANG_PATH ${TEMP} )
 endif()
 
-set( PYBIND11_INCLUDES_DIR "${CMAKE_SOURCE_DIR}/pybind11" )
-
 file( GLOB SERVER_SOURCES *.h *.cpp )
 
 include_directories(
@@ -319,17 +317,18 @@ endif()
 
 #############################################################################
 
+nanobind_build_library(nanobind-static)
 add_library( ${PROJECT_NAME} SHARED ${SERVER_SOURCES})
 
 if ( ${ABSL_SUPPORTED} )
-  target_compile_definitions( ${PROJECT_NAME} PUBLIC YCM_ABSEIL_SUPPORTED )
+	#target_compile_definitions( ${PROJECT_NAME} PUBLIC YCM_ABSEIL_SUPPORTED )
 endif()
 
 target_include_directories(
   ${PROJECT_NAME}
   SYSTEM
-  PUBLIC ${PYBIND11_INCLUDES_DIR}
-  PUBLIC ${Python3_INCLUDE_DIRS}
+  PUBLIC ${CMAKE_SOURCE_DIR}/nanobind/include
+  PUBLIC ${Python_INCLUDE_DIRS}
   PUBLIC ${CLANG_INCLUDES_DIR}
   PUBLIC ${CMAKE_SOURCE_DIR}/absl
   )
@@ -341,7 +340,8 @@ if ( USE_CLANG_COMPLETER AND NOT LIBCLANG_TARGET )
 endif()
 
 target_link_libraries( ${PROJECT_NAME}
-                       PUBLIC ${Python3_LIBRARIES}
+                       PUBLIC nanobind-static
+                       PUBLIC ${Python_LIBRARIES}
                        PUBLIC ${LIBCLANG_TARGET}
                        PUBLIC ${STD_FS_LIB}
                        PUBLIC ${EXTRA_LIBS}
@@ -385,7 +385,7 @@ endif()
 # We don't want the "lib" prefix, it can screw up python when it tries to search
 # for our module
 execute_process( COMMAND
-  "${Python3_EXECUTABLE}" "-c"
+  "${Python_EXECUTABLE}" "-c"
   "print(__import__('sysconfig').get_config_var('EXT_SUFFIX'))"
   OUTPUT_VARIABLE PYTHON_EXTENSION
   OUTPUT_STRIP_TRAILING_WHITESPACE )

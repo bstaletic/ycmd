@@ -33,9 +33,10 @@
 #  include "UnsavedFile.h"
 #endif // USE_CLANG_COMPLETER
 
-#include <pybind11/stl_bind.h>
+#include <nanobind/stl/bind_vector.h>
+#include <nanobind/stl/string.h>
 
-namespace py = pybind11;
+namespace py = nanobind;
 using namespace YouCompleteMe;
 
 static bool HasClangSupport() {
@@ -46,17 +47,17 @@ static bool HasClangSupport() {
 #endif // USE_CLANG_COMPLETER
 }
 
-PYBIND11_MAKE_OPAQUE( std::vector< std::string > )
+NB_MAKE_OPAQUE( std::vector< std::string > )
 #ifdef USE_CLANG_COMPLETER
-PYBIND11_MAKE_OPAQUE( std::vector< UnsavedFile > )
-PYBIND11_MAKE_OPAQUE( std::vector< Range > )
-PYBIND11_MAKE_OPAQUE( std::vector< CompletionData > )
-PYBIND11_MAKE_OPAQUE( std::vector< Diagnostic > )
-PYBIND11_MAKE_OPAQUE( std::vector< FixIt > )
-PYBIND11_MAKE_OPAQUE( std::vector< FixItChunk > )
+NB_MAKE_OPAQUE( std::vector< UnsavedFile > )
+NB_MAKE_OPAQUE( std::vector< Range > )
+NB_MAKE_OPAQUE( std::vector< CompletionData > )
+NB_MAKE_OPAQUE( std::vector< Diagnostic > )
+NB_MAKE_OPAQUE( std::vector< FixIt > )
+NB_MAKE_OPAQUE( std::vector< FixItChunk > )
 #endif // USE_CLANG_COMPLETER
 
-PYBIND11_MODULE( ycm_core, mod )
+NB_MODULE( ycm_core, mod )
 {
   mod.def( "HasClangSupport", &HasClangSupport );
 
@@ -70,8 +71,9 @@ PYBIND11_MODULE( ycm_core, mod )
   mod.def( "YcmCoreVersion", &YcmCoreVersion );
 
   // This is exposed so that we can test it.
-  mod.def( "GetUtf8String", []( py::object o ) -> py::bytes {
-                                  return GetUtf8String( o ); } );
+  mod.def( "GetUtf8String", []( py::handle o ) -> py::bytes {
+    std::string output = GetUtf8String( o );
+    return py::steal<py::bytes>(PyBytes_FromStringAndSize(output.data(), output.size())); } );
 
   py::class_< IdentifierCompleter >( mod, "IdentifierCompleter" )
     .def( py::init<>() )
@@ -94,7 +96,7 @@ PYBIND11_MODULE( ycm_core, mod )
   py::bind_vector< std::vector< std::string > >( mod, "StringVector" );
 
 #ifdef USE_CLANG_COMPLETER
-  py::register_exception< ClangParseError >( mod, "ClangParseError" );
+  py::exception< ClangParseError >( mod, "ClangParseError" );
 
   mod.def( "ClangVersion", ClangVersion );
 
@@ -104,9 +106,9 @@ PYBIND11_MODULE( ycm_core, mod )
   // outlive our UnsavedFile objects.
   py::class_< UnsavedFile >( mod, "UnsavedFile" )
     .def( py::init<>() )
-    .def_readwrite( "filename_", &UnsavedFile::filename_ )
-    .def_readwrite( "contents_", &UnsavedFile::contents_ )
-    .def_readwrite( "length_", &UnsavedFile::length_ );
+    .def_rw( "filename_", &UnsavedFile::filename_ )
+    .def_rw( "contents_", &UnsavedFile::contents_ )
+    .def_rw( "length_", &UnsavedFile::length_ );
 
   py::bind_vector< std::vector< UnsavedFile > >( mod, "UnsavedFileVector" );
 
@@ -167,39 +169,39 @@ PYBIND11_MODULE( ycm_core, mod )
     .def( "DetailedInfoForPreviewWindow",
           &CompletionData::DetailedInfoForPreviewWindow )
     .def( "DocString", &CompletionData::DocString )
-    .def_readonly( "kind_", &CompletionData::kind_ )
-    .def_readonly( "fixit_", &CompletionData::fixit_ );
+    .def_ro( "kind_", &CompletionData::kind_ )
+    .def_ro( "fixit_", &CompletionData::fixit_ );
 
   py::bind_vector< std::vector< CompletionData > >( mod,
                                                     "CompletionVector" );
 
   py::class_< Location >( mod, "Location" )
     .def( py::init<>() )
-    .def_readonly( "line_number_", &Location::line_number_ )
-    .def_readonly( "column_number_", &Location::column_number_ )
-    .def_readonly( "filename_", &Location::filename_ )
+    .def_ro( "line_number_", &Location::line_number_ )
+    .def_ro( "column_number_", &Location::column_number_ )
+    .def_ro( "filename_", &Location::filename_ )
     .def( "IsValid", &Location::IsValid );
 
   py::class_< Range >( mod, "Range" )
     .def( py::init<>() )
-    .def_readonly( "start_", &Range::start_ )
-    .def_readonly( "end_", &Range::end_ );
+    .def_ro( "start_", &Range::start_ )
+    .def_ro( "end_", &Range::end_ );
 
   py::bind_vector< std::vector< Range > >( mod, "RangeVector" );
 
   py::class_< FixItChunk >( mod, "FixItChunk" )
     .def( py::init<>() )
-    .def_readonly( "replacement_text", &FixItChunk::replacement_text )
-    .def_readonly( "range", &FixItChunk::range );
+    .def_ro( "replacement_text", &FixItChunk::replacement_text )
+    .def_ro( "range", &FixItChunk::range );
 
   py::bind_vector< std::vector< FixItChunk > >( mod, "FixItChunkVector" );
 
   py::class_< FixIt >( mod, "FixIt" )
     .def( py::init<>() )
-    .def_readonly( "chunks", &FixIt::chunks )
-    .def_readonly( "location", &FixIt::location )
-    .def_readonly( "text", &FixIt::text )
-    .def_property_readonly( "kind", [](const py::handle) {
+    .def_ro( "chunks", &FixIt::chunks )
+    .def_ro( "location", &FixIt::location )
+    .def_ro( "text", &FixIt::text )
+    .def_prop_ro( "kind", [](const py::handle) {
       return py::none();
     });
 
@@ -212,23 +214,23 @@ PYBIND11_MODULE( ycm_core, mod )
 
   py::class_< Diagnostic >( mod, "Diagnostic" )
     .def( py::init<>() )
-    .def_readonly( "ranges_", &Diagnostic::ranges_ )
-    .def_readonly( "location_", &Diagnostic::location_ )
-    .def_readonly( "location_extent_", &Diagnostic::location_extent_ )
-    .def_readonly( "kind_", &Diagnostic::kind_ )
-    .def_readonly( "text_", &Diagnostic::text_ )
-    .def_readonly( "long_formatted_text_", &Diagnostic::long_formatted_text_ )
-    .def_readonly( "fixits_", &Diagnostic::fixits_ );
+    .def_ro( "ranges_", &Diagnostic::ranges_ )
+    .def_ro( "location_", &Diagnostic::location_ )
+    .def_ro( "location_extent_", &Diagnostic::location_extent_ )
+    .def_ro( "kind_", &Diagnostic::kind_ )
+    .def_ro( "text_", &Diagnostic::text_ )
+    .def_ro( "long_formatted_text_", &Diagnostic::long_formatted_text_ )
+    .def_ro( "fixits_", &Diagnostic::fixits_ );
 
   py::bind_vector< std::vector< Diagnostic > >( mod, "DiagnosticVector" );
 
   py::class_< DocumentationData >( mod, "DocumentationData" )
     .def( py::init<>() )
-    .def_readonly( "comment_xml", &DocumentationData::comment_xml )
-    .def_readonly( "raw_comment", &DocumentationData::raw_comment )
-    .def_readonly( "brief_comment", &DocumentationData::brief_comment )
-    .def_readonly( "canonical_type", &DocumentationData::canonical_type )
-    .def_readonly( "display_name", &DocumentationData::display_name );
+    .def_ro( "comment_xml", &DocumentationData::comment_xml )
+    .def_ro( "raw_comment", &DocumentationData::raw_comment )
+    .def_ro( "brief_comment", &DocumentationData::brief_comment )
+    .def_ro( "canonical_type", &DocumentationData::canonical_type )
+    .def_ro( "display_name", &DocumentationData::display_name );
 
   py::class_< CompilationDatabase >( mod, "CompilationDatabase" )
     .def( py::init< py::object >() )
@@ -238,16 +240,14 @@ PYBIND11_MODULE( ycm_core, mod )
           &CompilationDatabase::AlreadyGettingFlags )
     .def( "GetCompilationInfoForFile",
           &CompilationDatabase::GetCompilationInfoForFile )
-    .def_property_readonly( "database_directory",
-                            &CompilationDatabase::GetDatabaseDirectory );
+    .def_prop_ro( "database_directory",
+                  &CompilationDatabase::GetDatabaseDirectory );
 
-  py::class_< CompilationInfoForFile,
-      std::shared_ptr< CompilationInfoForFile > >(
-          mod, "CompilationInfoForFile" )
-    .def_readonly( "compiler_working_dir_",
-                   &CompilationInfoForFile::compiler_working_dir_ )
-    .def_readonly( "compiler_flags_",
-                   &CompilationInfoForFile::compiler_flags_ );
+  py::class_< CompilationInfoForFile >( mod, "CompilationInfoForFile" )
+    .def_ro( "compiler_working_dir_",
+             &CompilationInfoForFile::compiler_working_dir_ )
+    .def_ro( "compiler_flags_",
+             &CompilationInfoForFile::compiler_flags_ );
 
 #endif // USE_CLANG_COMPLETER
 }

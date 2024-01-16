@@ -423,9 +423,9 @@ def CustomPythonCmakeArgs( args ):
     print( f'Found Python headers folder: { python_include }' )
 
   return [
-    f'-DPython3_LIBRARY={ python_library }',
-    f'-DPython3_EXECUTABLE={ sys.executable }',
-    f'-DPython3_INCLUDE_DIR={ python_include }'
+    f'-DPython_LIBRARY={ python_library }',
+    f'-DPython_EXECUTABLE={ sys.executable }',
+    f'-DPython_INCLUDE_DIR={ python_include }'
   ]
 
 

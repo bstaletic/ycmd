@@ -20,7 +20,7 @@
 
 #include <clang-c/CXCompilationDatabase.h>
 #include <mutex>
-#include <pybind11/pybind11.h>
+#include <nanobind/nanobind.h>
 #include <string>
 #include <vector>
 
@@ -36,7 +36,7 @@ struct CompilationInfoForFile {
 class CompilationDatabase {
 public:
   // |path_to_directory| should be a string-like object.
-  explicit CompilationDatabase( pybind11::object path_to_directory );
+  explicit CompilationDatabase( nanobind::object path_to_directory );
   CompilationDatabase( const CompilationDatabase& ) = delete;
   CompilationDatabase& operator=( const CompilationDatabase& ) = delete;
   ~CompilationDatabase();
@@ -51,7 +51,7 @@ public:
   // serialized since Clang internals are not thread-safe.
   // |path_to_file| should be a string-like object.
   CompilationInfoForFile GetCompilationInfoForFile(
-    pybind11::object path_to_file );
+    nanobind::object path_to_file );
 
   std::string GetDatabaseDirectory() {
     return path_to_directory_;

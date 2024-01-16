@@ -20,6 +20,7 @@
 #include "PythonSupport.h"
 
 #include <benchmark/benchmark.h>
+#include <nanobind/stl/string.h>
 
 namespace YouCompleteMe {
 
@@ -41,14 +42,14 @@ BENCHMARK_DEFINE_F( PythonSupportFixture,
   raw_candidates = GenerateCandidatesWithCommonPrefix( "a_A_a_",
                                                        state.range( 0 ) );
 
-  pybind11::list candidates;
+  nanobind::list candidates;
   for ( auto insertion_text : raw_candidates ) {
-    pybind11::dict candidate;
+    nanobind::dict candidate;
     candidate[ "insertion_text" ] = insertion_text;
     candidates.append( candidate );
   }
 
-  pybind11::str candidate_property("insertion_text");
+  nanobind::str candidate_property("insertion_text");
   for ( auto _ : state ) {
     state.PauseTiming();
     Repository< Character >::Instance().ClearElements();
@@ -71,14 +72,14 @@ BENCHMARK_DEFINE_F( PythonSupportFixture,
   raw_candidates = GenerateCandidatesWithCommonPrefix( "a_A_a_",
                                                        state.range( 0 ) );
 
-  pybind11::list candidates;
+  nanobind::list candidates;
   for ( auto insertion_text : raw_candidates ) {
-    pybind11::dict candidate;
+    nanobind::dict candidate;
     candidate[ "insertion_text" ] = insertion_text;
     candidates.append( candidate );
   }
 
-  pybind11::str candidate_property("insertion_text");
+  nanobind::str candidate_property("insertion_text");
   // Store the candidates in the repository.
   std::string query = "aA";
   FilterAndSortCandidates( candidates, candidate_property, query,

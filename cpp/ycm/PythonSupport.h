@@ -18,7 +18,7 @@
 #ifndef PYTHONSUPPORT_H_KWGFEX0V
 #define PYTHONSUPPORT_H_KWGFEX0V
 
-#include <pybind11/pybind11.h>
+#include <nanobind/nanobind.h>
 
 namespace YouCompleteMe {
 
@@ -28,16 +28,16 @@ namespace YouCompleteMe {
 /// original objects that survived the filtering. This list contains at most
 /// |max_candidates|. If |max_candidates| is omitted or 0, all candidates are
 /// sorted.
-YCM_EXPORT pybind11::list FilterAndSortCandidates(
-  const pybind11::list& candidates,
-  pybind11::str candidate_property,
+YCM_EXPORT nanobind::list FilterAndSortCandidates(
+  const nanobind::list& candidates,
+  nanobind::str candidate_property,
   std::string& query,
   const size_t max_candidates = 0 );
 
 /// Given a Python object that's supposed to be "string-like", returns a UTF-8
 /// encoded std::string. Raises an exception if the object can't be converted to
 /// a string.
-std::string GetUtf8String( pybind11::handle value );
+std::string GetUtf8String( nanobind::handle value );
 
 } // namespace YouCompleteMe
 
