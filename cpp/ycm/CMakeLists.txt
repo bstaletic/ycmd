@@ -312,7 +312,7 @@ file( REMOVE ${CMAKE_CURRENT_BINARY_DIR}/main.cpp )
 
 if( ${ABSL_SUPPORTED} )
   message( STATUS "Using Abseil hash tables" )
-  set( EXTRA_LIBS ${EXTRA_LIBS} absl::flat_hash_map absl::flat_hash_set )
+  #set( EXTRA_LIBS ${EXTRA_LIBS} absl::flat_hash_map absl::flat_hash_set )
 else()
   message( STATUS "Using STL hash tables" )
 endif()
@@ -322,7 +322,7 @@ endif()
 add_library( ${PROJECT_NAME} SHARED ${SERVER_SOURCES})
 
 if ( ${ABSL_SUPPORTED} )
-  target_compile_definitions( ${PROJECT_NAME} PUBLIC YCM_ABSEIL_SUPPORTED )
+	#target_compile_definitions( ${PROJECT_NAME} PUBLIC YCM_ABSEIL_SUPPORTED )
 endif()
 
 target_include_directories(

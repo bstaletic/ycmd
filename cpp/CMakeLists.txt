@@ -237,18 +237,18 @@ find_package( Python3 3.6 REQUIRED COMPONENTS Interpreter Development )
 #############################################################################
 
 set( CMAKE_POSITION_INDEPENDENT_CODE ON )
-set( ABSL_PROPAGATE_CXX_STD ON )
-if ( USE_SYSTEM_ABSEIL )
-  find_package( absl REQUIRED )
-else()
-  include( FetchContent )
-  FetchContent_Declare(
-    absl
-    GIT_REPOSITORY https://github.com/abseil/abseil-cpp
-    GIT_TAG fb3621f4f897824c0dbe0615fa94543df6192f30
-    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/absl
-  )
-  FetchContent_MakeAvailable( absl )
-endif()
+#set( ABSL_PROPAGATE_CXX_STD ON )
+#if ( USE_SYSTEM_ABSEIL )
+#  find_package( absl REQUIRED )
+#else()
+#  include( FetchContent )
+#  FetchContent_Declare(
+#    absl
+#    GIT_REPOSITORY https://github.com/abseil/abseil-cpp
+#    GIT_TAG fb3621f4f897824c0dbe0615fa94543df6192f30
+#    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/absl
+#  )
+#  FetchContent_MakeAvailable( absl )
+#endif()
 
 add_subdirectory( ycm )

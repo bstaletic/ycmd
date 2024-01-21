@@ -225,35 +225,39 @@ void PartialSort( std::vector< Element > &elements,
       futures[i] = tasks.push(
         [ &, i ] ( auto begin, auto end ) {
           std::sort( begin, end );
-          if ( i % 2 == 0 ) {
-            unsigned next_wait = 1;
-            do {
-              if ( i + next_wait > n_threads - 1 ) {
-                break;
-              }
-              {
-                // This might be better served by a semaphore.
-                // That's C++20 and a naive semaphore built on atmoics is
-                // about as good as this thing.
-                std::unique_lock lock{ cv_mutex };
-                cv.wait( lock, [ &finished, i, next_wait ] {
-                  return finished[ i + next_wait ] == true;
-                } );
-              }
-              auto middle = begin + chunk_size * next_wait;
-              end = begin + chunk_size * next_wait * 2;
-              std::inplace_merge( begin, middle, end );
-            // TODO: Boris, mind explaining this magic?
-            } while( ~i & ( next_wait <<= 1 ) );
-          }
-          {
-              std::unique_lock lock{ cv_mutex };
-              finished[ i ] = true;
-          }
-          cv.notify_all();
+          //if ( i % 2 == 0 ) {
+          //  unsigned next_wait = 1;
+          //  do {
+          //    if ( i + next_wait > n_threads - 1 ) {
+          //      break;
+          //    }
+          //    {
+          //      // This might be better served by a semaphore.
+          //      // That's C++20 and a naive semaphore built on atmoics is
+          //      // about as good as this thing.
+          //      std::unique_lock lock{ cv_mutex };
+          //      cv.wait( lock, [ &finished, i, next_wait ] {
+          //        return finished[ i + next_wait ];
+          //      } );
+          //    }
+          //    auto middle = begin + chunk_size * next_wait;
+          //    end = begin + chunk_size * next_wait * 2;
+          //    std::inplace_merge( begin, middle, end );
+          //  // TODO: Boris, mind explaining this magic?
+          //  } while( ~i & ( next_wait <<= 1 ) );
+          //}
+          //{
+          //    std::unique_lock lock{ cv_mutex };
+          //    finished[ i ] = true;
+          //}
+          //cv.notify_all();
         }, begin, end );
     }
     for ( auto&& f : futures ) { f.get(); }
+    for(auto begin = real_begin, mid = real_begin + chunk_size, end = mid + chunk_size; mid != real_end; end = real_end - end <= chunk_size ? real_end : end + chunk_size) {
+	    std::inplace_merge(begin, mid, end);
+	    mid = end;
+    }
   } else {
     std::nth_element( elements.begin(),
                       elements.begin() + static_cast< diff >( max_elements ),
