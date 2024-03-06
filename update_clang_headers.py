@@ -36,7 +36,7 @@ def Download( url ):
 def ExtractTar( uncompressed_data, destination ):
   with tarfile.TarFile( fileobj=uncompressed_data, mode='r' ) as tar_file:
     a_member = tar_file.getmembers()[ 0 ]
-    tar_file.extractall( destination )
+    tar_file.extractall( destination, filter = 'data' )
 
   # Determine the directory name
   return os.path.join( destination, a_member.name.split( '/' )[ 0 ] )

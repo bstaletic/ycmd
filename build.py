@@ -877,6 +877,12 @@ def ExtractCsCompleter( writeStdout, build_dir, package_path ):
       package_zip.extractall()
   else:
     with tarfile.open( package_path ) as package_tar:
+      try:
+        # CVE-2007-4559 mitigation. See PEP 706
+        # This will be the default since python 3.14
+        package_tar.extraction_filter = tarfile.data_filter
+      except AttributeError:
+        pass
       package_tar.extractall()
   writeStdout( 'DONE\n' )
 
@@ -1129,6 +1135,12 @@ def EnableJavaCompleter( switches ):
 
   Print( f"Extracting jdt.ls to { REPOSITORY }..." )
   with tarfile.open( file_name ) as package_tar:
+    try:
+      # CVE-2007-4559 mitigation. See PEP 706
+      # This will be the default since python 3.14
+      package_tar.extraction_filter = tarfile.data_filter
+    except AttributeError:
+      pass
     package_tar.extractall( REPOSITORY )
 
   Print( "Done installing jdt.ls" )
@@ -1213,6 +1225,12 @@ def DownloadClangd( printer ):
 
   printer( f"Extracting Clangd to { CLANGD_OUTPUT_DIR }..." )
   with tarfile.open( file_name ) as package_tar:
+    try:
+      # CVE-2007-4559 mitigation. See PEP 706
+      # This will be the default since python 3.14
+      package_tar.extraction_filter = tarfile.data_filter
+    except AttributeError:
+      pass
     package_tar.extractall( CLANGD_OUTPUT_DIR )
 
   printer( "Done installing Clangd" )
