@@ -69,7 +69,7 @@ class CsharpCompleter( language_server_completer.LanguageServerCompleter ):
 
 
   def GetProjectRootFiles( self ):
-    return [] # TODO: How to implement this? Regex?
+    return [ '*.csproj' ]
 
 
   def GetCommandLine( self ):
