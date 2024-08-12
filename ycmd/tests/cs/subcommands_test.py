@@ -517,7 +517,7 @@ class SubcommandsTest( TestCase ):
                                  filepath = filepath )
 
     response = app.post_json( '/run_completer_command', gettype_data ).json
-    assert_that( response, has_entry( 'message',
+    assert_that( response, has_entry( 'detailed_info',
                                       '(local variable) string str' ) )
 
 
@@ -536,7 +536,7 @@ class SubcommandsTest( TestCase ):
 
     response = app.post_json( '/run_completer_command', gettype_data ).json
     assert_that( response, has_entry(
-      'message', '(field) int GetTypeTestCase.an_int_with_docs' ) )
+      'detailed_info', '(field) int GetTypeTestCase.an_int_with_docs' ) )
 
 
   @IsolatedYcmd()
