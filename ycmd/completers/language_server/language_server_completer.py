@@ -2657,7 +2657,8 @@ class LanguageServerCompleter( Completer ):
     result = response.get( 'result' ) or []
 
     if any( 'range' in s for s in result ):
-      return _DocumentSymboListToGoTo( request_data, result )
+      raise ValueError(
+        "Invalid server response; DocumentSymbol not supported" )
 
     return _SymbolInfoListToGoTo( request_data, result )
 
@@ -3402,38 +3403,6 @@ def _SymbolInfoListToGoTo( request_data, symbols ):
     location, line_value = _LspLocationToLocationAndDescription(
       request_data,
       symbol[ 'location' ] )
-
-    description = ( f'{ lsp.SYMBOL_KIND[ symbol[ "kind" ] ] }: '
-                    f'{ symbol[ "name" ] }' )
-
-    goto = responses.BuildGoToResponseFromLocation( location,
-                                                    description )
-    goto[ 'extra_data' ] = {
-      'kind': lsp.SYMBOL_KIND[ symbol[ 'kind' ] ],
-      'name': symbol[ 'name' ],
-    }
-    return goto
-
-  locations = [ BuildGoToLocationFromSymbol( s ) for s in
-                sorted( symbols,
-                        key = lambda s: ( s[ 'kind' ], s[ 'name' ] ) ) ]
-
-  if not locations:
-    raise RuntimeError( "Symbol not found" )
-  elif len( locations ) == 1:
-    return locations[ 0 ]
-  else:
-    return locations
-
-
-def _DocumentSymboListToGoTo( request_data, symbols ):
-  """Convert a list of LSP DocumentSymbol into a YCM GoTo response"""
-
-  def BuildGoToLocationFromSymbol( symbol ):
-    symbol[ 'uri' ] = lsp.FilePathToUri( request_data[ 'filepath' ] )
-    location, line_value = _LspLocationToLocationAndDescription(
-      request_data,
-      symbol )
 
     description = ( f'{ lsp.SYMBOL_KIND[ symbol[ "kind" ] ] }: '
                     f'{ symbol[ "name" ] }' )

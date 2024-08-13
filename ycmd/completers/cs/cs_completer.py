@@ -18,7 +18,11 @@
 import os
 import logging
 
-from ycmd.completers.language_server import language_server_completer
+from ycmd.completers.language_server.language_server_completer import (
+    LanguageServerCompleter,
+    REQUEST_TIMEOUT_COMMAND,
+    _LspLocationToLocationAndDescription )
+from ycmd.completers.language_server import language_server_protocol as lsp
 from ycmd import responses
 from ycmd.utils import ( FindExecutable,
                          FindExecutableWithFallback,
@@ -65,7 +69,7 @@ def ShouldEnableCsCompleter( user_options ):
   return True
 
 
-class CsharpCompleter( language_server_completer.LanguageServerCompleter ):
+class CsharpCompleter( LanguageServerCompleter ):
   def __init__( self, user_options ):
     super().__init__( user_options )
     if os.path.isfile( user_options[ 'roslyn_binary_path' ] ):
@@ -105,3 +109,65 @@ class CsharpCompleter( language_server_completer.LanguageServerCompleter ):
       raise RuntimeError( 'No type found.' )
     value = value.split( '\n' )[ 1 ]
     return responses.BuildDetailedInfoResponse( value )
+
+
+  def GoToDocumentOutline( self, request_data ):
+    if not self.ServerIsReady():
+      raise RuntimeError( 'Server is initializing. Please wait.' )
+
+    self._UpdateServerWithFileContents( request_data )
+
+    request_id = self.GetConnection().NextRequestId()
+    message = lsp.DocumentSymbol( request_id, request_data )
+    response = self.GetConnection().GetResponse(
+        request_id,
+        message,
+        REQUEST_TIMEOUT_COMMAND )
+
+    result = response.get( 'result' ) or []
+    result = _FlattenDocumentSymbolHierarchy( result )
+    return _DocumentSymboListToGoTo( request_data, result )
+
+
+
+def _DocumentSymboListToGoTo( request_data, symbols ):
+  """Convert a list of LSP DocumentSymbol into a YCM GoTo response"""
+
+  def BuildGoToLocationFromSymbol( symbol ):
+    symbol[ 'uri' ] = lsp.FilePathToUri( request_data[ 'filepath' ] )
+    location, line_value = _LspLocationToLocationAndDescription(
+      request_data,
+      symbol )
+
+    description = ( f'{ lsp.SYMBOL_KIND[ symbol[ "kind" ] ] }: '
+                    f'{ symbol[ "name" ] }' )
+
+    goto = responses.BuildGoToResponseFromLocation( location,
+                                                    description )
+    goto[ 'extra_data' ] = {
+      'kind': lsp.SYMBOL_KIND[ symbol[ 'kind' ] ],
+      'name': symbol[ 'name' ],
+    }
+    return goto
+
+  locations = [ BuildGoToLocationFromSymbol( s ) for s in
+                sorted( symbols,
+                        key = lambda s: ( s[ 'kind' ], s[ 'name' ] ) ) ]
+
+  if not locations:
+    raise RuntimeError( "Symbol not found" )
+  elif len( locations ) == 1:
+    return locations[ 0 ]
+  else:
+    return locations
+
+
+def _FlattenDocumentSymbolHierarchy( symbols ):
+  total = []
+  for s in symbols:
+    partial_results = [ s ]
+    if s.get( 'children' ):
+      partial_results.extend(
+          _FlattenDocumentSymbolHierarchy( s[ 'children' ] ) )
+    total.extend( partial_results )
+  return total
