@@ -250,6 +250,11 @@ jobs:
       with:
         python-version: '3.9'
         architecture: ${{ matrix.python-arch }}
+    - name: Setup dotnet sdk
+      if: matrix.benchmark == false
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.x'
     - name: Install Go
       if: matrix.benchmark == false
       uses: actions/setup-go@v5
