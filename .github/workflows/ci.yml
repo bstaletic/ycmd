@@ -106,7 +106,15 @@ jobs:
     - name: dotnet test
       run: |
         Invoke-WebRequest -Uri 'https://github.com/dotnet/cli-lab/releases/download/1.7.521001/dotnet-core-uninstall-1.7.521001.msi' -OutFile dotnet-core-uninstall.msi
+    - name: dotnet test
+      run: |
         dotnet --info
+    - name: dotnet test
+      run: |
         msiexec /i dotnet-core-uninstall.msi /quiet /passive
+    - name: dotnet test
+      run: |
         dotnet-core-uninstall -h
+    - name: dotnet test
+      run: |
         dotnet-core-uninstall list
