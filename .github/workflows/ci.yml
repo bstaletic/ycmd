@@ -102,7 +102,6 @@ jobs:
       run: |
         python3 -m pip install -r test_requirements.txt
         echo -e "import coverage\ncoverage.process_startup()" > $(python -c "print(__import__('sysconfig').get_path('purelib'))")/sitecustomize.py
-        wget https://github.com/dotnet/cli-lab/releases/download/1.7.521001/dotnet-core-uninstall-1.7.521001.msi
       shell: bash
     - name: dotnet test
       run: |
