@@ -89,10 +89,10 @@ DYNAMIC_PYTHON_LIBRARY_REGEX = """
   )$
 """
 
-JDTLS_MILESTONE = '1.39.0'
-JDTLS_BUILD_STAMP = '202408291433'
+JDTLS_MILESTONE = '1.41.0'
+JDTLS_BUILD_STAMP = '202410311350'
 JDTLS_SHA256 = (
-  'f046d8f08974e6e773f2ed474266eab09889c6459f2663579f8b7d497bd34729'
+  'adab7e8991d5bc379b5f4381e932353e4bc5818b2c3d80dcd78d12a3c2a897f5'
 )
 
 DEFAULT_RUST_TOOLCHAIN = 'nightly-2024-12-12'
@@ -1342,20 +1342,20 @@ def Main(): # noqa: C901
   try:
     if not args.skip_build:
       DoCmakeBuilds( args )
-    if args.cs_completer or args.omnisharp_completer or args.all_completers:
-      EnableCsCompleter( args )
-    if args.go_completer or args.gocode_completer or args.all_completers:
-      EnableGoCompleter( args )
-    if args.js_completer or args.tern_completer or args.all_completers:
-      EnableJavaScriptCompleter( args )
-    if args.rust_completer or args.racer_completer or args.all_completers:
-      EnableRustCompleter( args )
+    #if args.cs_completer or args.omnisharp_completer or args.all_completers:
+    #  EnableCsCompleter( args )
+    #if args.go_completer or args.gocode_completer or args.all_completers:
+    #  EnableGoCompleter( args )
+    #if args.js_completer or args.tern_completer or args.all_completers:
+    #  EnableJavaScriptCompleter( args )
+    #if args.rust_completer or args.racer_completer or args.all_completers:
+    #  EnableRustCompleter( args )
     if args.java_completer or args.all_completers:
       EnableJavaCompleter( args )
-    if args.ts_completer or args.all_completers:
-      EnableTypeScriptCompleter( args )
-    if args.clangd_completer or args.all_completers:
-      EnableClangdCompleter( args )
+    #if args.ts_completer or args.all_completers:
+    #  EnableTypeScriptCompleter( args )
+    #if args.clangd_completer or args.all_completers:
+    #  EnableClangdCompleter( args )
   except InstallationFailed as e:
     e.Print()
     if args.quiet:

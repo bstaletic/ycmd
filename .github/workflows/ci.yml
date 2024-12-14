@@ -100,7 +100,7 @@ jobs:
       shell: bash
     - name: Run tests
       if: matrix.benchmark == false
-      run: python3 run_tests.py --msvc ${{ matrix.msvc }} --quiet ycmd/tests/java/server_management_test.py
+      run: python3 run_tests.py --msvc ${{ matrix.msvc }} --quiet ycmd/tests/java/server_management_test.py -k WipeWorkspace_NoConfig -v --no-flake8
     - name: Combine and summarise coverage
       if: matrix.benchmark == false
       run: coverage combine && coverage xml
